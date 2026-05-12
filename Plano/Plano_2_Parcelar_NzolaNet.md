@@ -24,14 +24,14 @@ Antes de mergulhar no plano, segue estes passos consoante a tua função:
 
 ### 👉 Para o BE-Dev (Willfredy)
 1. Lê este plano de **fio a pavio** (~20 min).
-2. Estuda 1–2 horas a [Secção 9 — O Que Estudar para Backend](#9-o-que-estudar-e-dominar--backend).
+2. Estuda 1–2 horas a [Secção 9 — O Que Estudar para Backend](#9-o-que-estudar-e-dominar-backend).
 3. Faz o vídeo de Nick Chapsas *"ASP.NET Core Web API 8 in 1 hour"* (YouTube grátis).
 4. Cria a solução: `dotnet new sln -n NzolaNet`. Segue os comandos da [Secção 5.12 do plano completo](./Plano_Definitivo_NzolaNet.html#512-comandos-uteis-backend).
 5. Estabelece o **contrato API** (Secção 6) **antes** de começar a codar — partilha com os FE-Devs.
 
 ### 👉 Para os FE-Devs (Emer, Jeovani, Manuel)
 1. Lê este plano de fio a pavio (~20 min).
-2. Estuda 1–2 horas a [Secção 10 — O Que Estudar para Frontend](#10-o-que-estudar-e-dominar--frontend).
+2. Estuda 1–2 horas a [Secção 10 — O Que Estudar para Frontend](#10-o-que-estudar-e-dominar-frontend).
 3. Vê o vídeo de Mosh Hamedani *"Angular Tutorial for Beginners"* (YouTube grátis).
 4. Cria o projeto: `ng new nzolanet-frontend --style=scss --routing=true`. Setup do Tailwind ou Bootstrap.
 5. **Combinem entre vocês** quem fica com qual módulo (ver Secção 3 para a divisão sugerida):
@@ -40,7 +40,7 @@ Antes de mergulhar no plano, segue estes passos consoante a tua função:
    - **Manuel** → perfis + seguidores + comentários
 
 ### 👉 Para o grupo todo (primeira reunião)
-1. **Criar o repositório GitHub** chamado `nzolanet` (ver [Secção 8](#8-git-e-github--resumo-pratico)).
+1. **Criar o repositório GitHub** chamado `nzolanet` (ver [Secção 8](#8-git-e-github-resumo-pratico)).
 2. **Convidar todos os membros** como colaboradores.
 3. **Combinar horário de reuniões** semanais (sugestão: 1h por semana para sincronizar progresso).
 4. **Definir o contrato API** em conjunto (Secção 6) — é o documento mais crítico, porque qualquer mudança aqui afeta toda a gente.
@@ -56,13 +56,13 @@ Antes de mergulhar no plano, segue estes passos consoante a tua função:
 - **1.5.** [Fluxo End-to-End (exemplo: criar publicação)](#15-fluxo-end-to-end-exemplo-criar-publicacao)
 - **2.** [Arquitetura Resumida (foco parcelar)](#2-arquitetura-resumida-foco-parcelar)
 - **3.** [Divisão da Equipa nesta Fase](#3-divisao-da-equipa-nesta-fase)
-- **4.** [FRONTEND — O Que Construir](#4-frontend--o-que-construir)
-- **5.** [BACKEND — O Que Construir](#5-backend--o-que-construir)
+- **4.** [FRONTEND — O Que Construir](#4-frontend-o-que-construir)
+- **5.** [BACKEND — O Que Construir](#5-backend-o-que-construir)
 - **6.** [Contrato API Mínimo (2.ª Parcelar)](#6-contrato-api-minimo-2-parcelar)
 - **7.** [Cronograma de 4 Semanas](#7-cronograma-de-4-semanas)
-- **8.** [Git e GitHub — Resumo Prático](#8-git-e-github--resumo-pratico)
-- **9.** [O Que Estudar e Dominar — Backend](#9-o-que-estudar-e-dominar--backend)
-- **10.** [O Que Estudar e Dominar — Frontend](#10-o-que-estudar-e-dominar--frontend)
+- **8.** [Git e GitHub — Resumo Prático](#8-git-e-github-resumo-pratico)
+- **9.** [O Que Estudar e Dominar — Backend](#9-o-que-estudar-e-dominar-backend)
+- **10.** [O Que Estudar e Dominar — Frontend](#10-o-que-estudar-e-dominar-frontend)
 - **11.** [Checklist 20/20 da 2.ª Parcelar](#11-checklist-2020-da-2-parcelar)
 - **12.** [Próximos Passos Após a Parcelar](#12-proximos-passos-apos-a-parcelar)
 - **13.** [Glossário de Termos Técnicos](#13-glossario-de-termos-tecnicos)
@@ -821,7 +821,7 @@ DELETE /comments/{id}              → MessageDto
 
 ## 8. Git e GitHub — Resumo Prático
 
-> Para o passo a passo **completo** (criar repo, convidar membros, proteger branches, etc.), vê o [Plano Definitivo Completo](./Plano_Definitivo_NzolaNet.html#7-git-e-github--estrategia-de-colaboracao).
+> Para o passo a passo **completo** (criar repo, convidar membros, proteger branches, etc.), vê o [Plano Definitivo Completo](./Plano_Definitivo_NzolaNet.html#7-git-e-github-estrategia-de-colaboracao).
 
 ### Workflow diário (todos os dias)
 

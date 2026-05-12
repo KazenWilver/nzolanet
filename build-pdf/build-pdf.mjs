@@ -57,7 +57,9 @@ function baseSlug(text) {
   let s = text.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s-]/g, "")
-    .trim().replace(/\s+/g, "-");
+    .trim().replace(/\s+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
   return s || "sec";
 }
 

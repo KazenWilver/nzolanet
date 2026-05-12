@@ -36,7 +36,7 @@ Lê na seguinte ordem:
 2. **Secção 4** ("FRONTEND — Angular") — toda. **É o vosso manual de instruções.**
 3. **Secção 6** (contrato API) — **decora**. É o "contrato" que o backend te entrega; tudo o que o teu Angular chama está aqui.
 4. **Secção 7** (Git/GitHub).
-5. **[Plano da 2.ª Parcelar — Secção 10](./Plano_2_Parcelar_NzolaNet.html#10-o-que-estudar-e-dominar--frontend)** — o teu roadmap de estudos.
+5. **[Plano da 2.ª Parcelar — Secção 10](./Plano_2_Parcelar_NzolaNet.html#10-o-que-estudar-e-dominar-frontend)** — o teu roadmap de estudos.
 
 ### 👉 Para o **grupo inteiro** (primeira reunião)
 1. Combinar o **nome do repositório GitHub** (sugestão: `nzolanet`).
@@ -54,10 +54,10 @@ Lê na seguinte ordem:
 1. [Análise do Enunciado](#1-analise-do-enunciado)
 2. [Visão Geral da Arquitetura](#2-visao-geral-da-arquitetura)
 3. [Divisão da Equipa](#3-divisao-da-equipa)
-4. [FRONTEND — Angular (3 elementos)](#4-frontend--angular-3-elementos)
-5. [BACKEND — ASP.NET Web API + SQL Server (1 elemento)](#5-backend--aspnet-web-api--sql-server-1-elemento)
-6. [Contrato da API (Frontend ↔ Backend)](#6-contrato-da-api-frontend--backend)
-7. [Git e GitHub — Estratégia de Colaboração](#7-git-e-github--estrategia-de-colaboracao)
+4. [FRONTEND — Angular (3 elementos)](#4-frontend-angular-3-elementos)
+5. [BACKEND — ASP.NET Web API + SQL Server (1 elemento)](#5-backend-aspnet-web-api-sql-server-1-elemento)
+6. [Contrato da API (Frontend ↔ Backend)](#6-contrato-da-api-frontend-backend)
+7. [Git e GitHub — Estratégia de Colaboração](#7-git-e-github-estrategia-de-colaboracao)
 8. [Cronograma de Entregas](#8-cronograma-de-entregas)
 9. [Checklist Final para 20/20](#9-checklist-final-para-2020)
 10. [Pressupostos Técnicos Assumidos](#10-pressupostos-tecnicos-assumidos)
@@ -228,38 +228,38 @@ nzolanet-frontend/
 │   │   │
 │   │   ├── features/                      # Módulos lazy-loaded por domínio
 │   │   │   │
-│   │   │   ├── auth/                      ← [FE-Dev 1]
+│   │   │   ├── auth/                      ← [Emer]
 │   │   │   │   ├── login/
 │   │   │   │   ├── register/
 │   │   │   │   ├── forgot-password/
 │   │   │   │   ├── reset-password/
 │   │   │   │   └── auth.module.ts
 │   │   │   │
-│   │   │   ├── feed/                      ← [FE-Dev 2]
+│   │   │   ├── feed/                      ← [Jeovani]
 │   │   │   │   ├── feed-page/             # Lista cronológica + infinite scroll
 │   │   │   │   ├── create-post/           # Formulário com upload media
 │   │   │   │   └── feed.module.ts
 │   │   │   │
-│   │   │   ├── posts/                     ← [FE-Dev 2]
+│   │   │   ├── posts/                     ← [Jeovani]
 │   │   │   │   ├── post-detail/
 │   │   │   │   ├── edit-post/
 │   │   │   │   └── posts.module.ts
 │   │   │   │
-│   │   │   ├── profile/                   ← [FE-Dev 1 + FE-Dev 3]
-│   │   │   │   ├── profile-page/          # Visualização (FE-Dev 3)
-│   │   │   │   ├── edit-profile/          # Edição + foto (FE-Dev 1)
+│   │   │   ├── profile/                   ← [Emer + Manuel]
+│   │   │   │   ├── profile-page/          # Visualização (Manuel)
+│   │   │   │   ├── edit-profile/          # Edição + foto (Emer)
 │   │   │   │   ├── followers-list/
 │   │   │   │   └── profile.module.ts
 │   │   │   │
-│   │   │   ├── comments/                  ← [FE-Dev 3]
+│   │   │   ├── comments/                  ← [Manuel]
 │   │   │   │   ├── comment-list/
 │   │   │   │   └── comments.module.ts
 │   │   │   │
-│   │   │   ├── notifications/             ← [FE-Dev 3]
+│   │   │   ├── notifications/             ← [Manuel]
 │   │   │   │   ├── notifications-page/
 │   │   │   │   └── notifications.module.ts
 │   │   │   │
-│   │   │   └── admin/                     ← (opcional) [FE-Dev 3]
+│   │   │   └── admin/                     ← (opcional) [Manuel]
 │   │   │       ├── comment-moderation/
 │   │   │       └── admin.module.ts
 │   │   │
@@ -1508,9 +1508,9 @@ develop             ← integração contínua. Todas as PRs vão para aqui.
 ├── backend/feature/feed
 ├── backend/feature/notifications
 │
-├── frontend/feature/auth               ← FE-Dev 1
-├── frontend/feature/feed               ← FE-Dev 2
-└── frontend/feature/comments-notifications  ← FE-Dev 3
+├── frontend/feature/auth               ← Emer (FE-Dev 1)
+├── frontend/feature/feed               ← Jeovani (FE-Dev 2)
+└── frontend/feature/comments-notifications  ← Manuel (FE-Dev 3)
 ```
 
 ### Convenção de nomes de branch
@@ -1537,7 +1537,7 @@ git pull origin develop
 
 ```bash
 # 2) Criar branch própria a partir de develop
-git checkout -b frontend/feature/auth          # exemplo FE-Dev 1
+git checkout -b frontend/feature/auth          # exemplo: Emer (Auth)
 # ou
 git checkout -b backend/feature/posts-crud     # exemplo Willfredy
 ```
@@ -1807,7 +1807,7 @@ git stash list                      # listar stashes
 
 # 11. Roadmap de Estudos Avançados (Pós-Parcelar)
 
-> Os fundamentos necessários para a 2.ª Parcelar (HTTP, REST, JWT, EF Core, Angular Forms/Router, Reactive Forms, Repository, Service, DTOs, Upload de ficheiros, RxJS básico, TailwindCSS/Bootstrap) estão detalhadamente listados no [Plano da 2.ª Parcelar](./Plano_2_Parcelar_NzolaNet.html#9-o-que-estudar-e-dominar--backend) (secções 9 e 10).
+> Os fundamentos necessários para a 2.ª Parcelar (HTTP, REST, JWT, EF Core, Angular Forms/Router, Reactive Forms, Repository, Service, DTOs, Upload de ficheiros, RxJS básico, TailwindCSS/Bootstrap) estão detalhadamente listados no [Plano da 2.ª Parcelar](./Plano_2_Parcelar_NzolaNet.html#9-o-que-estudar-e-dominar-backend) (secções 9 e 10).
 >
 > Esta secção cobre apenas os **tópicos avançados** necessários **depois** da parcelar — para fechar tudo o que ficou de fora e levar o projeto a 20/20 no Exame de Época Normal.
 

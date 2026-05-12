@@ -560,7 +560,7 @@ body {
 <li><strong>Secção 4</strong> (&quot;FRONTEND — Angular&quot;) — toda. <strong>É o vosso manual de instruções.</strong></li>
 <li><strong>Secção 6</strong> (contrato API) — <strong>decora</strong>. É o &quot;contrato&quot; que o backend te entrega; tudo o que o teu Angular chama está aqui.</li>
 <li><strong>Secção 7</strong> (Git/GitHub).</li>
-<li><strong><a href="./Plano_2_Parcelar_NzolaNet.html#10-o-que-estudar-e-dominar--frontend">Plano da 2.ª Parcelar — Secção 10</a></strong> — o teu roadmap de estudos.</li>
+<li><strong><a href="./Plano_2_Parcelar_NzolaNet.html#10-o-que-estudar-e-dominar-frontend">Plano da 2.ª Parcelar — Secção 10</a></strong> — o teu roadmap de estudos.</li>
 </ol>
 <h3 id="para-o-grupo-inteiro-primeira-reuniao"><a class="heading-anchor" href="#para-o-grupo-inteiro-primeira-reuniao" aria-hidden="true">#</a>👉 Para o <strong>grupo inteiro</strong> (primeira reunião)</h3>
 <ol>
@@ -579,10 +579,10 @@ body {
 <li><a href="#1-analise-do-enunciado">Análise do Enunciado</a></li>
 <li><a href="#2-visao-geral-da-arquitetura">Visão Geral da Arquitetura</a></li>
 <li><a href="#3-divisao-da-equipa">Divisão da Equipa</a></li>
-<li><a href="#4-frontend--angular-3-elementos">FRONTEND — Angular (3 elementos)</a></li>
-<li><a href="#5-backend--aspnet-web-api--sql-server-1-elemento">BACKEND — ASP.NET Web API + SQL Server (1 elemento)</a></li>
-<li><a href="#6-contrato-da-api-frontend--backend">Contrato da API (Frontend ↔ Backend)</a></li>
-<li><a href="#7-git-e-github--estrategia-de-colaboracao">Git e GitHub — Estratégia de Colaboração</a></li>
+<li><a href="#4-frontend-angular-3-elementos">FRONTEND — Angular (3 elementos)</a></li>
+<li><a href="#5-backend-aspnet-web-api-sql-server-1-elemento">BACKEND — ASP.NET Web API + SQL Server (1 elemento)</a></li>
+<li><a href="#6-contrato-da-api-frontend-backend">Contrato da API (Frontend ↔ Backend)</a></li>
+<li><a href="#7-git-e-github-estrategia-de-colaboracao">Git e GitHub — Estratégia de Colaboração</a></li>
 <li><a href="#8-cronograma-de-entregas">Cronograma de Entregas</a></li>
 <li><a href="#9-checklist-final-para-2020">Checklist Final para 20/20</a></li>
 <li><a href="#10-pressupostos-tecnicos-assumidos">Pressupostos Técnicos Assumidos</a></li>
@@ -752,38 +752,38 @@ body {
 │   │   │
 │   │   ├── features/                      # Módulos lazy-loaded por domínio
 │   │   │   │
-│   │   │   ├── auth/                      ← [FE-Dev 1]
+│   │   │   ├── auth/                      ← [Emer]
 │   │   │   │   ├── login/
 │   │   │   │   ├── register/
 │   │   │   │   ├── forgot-password/
 │   │   │   │   ├── reset-password/
 │   │   │   │   └── auth.module.ts
 │   │   │   │
-│   │   │   ├── feed/                      ← [FE-Dev 2]
+│   │   │   ├── feed/                      ← [Jeovani]
 │   │   │   │   ├── feed-page/             # Lista cronológica + infinite scroll
 │   │   │   │   ├── create-post/           # Formulário com upload media
 │   │   │   │   └── feed.module.ts
 │   │   │   │
-│   │   │   ├── posts/                     ← [FE-Dev 2]
+│   │   │   ├── posts/                     ← [Jeovani]
 │   │   │   │   ├── post-detail/
 │   │   │   │   ├── edit-post/
 │   │   │   │   └── posts.module.ts
 │   │   │   │
-│   │   │   ├── profile/                   ← [FE-Dev 1 + FE-Dev 3]
-│   │   │   │   ├── profile-page/          # Visualização (FE-Dev 3)
-│   │   │   │   ├── edit-profile/          # Edição + foto (FE-Dev 1)
+│   │   │   ├── profile/                   ← [Emer + Manuel]
+│   │   │   │   ├── profile-page/          # Visualização (Manuel)
+│   │   │   │   ├── edit-profile/          # Edição + foto (Emer)
 │   │   │   │   ├── followers-list/
 │   │   │   │   └── profile.module.ts
 │   │   │   │
-│   │   │   ├── comments/                  ← [FE-Dev 3]
+│   │   │   ├── comments/                  ← [Manuel]
 │   │   │   │   ├── comment-list/
 │   │   │   │   └── comments.module.ts
 │   │   │   │
-│   │   │   ├── notifications/             ← [FE-Dev 3]
+│   │   │   ├── notifications/             ← [Manuel]
 │   │   │   │   ├── notifications-page/
 │   │   │   │   └── notifications.module.ts
 │   │   │   │
-│   │   │   └── admin/                     ← (opcional) [FE-Dev 3]
+│   │   │   └── admin/                     ← (opcional) [Manuel]
 │   │   │       ├── comment-moderation/
 │   │   │       └── admin.module.ts
 │   │   │
@@ -862,38 +862,38 @@ body {
 │   │   │
 │   │   ├── features<span class="hljs-symbol">/</span>                      <span class="hljs-comment"># Módulos lazy-loaded por domínio</span>
 │   │   │   │
-│   │   │   ├── auth<span class="hljs-symbol">/</span>                      ← [FE-Dev <span class="hljs-number">1</span>]
+│   │   │   ├── auth<span class="hljs-symbol">/</span>                      ← [Emer]
 │   │   │   │   ├── login<span class="hljs-symbol">/</span>
 │   │   │   │   ├── register<span class="hljs-symbol">/</span>
 │   │   │   │   ├── forgot-password<span class="hljs-symbol">/</span>
 │   │   │   │   ├── reset-password<span class="hljs-symbol">/</span>
 │   │   │   │   └── auth.module.ts
 │   │   │   │
-│   │   │   ├── feed<span class="hljs-symbol">/</span>                      ← [FE-Dev <span class="hljs-number">2</span>]
+│   │   │   ├── feed<span class="hljs-symbol">/</span>                      ← [Jeovani]
 │   │   │   │   ├── feed-page<span class="hljs-symbol">/</span>             <span class="hljs-comment"># Lista cronológica + infinite scroll</span>
 │   │   │   │   ├── create-post<span class="hljs-symbol">/</span>           <span class="hljs-comment"># Formulário com upload media</span>
 │   │   │   │   └── feed.module.ts
 │   │   │   │
-│   │   │   ├── posts<span class="hljs-symbol">/</span>                     ← [FE-Dev <span class="hljs-number">2</span>]
+│   │   │   ├── posts<span class="hljs-symbol">/</span>                     ← [Jeovani]
 │   │   │   │   ├── post-detail<span class="hljs-symbol">/</span>
 │   │   │   │   ├── edit-post<span class="hljs-symbol">/</span>
 │   │   │   │   └── posts.module.ts
 │   │   │   │
-│   │   │   ├── profile<span class="hljs-symbol">/</span>                   ← [FE-Dev <span class="hljs-number">1</span> <span class="hljs-operator">+</span> FE-Dev <span class="hljs-number">3</span>]
-│   │   │   │   ├── profile-page<span class="hljs-symbol">/</span>          <span class="hljs-comment"># Visualização (FE-Dev 3)</span>
-│   │   │   │   ├── edit-profile<span class="hljs-symbol">/</span>          <span class="hljs-comment"># Edição + foto (FE-Dev 1)</span>
+│   │   │   ├── profile<span class="hljs-symbol">/</span>                   ← [Emer <span class="hljs-operator">+</span> Manuel]
+│   │   │   │   ├── profile-page<span class="hljs-symbol">/</span>          <span class="hljs-comment"># Visualização (Manuel)</span>
+│   │   │   │   ├── edit-profile<span class="hljs-symbol">/</span>          <span class="hljs-comment"># Edição + foto (Emer)</span>
 │   │   │   │   ├── followers-list<span class="hljs-symbol">/</span>
 │   │   │   │   └── profile.module.ts
 │   │   │   │
-│   │   │   ├── comments<span class="hljs-symbol">/</span>                  ← [FE-Dev <span class="hljs-number">3</span>]
+│   │   │   ├── comments<span class="hljs-symbol">/</span>                  ← [Manuel]
 │   │   │   │   ├── comment-list<span class="hljs-symbol">/</span>
 │   │   │   │   └── comments.module.ts
 │   │   │   │
-│   │   │   ├── notifications<span class="hljs-symbol">/</span>             ← [FE-Dev <span class="hljs-number">3</span>]
+│   │   │   ├── notifications<span class="hljs-symbol">/</span>             ← [Manuel]
 │   │   │   │   ├── notifications-page<span class="hljs-symbol">/</span>
 │   │   │   │   └── notifications.module.ts
 │   │   │   │
-│   │   │   └── admin<span class="hljs-symbol">/</span>                     ← (opcional) [FE-Dev <span class="hljs-number">3</span>]
+│   │   │   └── admin<span class="hljs-symbol">/</span>                     ← (opcional) [Manuel]
 │   │   │       ├── comment-moderation<span class="hljs-symbol">/</span>
 │   │   │       └── admin.module.ts
 │   │   │
@@ -2993,9 +2993,9 @@ develop             ← integração contínua. Todas as PRs vão para aqui.
 ├── backend/feature/feed
 ├── backend/feature/notifications
 │
-├── frontend/feature/auth               ← FE-Dev 1
-├── frontend/feature/feed               ← FE-Dev 2
-└── frontend/feature/comments-notifications  ← FE-Dev 3" aria-label="Copiar codigo">Copiar</button>
+├── frontend/feature/auth               ← Emer (FE-Dev 1)
+├── frontend/feature/feed               ← Jeovani (FE-Dev 2)
+└── frontend/feature/comments-notifications  ← Manuel (FE-Dev 3)" aria-label="Copiar codigo">Copiar</button>
 <pre class="hljs"><code class="hljs language-">main                ← versão estável (entregas). Protegida. Nunca commit direto.
 │
 develop             ← integração contínua. Todas <span class="hljs-keyword">as</span> PRs vão para aqui.
@@ -3006,9 +3006,9 @@ develop             ← integração contínua. Todas <span class="hljs-keyword"
 ├── backend<span class="hljs-regexp">/feature/</span>feed
 ├── backend<span class="hljs-regexp">/feature/</span>notifications
 │
-├── frontend<span class="hljs-regexp">/feature/</span>auth               ← FE-Dev <span class="hljs-number">1</span>
-├── frontend<span class="hljs-regexp">/feature/</span>feed               ← FE-Dev <span class="hljs-number">2</span>
-└── frontend<span class="hljs-regexp">/feature/</span>comments-notifications  ← FE-Dev <span class="hljs-number">3</span></code></pre>
+├── frontend<span class="hljs-regexp">/feature/</span>auth               ← Emer (FE-Dev <span class="hljs-number">1</span>)
+├── frontend<span class="hljs-regexp">/feature/</span>feed               ← Jeovani (FE-Dev <span class="hljs-number">2</span>)
+└── frontend<span class="hljs-regexp">/feature/</span>comments-notifications  ← Manuel (FE-Dev <span class="hljs-number">3</span>)</code></pre>
 </div><h3 id="convencao-de-nomes-de-branch"><a class="heading-anchor" href="#convencao-de-nomes-de-branch" aria-hidden="true">#</a>Convenção de nomes de branch</h3>
 <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Formato</th><th>Exemplo</th></tr></thead><tbody><tr><td>Feature backend</td><td><code>backend/feature/&lt;nome-curto&gt;</code></td><td><code>backend/feature/posts-crud</code></td></tr>
 <tr><td>Feature frontend</td><td><code>frontend/feature/&lt;nome-curto&gt;</code></td><td><code>frontend/feature/feed-infinite-scroll</code></td></tr>
@@ -3028,11 +3028,11 @@ git pull origin develop</code></pre>
 <div class="code-block">
 <span class="code-lang">bash</span>
 <button class="code-copy" type="button" data-code="# 2) Criar branch própria a partir de develop
-git checkout -b frontend/feature/auth          # exemplo FE-Dev 1
+git checkout -b frontend/feature/auth          # exemplo: Emer (Auth)
 # ou
 git checkout -b backend/feature/posts-crud     # exemplo Willfredy" aria-label="Copiar codigo">Copiar</button>
 <pre class="hljs"><code class="hljs language-bash"><span class="hljs-comment"># 2) Criar branch própria a partir de develop</span>
-git checkout -b frontend/feature/auth          <span class="hljs-comment"># exemplo FE-Dev 1</span>
+git checkout -b frontend/feature/auth          <span class="hljs-comment"># exemplo: Emer (Auth)</span>
 <span class="hljs-comment"># ou</span>
 git checkout -b backend/feature/posts-crud     <span class="hljs-comment"># exemplo Willfredy</span></code></pre>
 </div><h3 id="trabalhar-e-commitar-frequencia-alta-mensagens-claras"><a class="heading-anchor" href="#trabalhar-e-commitar-frequencia-alta-mensagens-claras" aria-hidden="true">#</a>Trabalhar e commitar (frequência alta, mensagens claras)</h3>
@@ -3345,7 +3345,7 @@ git stash list                      <span class="hljs-comment"># listar stashes<
 <tr><td>8</td><td>Estilização do frontend</td><td><strong>TailwindCSS</strong> (default) ou Bootstrap 5</td><td>Tailwind para responsividade rápida; equipa pode decidir</td></tr></tbody></table></div><hr>
 <h1 id="11-roadmap-de-estudos-avancados-pos-parcelar"><a class="heading-anchor" href="#11-roadmap-de-estudos-avancados-pos-parcelar" aria-hidden="true">#</a>11. Roadmap de Estudos Avançados (Pós-Parcelar)</h1>
 <blockquote>
-<p>Os fundamentos necessários para a 2.ª Parcelar (HTTP, REST, JWT, EF Core, Angular Forms/Router, Reactive Forms, Repository, Service, DTOs, Upload de ficheiros, RxJS básico, TailwindCSS/Bootstrap) estão detalhadamente listados no <a href="./Plano_2_Parcelar_NzolaNet.html#9-o-que-estudar-e-dominar--backend">Plano da 2.ª Parcelar</a> (secções 9 e 10).</p>
+<p>Os fundamentos necessários para a 2.ª Parcelar (HTTP, REST, JWT, EF Core, Angular Forms/Router, Reactive Forms, Repository, Service, DTOs, Upload de ficheiros, RxJS básico, TailwindCSS/Bootstrap) estão detalhadamente listados no <a href="./Plano_2_Parcelar_NzolaNet.html#9-o-que-estudar-e-dominar-backend">Plano da 2.ª Parcelar</a> (secções 9 e 10).</p>
 <p>Esta secção cobre apenas os <strong>tópicos avançados</strong> necessários <strong>depois</strong> da parcelar — para fechar tudo o que ficou de fora e levar o projeto a 20/20 no Exame de Época Normal.</p>
 </blockquote>
 <h2 id="111-backend-avancado-pos-parcelar"><a class="heading-anchor" href="#111-backend-avancado-pos-parcelar" aria-hidden="true">#</a>11.1. Backend Avançado (pós-parcelar)</h2>

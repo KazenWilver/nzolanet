@@ -63,7 +63,9 @@ function baseSlug(text) {
   let s = text.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s-]/g, "")
-    .trim().replace(/\s+/g, "-");
+    .trim().replace(/\s+/g, "-")
+    .replace(/-{2,}/g, "-")     // colapsa multiplos hifenes (caso de em-dash ou --)
+    .replace(/^-+|-+$/g, "");   // remove hifenes no inicio/fim
   return s || "sec";
 }
 
