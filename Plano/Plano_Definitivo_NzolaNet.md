@@ -30,7 +30,7 @@ Lê na seguinte ordem:
 4. **Secção 7** (Git/GitHub).
 5. **Secção 11** ("Roadmap de Estudos Avançados") — para o exame final.
 
-### 👉 Se és **FE-Dev** (Frontend 1, 2 ou 3)
+### 👉 Se és **FE-Dev** (Emer, Jeovani ou Manuel)
 Lê na seguinte ordem:
 1. **Secções 1, 2, 3** (entender o projeto e divisão).
 2. **Secção 4** ("FRONTEND — Angular") — toda. **É o vosso manual de instruções.**
@@ -138,9 +138,9 @@ nzolanet/
 
 | Elemento | Função | Responsabilidade principal |
 |---|---|---|
-| **FE-Dev 1** | Frontend | Módulo `auth/` + guards + interceptors + edição de perfil |
-| **FE-Dev 2** | Frontend | Módulo `feed/` + criação/edição de publicações + componente `post-card` + toggle de baze |
-| **FE-Dev 3** | Frontend | Módulo `notifications/` + módulo `comments/` + seguir/deixar de seguir + perfil (visualização) |
+| **Emer Tavares** (FE-Dev 1) | Frontend | Módulo `auth/` + guards + interceptors + edição de perfil |
+| **Jeovani Sassombo** (FE-Dev 2) | Frontend | Módulo `feed/` + criação/edição de publicações + componente `post-card` + toggle de baze |
+| **Manuel Sulo** (FE-Dev 3) | Frontend | Módulo `notifications/` + módulo `comments/` + seguir/deixar de seguir + perfil (visualização) |
 | **BE-Dev (Willfredy)** | Backend | Toda a Web API, SQL Server, autenticação JWT, regras de negócio, upload de ficheiros, relatório técnico |
 
 > **Regra de ouro:** qualquer mudança ao **contrato API** (endpoints, DTOs) deve ser comunicada ao grupo e atualizada em `docs/API_CONTRACT.md` **antes** de ser implementada.
@@ -486,9 +486,9 @@ const routes: Routes = [
 
 | Dev | Branch Git | Módulos / Componentes |
 |---|---|---|
-| **FE-Dev 1** | `frontend/feature/auth` | `auth/` (login, register, forgot/reset), `auth.guard`, `guest.guard`, `jwt.interceptor`, `error.interceptor`, `AuthService`, `edit-profile/` |
-| **FE-Dev 2** | `frontend/feature/feed` | `feed/` (feed-page + infinite scroll), `create-post/`, `posts/edit-post`, `post-card` (shared), `like-button` (shared), `media-preview` (shared), `PostService`, `FeedService`, `BazeService`, `UploadService` |
-| **FE-Dev 3** | `frontend/feature/comments-notifications` | `comments/`, `notifications/`, `notification-bell` (shared), `profile-page/`, `followers-list/`, `admin/comment-moderation`, `CommentService`, `NotificationService`, `UserService` (follow/unfollow) |
+| **Emer Tavares** (FE-Dev 1) | `frontend/feature/auth` | `auth/` (login, register, forgot/reset), `auth.guard`, `guest.guard`, `jwt.interceptor`, `error.interceptor`, `AuthService`, `edit-profile/` |
+| **Jeovani Sassombo** (FE-Dev 2) | `frontend/feature/feed` | `feed/` (feed-page + infinite scroll), `create-post/`, `posts/edit-post`, `post-card` (shared), `like-button` (shared), `media-preview` (shared), `PostService`, `FeedService`, `BazeService`, `UploadService` |
+| **Manuel Sulo** (FE-Dev 3) | `frontend/feature/comments-notifications` | `comments/`, `notifications/`, `notification-bell` (shared), `profile-page/`, `followers-list/`, `admin/comment-moderation`, `CommentService`, `NotificationService`, `UserService` (follow/unfollow) |
 
 > **Componentes shared:** quem criar é "dono"; alterações por outro dev passam **obrigatoriamente** por PR com revisão.
 

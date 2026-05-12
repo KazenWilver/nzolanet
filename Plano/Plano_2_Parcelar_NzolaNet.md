@@ -29,12 +29,15 @@ Antes de mergulhar no plano, segue estes passos consoante a tua função:
 4. Cria a solução: `dotnet new sln -n NzolaNet`. Segue os comandos da [Secção 5.12 do plano completo](./Plano_Definitivo_NzolaNet.html#512-comandos-uteis-backend).
 5. Estabelece o **contrato API** (Secção 6) **antes** de começar a codar — partilha com os FE-Devs.
 
-### 👉 Para os FE-Devs (1, 2, 3)
+### 👉 Para os FE-Devs (Emer, Jeovani, Manuel)
 1. Lê este plano de fio a pavio (~20 min).
 2. Estuda 1–2 horas a [Secção 10 — O Que Estudar para Frontend](#10-o-que-estudar-e-dominar--frontend).
 3. Vê o vídeo de Mosh Hamedani *"Angular Tutorial for Beginners"* (YouTube grátis).
 4. Cria o projeto: `ng new nzolanet-frontend --style=scss --routing=true`. Setup do Tailwind ou Bootstrap.
-5. **Combinem entre vocês** quem fica com qual módulo (Secção 3).
+5. **Combinem entre vocês** quem fica com qual módulo (ver Secção 3 para a divisão sugerida):
+   - **Emer** → `auth/` + perfil
+   - **Jeovani** → `feed/` + publicações + comentários
+   - **Manuel** → perfis + seguidores + comentários
 
 ### 👉 Para o grupo todo (primeira reunião)
 1. **Criar o repositório GitHub** chamado `nzolanet` (ver [Secção 8](#8-git-e-github--resumo-pratico)).
@@ -211,9 +214,9 @@ nzolanet/
 
 | Elemento | Branch Git | Tarefas na 2.ª Parcelar |
 |---|---|---|
-| **FE-Dev 1** | `frontend/feature/auth` | Módulo `auth/` (login, register, recover) + `JwtInterceptor` + `AuthGuard` + `edit-profile/` + `AuthService` |
-| **FE-Dev 2** | `frontend/feature/feed-posts` | `feed-page/` (cronológico simples), `create-post/`, `edit-post/`, `post-card` (shared), `PostService`, `UploadService`, `media-preview` (shared) |
-| **FE-Dev 3** | `frontend/feature/profile-comments` | `profile-page/`, `followers-list/`, `comment-list/`, `comment-form/`, `comment-item/`, `UserService` (follow/unfollow), `CommentService` |
+| **Emer Tavares** (FE-Dev 1) | `frontend/feature/auth` | Módulo `auth/` (login, register, recover) + `JwtInterceptor` + `AuthGuard` + `edit-profile/` + `AuthService` |
+| **Jeovani Sassombo** (FE-Dev 2) | `frontend/feature/feed-posts` | `feed-page/` (cronológico simples), `create-post/`, `edit-post/`, `post-card` (shared), `PostService`, `UploadService`, `media-preview` (shared) |
+| **Manuel Sulo** (FE-Dev 3) | `frontend/feature/profile-comments` | `profile-page/`, `followers-list/`, `comment-list/`, `comment-form/`, `comment-item/`, `UserService` (follow/unfollow), `CommentService` |
 | **BE-Dev (Willfredy)** | `backend/feature/*` | Toda a API: Auth + Users + Posts + Comments + Follow, JWT, upload de ficheiros, regras de negócio |
 
 > **Componentes shared:** `navbar`, `sidebar`, `user-avatar`, `post-card`, `comment-item`, `loading-spinner`, `confirm-dialog`, `media-preview`. Quem cria é "dono"; alterações por outros via PR.
@@ -977,7 +980,7 @@ Semana 4:
 
 ## 10. O Que Estudar e Dominar — Frontend
 
-> **Audiência:** FE-Dev 1, FE-Dev 2, FE-Dev 3. Tópicos ordenados por **prioridade** para a 2.ª Parcelar.
+> **Audiência:** Emer Tavares, Jeovani Sassombo, Manuel Sulo (FE-Devs). Tópicos ordenados por **prioridade** para a 2.ª Parcelar.
 
 ### 10.1. Fundamentos TypeScript / Angular (Pré-requisito)
 
@@ -1089,9 +1092,9 @@ Semana 4:
 
 | Dev | Tópicos prioritários | Tópicos secundários |
 |---|---|---|
-| **FE-Dev 1** (Auth + Edit Profile) | Reactive Forms · Validators customizados · JWT no LocalStorage · HttpInterceptor · AuthGuard | Upload de foto (FormData) |
-| **FE-Dev 2** (Feed + Posts) | HttpClient + paginação simples · Componentes reutilizáveis (`post-card`) · `*ngFor` + `trackBy` · Lazy loading | Upload de imagem/vídeo · `<video>` HTML5 |
-| **FE-Dev 3** (Profile + Comments) | RxJS (Observable + async pipe) · Comunicação entre componentes (`@Input`/`@Output`) · Route Params (`/profile/:id`) | Diálogos de confirmação · `ng-content` |
+| **Emer** (FE-Dev 1 · Auth + Edit Profile) | Reactive Forms · Validators customizados · JWT no LocalStorage · HttpInterceptor · AuthGuard | Upload de foto (FormData) |
+| **Jeovani** (FE-Dev 2 · Feed + Posts) | HttpClient + paginação simples · Componentes reutilizáveis (`post-card`) · `*ngFor` + `trackBy` · Lazy loading | Upload de imagem/vídeo · `<video>` HTML5 |
+| **Manuel** (FE-Dev 3 · Profile + Comments) | RxJS (Observable + async pipe) · Comunicação entre componentes (`@Input`/`@Output`) · Route Params (`/profile/:id`) | Diálogos de confirmação · `ng-content` |
 
 ---
 

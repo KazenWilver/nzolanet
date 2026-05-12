@@ -5,7 +5,7 @@
 
 ## 📄 Documentação do Projeto
 
-Toda a documentação está disponível em **[https://<teu-utilizador>.github.io/nzolanet/](#)** (substitui pelo teu link depois de ativar GitHub Pages).
+Toda a documentação está disponível em **[https://kazenwilver.github.io/nzolanet/](https://kazenwilver.github.io/nzolanet/)** (após ativares o GitHub Pages em **Settings → Pages → Source: `main` / root**).
 
 Localmente, podes abrir os seguintes ficheiros no browser:
 
@@ -34,14 +34,14 @@ NzolaNet/
 └── frontend/               ← (a criar) Angular
 ```
 
-## 👥 Equipa
+## 👥 Equipa — Grupo LODA
 
 | Função | Membro | Stack |
 |---|---|---|
 | Backend | **Willfredy Vieira Dias** | ASP.NET Web API + SQL Server + EF Core |
-| Frontend 1 | FE-Dev 1 | Angular — Autenticação + Perfil |
-| Frontend 2 | FE-Dev 2 | Angular — Publicações + Comentários |
-| Frontend 3 | FE-Dev 3 | Angular — Feed + Notificações + Design System |
+| Frontend 1 | **Emer Tavares** | Angular — Autenticação + Perfil |
+| Frontend 2 | **Jeovani Sassombo** | Angular — Publicações + Comentários |
+| Frontend 3 | **Manuel Sulo** | Angular — Feed + Notificações + Design System |
 
 ## 🚀 Como regenerar a documentação
 
