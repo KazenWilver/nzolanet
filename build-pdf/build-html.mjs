@@ -58,13 +58,28 @@ const TARGETS = [
 
 // ---- Marked + renderer customizado ----------------------------------------
 
+// Normalizacao pura (sem contador) - usada para reescrever anchors de links
+function baseSlug(text) {
+  let s = text.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .trim().replace(/\s+/g, "-");
+  return s || "sec";
+}
+
+// Reescreve TODOS os links internos do tipo ](...#anchor) aplicando o mesmo
+// slugify dos headings. Necessario porque os MDs foram escritos com acentos
+// nos anchors do indice (ex: #1-analise-do-enunciado) mas as headings geram
+// IDs sem acentos. Cobre tambem links cross-doc (./outro.html#anchor).
+function normalizeAnchorLinks(md) {
+  return md.replace(/(\]\([^)#\s]*)#([^)\s"]+)/g, (_m, before, anchor) => {
+    return `${before}#${baseSlug(anchor)}`;
+  });
+}
+
 function buildMarked(headings, slugUsed) {
   function slugify(text) {
-    let base = text.toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, "")
-      .trim().replace(/\s+/g, "-");
-    if (!base) base = "sec";
+    const base = baseSlug(text);
     const count = slugUsed.get(base) ?? 0;
     slugUsed.set(base, count + 1);
     return count === 0 ? base : `${base}-${count}`;
@@ -751,7 +766,9 @@ function buildOne(target) {
   }
   md = lines.slice(cutAt).join("\n").replace(/^\s+/, "");
 
-  // Tambem, caso haja um terceiro blockquote (link para outro plano), nao cortar.
+  // Normaliza todos os anchors dos links internos (#xyz) para que correspondam
+  // aos IDs gerados pelas headings (sem acentos, sem caracteres especiais).
+  md = normalizeAnchorLinks(md);
 
   const headings = [];
   const slugUsed = new Map();

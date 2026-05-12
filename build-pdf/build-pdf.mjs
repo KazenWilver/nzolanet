@@ -51,13 +51,42 @@ function findEdge() {
   throw new Error("Microsoft Edge nao foi encontrado no sistema.");
 }
 
+// ---- Slug helpers ---------------------------------------------------------
+
+function baseSlug(text) {
+  let s = text.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .trim().replace(/\s+/g, "-");
+  return s || "sec";
+}
+
+function normalizeAnchorLinks(md) {
+  return md.replace(/(\]\([^)#\s]*)#([^)\s"]+)/g, (_m, before, anchor) => {
+    return `${before}#${baseSlug(anchor)}`;
+  });
+}
+
 // ---- Marked ---------------------------------------------------------------
 
 function buildMarked() {
+  const slugUsed = new Map();
+  function slugify(text) {
+    const base = baseSlug(text);
+    const count = slugUsed.get(base) ?? 0;
+    slugUsed.set(base, count + 1);
+    return count === 0 ? base : `${base}-${count}`;
+  }
+
   const marked = new Marked({ gfm: true, breaks: false });
-  marked.use(gfmHeadingId({ prefix: "sec-" }));
+  marked.use(gfmHeadingId({ prefix: "" }));
   marked.use({
     renderer: {
+      heading(token) {
+        const text = this.parser.parseInline(token.tokens);
+        const id = slugify(token.text);
+        return `<h${token.depth} id="${id}">${text}</h${token.depth}>\n`;
+      },
       code(token) {
         const lang = (token.lang || "").trim();
         const raw = token.text;
@@ -259,7 +288,8 @@ table, pre { page-break-inside: avoid; }
 // ---- Build de um target ---------------------------------------------------
 
 function buildOne(target) {
-  const md = readFileSync(target.inputMd, "utf8");
+  let md = readFileSync(target.inputMd, "utf8");
+  md = normalizeAnchorLinks(md);
   const marked = buildMarked();
   const bodyHtml = marked.parse(md);
 

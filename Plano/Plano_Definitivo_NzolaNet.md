@@ -51,18 +51,18 @@ Lê na seguinte ordem:
 
 ## Índice
 
-1. [Análise do Enunciado](#1-análise-do-enunciado)
-2. [Visão Geral da Arquitetura](#2-visão-geral-da-arquitetura)
-3. [Divisão da Equipa](#3-divisão-da-equipa)
+1. [Análise do Enunciado](#1-analise-do-enunciado)
+2. [Visão Geral da Arquitetura](#2-visao-geral-da-arquitetura)
+3. [Divisão da Equipa](#3-divisao-da-equipa)
 4. [FRONTEND — Angular (3 elementos)](#4-frontend--angular-3-elementos)
 5. [BACKEND — ASP.NET Web API + SQL Server (1 elemento)](#5-backend--aspnet-web-api--sql-server-1-elemento)
 6. [Contrato da API (Frontend ↔ Backend)](#6-contrato-da-api-frontend--backend)
-7. [Git e GitHub — Estratégia de Colaboração](#7-git-e-github--estratégia-de-colaboração)
+7. [Git e GitHub — Estratégia de Colaboração](#7-git-e-github--estrategia-de-colaboracao)
 8. [Cronograma de Entregas](#8-cronograma-de-entregas)
 9. [Checklist Final para 20/20](#9-checklist-final-para-2020)
-10. [Pressupostos Técnicos Assumidos](#10-pressupostos-técnicos-assumidos)
-11. [Roadmap de Estudos Avançados (Pós-Parcelar)](#11-roadmap-de-estudos-avançados-pós-parcelar)
-12. [Glossário de Termos Técnicos](#12-glossário-de-termos-técnicos)
+10. [Pressupostos Técnicos Assumidos](#10-pressupostos-tecnicos-assumidos)
+11. [Roadmap de Estudos Avançados (Pós-Parcelar)](#11-roadmap-de-estudos-avancados-pos-parcelar)
+12. [Glossário de Termos Técnicos](#12-glossario-de-termos-tecnicos)
 
 ---
 
