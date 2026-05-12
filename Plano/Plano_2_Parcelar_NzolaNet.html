@@ -1,0 +1,2327 @@
+<!doctype html>
+<html lang="pt-pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="description" content="2.ª Parcelar do projeto NzolaNet - Angular + ASP.NET Web API + SQL Server. Por Willfredy Vieira Dias.">
+<title>NzolaNet · 2.ª Parcelar</title>
+<style>
+:root {
+  --c-bg: #f8fafc;
+  --c-bg-elev: #ffffff;
+  --c-bg-soft: #f1f5f9;
+  --c-text: #1e293b;
+  --c-text-muted: #64748b;
+  --c-text-strong: #0f172a;
+  --c-border: #e2e8f0;
+  --c-border-strong: #cbd5e1;
+  --c-accent: #2563eb;
+  --c-accent-hover: #1d4ed8;
+  --c-accent-soft: #dbeafe;
+  --c-success: #10b981;
+  --c-code-bg: #0f172a;
+  --c-code-text: #e2e8f0;
+  --c-code-border: #1e293b;
+  --c-inline-bg: #f1f5f9;
+  --c-inline-text: #be185d;
+  --c-table-head: #1e293b;
+  --c-table-head-text: #f8fafc;
+  --c-table-row-alt: #f8fafc;
+  --c-table-row-hover: #eff6ff;
+  --c-blockquote-bg: #eff6ff;
+  --c-blockquote-border: #2563eb;
+  --c-blockquote-text: #1e3a8a;
+  --c-cover-from: #0f172a;
+  --c-cover-via: #1e3a8a;
+  --c-cover-to: #2563eb;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, .08), 0 2px 4px rgba(15, 23, 42, .04);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, .12), 0 4px 8px rgba(15, 23, 42, .06);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --sidebar-w: 320px;
+  --header-h: 64px;
+}
+
+[data-theme="dark"] {
+  --c-bg: #0b1220;
+  --c-bg-elev: #121a2c;
+  --c-bg-soft: #1a2438;
+  --c-text: #cbd5e1;
+  --c-text-muted: #94a3b8;
+  --c-text-strong: #f1f5f9;
+  --c-border: #1e293b;
+  --c-border-strong: #334155;
+  --c-accent: #60a5fa;
+  --c-accent-hover: #93c5fd;
+  --c-accent-soft: rgba(96, 165, 250, .14);
+  --c-code-bg: #060b16;
+  --c-code-text: #e2e8f0;
+  --c-code-border: #1e293b;
+  --c-inline-bg: #1a2438;
+  --c-inline-text: #f9a8d4;
+  --c-table-head: #1e3a8a;
+  --c-table-head-text: #f1f5f9;
+  --c-table-row-alt: #131c30;
+  --c-table-row-hover: rgba(96, 165, 250, .08);
+  --c-blockquote-bg: rgba(96, 165, 250, .08);
+  --c-blockquote-border: #60a5fa;
+  --c-blockquote-text: #bfdbfe;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 16px); }
+body {
+  margin: 0; padding: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-size: 15px; line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* HEADER */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--header-h);
+  background: rgba(255, 255, 255, .82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--c-border);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 16px;
+}
+[data-theme="dark"] .app-header { background: rgba(11, 18, 32, .82); }
+
+.app-header .brand {
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 700; color: var(--c-text-strong);
+  text-decoration: none; font-size: 16px;
+}
+.app-header .brand-logo {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 14px;
+  box-shadow: var(--shadow-md);
+}
+.app-header .brand-meta { display: flex; flex-direction: column; line-height: 1.15; }
+.app-header .brand-meta small {
+  font-size: 11px; color: var(--c-text-muted); font-weight: 500; letter-spacing: .4px;
+}
+.app-header .spacer { flex: 1; }
+
+.app-header .header-btn {
+  appearance: none;
+  border: 1px solid var(--c-border-strong);
+  background: var(--c-bg-elev); color: var(--c-text);
+  height: 36px; padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all .15s ease;
+}
+.app-header .header-btn:hover { border-color: var(--c-accent); color: var(--c-accent); transform: translateY(-1px); }
+.app-header .header-btn.icon { width: 36px; padding: 0; justify-content: center; }
+.app-header .header-btn.primary {
+  background: var(--c-accent); border-color: var(--c-accent); color: white;
+}
+.app-header .header-btn.primary:hover { background: var(--c-accent-hover); border-color: var(--c-accent-hover); color: white; }
+
+.plan-switch {
+  display: inline-flex; align-items: center; gap: 0;
+  background: var(--c-bg-soft);
+  border: 1px solid var(--c-border);
+  border-radius: 10px; padding: 3px;
+  height: 36px;
+}
+.plan-switch a {
+  text-decoration: none; color: var(--c-text-muted);
+  padding: 0 12px; height: 28px;
+  display: inline-flex; align-items: center;
+  border-radius: 7px; font-size: 12.5px; font-weight: 600;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.plan-switch a:hover { color: var(--c-text-strong); }
+.plan-switch a.current {
+  background: var(--c-bg-elev); color: var(--c-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.menu-toggle { display: none; }
+
+/* LAYOUT */
+.app-layout {
+  display: grid; grid-template-columns: var(--sidebar-w) 1fr;
+  gap: 0; max-width: 1400px; margin: 0 auto;
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: sticky; top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: auto;
+  padding: 28px 18px 28px 28px;
+  border-right: 1px solid var(--c-border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border-strong) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--c-border-strong); border-radius: 3px; }
+
+.sidebar h3 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1.6px;
+  font-weight: 700; color: var(--c-text-muted); margin: 0 0 16px 0;
+}
+
+.toc-list, .toc-sublist { list-style: none; padding-left: 0; margin: 0; }
+.toc-list > li { margin: 4px 0; }
+.toc-link {
+  display: block; padding: 7px 12px;
+  border-radius: 7px; color: var(--c-text);
+  text-decoration: none; font-size: 13.5px;
+  border-left: 2px solid transparent;
+  transition: all .15s ease;
+}
+.toc-link:hover { background: var(--c-bg-soft); color: var(--c-accent); }
+.toc-link.toc-l2 { font-weight: 600; color: var(--c-text-strong); }
+.toc-link.toc-l3 { font-size: 12.5px; padding-left: 26px; color: var(--c-text-muted); }
+.toc-link.active {
+  background: var(--c-accent-soft); color: var(--c-accent);
+  border-left-color: var(--c-accent); font-weight: 700;
+}
+.toc-sublist { margin: 2px 0 6px 0; padding-left: 0; }
+.toc-sublist > li { margin: 2px 0; }
+
+/* MAIN */
+.main { padding: 0 40px 80px 40px; min-width: 0; }
+
+/* HERO */
+.hero {
+  margin: 28px 0 56px 0;
+  padding: 56px 48px;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(59, 130, 246, .35), transparent 40%),
+    radial-gradient(circle at 80% 100%, rgba(14, 165, 233, .25), transparent 40%),
+    linear-gradient(135deg, var(--c-cover-from) 0%, var(--c-cover-via) 60%, var(--c-cover-to) 100%);
+  color: #f8fafc;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.hero::before {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+.hero > * { position: relative; }
+.hero .badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: #cbd5e1; font-weight: 600;
+}
+.hero h1 {
+  font-size: 48px; margin: 18px 0 8px 0;
+  font-weight: 800; letter-spacing: -1.5px;
+  color: #ffffff; line-height: 1.1;
+  border: none; padding: 0;
+}
+.hero .subtitle {
+  font-size: 18px; color: #cbd5e1;
+  margin: 0 0 32px 0; font-weight: 400;
+}
+.hero .chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 12px 0; }
+.hero .chip {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 8px; padding: 8px 14px;
+  font-size: 13px; color: #e2e8f0; font-weight: 500;
+}
+.hero .author-card {
+  margin-top: 36px; padding: 20px 26px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius-md);
+  background: rgba(15,23,42,.4);
+  backdrop-filter: blur(10px);
+  max-width: 520px;
+}
+.hero .author-card .label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 2.5px;
+  color: #94a3b8; margin-bottom: 6px; font-weight: 700;
+}
+.hero .author-card .name {
+  font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 4px;
+}
+.hero .author-card .role { font-size: 13px; color: #cbd5e1; margin-bottom: 10px; }
+.hero .author-card .slogan { font-size: 13px; font-style: italic; color: #93c5fd; }
+.hero .cover-footer {
+  margin-top: 24px; font-size: 12px; color: #94a3b8;
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+
+/* TYPOGRAPHY */
+.content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+  color: var(--c-text-strong); font-weight: 700; line-height: 1.3;
+  margin: 2em 0 0.6em 0;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+  position: relative;
+}
+.content h1 {
+  font-size: 32px; border-bottom: 3px solid var(--c-accent); padding-bottom: 0.3em;
+}
+.content h2 {
+  font-size: 26px; border-bottom: 1px solid var(--c-border); padding-bottom: 0.3em;
+}
+.content h3 { font-size: 20px; color: var(--c-accent); }
+.content h4 { font-size: 17px; color: var(--c-text-strong); }
+.content h5 { font-size: 14px; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 1.2px; }
+
+.heading-anchor {
+  position: absolute; left: -22px;
+  color: var(--c-border-strong); text-decoration: none;
+  opacity: 0; transition: opacity .15s ease;
+  font-weight: 400;
+}
+.content h1:hover .heading-anchor,
+.content h2:hover .heading-anchor,
+.content h3:hover .heading-anchor,
+.content h4:hover .heading-anchor { opacity: 1; }
+.heading-anchor:hover { color: var(--c-accent); }
+
+.content p { margin: 0.8em 0; }
+.content a { color: var(--c-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .15s; }
+.content a:hover { border-bottom-color: var(--c-accent); }
+.content strong { color: var(--c-text-strong); font-weight: 700; }
+.content em { color: var(--c-text); font-style: italic; }
+
+.content ul, .content ol { margin: 0.8em 0 1em 0; padding-left: 1.8em; }
+.content li { margin: 0.3em 0; }
+.content li::marker { color: var(--c-accent); }
+.content ul li input[type="checkbox"] { margin-right: 8px; transform: translateY(1px); }
+
+.content blockquote {
+  margin: 1.2em 0; padding: 14px 20px;
+  border-left: 4px solid var(--c-blockquote-border);
+  background: var(--c-blockquote-bg);
+  color: var(--c-blockquote-text);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+.content blockquote p { margin: 0.3em 0; }
+.content blockquote strong { color: var(--c-blockquote-text); }
+.content blockquote a { color: var(--c-blockquote-text); border-bottom: 1px solid var(--c-blockquote-text); }
+
+.content :not(pre) > code {
+  background: var(--c-inline-bg); color: var(--c-inline-text);
+  padding: 2px 7px; border-radius: 5px;
+  font-family: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+  font-size: 0.88em; font-weight: 500;
+  border: 1px solid var(--c-border);
+}
+
+.code-block {
+  position: relative; margin: 1.2em 0;
+  border-radius: var(--radius-md); overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--c-code-bg);
+  border: 1px solid var(--c-code-border);
+}
+.code-block pre.hljs {
+  margin: 0; padding: 18px 18px 18px 18px; padding-top: 38px;
+  background: transparent; color: var(--c-code-text);
+  font-size: 13px; line-height: 1.6; overflow-x: auto;
+  font-family: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+}
+.code-block pre.hljs code {
+  background: transparent; color: inherit;
+  padding: 0; border: none; font-family: inherit;
+}
+.code-block .code-lang {
+  position: absolute; top: 10px; left: 16px;
+  font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: #94a3b8; font-family: "Inter", system-ui, sans-serif;
+  font-weight: 700; user-select: none;
+}
+.code-block .code-copy {
+  position: absolute; top: 8px; right: 10px;
+  appearance: none;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04); color: #cbd5e1;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 6px;
+  cursor: pointer; font-family: "Inter", system-ui, sans-serif;
+  letter-spacing: .4px; transition: all .15s ease;
+}
+.code-block .code-copy:hover { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+.code-block .code-copy.copied { background: rgba(16,185,129,.2); color: #6ee7b7; border-color: rgba(16,185,129,.4); }
+
+.hljs-comment, .hljs-quote { color: #94a3b8; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-name, .hljs-tag { color: #c084fc; }
+.hljs-string, .hljs-doctag, .hljs-template-tag, .hljs-template-variable { color: #86efac; }
+.hljs-title, .hljs-section, .hljs-selector-id, .hljs-title.class_, .hljs-title.function_ { color: #fde68a; }
+.hljs-number, .hljs-literal, .hljs-symbol, .hljs-attr { color: #fda4af; }
+.hljs-type, .hljs-class .hljs-title { color: #67e8f9; }
+.hljs-attribute, .hljs-variable, .hljs-meta, .hljs-params { color: #93c5fd; }
+.hljs-deletion { color: #fca5a5; }
+.hljs-addition { color: #86efac; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
+
+.table-wrap {
+  overflow-x: auto; margin: 1.2em 0;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  background: var(--c-bg-elev);
+}
+.content table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.content thead { background: var(--c-table-head); }
+.content thead th {
+  color: var(--c-table-head-text); text-align: left;
+  padding: 10px 16px; font-weight: 600; font-size: 13px;
+  letter-spacing: .2px; white-space: nowrap;
+}
+.content tbody td {
+  padding: 9px 16px; border-top: 1px solid var(--c-border); vertical-align: top;
+}
+.content tbody tr:nth-child(even) { background: var(--c-table-row-alt); }
+.content tbody tr:hover { background: var(--c-table-row-hover); }
+
+.content hr { border: none; height: 1px; background: var(--c-border); margin: 2.2em 0; }
+.content img { max-width: 100%; height: auto; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+
+/* BACK TO TOP */
+.back-top {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--c-accent); color: white;
+  border: none; cursor: pointer;
+  font-size: 20px; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transform: translateY(8px);
+  transition: all .25s ease; z-index: 90;
+}
+.back-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.back-top:hover { background: var(--c-accent-hover); transform: translateY(-2px); }
+
+/* PROGRESS */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0;
+  background: linear-gradient(90deg, var(--c-accent), #0ea5e9);
+  z-index: 200; transition: width .08s linear;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .app-layout { grid-template-columns: 1fr; }
+  .menu-toggle { display: inline-flex; }
+  .sidebar {
+    position: fixed; top: var(--header-h); left: 0;
+    width: var(--sidebar-w); height: calc(100vh - var(--header-h));
+    background: var(--c-bg); z-index: 95;
+    transform: translateX(-100%); transition: transform .25s ease;
+    border-right: 1px solid var(--c-border);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay {
+    position: fixed; inset: var(--header-h) 0 0 0;
+    background: rgba(15, 23, 42, .4); backdrop-filter: blur(2px);
+    z-index: 94; opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+  .main { padding: 0 22px 60px 22px; }
+  .hero { padding: 40px 28px; margin: 20px 0 36px 0; }
+  .hero h1 { font-size: 34px; }
+  .hero .subtitle { font-size: 16px; }
+}
+
+@media (max-width: 720px) {
+  .plan-switch a { padding: 0 8px; font-size: 11.5px; }
+}
+
+@media (max-width: 640px) {
+  .app-header { padding: 0 14px; gap: 8px; }
+  .app-header .brand-meta small { display: none; }
+  .app-header .header-btn span.label { display: none; }
+  .app-header .header-btn { padding: 0 10px; }
+  :root { --sidebar-w: 280px; }
+  .hero { padding: 30px 20px; border-radius: 12px; }
+  .hero h1 { font-size: 28px; }
+  .hero .author-card { padding: 16px 18px; }
+  .main { padding: 0 14px 60px 14px; }
+  .content h2 { font-size: 22px; }
+  .content h3 { font-size: 18px; }
+  .back-top { bottom: 16px; right: 16px; }
+}
+
+@media print {
+  .app-header, .sidebar, .back-top, .scroll-progress, .code-copy, .heading-anchor { display: none !important; }
+  .app-layout { grid-template-columns: 1fr; }
+  .main { padding: 0; }
+  body { background: white; color: black; font-size: 11pt; }
+  .hero { page-break-after: always; }
+  .content h1, .content h2 { page-break-before: auto; page-break-after: avoid; }
+  .code-block, .table-wrap { page-break-inside: avoid; }
+}
+
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<header class="app-header">
+  <button class="header-btn icon menu-toggle" id="menu-toggle" aria-label="Abrir indice">☰</button>
+  <a class="brand" href="#">
+    <span class="brand-logo">NN</span>
+    <span class="brand-meta">
+      <span>NzolaNet</span>
+      <small>2.ª Parcelar · Projecto AW</small>
+    </span>
+  </a>
+  <nav class="plan-switch" aria-label="Alternar entre planos">
+    <a class="current" href="./Plano_2_Parcelar_NzolaNet.html" aria-current="page">2.ª Parcelar</a>
+    <a href="./Plano_Definitivo_NzolaNet.html">Plano Completo</a>
+  </nav>
+  <div class="spacer"></div>
+  <button class="header-btn" id="theme-toggle" type="button" title="Alternar tema (T)">
+    <span id="theme-icon">☾</span>
+    <span class="label" id="theme-label">Escuro</span>
+  </button>
+  <a class="header-btn primary" href="./Plano_2_Parcelar_NzolaNet.pdf" target="_blank" rel="noopener" title="Abrir PDF">
+    <span>📄</span><span class="label">PDF</span>
+  </a>
+</header>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar" aria-label="Indice do documento">
+    <h3>Indice</h3>
+    <ol class="toc-list"><li><a href="#por-onde-comecar-guia-rapido-1-dia" class="toc-link toc-l2" data-target="por-onde-comecar-guia-rapido-1-dia">Por Onde Começar — Guia Rápido (1.º dia)</a><ol class="toc-sublist"><li><a href="#para-o-be-dev-willfredy" class="toc-link toc-l3" data-target="para-o-be-dev-willfredy">👉 Para o BE-Dev (Willfredy)</a></li><li><a href="#para-os-fe-devs-1-2-3" class="toc-link toc-l3" data-target="para-os-fe-devs-1-2-3">👉 Para os FE-Devs (1, 2, 3)</a></li><li><a href="#para-o-grupo-todo-primeira-reuniao" class="toc-link toc-l3" data-target="para-o-grupo-todo-primeira-reuniao">👉 Para o grupo todo (primeira reunião)</a></li></ol></li><li><a href="#indice" class="toc-link toc-l2" data-target="indice">Índice</a></li><li><a href="#1-o-que-tem-de-funcionar-na-2-parcelar" class="toc-link toc-l2" data-target="1-o-que-tem-de-funcionar-na-2-parcelar">1. O Que Tem de Funcionar na 2.ª Parcelar</a><ol class="toc-sublist"><li><a href="#11-gestao-de-utilizadores" class="toc-link toc-l3" data-target="11-gestao-de-utilizadores">1.1. Gestão de Utilizadores</a></li><li><a href="#12-gestao-de-publicacoes" class="toc-link toc-l3" data-target="12-gestao-de-publicacoes">1.2. Gestão de Publicações</a></li><li><a href="#13-gestao-de-comentarios" class="toc-link toc-l3" data-target="13-gestao-de-comentarios">1.3. Gestão de Comentários</a></li><li><a href="#14-o-que-nao-entra-na-2-parcelar-mas-a-infraestrutura-ja-pode-existir" class="toc-link toc-l3" data-target="14-o-que-nao-entra-na-2-parcelar-mas-a-infraestrutura-ja-pode-existir">1.4. O Que **Não Entra** na 2.ª Parcelar (mas a infraestrutura já pode existir)</a></li></ol></li><li><a href="#15-fluxo-end-to-end-exemplo-criar-publicacao" class="toc-link toc-l2" data-target="15-fluxo-end-to-end-exemplo-criar-publicacao">1.5. Fluxo End-to-End (exemplo: "criar publicação")</a></li><li><a href="#2-arquitetura-resumida-foco-parcelar" class="toc-link toc-l2" data-target="2-arquitetura-resumida-foco-parcelar">2. Arquitetura Resumida (foco parcelar)</a></li><li><a href="#3-divisao-da-equipa-nesta-fase" class="toc-link toc-l2" data-target="3-divisao-da-equipa-nesta-fase">3. Divisão da Equipa nesta Fase</a></li><li><a href="#4-frontend-o-que-construir" class="toc-link toc-l2" data-target="4-frontend-o-que-construir">4. FRONTEND — O Que Construir</a><ol class="toc-sublist"><li><a href="#41-tecnologias-minimas-para-a-2-parcelar" class="toc-link toc-l3" data-target="41-tecnologias-minimas-para-a-2-parcelar">4.1. Tecnologias mínimas para a 2.ª Parcelar</a></li><li><a href="#42-estrutura-minima-de-pastas-frontend-2-parcelar" class="toc-link toc-l3" data-target="42-estrutura-minima-de-pastas-frontend-2-parcelar">4.2. Estrutura mínima de pastas (Frontend — 2.ª Parcelar)</a></li><li><a href="#43-ecras-minimos-10-ecras-que-tem-de-existir" class="toc-link toc-l3" data-target="43-ecras-minimos-10-ecras-que-tem-de-existir">4.3. Ecrãs mínimos (10 ecrãs) que têm de existir</a></li><li><a href="#44-modelos-typescript-espelham-os-dtos-do-backend" class="toc-link toc-l3" data-target="44-modelos-typescript-espelham-os-dtos-do-backend">4.4. Modelos TypeScript (espelham os DTOs do backend)</a></li><li><a href="#45-services-principais" class="toc-link toc-l3" data-target="45-services-principais">4.5. Services principais</a></li><li><a href="#46-interceptor-jwt-essencial" class="toc-link toc-l3" data-target="46-interceptor-jwt-essencial">4.6. Interceptor JWT (essencial)</a></li><li><a href="#47-authguard" class="toc-link toc-l3" data-target="47-authguard">4.7. AuthGuard</a></li><li><a href="#48-regras-de-ui-obrigatorias" class="toc-link toc-l3" data-target="48-regras-de-ui-obrigatorias">4.8. Regras de UI obrigatórias</a></li></ol></li><li><a href="#5-backend-o-que-construir" class="toc-link toc-l2" data-target="5-backend-o-que-construir">5. BACKEND — O Que Construir</a><ol class="toc-sublist"><li><a href="#51-pacotes-nuget-minimos-2-parcelar" class="toc-link toc-l3" data-target="51-pacotes-nuget-minimos-2-parcelar">5.1. Pacotes NuGet mínimos (2.ª Parcelar)</a></li><li><a href="#52-estrutura-da-solucao" class="toc-link toc-l3" data-target="52-estrutura-da-solucao">5.2. Estrutura da solução</a></li><li><a href="#53-base-de-dados-tabelas-minimas-2-parcelar" class="toc-link toc-l3" data-target="53-base-de-dados-tabelas-minimas-2-parcelar">5.3. Base de Dados — Tabelas mínimas (2.ª Parcelar)</a></li><li><a href="#54-endpoints-minimos-rest" class="toc-link toc-l3" data-target="54-endpoints-minimos-rest">5.4. Endpoints mínimos (REST)</a></li><li><a href="#55-dtos-essenciais" class="toc-link toc-l3" data-target="55-dtos-essenciais">5.5. DTOs essenciais</a></li><li><a href="#56-regras-de-negocio-criticas-services" class="toc-link toc-l3" data-target="56-regras-de-negocio-criticas-services">5.6. Regras de negócio críticas (Services)</a></li><li><a href="#57-upload-de-ficheiros" class="toc-link toc-l3" data-target="57-upload-de-ficheiros">5.7. Upload de ficheiros</a></li><li><a href="#58-programcs-minimo-viavel" class="toc-link toc-l3" data-target="58-programcs-minimo-viavel">5.8. Program.cs (mínimo viável)</a></li></ol></li><li><a href="#6-contrato-api-minimo-2-parcelar" class="toc-link toc-l2" data-target="6-contrato-api-minimo-2-parcelar">6. Contrato API Mínimo (2.ª Parcelar)</a></li><li><a href="#7-cronograma-de-4-semanas" class="toc-link toc-l2" data-target="7-cronograma-de-4-semanas">7. Cronograma de 4 Semanas</a><ol class="toc-sublist"><li><a href="#marcos-criticos" class="toc-link toc-l3" data-target="marcos-criticos">Marcos críticos</a></li></ol></li><li><a href="#8-git-e-github-resumo-pratico" class="toc-link toc-l2" data-target="8-git-e-github-resumo-pratico">8. Git e GitHub — Resumo Prático</a><ol class="toc-sublist"><li><a href="#workflow-diario-todos-os-dias" class="toc-link toc-l3" data-target="workflow-diario-todos-os-dias">Workflow diário (todos os dias)</a></li><li><a href="#convencao-de-commits" class="toc-link toc-l3" data-target="convencao-de-commits">Convenção de commits</a></li><li><a href="#branches-da-2-parcelar" class="toc-link toc-l3" data-target="branches-da-2-parcelar">Branches da 2.ª Parcelar</a></li><li><a href="#promocao-final-da-parcelar" class="toc-link toc-l3" data-target="promocao-final-da-parcelar">Promoção final da parcelar</a></li></ol></li><li><a href="#9-o-que-estudar-e-dominar-backend" class="toc-link toc-l2" data-target="9-o-que-estudar-e-dominar-backend">9. O Que Estudar e Dominar — Backend</a><ol class="toc-sublist"><li><a href="#91-fundamentos-c-net-pre-requisito" class="toc-link toc-l3" data-target="91-fundamentos-c-net-pre-requisito">9.1. Fundamentos C# / .NET (Pré-requisito)</a></li><li><a href="#92-aspnet-core-web-api" class="toc-link toc-l3" data-target="92-aspnet-core-web-api">9.2. ASP.NET Core Web API</a></li><li><a href="#93-entity-framework-core" class="toc-link toc-l3" data-target="93-entity-framework-core">9.3. Entity Framework Core</a></li><li><a href="#94-sql-server" class="toc-link toc-l3" data-target="94-sql-server">9.4. SQL Server</a></li><li><a href="#95-autenticacao-e-seguranca" class="toc-link toc-l3" data-target="95-autenticacao-e-seguranca">9.5. Autenticação e Segurança</a></li><li><a href="#96-padroes-de-arquitetura" class="toc-link toc-l3" data-target="96-padroes-de-arquitetura">9.6. Padrões de Arquitetura</a></li><li><a href="#97-upload-de-ficheiros" class="toc-link toc-l3" data-target="97-upload-de-ficheiros">9.7. Upload de Ficheiros</a></li><li><a href="#98-roadmap-sugerido-sequencia-de-estudo" class="toc-link toc-l3" data-target="98-roadmap-sugerido-sequencia-de-estudo">9.8. Roadmap sugerido (sequência de estudo)</a></li><li><a href="#99-cursos-completos-recomendados-escolher-1-ou-2" class="toc-link toc-l3" data-target="99-cursos-completos-recomendados-escolher-1-ou-2">9.9. Cursos completos recomendados (escolher 1 ou 2)</a></li></ol></li><li><a href="#10-o-que-estudar-e-dominar-frontend" class="toc-link toc-l2" data-target="10-o-que-estudar-e-dominar-frontend">10. O Que Estudar e Dominar — Frontend</a><ol class="toc-sublist"><li><a href="#101-fundamentos-typescript-angular-pre-requisito" class="toc-link toc-l3" data-target="101-fundamentos-typescript-angular-pre-requisito">10.1. Fundamentos TypeScript / Angular (Pré-requisito)</a></li><li><a href="#102-roteamento-e-navegacao" class="toc-link toc-l3" data-target="102-roteamento-e-navegacao">10.2. Roteamento e Navegação</a></li><li><a href="#103-formularios" class="toc-link toc-l3" data-target="103-formularios">10.3. Formulários</a></li><li><a href="#104-http-e-comunicacao-com-api" class="toc-link toc-l3" data-target="104-http-e-comunicacao-com-api">10.4. HTTP e Comunicação com API</a></li><li><a href="#105-rxjs-observable-pipe-operators" class="toc-link toc-l3" data-target="105-rxjs-observable-pipe-operators">10.5. RxJS (Observable, Pipe Operators)</a></li><li><a href="#106-estilizacao-e-responsividade" class="toc-link toc-l3" data-target="106-estilizacao-e-responsividade">10.6. Estilização e Responsividade</a></li><li><a href="#107-padroes-e-boas-praticas" class="toc-link toc-l3" data-target="107-padroes-e-boas-praticas">10.7. Padrões e Boas Práticas</a></li><li><a href="#108-roadmap-sugerido-sequencia-de-estudo" class="toc-link toc-l3" data-target="108-roadmap-sugerido-sequencia-de-estudo">10.8. Roadmap sugerido (sequência de estudo)</a></li><li><a href="#109-cursos-completos-recomendados-escolher-1-ou-2" class="toc-link toc-l3" data-target="109-cursos-completos-recomendados-escolher-1-ou-2">10.9. Cursos completos recomendados (escolher 1 ou 2)</a></li><li><a href="#1010-para-os-3-fe-devs-divisao-sugerida-de-estudo" class="toc-link toc-l3" data-target="1010-para-os-3-fe-devs-divisao-sugerida-de-estudo">10.10. Para os 3 FE-Devs: divisão sugerida de estudo</a></li></ol></li><li><a href="#11-checklist-2020-da-2-parcelar" class="toc-link toc-l2" data-target="11-checklist-2020-da-2-parcelar">11. Checklist 20/20 da 2.ª Parcelar</a><ol class="toc-sublist"><li><a href="#backend" class="toc-link toc-l3" data-target="backend">Backend ✓</a></li><li><a href="#frontend" class="toc-link toc-l3" data-target="frontend">Frontend ✓</a></li><li><a href="#git-e-documentacao" class="toc-link toc-l3" data-target="git-e-documentacao">Git e Documentação ✓</a></li><li><a href="#demo" class="toc-link toc-l3" data-target="demo">Demo ✓</a></li></ol></li><li><a href="#12-proximos-passos-apos-a-parcelar" class="toc-link toc-l2" data-target="12-proximos-passos-apos-a-parcelar">12. Próximos Passos Após a Parcelar</a><ol class="toc-sublist"><li><a href="#recursos-rapidos" class="toc-link toc-l3" data-target="recursos-rapidos">Recursos rápidos</a></li></ol></li><li><a href="#13-glossario-de-termos-tecnicos" class="toc-link toc-l2" data-target="13-glossario-de-termos-tecnicos">13. Glossário de Termos Técnicos</a><ol class="toc-sublist"><li><a href="#geral-arquitetura" class="toc-link toc-l3" data-target="geral-arquitetura">Geral / Arquitetura</a></li><li><a href="#frontend-angular" class="toc-link toc-l3" data-target="frontend-angular">Frontend (Angular)</a></li><li><a href="#backend-aspnet" class="toc-link toc-l3" data-target="backend-aspnet">Backend (ASP.NET)</a></li><li><a href="#base-de-dados-sql-server" class="toc-link toc-l3" data-target="base-de-dados-sql-server">Base de Dados (SQL Server)</a></li><li><a href="#git-colaboracao" class="toc-link toc-l3" data-target="git-colaboracao">Git / Colaboração</a></li><li><a href="#estrutura-de-dominio-nzolanet" class="toc-link toc-l3" data-target="estrutura-de-dominio-nzolanet">Estrutura de domínio NzolaNet</a></li></ol></li></ol>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <span class="badge">Projecto AW · Entrega Intermédia</span>
+      <h1>2.ª Parcelar</h1>
+      <p class="subtitle">Gestão de Utilizadores · Publicações · Comentários — Caminho directo para 20 / 20</p>
+
+      <div class="chips"><span class="chip">Gestão de Utilizadores</span><span class="chip">Gestão de Publicações</span><span class="chip">Gestão de Comentários</span></div>
+      <div class="chips"><span class="chip">4 Semanas</span><span class="chip">JWT + EF Core</span><span class="chip">Setup Completo</span></div>
+
+      <div class="author-card">
+        <div class="label">Feito por</div>
+        <div class="name">Willfredy Vieira Dias</div>
+        <div class="role">Backend com ASP.NET Web API</div>
+        <div class="slogan">"Nerd Altamente e Programador de Computadores 🤓✌️"</div>
+      </div>
+
+      <div class="cover-footer">Foco: 1.ª entrega da NzolaNet (4 semanas)</div>
+    </section>
+
+    <article class="content">
+<blockquote>
+<p>📘 <strong>Este documento é uma extensão do <a href="./Plano_Definitivo_NzolaNet.html">Plano Definitivo Completo</a>.</strong>
+Aqui focamos <strong>exclusivamente</strong> o que tem de estar a funcionar até à 2.ª Parcelar. Os tópicos avançados (Bazes, Feed personalizado, Notificações, Privacidade, Moderação) ficam para o <strong>Exame de Época Normal</strong> — vê o plano completo para o roadmap total.</p>
+</blockquote>
+<hr>
+<h2 id="por-onde-comecar-guia-rapido-1-dia"><a class="heading-anchor" href="#por-onde-comecar-guia-rapido-1-dia" aria-hidden="true">#</a>Por Onde Começar — Guia Rápido (1.º dia)</h2>
+<p>Antes de mergulhar no plano, segue estes passos consoante a tua função:</p>
+<h3 id="para-o-be-dev-willfredy"><a class="heading-anchor" href="#para-o-be-dev-willfredy" aria-hidden="true">#</a>👉 Para o BE-Dev (Willfredy)</h3>
+<ol>
+<li>Lê este plano de <strong>fio a pavio</strong> (~20 min).</li>
+<li>Estuda 1–2 horas a <a href="#9-o-que-estudar-e-dominar--backend">Secção 9 — O Que Estudar para Backend</a>.</li>
+<li>Faz o vídeo de Nick Chapsas <em>&quot;ASP.NET Core Web API 8 in 1 hour&quot;</em> (YouTube grátis).</li>
+<li>Cria a solução: <code>dotnet new sln -n NzolaNet</code>. Segue os comandos da <a href="./Plano_Definitivo_NzolaNet.html#512-comandos-%C3%BAteis-backend">Secção 5.12 do plano completo</a>.</li>
+<li>Estabelece o <strong>contrato API</strong> (Secção 6) <strong>antes</strong> de começar a codar — partilha com os FE-Devs.</li>
+</ol>
+<h3 id="para-os-fe-devs-1-2-3"><a class="heading-anchor" href="#para-os-fe-devs-1-2-3" aria-hidden="true">#</a>👉 Para os FE-Devs (1, 2, 3)</h3>
+<ol>
+<li>Lê este plano de fio a pavio (~20 min).</li>
+<li>Estuda 1–2 horas a <a href="#10-o-que-estudar-e-dominar--frontend">Secção 10 — O Que Estudar para Frontend</a>.</li>
+<li>Vê o vídeo de Mosh Hamedani <em>&quot;Angular Tutorial for Beginners&quot;</em> (YouTube grátis).</li>
+<li>Cria o projeto: <code>ng new nzolanet-frontend --style=scss --routing=true</code>. Setup do Tailwind ou Bootstrap.</li>
+<li><strong>Combinem entre vocês</strong> quem fica com qual módulo (Secção 3).</li>
+</ol>
+<h3 id="para-o-grupo-todo-primeira-reuniao"><a class="heading-anchor" href="#para-o-grupo-todo-primeira-reuniao" aria-hidden="true">#</a>👉 Para o grupo todo (primeira reunião)</h3>
+<ol>
+<li><strong>Criar o repositório GitHub</strong> chamado <code>nzolanet</code> (ver <a href="#8-git-e-github--resumo-pr%C3%A1tico">Secção 8</a>).</li>
+<li><strong>Convidar todos os membros</strong> como colaboradores.</li>
+<li><strong>Combinar horário de reuniões</strong> semanais (sugestão: 1h por semana para sincronizar progresso).</li>
+<li><strong>Definir o contrato API</strong> em conjunto (Secção 6) — é o documento mais crítico, porque qualquer mudança aqui afeta toda a gente.</li>
+<li><strong>Aceitar este plano como fonte da verdade</strong> — qualquer alteração deve ser comunicada ao grupo.</li>
+</ol>
+<blockquote>
+<p>💡 <strong>Conselho:</strong> percam 1–2 dias com os fundamentos antes de codar. Vão ganhar 2 semanas depois.</p>
+</blockquote>
+<hr>
+<h2 id="indice"><a class="heading-anchor" href="#indice" aria-hidden="true">#</a>Índice</h2>
+<ol>
+<li><a href="#1-o-que-tem-de-funcionar-na-2-parcelar">O Que Tem de Funcionar na 2.ª Parcelar</a>
+1.5. <a href="#15-fluxo-end-to-end-exemplo-criar-publica%C3%A7%C3%A3o">Fluxo End-to-End (exemplo: criar publicação)</a></li>
+<li><a href="#2-arquitetura-resumida-foco-parcelar">Arquitetura Resumida (foco parcelar)</a></li>
+<li><a href="#3-divis%C3%A3o-da-equipa-nesta-fase">Divisão da Equipa nesta Fase</a></li>
+<li><a href="#4-frontend--o-que-construir">FRONTEND — O Que Construir</a></li>
+<li><a href="#5-backend--o-que-construir">BACKEND — O Que Construir</a></li>
+<li><a href="#6-contrato-api-m%C3%ADnimo-2-parcelar">Contrato API Mínimo (2.ª Parcelar)</a></li>
+<li><a href="#7-cronograma-de-4-semanas">Cronograma de 4 Semanas</a></li>
+<li><a href="#8-git-e-github--resumo-pr%C3%A1tico">Git e GitHub — Resumo Prático</a></li>
+<li><a href="#9-o-que-estudar-e-dominar--backend">O Que Estudar e Dominar — Backend</a></li>
+<li><a href="#10-o-que-estudar-e-dominar--frontend">O Que Estudar e Dominar — Frontend</a></li>
+<li><a href="#11-checklist-2020-da-2-parcelar">Checklist 20/20 da 2.ª Parcelar</a></li>
+<li><a href="#12-pr%C3%B3ximos-passos-ap%C3%B3s-a-parcelar">Próximos Passos Após a Parcelar</a></li>
+<li><a href="#13-gloss%C3%A1rio-de-termos-t%C3%A9cnicos">Glossário de Termos Técnicos</a></li>
+</ol>
+<hr>
+<h2 id="1-o-que-tem-de-funcionar-na-2-parcelar"><a class="heading-anchor" href="#1-o-que-tem-de-funcionar-na-2-parcelar" aria-hidden="true">#</a>1. O Que Tem de Funcionar na 2.ª Parcelar</h2>
+<p>O enunciado é claro: na 2.ª Parcelar têm de estar <strong>completos e funcionais</strong> três domínios.</p>
+<h3 id="11-gestao-de-utilizadores"><a class="heading-anchor" href="#11-gestao-de-utilizadores" aria-hidden="true">#</a>1.1. Gestão de Utilizadores</h3>
+<ul>
+<li>Registo de novos utilizadores</li>
+<li>Login (com geração de token JWT)</li>
+<li>Recuperação da senha de acesso</li>
+<li>Visualização do perfil próprio e de outros utilizadores</li>
+<li>Edição do perfil (nome, bio, privacidade)</li>
+<li>Alteração da foto de perfil (upload)</li>
+<li>Seguir e deixar de seguir um utilizador</li>
+</ul>
+<h3 id="12-gestao-de-publicacoes"><a class="heading-anchor" href="#12-gestao-de-publicacoes" aria-hidden="true">#</a>1.2. Gestão de Publicações</h3>
+<ul>
+<li>Criar publicações (texto obrigatório; imagem e vídeo opcionais)</li>
+<li>Editar publicações próprias</li>
+<li>Excluir publicações próprias</li>
+<li>Upload de imagens e vídeos</li>
+<li>Visualizar publicações em <strong>ordem cronológica</strong></li>
+<li>Visualização de conteúdo multimédia (imagens e player de vídeo)</li>
+<li>Lista das publicações de um utilizador (no perfil dele)</li>
+</ul>
+<h3 id="13-gestao-de-comentarios"><a class="heading-anchor" href="#13-gestao-de-comentarios" aria-hidden="true">#</a>1.3. Gestão de Comentários</h3>
+<ul>
+<li>Adicionar comentários a uma publicação</li>
+<li>Editar comentários próprios</li>
+<li>Excluir comentários próprios</li>
+<li>Visualizar a lista de comentários de uma publicação</li>
+</ul>
+<h3 id="14-o-que-nao-entra-na-2-parcelar-mas-a-infraestrutura-ja-pode-existir"><a class="heading-anchor" href="#14-o-que-nao-entra-na-2-parcelar-mas-a-infraestrutura-ja-pode-existir" aria-hidden="true">#</a>1.4. O Que <strong>Não Entra</strong> na 2.ª Parcelar (mas a infraestrutura já pode existir)</h3>
+<div class="table-wrap"><table><thead><tr><th>Funcionalidade</th><th>Status na 2.ª Parcelar</th></tr></thead><tbody><tr><td>Bazes (likes)</td><td>Adiada para Exame Final</td></tr>
+<tr><td>Feed personalizado de seguidos</td><td>Adiada (mostrar feed cronológico simples basta)</td></tr>
+<tr><td>Notificações</td><td>Adiada</td></tr>
+<tr><td>Perfis privados (visibilidade condicional)</td><td>Adiada (assumir tudo público nesta fase)</td></tr>
+<tr><td>Moderação por administrador</td><td>Adiada</td></tr></tbody></table></div><blockquote>
+<p>💡 <strong>Decisão técnica:</strong> podes já criar as <strong>tabelas</strong> <code>Bazes</code>, <code>Notifications</code>, <code>Follows</code> na BD desde o início (já estão no schema). Apenas não implementas os endpoints/UI até depois da parcelar. Isto evita migrações dolorosas na fase final.</p>
+</blockquote>
+<hr>
+<h2 id="15-fluxo-end-to-end-exemplo-criar-publicacao"><a class="heading-anchor" href="#15-fluxo-end-to-end-exemplo-criar-publicacao" aria-hidden="true">#</a>1.5. Fluxo End-to-End (exemplo: &quot;criar publicação&quot;)</h2>
+<p>Para perceber como tudo se interliga, segue o caminho de um clique até à base de dados e de volta. <strong>Estuda este diagrama</strong> — é o &quot;santo graal&quot; da compreensão do sistema.</p>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="1. UTILIZADOR clica em &quot;Publicar&quot; no Angular
+   ↓
+2. ANGULAR (CreatePostComponent)
+   - Reactive Form recolhe { content, image, video }
+   - PostService monta FormData (multipart)
+   - HttpClient envia: POST /api/posts
+   ↓
+3. JwtInterceptor (Angular)
+   - Lê o token do localStorage
+   - Adiciona header: Authorization: Bearer &lt;jwt&gt;
+   ↓ ─── HTTP via internet ───
+4. ASP.NET Web API recebe o pedido
+   - Middleware de autenticação valida o JWT
+   - Identifica o utilizador pelos claims do token
+   ↓
+5. PostsController.Create(CreatePostDto dto)
+   - [Authorize] confirma que está autenticado
+   - Recebe o DTO já desserializado
+   - Chama PostService.CreateAsync(dto, userId)
+   ↓
+6. PostService (camada de regras de negócio)
+   - Valida o conteúdo
+   - Se há imagem/vídeo: chama StorageService.SaveAsync
+     → grava ficheiro em wwwroot/uploads/...
+     → devolve URL &quot;/uploads/media/abc.jpg&quot;
+   - Cria entidade Post { UserId, Content, ImageUrl, VideoUrl }
+   - Chama PostRepository.AddAsync(post)
+   ↓
+7. PostRepository (camada de acesso a dados)
+   - dbContext.Posts.Add(post)
+   - await dbContext.SaveChangesAsync()
+   ↓
+8. ENTITY FRAMEWORK CORE traduz em SQL:
+   INSERT INTO Posts (UserId, Content, ImageUrl, ...) VALUES (...)
+   ↓
+9. SQL SERVER grava na tabela Posts
+   - retorna o Id auto-gerado
+   ↓ ─── caminho de volta ───
+10. PostService mapeia Post → PostDto via AutoMapper
+11. PostsController devolve 201 Created + PostDto (JSON)
+12. ANGULAR recebe o PostDto
+    - PostService emite o novo post via Observable
+    - FeedComponent atualiza a lista (prepend)
+    - Toast: &quot;Publicação criada com sucesso!&quot;
+13. UTILIZADOR vê a publicação aparecer no topo do feed" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">1. UTILIZADOR clica em <span class="hljs-string">&quot;Publicar&quot;</span> <span class="hljs-keyword">no</span> Angular
+   ↓
+2. ANGULAR (CreatePostComponent)
+   - Reactive <span class="hljs-keyword">Form</span> recolhe { content, image, video }
+   - PostService monta FormData (multipart)
+   - HttpClient envia: <span class="hljs-keyword">POST</span> /api/posts
+   ↓
+3. JwtInterceptor (Angular)
+   - <span class="hljs-keyword">L</span>ê o <span class="hljs-keyword">token</span> <span class="hljs-keyword">do</span> localStorage
+   - Adiciona header: Authorization: Bearer &lt;jwt&gt;
+   ↓ ─── HTTP via internet ───
+4. ASP.<span class="hljs-keyword">NET</span> Web API recebe o pedido
+   - Middleware <span class="hljs-keyword">de</span> autenticação valida o JWT
+   - Identifica o utilizador pelos claims <span class="hljs-keyword">do</span> <span class="hljs-keyword">token</span>
+   ↓
+5. PostsController.Create(CreatePostDto dto)
+   - [Authorize] confirma <span class="hljs-keyword">que</span> <span class="hljs-keyword">est</span>á autenticado
+   - Recebe o DTO já desserializado
+   - Chama PostService.CreateAsync(dto, userId)
+   ↓
+6. PostService (camada <span class="hljs-keyword">de</span> regras <span class="hljs-keyword">de</span> negócio)
+   - Valida o conteú<span class="hljs-keyword">do</span>
+   - <span class="hljs-keyword">Se</span> <span class="hljs-keyword">h</span>á imagem/vídeo: chama StorageService.SaveAsync
+     → grava ficheiro em wwwroot/uploads/...
+     → devolve URL <span class="hljs-string">&quot;/uploads/media/abc.jpg&quot;</span>
+   - Cria entidade <span class="hljs-keyword">Post</span> { UserId, Content, ImageUrl, VideoUrl }
+   - Chama PostRepository.AddAsync(<span class="hljs-keyword">post</span>)
+   ↓
+7. PostRepository (camada <span class="hljs-keyword">de</span> acesso a dados)
+   - dbContext.Posts.Add(<span class="hljs-keyword">post</span>)
+   - await dbContext.SaveChangesAsync()
+   ↓
+8. ENTITY FRAMEWORK CORE traduz em SQL:
+   INSERT INTO Posts (UserId, Content, ImageUrl, ...) VALUES (...)
+   ↓
+9. SQL SERVER grava na tabela Posts
+   - retorna o Id auto-gerado
+   ↓ ─── caminho <span class="hljs-keyword">de</span> volta ───
+10. PostService mapeia <span class="hljs-keyword">Post</span> → PostDto via AutoMapper
+11. PostsController devolve 201 Created + PostDto (JSON)
+12. ANGULAR recebe o PostDto
+    - PostService emite o novo <span class="hljs-keyword">post</span> via Observable
+    - FeedComponent atualiza a lista (prepend)
+    - Toast: <span class="hljs-string">&quot;Publicação criada com sucesso!&quot;</span>
+13. UTILIZADOR vê a publicação aparecer <span class="hljs-keyword">no</span> topo <span class="hljs-keyword">do</span> feed</code></pre>
+</div><p><strong>Mensagem-chave:</strong> cada camada tem <strong>uma responsabilidade clara</strong>. Não há lógica de BD no Controller. Não há HTTP na Service. Isto é &quot;Separação de Camadas&quot; — exatamente o que o enunciado pede.</p>
+<hr>
+<h2 id="2-arquitetura-resumida-foco-parcelar"><a class="heading-anchor" href="#2-arquitetura-resumida-foco-parcelar" aria-hidden="true">#</a>2. Arquitetura Resumida (foco parcelar)</h2>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="┌──────────────────────────────────────────────────────────┐
+│                  FRONTEND (Angular 17+)                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │   Auth   │  │  Feed/   │  │ Profile  │  │ Comments │  │
+│  │ (Login,  │  │  Posts   │  │  (View,  │  │  (CRUD)  │  │
+│  │ Register)│  │  (CRUD)  │  │   Edit)  │  │          │  │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
+└────────────────────────┬─────────────────────────────────┘
+                         │  HTTP/JSON + JWT Bearer
+                         ▼
+┌──────────────────────────────────────────────────────────┐
+│             BACKEND (ASP.NET Web API / .NET 8)           │
+│  ┌─────────────┐    ┌──────────┐    ┌─────────────────┐  │
+│  │ Controllers │───▶│ Services │───▶│  Repositories   │  │
+│  │   (REST)    │    │ (Regras) │    │  (EF Core)      │  │
+│  └─────────────┘    └──────────┘    └─────────────────┘  │
+│           ▲                                              │
+│           │ DTOs (Request/Response)                      │
+└───────────┼──────────────────────────────────────────────┘
+            │ EF Core (Code-First)
+            ▼
+┌──────────────────────────────────────────────────────────┐
+│                  SQL SERVER (3FN)                        │
+│  Users · Posts · Comments  (esta fase)                   │
+│  (+ Bazes, Follows, Notifications criadas mas inativas)  │
+└──────────────────────────────────────────────────────────┘" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">┌──────────────────────────────────────────────────────────┐
+│                  FRONTEND (Angular <span class="hljs-number">17</span>+)                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │   Auth   │  │  Feed/   │  │ Profile  │  │ Comments │  │
+│  │ (<span class="hljs-keyword">Login</span>,  │  │  Posts   │  │  (<span class="hljs-keyword">View</span>,  │  │  (CRUD)  │  │
+│  │ Register)│  │  (CRUD)  │  │   Edit)  │  │          │  │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
+└────────────────────────┬─────────────────────────────────┘
+                         │  HTTP/<span class="hljs-type">JSON</span> + JWT Bearer
+                         ▼
+┌──────────────────────────────────────────────────────────┐
+│             BACKEND (ASP.NET Web API / .NET <span class="hljs-number">8</span>)           │
+│  ┌─────────────┐    ┌──────────┐    ┌─────────────────┐  │
+│  │ Controllers │───▶│ Services │───▶│  Repositories   │  │
+│  │   (REST)    │    │ (Regras) │    │  (EF Core)      │  │
+│  └─────────────┘    └──────────┘    └─────────────────┘  │
+│           ▲                                              │
+│           │ DTOs (Request/Response)                      │
+└───────────┼──────────────────────────────────────────────┘
+            │ EF Core (Code-First)
+            ▼
+┌──────────────────────────────────────────────────────────┐
+│                  <span class="hljs-keyword">SQL</span> <span class="hljs-keyword">SERVER</span> (<span class="hljs-number">3</span>FN)                        │
+│  Users · Posts · Comments  (esta fase)                   │
+│  (+ Bazes, Follows, Notifications criadas mas inativas)  │
+└──────────────────────────────────────────────────────────┘</code></pre>
+</div><p><strong>Repositório (monorepo):</strong></p>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="nzolanet/
+├── backend/          ← ASP.NET Web API     (Willfredy)
+├── frontend/         ← Angular             (3 colegas)
+├── docs/             ← API_CONTRACT.md, ERD, relatório
+└── README.md" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">nzolanet<span class="hljs-symbol">/</span>
+├── backend<span class="hljs-symbol">/</span>          ← ASP.NET Web API     (Willfredy)
+├── frontend<span class="hljs-symbol">/</span>         ← Angular             (<span class="hljs-number">3</span> colegas)
+├── docs<span class="hljs-symbol">/</span>             ← API_CONTRACT.md, ERD, relatório
+└── README.md</code></pre>
+</div><hr>
+<h2 id="3-divisao-da-equipa-nesta-fase"><a class="heading-anchor" href="#3-divisao-da-equipa-nesta-fase" aria-hidden="true">#</a>3. Divisão da Equipa nesta Fase</h2>
+<div class="table-wrap"><table><thead><tr><th>Elemento</th><th>Branch Git</th><th>Tarefas na 2.ª Parcelar</th></tr></thead><tbody><tr><td><strong>FE-Dev 1</strong></td><td><code>frontend/feature/auth</code></td><td>Módulo <code>auth/</code> (login, register, recover) + <code>JwtInterceptor</code> + <code>AuthGuard</code> + <code>edit-profile/</code> + <code>AuthService</code></td></tr>
+<tr><td><strong>FE-Dev 2</strong></td><td><code>frontend/feature/feed-posts</code></td><td><code>feed-page/</code> (cronológico simples), <code>create-post/</code>, <code>edit-post/</code>, <code>post-card</code> (shared), <code>PostService</code>, <code>UploadService</code>, <code>media-preview</code> (shared)</td></tr>
+<tr><td><strong>FE-Dev 3</strong></td><td><code>frontend/feature/profile-comments</code></td><td><code>profile-page/</code>, <code>followers-list/</code>, <code>comment-list/</code>, <code>comment-form/</code>, <code>comment-item/</code>, <code>UserService</code> (follow/unfollow), <code>CommentService</code></td></tr>
+<tr><td><strong>BE-Dev (Willfredy)</strong></td><td><code>backend/feature/*</code></td><td>Toda a API: Auth + Users + Posts + Comments + Follow, JWT, upload de ficheiros, regras de negócio</td></tr></tbody></table></div><blockquote>
+<p><strong>Componentes shared:</strong> <code>navbar</code>, <code>sidebar</code>, <code>user-avatar</code>, <code>post-card</code>, <code>comment-item</code>, <code>loading-spinner</code>, <code>confirm-dialog</code>, <code>media-preview</code>. Quem cria é &quot;dono&quot;; alterações por outros via PR.</p>
+</blockquote>
+<hr>
+<h2 id="4-frontend-o-que-construir"><a class="heading-anchor" href="#4-frontend-o-que-construir" aria-hidden="true">#</a>4. FRONTEND — O Que Construir</h2>
+<h3 id="41-tecnologias-minimas-para-a-2-parcelar"><a class="heading-anchor" href="#41-tecnologias-minimas-para-a-2-parcelar" aria-hidden="true">#</a>4.1. Tecnologias mínimas para a 2.ª Parcelar</h3>
+<div class="table-wrap"><table><thead><tr><th>Tecnologia</th><th>Papel</th><th>Indispensável?</th></tr></thead><tbody><tr><td>Angular 17+</td><td>Framework</td><td>✅ Sim</td></tr>
+<tr><td>TypeScript 5+</td><td>Linguagem</td><td>✅ Sim</td></tr>
+<tr><td>Angular Router (com <strong>lazy loading</strong>)</td><td>Navegação</td><td>✅ Sim</td></tr>
+<tr><td>Angular <strong>Reactive Forms</strong></td><td>Formulários</td><td>✅ Sim</td></tr>
+<tr><td>Angular <strong>HttpClient</strong></td><td>Comunicação REST</td><td>✅ Sim</td></tr>
+<tr><td>Angular <strong>Guards</strong> + <strong>Interceptors</strong></td><td>Proteção rotas + JWT</td><td>✅ Sim</td></tr>
+<tr><td><strong>RxJS</strong> (Observable, BehaviorSubject)</td><td>Reatividade</td><td>✅ Sim</td></tr>
+<tr><td><strong>TailwindCSS</strong> ou <strong>Bootstrap 5</strong></td><td>Estilização responsiva</td><td>✅ Sim (1 dos 2)</td></tr>
+<tr><td><code>ngx-toastr</code></td><td>Toasts de feedback</td><td>🟡 Recomendado</td></tr>
+<tr><td><code>date-fns</code></td><td>Formatação &quot;há 2 horas&quot;</td><td>🟡 Recomendado</td></tr>
+<tr><td><code>jwt-decode</code></td><td>Decodificar payload do token</td><td>🟡 Recomendado</td></tr></tbody></table></div><h3 id="42-estrutura-minima-de-pastas-frontend-2-parcelar"><a class="heading-anchor" href="#42-estrutura-minima-de-pastas-frontend-2-parcelar" aria-hidden="true">#</a>4.2. Estrutura mínima de pastas (Frontend — 2.ª Parcelar)</h3>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="nzolanet-frontend/
+├── src/
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── guards/
+│   │   │   │   ├── auth.guard.ts
+│   │   │   │   └── guest.guard.ts
+│   │   │   ├── interceptors/
+│   │   │   │   ├── jwt.interceptor.ts
+│   │   │   │   └── error.interceptor.ts
+│   │   │   ├── models/
+│   │   │   │   ├── user.model.ts
+│   │   │   │   ├── post.model.ts
+│   │   │   │   ├── comment.model.ts
+│   │   │   │   └── auth.model.ts
+│   │   │   └── services/
+│   │   │       ├── auth.service.ts
+│   │   │       ├── user.service.ts
+│   │   │       ├── post.service.ts
+│   │   │       ├── comment.service.ts
+│   │   │       └── upload.service.ts
+│   │   ├── shared/
+│   │   │   ├── components/
+│   │   │   │   ├── navbar/
+│   │   │   │   ├── post-card/
+│   │   │   │   ├── comment-item/
+│   │   │   │   ├── comment-form/
+│   │   │   │   ├── user-avatar/
+│   │   │   │   ├── media-preview/
+│   │   │   │   ├── loading-spinner/
+│   │   │   │   └── confirm-dialog/
+│   │   │   └── pipes/
+│   │   │       └── time-ago.pipe.ts
+│   │   ├── layouts/
+│   │   │   ├── public-layout/
+│   │   │   └── private-layout/
+│   │   └── features/
+│   │       ├── auth/
+│   │       │   ├── login/
+│   │       │   ├── register/
+│   │       │   ├── forgot-password/
+│   │       │   └── auth.module.ts
+│   │       ├── feed/
+│   │       │   ├── feed-page/
+│   │       │   ├── create-post/
+│   │       │   └── feed.module.ts
+│   │       ├── posts/
+│   │       │   ├── post-detail/
+│   │       │   ├── edit-post/
+│   │       │   └── posts.module.ts
+│   │       ├── profile/
+│   │       │   ├── profile-page/
+│   │       │   ├── edit-profile/
+│   │       │   ├── followers-list/
+│   │       │   └── profile.module.ts
+│   │       └── comments/
+│   │           └── comments.module.ts
+│   ├── environments/
+│   │   ├── environment.ts            # apiUrl: 'http://localhost:5000/api'
+│   │   └── environment.prod.ts
+│   └── styles/
+└── proxy.conf.json" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">nzolanet-frontend<span class="hljs-symbol">/</span>
+├── src<span class="hljs-symbol">/</span>
+│   ├── app<span class="hljs-symbol">/</span>
+│   │   ├── core<span class="hljs-symbol">/</span>
+│   │   │   ├── guards<span class="hljs-symbol">/</span>
+│   │   │   │   ├── auth.guard.ts
+│   │   │   │   └── guest.guard.ts
+│   │   │   ├── interceptors<span class="hljs-symbol">/</span>
+│   │   │   │   ├── jwt.interceptor.ts
+│   │   │   │   └── error.interceptor.ts
+│   │   │   ├── models<span class="hljs-symbol">/</span>
+│   │   │   │   ├── user.model.ts
+│   │   │   │   ├── post.model.ts
+│   │   │   │   ├── comment.model.ts
+│   │   │   │   └── auth.model.ts
+│   │   │   └── services<span class="hljs-symbol">/</span>
+│   │   │       ├── auth.service.ts
+│   │   │       ├── user.service.ts
+│   │   │       ├── post.service.ts
+│   │   │       ├── comment.service.ts
+│   │   │       └── upload.service.ts
+│   │   ├── shared<span class="hljs-symbol">/</span>
+│   │   │   ├── components<span class="hljs-symbol">/</span>
+│   │   │   │   ├── navbar<span class="hljs-symbol">/</span>
+│   │   │   │   ├── post-card<span class="hljs-symbol">/</span>
+│   │   │   │   ├── comment-item<span class="hljs-symbol">/</span>
+│   │   │   │   ├── comment-form<span class="hljs-symbol">/</span>
+│   │   │   │   ├── user-avatar<span class="hljs-symbol">/</span>
+│   │   │   │   ├── media-preview<span class="hljs-symbol">/</span>
+│   │   │   │   ├── loading-spinner<span class="hljs-symbol">/</span>
+│   │   │   │   └── confirm-dialog<span class="hljs-symbol">/</span>
+│   │   │   └── pipes<span class="hljs-symbol">/</span>
+│   │   │       └── time-ago.pipe.ts
+│   │   ├── layouts<span class="hljs-symbol">/</span>
+│   │   │   ├── public-layout<span class="hljs-symbol">/</span>
+│   │   │   └── private-layout<span class="hljs-symbol">/</span>
+│   │   └── features<span class="hljs-symbol">/</span>
+│   │       ├── auth<span class="hljs-symbol">/</span>
+│   │       │   ├── login<span class="hljs-symbol">/</span>
+│   │       │   ├── register<span class="hljs-symbol">/</span>
+│   │       │   ├── forgot-password<span class="hljs-symbol">/</span>
+│   │       │   └── auth.module.ts
+│   │       ├── feed<span class="hljs-symbol">/</span>
+│   │       │   ├── feed-page<span class="hljs-symbol">/</span>
+│   │       │   ├── create-post<span class="hljs-symbol">/</span>
+│   │       │   └── feed.module.ts
+│   │       ├── posts<span class="hljs-symbol">/</span>
+│   │       │   ├── post-detail<span class="hljs-symbol">/</span>
+│   │       │   ├── edit-post<span class="hljs-symbol">/</span>
+│   │       │   └── posts.module.ts
+│   │       ├── profile<span class="hljs-symbol">/</span>
+│   │       │   ├── profile-page<span class="hljs-symbol">/</span>
+│   │       │   ├── edit-profile<span class="hljs-symbol">/</span>
+│   │       │   ├── followers-list<span class="hljs-symbol">/</span>
+│   │       │   └── profile.module.ts
+│   │       └── comments<span class="hljs-symbol">/</span>
+│   │           └── comments.module.ts
+│   ├── environments<span class="hljs-symbol">/</span>
+│   │   ├── environment.ts            <span class="hljs-comment"># apiUrl: &#x27;http://localhost:5000/api&#x27;</span>
+│   │   └── environment.prod.ts
+│   └── styles<span class="hljs-symbol">/</span>
+└── proxy.conf.json</code></pre>
+</div><h3 id="43-ecras-minimos-10-ecras-que-tem-de-existir"><a class="heading-anchor" href="#43-ecras-minimos-10-ecras-que-tem-de-existir" aria-hidden="true">#</a>4.3. Ecrãs mínimos (10 ecrãs) que têm de existir</h3>
+<ol>
+<li><strong>Login</strong> — formulário (email + password)</li>
+<li><strong>Registo</strong> — formulário (username, email, password, fullName)</li>
+<li><strong>Recuperar senha</strong> — formulário de pedido (email)</li>
+<li><strong>Reset senha</strong> — formulário com token + nova senha</li>
+<li><strong>Feed principal</strong> — lista cronológica de publicações + botão &quot;criar&quot;</li>
+<li><strong>Criar publicação</strong> — modal/página com textarea + upload de imagem/vídeo</li>
+<li><strong>Detalhe da publicação</strong> — publicação + lista de comentários + form de adicionar comentário</li>
+<li><strong>Editar publicação</strong> — formulário pré-preenchido</li>
+<li><strong>Perfil do utilizador</strong> — info do user + lista das suas publicações + botão Seguir/Deixar de seguir</li>
+<li><strong>Editar perfil</strong> — formulário (nome, bio, privacidade, foto)</li>
+</ol>
+<h3 id="44-modelos-typescript-espelham-os-dtos-do-backend"><a class="heading-anchor" href="#44-modelos-typescript-espelham-os-dtos-do-backend" aria-hidden="true">#</a>4.4. Modelos TypeScript (espelham os DTOs do backend)</h3>
+<div class="code-block">
+<span class="code-lang">typescript</span>
+<button class="code-copy" type="button" data-code="// core/models/user.model.ts
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  fullName: string;
+  bio?: string;
+  profilePhotoUrl?: string;
+  isPrivate: boolean;
+  isAdmin: boolean;
+}
+
+export interface UserProfile extends User {
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  isFollowing: boolean;
+}
+
+// core/models/post.model.ts
+export interface Post {
+  id: number;
+  authorId: number;
+  authorName: string;
+  authorUsername: string;
+  authorPhotoUrl?: string;
+  content: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  commentsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// core/models/comment.model.ts
+export interface Comment {
+  id: number;
+  postId: number;
+  authorId: number;
+  authorName: string;
+  authorPhotoUrl?: string;
+  content: string;
+  isEditable: boolean;
+  createdAt: string;
+}
+
+// core/models/auth.model.ts
+export interface LoginRequest { email: string; password: string; }
+export interface RegisterRequest {
+  username: string; email: string; password: string; fullName: string;
+}
+export interface AuthResponse { token: string; expiration: string; user: User; }" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-typescript"><span class="hljs-comment">// core/models/user.model.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">User</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">username</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">fullName</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">bio</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">profilePhotoUrl</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">isPrivate</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">isAdmin</span>: <span class="hljs-built_in">boolean</span>;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">UserProfile</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">User</span> {
+  <span class="hljs-attr">followersCount</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">followingCount</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">postsCount</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">isFollowing</span>: <span class="hljs-built_in">boolean</span>;
+}
+
+<span class="hljs-comment">// core/models/post.model.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Post</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">authorId</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">authorName</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">authorUsername</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">authorPhotoUrl</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">content</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">imageUrl</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">videoUrl</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">commentsCount</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">createdAt</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">updatedAt</span>: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-comment">// core/models/comment.model.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Comment</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">postId</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">authorId</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">authorName</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">authorPhotoUrl</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">content</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">isEditable</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">createdAt</span>: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-comment">// core/models/auth.model.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">LoginRequest</span> { <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">password</span>: <span class="hljs-built_in">string</span>; }
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">RegisterRequest</span> {
+  <span class="hljs-attr">username</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">password</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">fullName</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">AuthResponse</span> { <span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">expiration</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">user</span>: <span class="hljs-title class_">User</span>; }</code></pre>
+</div><blockquote>
+<p>⚠️ Repara que <strong>não</strong> existe <code>bazesCount</code> nem <code>userHasBazed</code> nesta fase — só nesses campos quando avançarmos para o Exame Final.</p>
+</blockquote>
+<h3 id="45-services-principais"><a class="heading-anchor" href="#45-services-principais" aria-hidden="true">#</a>4.5. Services principais</h3>
+<div class="code-block">
+<span class="code-lang">typescript</span>
+<button class="code-copy" type="button" data-code="@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private apiUrl = environment.apiUrl;
+  currentUser$ = new BehaviorSubject&lt;User | null&gt;(this.loadUser());
+
+  login(data: LoginRequest): Observable&lt;AuthResponse&gt; {
+    return this.http.post&lt;AuthResponse&gt;(`${this.apiUrl}/auth/login`, data)
+      .pipe(tap(res =&gt; this.saveSession(res)));
+  }
+  register(data: RegisterRequest): Observable&lt;AuthResponse&gt; { /* ... */ }
+  forgotPassword(email: string): Observable&lt;void&gt; { /* ... */ }
+  resetPassword(token: string, newPassword: string): Observable&lt;void&gt; { /* ... */ }
+  logout(): void { localStorage.clear(); this.currentUser$.next(null); }
+  getToken(): string | null { return localStorage.getItem('token'); }
+  isAuthenticated(): boolean { return !!this.getToken(); }
+}" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-typescript"><span class="hljs-meta">@Injectable</span>({ <span class="hljs-attr">providedIn</span>: <span class="hljs-string">&#x27;root&#x27;</span> })
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AuthService</span> {
+  <span class="hljs-keyword">private</span> apiUrl = environment.<span class="hljs-property">apiUrl</span>;
+  currentUser$ = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BehaviorSubject</span>&lt;<span class="hljs-title class_">User</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">loadUser</span>());
+
+  <span class="hljs-title function_">login</span>(<span class="hljs-attr">data</span>: <span class="hljs-title class_">LoginRequest</span>): <span class="hljs-title class_">Observable</span>&lt;<span class="hljs-title class_">AuthResponse</span>&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">http</span>.<span class="hljs-property">post</span>&lt;<span class="hljs-title class_">AuthResponse</span>&gt;(<span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-variable language_">this</span>.apiUrl}</span>/auth/login`</span>, data)
+      .<span class="hljs-title function_">pipe</span>(<span class="hljs-title function_">tap</span>(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">saveSession</span>(res)));
+  }
+  <span class="hljs-title function_">register</span>(<span class="hljs-attr">data</span>: <span class="hljs-title class_">RegisterRequest</span>): <span class="hljs-title class_">Observable</span>&lt;<span class="hljs-title class_">AuthResponse</span>&gt; { <span class="hljs-comment">/* ... */</span> }
+  <span class="hljs-title function_">forgotPassword</span>(<span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Observable</span>&lt;<span class="hljs-built_in">void</span>&gt; { <span class="hljs-comment">/* ... */</span> }
+  <span class="hljs-title function_">resetPassword</span>(<span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">newPassword</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Observable</span>&lt;<span class="hljs-built_in">void</span>&gt; { <span class="hljs-comment">/* ... */</span> }
+  <span class="hljs-title function_">logout</span>(): <span class="hljs-built_in">void</span> { <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">clear</span>(); <span class="hljs-variable language_">this</span>.<span class="hljs-property">currentUser$</span>.<span class="hljs-title function_">next</span>(<span class="hljs-literal">null</span>); }
+  <span class="hljs-title function_">getToken</span>(): <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span> { <span class="hljs-keyword">return</span> <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">getItem</span>(<span class="hljs-string">&#x27;token&#x27;</span>); }
+  <span class="hljs-title function_">isAuthenticated</span>(): <span class="hljs-built_in">boolean</span> { <span class="hljs-keyword">return</span> !!<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getToken</span>(); }
+}</code></pre>
+</div><h3 id="46-interceptor-jwt-essencial"><a class="heading-anchor" href="#46-interceptor-jwt-essencial" aria-hidden="true">#</a>4.6. Interceptor JWT (essencial)</h3>
+<div class="code-block">
+<span class="code-lang">typescript</span>
+<button class="code-copy" type="button" data-code="export const jwtInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  const token = inject(AuthService).getToken();
+  if (token) req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+  return next(req);
+};" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-typescript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">jwtInterceptor</span>: <span class="hljs-title class_">HttpInterceptorFn</span> = <span class="hljs-function">(<span class="hljs-params">req, next</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> token = <span class="hljs-title function_">inject</span>(<span class="hljs-title class_">AuthService</span>).<span class="hljs-title function_">getToken</span>();
+  <span class="hljs-keyword">if</span> (token) req = req.<span class="hljs-title function_">clone</span>({ <span class="hljs-attr">setHeaders</span>: { <span class="hljs-title class_">Authorization</span>: <span class="hljs-string">`Bearer <span class="hljs-subst">${token}</span>`</span> } });
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">next</span>(req);
+};</code></pre>
+</div><h3 id="47-authguard"><a class="heading-anchor" href="#47-authguard" aria-hidden="true">#</a>4.7. AuthGuard</h3>
+<div class="code-block">
+<span class="code-lang">typescript</span>
+<button class="code-copy" type="button" data-code="export const authGuard: CanActivateFn = () =&gt; {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.isAuthenticated()) return true;
+  router.navigate(['/auth/login']);
+  return false;
+};" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-typescript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">authGuard</span>: <span class="hljs-title class_">CanActivateFn</span> = <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> auth = <span class="hljs-title function_">inject</span>(<span class="hljs-title class_">AuthService</span>);
+  <span class="hljs-keyword">const</span> router = <span class="hljs-title function_">inject</span>(<span class="hljs-title class_">Router</span>);
+  <span class="hljs-keyword">if</span> (auth.<span class="hljs-title function_">isAuthenticated</span>()) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+  router.<span class="hljs-title function_">navigate</span>([<span class="hljs-string">&#x27;/auth/login&#x27;</span>]);
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+};</code></pre>
+</div><h3 id="48-regras-de-ui-obrigatorias"><a class="heading-anchor" href="#48-regras-de-ui-obrigatorias" aria-hidden="true">#</a>4.8. Regras de UI obrigatórias</h3>
+<ul>
+<li><strong>Botão &quot;Editar/Apagar&quot;</strong> só aparece se o <code>post.authorId === currentUserId</code> (idem para comentários).</li>
+<li><strong>Feed cronológico</strong> (<code>createdAt DESC</code>) — paginação simples ou botão &quot;Carregar mais&quot; basta.</li>
+<li><strong>Upload com pré-visualização</strong>: mostrar a imagem/vídeo antes do submit.</li>
+<li><strong>Responsividade</strong>: testar em 320 px (mobile), 768 px (tablet), 1024 px (desktop).</li>
+<li><strong>Feedback visual</strong>: spinners durante chamadas HTTP, toasts em todos os sucessos/erros.</li>
+<li><strong>Validações client-side</strong>: email válido, password mínimo 8 caracteres, campos obrigatórios.</li>
+</ul>
+<hr>
+<h2 id="5-backend-o-que-construir"><a class="heading-anchor" href="#5-backend-o-que-construir" aria-hidden="true">#</a>5. BACKEND — O Que Construir</h2>
+<h3 id="51-pacotes-nuget-minimos-2-parcelar"><a class="heading-anchor" href="#51-pacotes-nuget-minimos-2-parcelar" aria-hidden="true">#</a>5.1. Pacotes NuGet mínimos (2.ª Parcelar)</h3>
+<div class="table-wrap"><table><thead><tr><th>Pacote</th><th>Indispensável?</th></tr></thead><tbody><tr><td><code>Microsoft.EntityFrameworkCore.SqlServer</code></td><td>✅ Sim</td></tr>
+<tr><td><code>Microsoft.EntityFrameworkCore.Tools</code></td><td>✅ Sim (migrations)</td></tr>
+<tr><td><code>Microsoft.AspNetCore.Authentication.JwtBearer</code></td><td>✅ Sim</td></tr>
+<tr><td><code>System.IdentityModel.Tokens.Jwt</code></td><td>✅ Sim</td></tr>
+<tr><td><code>BCrypt.Net-Next</code></td><td>✅ Sim (hash senha)</td></tr>
+<tr><td><code>AutoMapper.Extensions.Microsoft.DependencyInjection</code></td><td>🟡 Recomendado</td></tr>
+<tr><td><code>FluentValidation.AspNetCore</code></td><td>🟡 Recomendado</td></tr>
+<tr><td><code>Swashbuckle.AspNetCore</code></td><td>✅ Sim (Swagger)</td></tr></tbody></table></div><h3 id="52-estrutura-da-solucao"><a class="heading-anchor" href="#52-estrutura-da-solucao" aria-hidden="true">#</a>5.2. Estrutura da solução</h3>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="NzolaNet.sln
+├── NzolaNet.Api/                 ← Controllers, Middleware, Program.cs
+├── NzolaNet.Application/         ← Services, DTOs, Validators, Exceptions, Mappings
+├── NzolaNet.Domain/              ← Entities, Enums, Interfaces (Repositories)
+└── NzolaNet.Infrastructure/      ← DbContext, Migrations, Repositories, JWT, Storage" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">NzolaNet.sln
+├── NzolaNet.Api<span class="hljs-symbol">/</span>                 ← Controllers, Middleware, Program.cs
+├── NzolaNet.Application<span class="hljs-symbol">/</span>         ← Services, DTOs, Validators, Exceptions, Mappings
+├── NzolaNet.Domain<span class="hljs-symbol">/</span>              ← Entities, Enums, Interfaces (Repositories)
+└── NzolaNet.Infrastructure<span class="hljs-symbol">/</span>      ← DbContext, Migrations, Repositories, JWT, Storage</code></pre>
+</div><h3 id="53-base-de-dados-tabelas-minimas-2-parcelar"><a class="heading-anchor" href="#53-base-de-dados-tabelas-minimas-2-parcelar" aria-hidden="true">#</a>5.3. Base de Dados — Tabelas mínimas (2.ª Parcelar)</h3>
+<p>Foco em <strong>Users, Posts, Comments, Follows, PasswordResetTokens</strong>. As outras (<code>Bazes</code>, <code>Notifications</code>) podem ser criadas desde já para evitar migrações futuras dolorosas, mas <strong>sem endpoints/serviços nesta fase</strong>.</p>
+<div class="code-block">
+<span class="code-lang">sql</span>
+<button class="code-copy" type="button" data-code="CREATE DATABASE NzolaNetDB;
+GO
+USE NzolaNetDB;
+GO
+
+CREATE TABLE Users (
+    Id              INT IDENTITY(1,1) PRIMARY KEY,
+    Username        NVARCHAR(50)  NOT NULL UNIQUE,
+    Email           NVARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash    NVARCHAR(255) NOT NULL,
+    FullName        NVARCHAR(100) NOT NULL,
+    Bio             NVARCHAR(500) NULL,
+    ProfilePhotoUrl NVARCHAR(500) NULL,
+    IsPrivate       BIT NOT NULL DEFAULT 0,
+    IsAdmin         BIT NOT NULL DEFAULT 0,
+    CreatedAt       DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt       DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+);
+CREATE INDEX IX_Users_Username ON Users(Username);
+CREATE INDEX IX_Users_Email    ON Users(Email);
+
+CREATE TABLE Posts (
+    Id        INT IDENTITY(1,1) PRIMARY KEY,
+    UserId    INT NOT NULL,
+    Content   NVARCHAR(5000) NOT NULL,
+    ImageUrl  NVARCHAR(500) NULL,
+    VideoUrl  NVARCHAR(500) NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_Posts_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+);
+CREATE INDEX IX_Posts_UserId_CreatedAt ON Posts(UserId, CreatedAt DESC);
+CREATE INDEX IX_Posts_CreatedAt ON Posts(CreatedAt DESC);
+
+CREATE TABLE Comments (
+    Id        INT IDENTITY(1,1) PRIMARY KEY,
+    PostId    INT NOT NULL,
+    UserId    INT NOT NULL,
+    Content   NVARCHAR(1000) NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_Comments_Posts FOREIGN KEY (PostId) REFERENCES Posts(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_Comments_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE NO ACTION
+);
+CREATE INDEX IX_Comments_PostId_CreatedAt ON Comments(PostId, CreatedAt);
+
+CREATE TABLE Follows (
+    Id         INT IDENTITY(1,1) PRIMARY KEY,
+    FollowerId INT NOT NULL,
+    FollowedId INT NOT NULL,
+    CreatedAt  DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Follows_Follower FOREIGN KEY (FollowerId) REFERENCES Users(Id) ON DELETE NO ACTION,
+    CONSTRAINT FK_Follows_Followed FOREIGN KEY (FollowedId) REFERENCES Users(Id) ON DELETE NO ACTION,
+    CONSTRAINT UQ_Follows_Pair    UNIQUE (FollowerId, FollowedId),
+    CONSTRAINT CK_Follows_NotSelf CHECK  (FollowerId &lt;&gt; FollowedId)
+);
+
+CREATE TABLE PasswordResetTokens (
+    Id        INT IDENTITY(1,1) PRIMARY KEY,
+    UserId    INT NOT NULL,
+    TokenHash NVARCHAR(255) NOT NULL UNIQUE,
+    ExpiresAt DATETIME2 NOT NULL,
+    UsedAt    DATETIME2 NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_PRT_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+);" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-sql"><span class="hljs-keyword">CREATE</span> DATABASE NzolaNetDB;
+GO
+USE NzolaNetDB;
+GO
+
+<span class="hljs-keyword">CREATE TABLE</span> Users (
+    Id              <span class="hljs-type">INT</span> <span class="hljs-keyword">IDENTITY</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>) <span class="hljs-keyword">PRIMARY KEY</span>,
+    Username        NVARCHAR(<span class="hljs-number">50</span>)  <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">UNIQUE</span>,
+    Email           NVARCHAR(<span class="hljs-number">100</span>) <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">UNIQUE</span>,
+    PasswordHash    NVARCHAR(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT NULL</span>,
+    FullName        NVARCHAR(<span class="hljs-number">100</span>) <span class="hljs-keyword">NOT NULL</span>,
+    Bio             NVARCHAR(<span class="hljs-number">500</span>) <span class="hljs-keyword">NULL</span>,
+    ProfilePhotoUrl NVARCHAR(<span class="hljs-number">500</span>) <span class="hljs-keyword">NULL</span>,
+    IsPrivate       BIT <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span>,
+    IsAdmin         BIT <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span>,
+    CreatedAt       DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    UpdatedAt       DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE()
+);
+<span class="hljs-keyword">CREATE</span> INDEX IX_Users_Username <span class="hljs-keyword">ON</span> Users(Username);
+<span class="hljs-keyword">CREATE</span> INDEX IX_Users_Email    <span class="hljs-keyword">ON</span> Users(Email);
+
+<span class="hljs-keyword">CREATE TABLE</span> Posts (
+    Id        <span class="hljs-type">INT</span> <span class="hljs-keyword">IDENTITY</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>) <span class="hljs-keyword">PRIMARY KEY</span>,
+    UserId    <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT NULL</span>,
+    Content   NVARCHAR(<span class="hljs-number">5000</span>) <span class="hljs-keyword">NOT NULL</span>,
+    ImageUrl  NVARCHAR(<span class="hljs-number">500</span>) <span class="hljs-keyword">NULL</span>,
+    VideoUrl  NVARCHAR(<span class="hljs-number">500</span>) <span class="hljs-keyword">NULL</span>,
+    CreatedAt DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    UpdatedAt DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    IsDeleted BIT <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span>,
+    <span class="hljs-keyword">CONSTRAINT</span> FK_Posts_Users <span class="hljs-keyword">FOREIGN KEY</span> (UserId) <span class="hljs-keyword">REFERENCES</span> Users(Id) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> CASCADE
+);
+<span class="hljs-keyword">CREATE</span> INDEX IX_Posts_UserId_CreatedAt <span class="hljs-keyword">ON</span> Posts(UserId, CreatedAt <span class="hljs-keyword">DESC</span>);
+<span class="hljs-keyword">CREATE</span> INDEX IX_Posts_CreatedAt <span class="hljs-keyword">ON</span> Posts(CreatedAt <span class="hljs-keyword">DESC</span>);
+
+<span class="hljs-keyword">CREATE TABLE</span> Comments (
+    Id        <span class="hljs-type">INT</span> <span class="hljs-keyword">IDENTITY</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>) <span class="hljs-keyword">PRIMARY KEY</span>,
+    PostId    <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT NULL</span>,
+    UserId    <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT NULL</span>,
+    Content   NVARCHAR(<span class="hljs-number">1000</span>) <span class="hljs-keyword">NOT NULL</span>,
+    CreatedAt DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    UpdatedAt DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    IsDeleted BIT <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span>,
+    <span class="hljs-keyword">CONSTRAINT</span> FK_Comments_Posts <span class="hljs-keyword">FOREIGN KEY</span> (PostId) <span class="hljs-keyword">REFERENCES</span> Posts(Id) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> CASCADE,
+    <span class="hljs-keyword">CONSTRAINT</span> FK_Comments_Users <span class="hljs-keyword">FOREIGN KEY</span> (UserId) <span class="hljs-keyword">REFERENCES</span> Users(Id) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">NO</span> ACTION
+);
+<span class="hljs-keyword">CREATE</span> INDEX IX_Comments_PostId_CreatedAt <span class="hljs-keyword">ON</span> Comments(PostId, CreatedAt);
+
+<span class="hljs-keyword">CREATE TABLE</span> Follows (
+    Id         <span class="hljs-type">INT</span> <span class="hljs-keyword">IDENTITY</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>) <span class="hljs-keyword">PRIMARY KEY</span>,
+    FollowerId <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT NULL</span>,
+    FollowedId <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT NULL</span>,
+    CreatedAt  DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    <span class="hljs-keyword">CONSTRAINT</span> FK_Follows_Follower <span class="hljs-keyword">FOREIGN KEY</span> (FollowerId) <span class="hljs-keyword">REFERENCES</span> Users(Id) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">NO</span> ACTION,
+    <span class="hljs-keyword">CONSTRAINT</span> FK_Follows_Followed <span class="hljs-keyword">FOREIGN KEY</span> (FollowedId) <span class="hljs-keyword">REFERENCES</span> Users(Id) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">NO</span> ACTION,
+    <span class="hljs-keyword">CONSTRAINT</span> UQ_Follows_Pair    <span class="hljs-keyword">UNIQUE</span> (FollowerId, FollowedId),
+    <span class="hljs-keyword">CONSTRAINT</span> CK_Follows_NotSelf <span class="hljs-keyword">CHECK</span>  (FollowerId <span class="hljs-operator">&lt;&gt;</span> FollowedId)
+);
+
+<span class="hljs-keyword">CREATE TABLE</span> PasswordResetTokens (
+    Id        <span class="hljs-type">INT</span> <span class="hljs-keyword">IDENTITY</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>) <span class="hljs-keyword">PRIMARY KEY</span>,
+    UserId    <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT NULL</span>,
+    TokenHash NVARCHAR(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">UNIQUE</span>,
+    ExpiresAt DATETIME2 <span class="hljs-keyword">NOT NULL</span>,
+    UsedAt    DATETIME2 <span class="hljs-keyword">NULL</span>,
+    CreatedAt DATETIME2 <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> GETUTCDATE(),
+    <span class="hljs-keyword">CONSTRAINT</span> FK_PRT_Users <span class="hljs-keyword">FOREIGN KEY</span> (UserId) <span class="hljs-keyword">REFERENCES</span> Users(Id) <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> CASCADE
+);</code></pre>
+</div><h3 id="54-endpoints-minimos-rest"><a class="heading-anchor" href="#54-endpoints-minimos-rest" aria-hidden="true">#</a>5.4. Endpoints mínimos (REST)</h3>
+<h4 id="authcontroller-apiauth"><a class="heading-anchor" href="#authcontroller-apiauth" aria-hidden="true">#</a>AuthController — <code>/api/auth</code></h4>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="POST   /auth/register         body: RegisterDto         → 201 AuthResponseDto
+POST   /auth/login            body: LoginDto            → 200 AuthResponseDto
+POST   /auth/forgot-password  body: ForgotPasswordDto   → 202 MessageDto
+POST   /auth/reset-password   body: ResetPasswordDto    → 200 MessageDto" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">POST   <span class="hljs-symbol">/auth/register</span>         <span class="hljs-params">body:</span> RegisterDto         → <span class="hljs-number">201</span> AuthResponseDto
+POST   <span class="hljs-symbol">/auth/login</span>            <span class="hljs-params">body:</span> LoginDto            → <span class="hljs-number">200</span> AuthResponseDto
+POST   <span class="hljs-symbol">/auth/forgot-password</span>  <span class="hljs-params">body:</span> ForgotPasswordDto   → <span class="hljs-number">202</span> MessageDto
+POST   <span class="hljs-symbol">/auth/reset-password</span>   <span class="hljs-params">body:</span> ResetPasswordDto    → <span class="hljs-number">200</span> MessageDto</code></pre>
+</div><h4 id="userscontroller-apiusers"><a class="heading-anchor" href="#userscontroller-apiusers" aria-hidden="true">#</a>UsersController — <code>/api/users</code></h4>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="GET    /users/{id}              [Authorize]              → UserProfileDto
+PUT    /users/me                [Authorize]              → UserProfileDto
+PUT    /users/me/photo          [Authorize] (multipart)  → UserProfileDto
+POST   /users/{id}/follow       [Authorize]              → MessageDto
+DELETE /users/{id}/follow       [Authorize]              → MessageDto
+GET    /users/{id}/followers    [Authorize]              → PagedResultDto&lt;UserDto&gt;
+GET    /users/{id}/following    [Authorize]              → PagedResultDto&lt;UserDto&gt;" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">GET    /users/{<span class="hljs-built_in">id</span>}              [Authorize]              → UserProfileDto
+PUT    /users/me                [Authorize]              → UserProfileDto
+PUT    /users/me/photo          [Authorize] (multipart)  → UserProfileDto
+POST   /users/{<span class="hljs-built_in">id</span>}/follow       [Authorize]              → MessageDto
+DELETE /users/{<span class="hljs-built_in">id</span>}/follow       [Authorize]              → MessageDto
+GET    /users/{<span class="hljs-built_in">id</span>}/followers    [Authorize]              → PagedResultDto&lt;UserDto&gt;
+GET    /users/{<span class="hljs-built_in">id</span>}/following    [Authorize]              → PagedResultDto&lt;UserDto&gt;</code></pre>
+</div><h4 id="postscontroller-apiposts"><a class="heading-anchor" href="#postscontroller-apiposts" aria-hidden="true">#</a>PostsController — <code>/api/posts</code></h4>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="POST   /posts                   [Authorize] (multipart)  → PostDto
+GET    /posts/{id}              [Authorize]              → PostDto
+PUT    /posts/{id}              [Authorize] (autor)      → PostDto
+DELETE /posts/{id}              [Authorize] (autor)      → MessageDto
+GET    /posts/user/{userId}     [Authorize]              → PagedResultDto&lt;PostDto&gt;
+GET    /posts?page=&amp;pageSize=   [Authorize]              → PagedResultDto&lt;PostDto&gt;   # feed cronológico simples" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">POST   /posts                   [Authorize] (multipart)  → PostD<span class="hljs-keyword">to</span>
+GET    /posts/{id}              [Authorize]              → PostD<span class="hljs-keyword">to</span>
+PUT    /posts/{id}              [Authorize] (autor)      → PostD<span class="hljs-keyword">to</span>
+DELETE /posts/{id}              [Authorize] (autor)      → MessageD<span class="hljs-keyword">to</span>
+GET    /posts/<span class="hljs-keyword">user</span>/{<span class="hljs-keyword">user</span>Id}     [Authorize]              → PagedResultD<span class="hljs-keyword">to</span><span class="hljs-variable">&lt;PostDto&gt;</span>
+GET    /posts?page=&amp;pageSize=   [Authorize]              → PagedResultD<span class="hljs-keyword">to</span><span class="hljs-variable">&lt;PostDto&gt;</span>   <span class="hljs-comment"># feed cronológico simples</span></code></pre>
+</div><h4 id="commentscontroller"><a class="heading-anchor" href="#commentscontroller" aria-hidden="true">#</a>CommentsController</h4>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="GET    /posts/{postId}/comments [Authorize]              → PagedResultDto&lt;CommentDto&gt;
+POST   /posts/{postId}/comments [Authorize]              → CommentDto
+PUT    /comments/{id}           [Authorize] (autor)      → CommentDto
+DELETE /comments/{id}           [Authorize] (autor)      → MessageDto" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">GET    /posts/{postId}/comments [Authorize]              → PagedResultDto&lt;CommentDto&gt;
+POST   /posts/{postId}/comments [Authorize]              → CommentDto
+PUT    /comments/{<span class="hljs-built_in">id</span>}           [Authorize] (autor)      → CommentDto
+DELETE /comments/{<span class="hljs-built_in">id</span>}           [Authorize] (autor)      → MessageDto</code></pre>
+</div><blockquote>
+<p>💡 Para a 2.ª Parcelar, o <strong>feed simples</strong> é <code>GET /posts?page=&amp;pageSize=</code> ordenado por <code>CreatedAt DESC</code> (todas as publicações públicas). No Exame Final criamos o <code>FeedController</code> personalizado de seguidos.</p>
+</blockquote>
+<h3 id="55-dtos-essenciais"><a class="heading-anchor" href="#55-dtos-essenciais" aria-hidden="true">#</a>5.5. DTOs essenciais</h3>
+<div class="code-block">
+<span class="code-lang">csharp</span>
+<button class="code-copy" type="button" data-code="// Auth
+public record RegisterDto(string Username, string Email, string Password, string FullName);
+public record LoginDto(string Email, string Password);
+public record AuthResponseDto(string Token, DateTime Expiration, UserDto User);
+
+// Users
+public record UserDto(int Id, string Username, string Email, string FullName,
+    string? Bio, string? ProfilePhotoUrl, bool IsPrivate, bool IsAdmin);
+
+public record UserProfileDto(int Id, string Username, string FullName, string? Bio,
+    string? ProfilePhotoUrl, bool IsPrivate,
+    int FollowersCount, int FollowingCount, int PostsCount, bool IsFollowing);
+
+public record UpdateProfileDto(string FullName, string? Bio, bool IsPrivate);
+
+// Posts
+public record PostDto(int Id, int AuthorId, string AuthorName, string AuthorUsername,
+    string? AuthorPhotoUrl, string Content, string? ImageUrl, string? VideoUrl,
+    int CommentsCount, DateTime CreatedAt, DateTime UpdatedAt);
+
+public record CreatePostDto(string Content, IFormFile? Image, IFormFile? Video);
+public record UpdatePostDto(string Content, IFormFile? Image, IFormFile? Video);
+
+// Comments
+public record CommentDto(int Id, int PostId, int AuthorId, string AuthorName,
+    string? AuthorPhotoUrl, string Content, bool IsEditable, DateTime CreatedAt);
+
+public record CreateCommentDto(string Content);
+public record UpdateCommentDto(string Content);
+
+// Shared
+public record PagedResultDto&lt;T&gt;(IEnumerable&lt;T&gt; Items, int Page, int PageSize,
+    int TotalCount, int TotalPages);
+public record MessageDto(string Message);" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-csharp"><span class="hljs-comment">// Auth</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">RegisterDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Username, <span class="hljs-built_in">string</span> Email, <span class="hljs-built_in">string</span> Password, <span class="hljs-built_in">string</span> FullName</span>)</span>;
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">LoginDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Email, <span class="hljs-built_in">string</span> Password</span>)</span>;
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">AuthResponseDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Token, DateTime Expiration, UserDto User</span>)</span>;
+
+<span class="hljs-comment">// Users</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">UserDto</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> Id, <span class="hljs-built_in">string</span> Username, <span class="hljs-built_in">string</span> Email, <span class="hljs-built_in">string</span> FullName,
+    <span class="hljs-built_in">string</span>? Bio, <span class="hljs-built_in">string</span>? ProfilePhotoUrl, <span class="hljs-built_in">bool</span> IsPrivate, <span class="hljs-built_in">bool</span> IsAdmin</span>)</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">UserProfileDto</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> Id, <span class="hljs-built_in">string</span> Username, <span class="hljs-built_in">string</span> FullName, <span class="hljs-built_in">string</span>? Bio,
+    <span class="hljs-built_in">string</span>? ProfilePhotoUrl, <span class="hljs-built_in">bool</span> IsPrivate,
+    <span class="hljs-built_in">int</span> FollowersCount, <span class="hljs-built_in">int</span> FollowingCount, <span class="hljs-built_in">int</span> PostsCount, <span class="hljs-built_in">bool</span> IsFollowing</span>)</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">UpdateProfileDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> FullName, <span class="hljs-built_in">string</span>? Bio, <span class="hljs-built_in">bool</span> IsPrivate</span>)</span>;
+
+<span class="hljs-comment">// Posts</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">PostDto</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> Id, <span class="hljs-built_in">int</span> AuthorId, <span class="hljs-built_in">string</span> AuthorName, <span class="hljs-built_in">string</span> AuthorUsername,
+    <span class="hljs-built_in">string</span>? AuthorPhotoUrl, <span class="hljs-built_in">string</span> Content, <span class="hljs-built_in">string</span>? ImageUrl, <span class="hljs-built_in">string</span>? VideoUrl,
+    <span class="hljs-built_in">int</span> CommentsCount, DateTime CreatedAt, DateTime UpdatedAt</span>)</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">CreatePostDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Content, IFormFile? Image, IFormFile? Video</span>)</span>;
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">UpdatePostDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Content, IFormFile? Image, IFormFile? Video</span>)</span>;
+
+<span class="hljs-comment">// Comments</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">CommentDto</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> Id, <span class="hljs-built_in">int</span> PostId, <span class="hljs-built_in">int</span> AuthorId, <span class="hljs-built_in">string</span> AuthorName,
+    <span class="hljs-built_in">string</span>? AuthorPhotoUrl, <span class="hljs-built_in">string</span> Content, <span class="hljs-built_in">bool</span> IsEditable, DateTime CreatedAt</span>)</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">CreateCommentDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Content</span>)</span>;
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">UpdateCommentDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Content</span>)</span>;
+
+<span class="hljs-comment">// Shared</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">PagedResultDto</span>&lt;<span class="hljs-title">T</span>&gt;(<span class="hljs-params">IEnumerable&lt;T&gt; Items, <span class="hljs-built_in">int</span> Page, <span class="hljs-built_in">int</span> PageSize,
+    <span class="hljs-built_in">int</span> TotalCount, <span class="hljs-built_in">int</span> TotalPages</span>)</span>;
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title">MessageDto</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> Message</span>)</span>;</code></pre>
+</div><h3 id="56-regras-de-negocio-criticas-services"><a class="heading-anchor" href="#56-regras-de-negocio-criticas-services" aria-hidden="true">#</a>5.6. Regras de negócio críticas (Services)</h3>
+<div class="code-block">
+<span class="code-lang">csharp</span>
+<button class="code-copy" type="button" data-code="// PostService.cs - Edição apenas pelo autor
+public async Task&lt;PostDto&gt; UpdateAsync(int postId, UpdatePostDto dto, int currentUserId)
+{
+    var post = await _postRepo.GetByIdAsync(postId)
+               ?? throw new NotFoundException(&quot;Publicação não encontrada.&quot;);
+
+    if (post.UserId != currentUserId)
+        throw new ForbiddenException(&quot;Apenas o autor pode editar esta publicação.&quot;);
+
+    post.Content = dto.Content;
+    post.UpdatedAt = DateTime.UtcNow;
+
+    if (dto.Image is not null) post.ImageUrl = await _storage.SaveAsync(dto.Image, &quot;media&quot;);
+    if (dto.Video is not null) post.VideoUrl = await _storage.SaveAsync(dto.Video, &quot;media&quot;);
+
+    await _postRepo.UpdateAsync(post);
+    return _mapper.Map&lt;PostDto&gt;(post);
+}" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-csharp"><span class="hljs-comment">// PostService.cs - Edição apenas pelo autor</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;PostDto&gt; <span class="hljs-title">UpdateAsync</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> postId, UpdatePostDto dto, <span class="hljs-built_in">int</span> currentUserId</span>)</span>
+{
+    <span class="hljs-keyword">var</span> post = <span class="hljs-keyword">await</span> _postRepo.GetByIdAsync(postId)
+               ?? <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NotFoundException(<span class="hljs-string">&quot;Publicação não encontrada.&quot;</span>);
+
+    <span class="hljs-keyword">if</span> (post.UserId != currentUserId)
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ForbiddenException(<span class="hljs-string">&quot;Apenas o autor pode editar esta publicação.&quot;</span>);
+
+    post.Content = dto.Content;
+    post.UpdatedAt = DateTime.UtcNow;
+
+    <span class="hljs-keyword">if</span> (dto.Image <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span>) post.ImageUrl = <span class="hljs-keyword">await</span> _storage.SaveAsync(dto.Image, <span class="hljs-string">&quot;media&quot;</span>);
+    <span class="hljs-keyword">if</span> (dto.Video <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">null</span>) post.VideoUrl = <span class="hljs-keyword">await</span> _storage.SaveAsync(dto.Video, <span class="hljs-string">&quot;media&quot;</span>);
+
+    <span class="hljs-keyword">await</span> _postRepo.UpdateAsync(post);
+    <span class="hljs-keyword">return</span> _mapper.Map&lt;PostDto&gt;(post);
+}</code></pre>
+</div><div class="code-block">
+<span class="code-lang">csharp</span>
+<button class="code-copy" type="button" data-code="// CommentService.cs - Edição apenas pelo autor
+public async Task&lt;CommentDto&gt; UpdateAsync(int commentId, UpdateCommentDto dto, int currentUserId)
+{
+    var comment = await _commentRepo.GetByIdAsync(commentId)
+                  ?? throw new NotFoundException(&quot;Comentário não encontrado.&quot;);
+
+    if (comment.UserId != currentUserId)
+        throw new ForbiddenException(&quot;Apenas o autor pode editar este comentário.&quot;);
+
+    comment.Content = dto.Content;
+    comment.UpdatedAt = DateTime.UtcNow;
+    await _commentRepo.UpdateAsync(comment);
+    return _mapper.Map&lt;CommentDto&gt;(comment);
+}" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-csharp"><span class="hljs-comment">// CommentService.cs - Edição apenas pelo autor</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;CommentDto&gt; <span class="hljs-title">UpdateAsync</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> commentId, UpdateCommentDto dto, <span class="hljs-built_in">int</span> currentUserId</span>)</span>
+{
+    <span class="hljs-keyword">var</span> comment = <span class="hljs-keyword">await</span> _commentRepo.GetByIdAsync(commentId)
+                  ?? <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NotFoundException(<span class="hljs-string">&quot;Comentário não encontrado.&quot;</span>);
+
+    <span class="hljs-keyword">if</span> (comment.UserId != currentUserId)
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ForbiddenException(<span class="hljs-string">&quot;Apenas o autor pode editar este comentário.&quot;</span>);
+
+    comment.Content = dto.Content;
+    comment.UpdatedAt = DateTime.UtcNow;
+    <span class="hljs-keyword">await</span> _commentRepo.UpdateAsync(comment);
+    <span class="hljs-keyword">return</span> _mapper.Map&lt;CommentDto&gt;(comment);
+}</code></pre>
+</div><div class="code-block">
+<span class="code-lang">csharp</span>
+<button class="code-copy" type="button" data-code="// FollowService.cs - Seguir
+public async Task FollowAsync(int targetUserId, int currentUserId)
+{
+    if (targetUserId == currentUserId)
+        throw new BadRequestException(&quot;Não podes seguir-te a ti próprio.&quot;);
+
+    if (await _followRepo.ExistsAsync(currentUserId, targetUserId))
+        throw new ConflictException(&quot;Já segues este utilizador.&quot;);
+
+    await _followRepo.AddAsync(new Follow {
+        FollowerId = currentUserId, FollowedId = targetUserId
+    });
+}" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-csharp"><span class="hljs-comment">// FollowService.cs - Seguir</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task <span class="hljs-title">FollowAsync</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> targetUserId, <span class="hljs-built_in">int</span> currentUserId</span>)</span>
+{
+    <span class="hljs-keyword">if</span> (targetUserId == currentUserId)
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadRequestException(<span class="hljs-string">&quot;Não podes seguir-te a ti próprio.&quot;</span>);
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">await</span> _followRepo.ExistsAsync(currentUserId, targetUserId))
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ConflictException(<span class="hljs-string">&quot;Já segues este utilizador.&quot;</span>);
+
+    <span class="hljs-keyword">await</span> _followRepo.AddAsync(<span class="hljs-keyword">new</span> Follow {
+        FollowerId = currentUserId, FollowedId = targetUserId
+    });
+}</code></pre>
+</div><h3 id="57-upload-de-ficheiros"><a class="heading-anchor" href="#57-upload-de-ficheiros" aria-hidden="true">#</a>5.7. Upload de ficheiros</h3>
+<div class="code-block">
+<span class="code-lang">csharp</span>
+<button class="code-copy" type="button" data-code="public class LocalFileStorageService : IStorageService
+{
+    private static readonly string[] _imgExt = [&quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.webp&quot;];
+    private static readonly string[] _vidExt = [&quot;.mp4&quot;, &quot;.webm&quot;, &quot;.mov&quot;];
+    private const long MaxImageSize = 10 * 1024 * 1024;
+    private const long MaxVideoSize = 50 * 1024 * 1024;
+
+    public async Task&lt;string&gt; SaveAsync(IFormFile file, string folder)
+    {
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var isImage = _imgExt.Contains(ext);
+        var isVideo = _vidExt.Contains(ext);
+
+        if (!isImage &amp;&amp; !isVideo)
+            throw new BadRequestException(&quot;Formato de ficheiro não suportado.&quot;);
+        if (isImage &amp;&amp; file.Length &gt; MaxImageSize)
+            throw new BadRequestException(&quot;Imagem demasiado grande (máx. 10 MB).&quot;);
+        if (isVideo &amp;&amp; file.Length &gt; MaxVideoSize)
+            throw new BadRequestException(&quot;Vídeo demasiado grande (máx. 50 MB).&quot;);
+
+        var fileName = $&quot;{Guid.NewGuid()}{ext}&quot;;
+        var dir = Path.Combine(&quot;wwwroot&quot;, &quot;uploads&quot;, folder);
+        Directory.CreateDirectory(dir);
+
+        await using var stream = new FileStream(Path.Combine(dir, fileName), FileMode.Create);
+        await file.CopyToAsync(stream);
+
+        return $&quot;/uploads/{folder}/{fileName}&quot;;
+    }
+}" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">LocalFileStorageService</span> : <span class="hljs-title">IStorageService</span>
+{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">string</span>[] _imgExt = [<span class="hljs-string">&quot;.jpg&quot;</span>, <span class="hljs-string">&quot;.jpeg&quot;</span>, <span class="hljs-string">&quot;.png&quot;</span>, <span class="hljs-string">&quot;.webp&quot;</span>];
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">string</span>[] _vidExt = [<span class="hljs-string">&quot;.mp4&quot;</span>, <span class="hljs-string">&quot;.webm&quot;</span>, <span class="hljs-string">&quot;.mov&quot;</span>];
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">long</span> MaxImageSize = <span class="hljs-number">10</span> * <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">long</span> MaxVideoSize = <span class="hljs-number">50</span> * <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;<span class="hljs-built_in">string</span>&gt; <span class="hljs-title">SaveAsync</span>(<span class="hljs-params">IFormFile <span class="hljs-keyword">file</span>, <span class="hljs-built_in">string</span> folder</span>)</span>
+    {
+        <span class="hljs-keyword">var</span> ext = Path.GetExtension(<span class="hljs-keyword">file</span>.FileName).ToLowerInvariant();
+        <span class="hljs-keyword">var</span> isImage = _imgExt.Contains(ext);
+        <span class="hljs-keyword">var</span> isVideo = _vidExt.Contains(ext);
+
+        <span class="hljs-keyword">if</span> (!isImage &amp;&amp; !isVideo)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadRequestException(<span class="hljs-string">&quot;Formato de ficheiro não suportado.&quot;</span>);
+        <span class="hljs-keyword">if</span> (isImage &amp;&amp; <span class="hljs-keyword">file</span>.Length &gt; MaxImageSize)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadRequestException(<span class="hljs-string">&quot;Imagem demasiado grande (máx. 10 MB).&quot;</span>);
+        <span class="hljs-keyword">if</span> (isVideo &amp;&amp; <span class="hljs-keyword">file</span>.Length &gt; MaxVideoSize)
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> BadRequestException(<span class="hljs-string">&quot;Vídeo demasiado grande (máx. 50 MB).&quot;</span>);
+
+        <span class="hljs-keyword">var</span> fileName = <span class="hljs-string">$&quot;<span class="hljs-subst">{Guid.NewGuid()}</span><span class="hljs-subst">{ext}</span>&quot;</span>;
+        <span class="hljs-keyword">var</span> dir = Path.Combine(<span class="hljs-string">&quot;wwwroot&quot;</span>, <span class="hljs-string">&quot;uploads&quot;</span>, folder);
+        Directory.CreateDirectory(dir);
+
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> <span class="hljs-keyword">var</span> stream = <span class="hljs-keyword">new</span> FileStream(Path.Combine(dir, fileName), FileMode.Create);
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">file</span>.CopyToAsync(stream);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-string">$&quot;/uploads/<span class="hljs-subst">{folder}</span>/<span class="hljs-subst">{fileName}</span>&quot;</span>;
+    }
+}</code></pre>
+</div><h3 id="58-programcs-minimo-viavel"><a class="heading-anchor" href="#58-programcs-minimo-viavel" aria-hidden="true">#</a>5.8. Program.cs (mínimo viável)</h3>
+<div class="code-block">
+<span class="code-lang">csharp</span>
+<button class="code-copy" type="button" data-code="var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext&lt;ApplicationDbContext&gt;(opt =&gt;
+    opt.UseSqlServer(builder.Configuration.GetConnectionString(&quot;DefaultConnection&quot;)));
+
+var jwtKey = builder.Configuration[&quot;Jwt:Key&quot;]!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =&gt; {
+        opt.TokenValidationParameters = new TokenValidationParameters {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidIssuer = builder.Configuration[&quot;Jwt:Issuer&quot;],
+            ValidAudience = builder.Configuration[&quot;Jwt:Audience&quot;],
+            ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true
+        };
+    });
+builder.Services.AddAuthorization();
+
+builder.Services.AddCors(opt =&gt; opt.AddPolicy(&quot;Angular&quot;, p =&gt; p
+    .WithOrigins(&quot;http://localhost:4200&quot;)
+    .AllowAnyHeader().AllowAnyMethod()));
+
+// DI - Repositórios
+builder.Services.AddScoped&lt;IUserRepository, UserRepository&gt;();
+builder.Services.AddScoped&lt;IPostRepository, PostRepository&gt;();
+builder.Services.AddScoped&lt;ICommentRepository, CommentRepository&gt;();
+builder.Services.AddScoped&lt;IFollowRepository, FollowRepository&gt;();
+
+// DI - Serviços
+builder.Services.AddScoped&lt;IAuthService, AuthService&gt;();
+builder.Services.AddScoped&lt;IUserService, UserService&gt;();
+builder.Services.AddScoped&lt;IPostService, PostService&gt;();
+builder.Services.AddScoped&lt;ICommentService, CommentService&gt;();
+builder.Services.AddScoped&lt;IFollowService, FollowService&gt;();
+builder.Services.AddScoped&lt;IStorageService, LocalFileStorageService&gt;();
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+app.UseSwagger(); app.UseSwaggerUI();
+app.UseCors(&quot;Angular&quot;);
+app.UseAuthentication(); app.UseAuthorization();
+app.UseStaticFiles();
+app.MapControllers();
+app.Run();" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-csharp"><span class="hljs-keyword">var</span> builder = WebApplication.CreateBuilder(<span class="hljs-keyword">args</span>);
+
+builder.Services.AddDbContext&lt;ApplicationDbContext&gt;(opt =&gt;
+    opt.UseSqlServer(builder.Configuration.GetConnectionString(<span class="hljs-string">&quot;DefaultConnection&quot;</span>)));
+
+<span class="hljs-keyword">var</span> jwtKey = builder.Configuration[<span class="hljs-string">&quot;Jwt:Key&quot;</span>]!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =&gt; {
+        opt.TokenValidationParameters = <span class="hljs-keyword">new</span> TokenValidationParameters {
+            ValidateIssuerSigningKey = <span class="hljs-literal">true</span>,
+            IssuerSigningKey = <span class="hljs-keyword">new</span> SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidIssuer = builder.Configuration[<span class="hljs-string">&quot;Jwt:Issuer&quot;</span>],
+            ValidAudience = builder.Configuration[<span class="hljs-string">&quot;Jwt:Audience&quot;</span>],
+            ValidateIssuer = <span class="hljs-literal">true</span>, ValidateAudience = <span class="hljs-literal">true</span>, ValidateLifetime = <span class="hljs-literal">true</span>
+        };
+    });
+builder.Services.AddAuthorization();
+
+builder.Services.AddCors(opt =&gt; opt.AddPolicy(<span class="hljs-string">&quot;Angular&quot;</span>, p =&gt; p
+    .WithOrigins(<span class="hljs-string">&quot;http://localhost:4200&quot;</span>)
+    .AllowAnyHeader().AllowAnyMethod()));
+
+<span class="hljs-comment">// DI - Repositórios</span>
+builder.Services.AddScoped&lt;IUserRepository, UserRepository&gt;();
+builder.Services.AddScoped&lt;IPostRepository, PostRepository&gt;();
+builder.Services.AddScoped&lt;ICommentRepository, CommentRepository&gt;();
+builder.Services.AddScoped&lt;IFollowRepository, FollowRepository&gt;();
+
+<span class="hljs-comment">// DI - Serviços</span>
+builder.Services.AddScoped&lt;IAuthService, AuthService&gt;();
+builder.Services.AddScoped&lt;IUserService, UserService&gt;();
+builder.Services.AddScoped&lt;IPostService, PostService&gt;();
+builder.Services.AddScoped&lt;ICommentService, CommentService&gt;();
+builder.Services.AddScoped&lt;IFollowService, FollowService&gt;();
+builder.Services.AddScoped&lt;IStorageService, LocalFileStorageService&gt;();
+
+builder.Services.AddAutoMapper(<span class="hljs-keyword">typeof</span>(AutoMapperProfile).Assembly);
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+
+<span class="hljs-keyword">var</span> app = builder.Build();
+app.UseSwagger(); app.UseSwaggerUI();
+app.UseCors(<span class="hljs-string">&quot;Angular&quot;</span>);
+app.UseAuthentication(); app.UseAuthorization();
+app.UseStaticFiles();
+app.MapControllers();
+app.Run();</code></pre>
+</div><hr>
+<h2 id="6-contrato-api-minimo-2-parcelar"><a class="heading-anchor" href="#6-contrato-api-minimo-2-parcelar" aria-hidden="true">#</a>6. Contrato API Mínimo (2.ª Parcelar)</h2>
+<p>Este é um <strong>subconjunto</strong> do <code>docs/API_CONTRACT.md</code>. Para a 2.ª Parcelar, basta este contrato funcionar end-to-end.</p>
+<div class="code-block">
+<span class="code-lang">markdown</span>
+<button class="code-copy" type="button" data-code="# API Contract — NzolaNet (v0.5 — 2.ª Parcelar)
+
+Base URL: http://localhost:5000/api
+Autenticação: Authorization: Bearer &lt;JWT&gt;
+
+## Auth
+POST   /auth/register          body: RegisterDto          → 201 AuthResponseDto
+POST   /auth/login             body: LoginDto             → 200 AuthResponseDto
+POST   /auth/forgot-password   body: { email }            → 202 MessageDto
+POST   /auth/reset-password    body: { token, password }  → 200 MessageDto
+
+## Users
+GET    /users/{id}             → UserProfileDto
+PUT    /users/me               body: UpdateProfileDto     → UserProfileDto
+PUT    /users/me/photo         multipart: photo           → UserProfileDto
+POST   /users/{id}/follow      → MessageDto
+DELETE /users/{id}/follow      → MessageDto
+GET    /users/{id}/followers   → PagedResultDto&lt;UserDto&gt;
+GET    /users/{id}/following   → PagedResultDto&lt;UserDto&gt;
+
+## Posts
+POST   /posts                  multipart: content, image?, video?  → 201 PostDto
+GET    /posts?page=&amp;pageSize=  → PagedResultDto&lt;PostDto&gt;   # feed cronológico simples
+GET    /posts/{id}             → PostDto
+PUT    /posts/{id}             multipart: content, image?, video?  → PostDto
+DELETE /posts/{id}             → MessageDto
+GET    /posts/user/{userId}    → PagedResultDto&lt;PostDto&gt;
+
+## Comments
+GET    /posts/{postId}/comments    → PagedResultDto&lt;CommentDto&gt;
+POST   /posts/{postId}/comments    body: { content }  → 201 CommentDto
+PUT    /comments/{id}              body: { content }  → CommentDto
+DELETE /comments/{id}              → MessageDto" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-markdown"><span class="hljs-section"># API Contract — NzolaNet (v0.5 — 2.ª Parcelar)</span>
+
+Base URL: http://localhost:5000/api
+Autenticação: Authorization: Bearer <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">JWT</span>&gt;</span></span>
+
+<span class="hljs-section">## Auth</span>
+POST   /auth/register          body: RegisterDto          → 201 AuthResponseDto
+POST   /auth/login             body: LoginDto             → 200 AuthResponseDto
+POST   /auth/forgot-password   body: { email }            → 202 MessageDto
+POST   /auth/reset-password    body: { token, password }  → 200 MessageDto
+
+<span class="hljs-section">## Users</span>
+GET    /users/{id}             → UserProfileDto
+PUT    /users/me               body: UpdateProfileDto     → UserProfileDto
+PUT    /users/me/photo         multipart: photo           → UserProfileDto
+POST   /users/{id}/follow      → MessageDto
+DELETE /users/{id}/follow      → MessageDto
+GET    /users/{id}/followers   → PagedResultDto<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserDto</span>&gt;</span></span>
+GET    /users/{id}/following   → PagedResultDto<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserDto</span>&gt;</span></span>
+
+<span class="hljs-section">## Posts</span>
+POST   /posts                  multipart: content, image?, video?  → 201 PostDto
+GET    /posts?page=&amp;pageSize=  → PagedResultDto<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">PostDto</span>&gt;</span></span>   # feed cronológico simples
+GET    /posts/{id}             → PostDto
+PUT    /posts/{id}             multipart: content, image?, video?  → PostDto
+DELETE /posts/{id}             → MessageDto
+GET    /posts/user/{userId}    → PagedResultDto<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">PostDto</span>&gt;</span></span>
+
+<span class="hljs-section">## Comments</span>
+GET    /posts/{postId}/comments    → PagedResultDto<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">CommentDto</span>&gt;</span></span>
+POST   /posts/{postId}/comments    body: { content }  → 201 CommentDto
+PUT    /comments/{id}              body: { content }  → CommentDto
+DELETE /comments/{id}              → MessageDto</code></pre>
+</div><hr>
+<h2 id="7-cronograma-de-4-semanas"><a class="heading-anchor" href="#7-cronograma-de-4-semanas" aria-hidden="true">#</a>7. Cronograma de 4 Semanas</h2>
+<div class="table-wrap"><table><thead><tr><th>Semana</th><th>Backend (Willfredy)</th><th>Frontend (3 devs)</th></tr></thead><tbody><tr><td><strong>Semana 1</strong></td><td>Setup solução .NET + EF Core + DB schema completo (Migration <code>InitialCreate</code>) + JWT setup + <strong>AuthController</strong> (register/login)</td><td>Setup Angular + Tailwind/Bootstrap + módulo <code>auth/</code> (login, register) + <code>AuthGuard</code> + <code>JwtInterceptor</code> + <code>AuthService</code> + layouts (<code>public-layout</code>, <code>private-layout</code>)</td></tr>
+<tr><td><strong>Semana 2</strong></td><td><strong>UsersController</strong> (perfil, edição, foto, follow/unfollow) + Upload de ficheiros</td><td><code>edit-profile/</code> + <code>profile-page/</code> + componentes <code>shared/</code> (navbar, user-avatar) + <code>UserService</code></td></tr>
+<tr><td><strong>Semana 3</strong></td><td><strong>PostsController</strong> (CRUD + upload media) + <strong>CommentsController</strong> (CRUD) + lista cronológica de posts</td><td><code>feed-page/</code> + <code>create-post/</code> + <code>edit-post/</code> + <code>post-card</code> (shared) + <code>comment-list/</code> + <code>comment-form/</code> + <code>PostService</code> + <code>CommentService</code></td></tr>
+<tr><td><strong>Semana 4</strong></td><td>Testes manuais via Swagger, correções, polimento, <strong>relatório intermédio</strong>, Swagger documentado, seed de dados</td><td>Responsividade (mobile/tablet/desktop), validações finais, integração ponta-a-ponta com o backend, fix de bugs</td></tr></tbody></table></div><h3 id="marcos-criticos"><a class="heading-anchor" href="#marcos-criticos" aria-hidden="true">#</a>Marcos críticos</h3>
+<ul>
+<li><strong>Final da Semana 1:</strong> registo + login a funcionar end-to-end. Token JWT chega ao frontend e é injetado nas chamadas seguintes.</li>
+<li><strong>Final da Semana 2:</strong> perfil completamente funcional (ver/editar/foto/seguir).</li>
+<li><strong>Final da Semana 3:</strong> publicações e comentários CRUD completos com upload.</li>
+<li><strong>Final da Semana 4:</strong> <strong>demo gravada</strong> + relatório parcial pronto.</li>
+</ul>
+<hr>
+<h2 id="8-git-e-github-resumo-pratico"><a class="heading-anchor" href="#8-git-e-github-resumo-pratico" aria-hidden="true">#</a>8. Git e GitHub — Resumo Prático</h2>
+<blockquote>
+<p>Para o passo a passo <strong>completo</strong> (criar repo, convidar membros, proteger branches, etc.), vê o <a href="./Plano_Definitivo_NzolaNet.html#7-git-e-github--estrat%C3%A9gia-de-colabora%C3%A7%C3%A3o">Plano Definitivo Completo</a>.</p>
+</blockquote>
+<h3 id="workflow-diario-todos-os-dias"><a class="heading-anchor" href="#workflow-diario-todos-os-dias" aria-hidden="true">#</a>Workflow diário (todos os dias)</h3>
+<div class="code-block">
+<span class="code-lang">bash</span>
+<button class="code-copy" type="button" data-code="# 1. Sincronizar com develop
+git checkout develop
+git pull origin develop
+
+# 2. Criar/continuar branch da tarefa
+git checkout -b frontend/feature/auth        # ou continuar existente
+# ... trabalhar ...
+
+# 3. Commitar com convenção
+git add .
+git commit -m &quot;feat(frontend/auth): implementa login com JWT&quot;
+git push -u origin frontend/feature/auth
+
+# 4. Abrir Pull Request no GitHub para `develop`
+# 5. Outro membro revê e aprova → squash merge" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-bash"><span class="hljs-comment"># 1. Sincronizar com develop</span>
+git checkout develop
+git pull origin develop
+
+<span class="hljs-comment"># 2. Criar/continuar branch da tarefa</span>
+git checkout -b frontend/feature/auth        <span class="hljs-comment"># ou continuar existente</span>
+<span class="hljs-comment"># ... trabalhar ...</span>
+
+<span class="hljs-comment"># 3. Commitar com convenção</span>
+git add .
+git commit -m <span class="hljs-string">&quot;feat(frontend/auth): implementa login com JWT&quot;</span>
+git push -u origin frontend/feature/auth
+
+<span class="hljs-comment"># 4. Abrir Pull Request no GitHub para `develop`</span>
+<span class="hljs-comment"># 5. Outro membro revê e aprova → squash merge</span></code></pre>
+</div><h3 id="convencao-de-commits"><a class="heading-anchor" href="#convencao-de-commits" aria-hidden="true">#</a>Convenção de commits</h3>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="feat(&lt;escopo&gt;):     nova funcionalidade
+fix(&lt;escopo&gt;):      correção de bug
+refactor(&lt;escopo&gt;): melhoria sem mudança de comportamento
+docs(&lt;escopo&gt;):     alteração de documentação
+chore(&lt;escopo&gt;):    config, dependências, manutenção" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-"><span class="hljs-function"><span class="hljs-title">feat</span><span class="hljs-params">(&lt;escopo&gt;)</span></span>:     nova funcionalidade
+<span class="hljs-function"><span class="hljs-title">fix</span><span class="hljs-params">(&lt;escopo&gt;)</span></span>:      correção de bug
+<span class="hljs-function"><span class="hljs-title">refactor</span><span class="hljs-params">(&lt;escopo&gt;)</span></span>: melhoria sem mudanç<span class="hljs-selector-tag">a</span> de comportamento
+<span class="hljs-function"><span class="hljs-title">docs</span><span class="hljs-params">(&lt;escopo&gt;)</span></span>:     alteração de documentação
+<span class="hljs-function"><span class="hljs-title">chore</span><span class="hljs-params">(&lt;escopo&gt;)</span></span>:    config, dependências, manutenção</code></pre>
+</div><h3 id="branches-da-2-parcelar"><a class="heading-anchor" href="#branches-da-2-parcelar" aria-hidden="true">#</a>Branches da 2.ª Parcelar</h3>
+<ul>
+<li><code>main</code> (protegida — versão estável)</li>
+<li><code>develop</code> (integração contínua)</li>
+<li><code>backend/feature/auth</code>, <code>backend/feature/users</code>, <code>backend/feature/posts</code>, <code>backend/feature/comments</code></li>
+<li><code>frontend/feature/auth</code>, <code>frontend/feature/feed-posts</code>, <code>frontend/feature/profile-comments</code></li>
+</ul>
+<h3 id="promocao-final-da-parcelar"><a class="heading-anchor" href="#promocao-final-da-parcelar" aria-hidden="true">#</a>Promoção final da parcelar</h3>
+<div class="code-block">
+<span class="code-lang">bash</span>
+<button class="code-copy" type="button" data-code="git checkout main
+git pull origin main
+git merge develop --no-ff -m &quot;release(v0.5): 2.ª Parcelar — Users, Posts, Comments&quot;
+git push origin main
+git tag v0.5-parcelar
+git push origin --tags" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-bash">git checkout main
+git pull origin main
+git merge develop --no-ff -m <span class="hljs-string">&quot;release(v0.5): 2.ª Parcelar — Users, Posts, Comments&quot;</span>
+git push origin main
+git tag v0.5-parcelar
+git push origin --tags</code></pre>
+</div><hr>
+<h2 id="9-o-que-estudar-e-dominar-backend"><a class="heading-anchor" href="#9-o-que-estudar-e-dominar-backend" aria-hidden="true">#</a>9. O Que Estudar e Dominar — Backend</h2>
+<blockquote>
+<p><strong>Audiência:</strong> Willfredy (BE-Dev). Tópicos ordenados por <strong>prioridade</strong> para a 2.ª Parcelar.</p>
+</blockquote>
+<h3 id="91-fundamentos-c-net-pre-requisito"><a class="heading-anchor" href="#91-fundamentos-c-net-pre-requisito" aria-hidden="true">#</a>9.1. Fundamentos C# / .NET (Pré-requisito)</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>Sintaxe C# moderna (records, pattern matching, primary constructors)</td><td>Toda a API e DTOs usam isto</td><td><strong>Microsoft Learn — C# Tutorial</strong> · YouTube: <strong>Nick Chapsas</strong> (&quot;C# 12 features&quot;)</td></tr>
+<tr><td>LINQ (Where, Select, OrderBy, Skip/Take, Include)</td><td>Todas as queries EF passam por LINQ</td><td>YouTube: <strong>IAmTimCorey</strong> (&quot;LINQ for Beginners&quot;) · <strong>Codewrinkles — LINQ Crash Course</strong></td></tr>
+<tr><td>async/await + Task</td><td>Toda a API é assíncrona</td><td><strong>Microsoft Learn — Asynchronous programming in C#</strong> · YouTube: <strong>Raw Coding</strong> (&quot;Async Await Explained&quot;)</td></tr>
+<tr><td>Dependency Injection (DI)</td><td>Toda a infraestrutura .NET 8 funciona com DI</td><td>YouTube: <strong>Nick Chapsas</strong> (&quot;Dependency Injection in .NET&quot;)</td></tr></tbody></table></div><h3 id="92-aspnet-core-web-api"><a class="heading-anchor" href="#92-aspnet-core-web-api" aria-hidden="true">#</a>9.2. ASP.NET Core Web API</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>Criar projeto Web API + Program.cs (minimal hosting)</td><td>Setup inicial</td><td>YouTube: <strong>Nick Chapsas</strong> — &quot;ASP.NET Core Web API 8 in 1 hour&quot;</td></tr>
+<tr><td>Controllers, ActionResults, Routing (<code>[Route]</code>, <code>[HttpGet]</code>, <code>[HttpPost]</code>, ...)</td><td>Toda a API</td><td><strong>Patrick God</strong> — &quot;Build a REST API with .NET 8&quot; (YouTube, full series)</td></tr>
+<tr><td>Model Binding + <code>[FromBody]</code>, <code>[FromForm]</code>, <code>[FromQuery]</code></td><td>Receber dados do frontend</td><td>Microsoft Learn — <em>Model Binding in ASP.NET Core</em></td></tr>
+<tr><td>Middleware (Pipeline, custom exception handler)</td><td>Tratamento global de erros</td><td>YouTube: <strong>Milan Jovanović</strong> — &quot;Global Exception Handling in ASP.NET&quot;</td></tr>
+<tr><td>CORS</td><td>Sem CORS o frontend não comunica</td><td>YouTube: <strong>Nick Chapsas</strong> — &quot;CORS in ASP.NET Core&quot;</td></tr>
+<tr><td>Swagger / OpenAPI (<code>Swashbuckle.AspNetCore</code>)</td><td>Documentar e testar a API</td><td><strong>Microsoft Learn</strong> — <em>Get started with Swashbuckle</em></td></tr></tbody></table></div><h3 id="93-entity-framework-core"><a class="heading-anchor" href="#93-entity-framework-core" aria-hidden="true">#</a>9.3. Entity Framework Core</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>DbContext, DbSet, OnModelCreating (Fluent API)</td><td>Configurar a BD</td><td>YouTube: <strong>Patrick God</strong> — &quot;Entity Framework Core 8 Crash Course&quot;</td></tr>
+<tr><td>Code-First Migrations (<code>Add-Migration</code>, <code>Update-Database</code>)</td><td>Versionar a BD</td><td><strong>IAmTimCorey</strong> — &quot;Entity Framework Core 6 Migrations&quot; (YouTube)</td></tr>
+<tr><td>Relações 1:N, N:N, Auto-referência (Follows)</td><td>Modelar o domínio</td><td><strong>Milan Jovanović</strong> — &quot;EF Core Relationships&quot;</td></tr>
+<tr><td>LINQ to SQL (Where, Include, Select projections, AsNoTracking)</td><td>Queries eficientes</td><td><strong>Nick Chapsas</strong> — &quot;EF Core Performance Tips&quot;</td></tr>
+<tr><td>Unique constraints e Check constraints via Fluent API</td><td><code>Bazes</code> e <code>Follows</code></td><td>Microsoft Learn — <em>Indexes (Fluent API)</em></td></tr></tbody></table></div><h3 id="94-sql-server"><a class="heading-anchor" href="#94-sql-server" aria-hidden="true">#</a>9.4. SQL Server</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>T-SQL básico (<code>SELECT</code>, <code>JOIN</code>, <code>WHERE</code>, <code>GROUP BY</code>)</td><td>Debug e Seeds</td><td><strong>Kudvenkat</strong> — &quot;SQL Server Tutorial for Beginners&quot; (YouTube)</td></tr>
+<tr><td>Constraints (PK, FK, UNIQUE, CHECK)</td><td>Integridade dos dados</td><td>Tutorial: <strong>W3Schools SQL</strong> · <strong>SQLBolt</strong></td></tr>
+<tr><td>Índices (clustered vs non-clustered)</td><td>Performance</td><td>YouTube: <strong>Brent Ozar</strong> — &quot;Index Tuning&quot;</td></tr>
+<tr><td>SSMS (SQL Server Management Studio)</td><td>Inspecionar a BD manualmente</td><td>YouTube: <strong>Kudvenkat</strong> — &quot;SSMS Tutorial&quot;</td></tr></tbody></table></div><h3 id="95-autenticacao-e-seguranca"><a class="heading-anchor" href="#95-autenticacao-e-seguranca" aria-hidden="true">#</a>9.5. Autenticação e Segurança</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>JWT (estrutura: header.payload.signature)</td><td>Base da autenticação</td><td>YouTube: <strong>Patrick God</strong> — &quot;JWT Authentication in .NET 8&quot;</td></tr>
+<tr><td>Hash de password com <strong>BCrypt</strong></td><td>Nunca guardar passwords em claro</td><td>YouTube: <strong>Nick Chapsas</strong> — &quot;Hashing Passwords in .NET&quot;</td></tr>
+<tr><td>Claims e Roles</td><td>Identificar utilizador autenticado nos controllers</td><td>Microsoft Learn — <em>Claims-based authorization</em></td></tr>
+<tr><td><code>[Authorize]</code> e Authorization Policies</td><td>Proteger endpoints</td><td>YouTube: <strong>Milan Jovanović</strong> — &quot;Authorization in ASP.NET Core&quot;</td></tr></tbody></table></div><h3 id="96-padroes-de-arquitetura"><a class="heading-anchor" href="#96-padroes-de-arquitetura" aria-hidden="true">#</a>9.6. Padrões de Arquitetura</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>Repository Pattern</td><td>Isolar acesso a dados</td><td>YouTube: <strong>Patrick God</strong> — &quot;Repository Pattern in .NET&quot;</td></tr>
+<tr><td>Service Layer</td><td>Concentrar regras de negócio</td><td>YouTube: <strong>Milan Jovanović</strong> — &quot;Service Layer in Clean Architecture&quot;</td></tr>
+<tr><td>DTO vs Entity</td><td>Não expor entidades à API</td><td>YouTube: <strong>Nick Chapsas</strong> — &quot;DTOs vs Entities&quot;</td></tr>
+<tr><td>AutoMapper (configuração de Profiles)</td><td>Mapear automaticamente</td><td>Documentação oficial: <strong>automapper.org</strong> · YouTube: <strong>Tim Corey</strong></td></tr>
+<tr><td>FluentValidation</td><td>Validar DTOs de forma elegante</td><td>YouTube: <strong>Milan Jovanović</strong> — &quot;FluentValidation in .NET&quot;</td></tr></tbody></table></div><h3 id="97-upload-de-ficheiros"><a class="heading-anchor" href="#97-upload-de-ficheiros" aria-hidden="true">#</a>9.7. Upload de Ficheiros</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td><code>IFormFile</code>, multipart/form-data</td><td>Upload de imagens/vídeos</td><td>YouTube: <strong>Patrick God</strong> — &quot;File Upload in ASP.NET Core&quot;</td></tr>
+<tr><td><code>app.UseStaticFiles()</code> + servir <code>wwwroot/uploads</code></td><td>Frontend acede aos uploads</td><td>Microsoft Learn — <em>Static files in ASP.NET Core</em></td></tr></tbody></table></div><h3 id="98-roadmap-sugerido-sequencia-de-estudo"><a class="heading-anchor" href="#98-roadmap-sugerido-sequencia-de-estudo" aria-hidden="true">#</a>9.8. Roadmap sugerido (sequência de estudo)</h3>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="Semana 0 (pré-projeto):
+  C# moderno + LINQ + async/await
+  + Criar primeira Web API &quot;Hello World&quot;
+
+Semana 1:
+  EF Core (DbContext, Migrations)
+  JWT Authentication (gerar e validar tokens)
+  Hash com BCrypt
+
+Semana 2:
+  Repository + Service Pattern
+  AutoMapper + DTOs
+  Upload de ficheiros (IFormFile)
+
+Semana 3:
+  FluentValidation
+  Exception Middleware
+  Swagger documentado com Bearer
+
+Semana 4:
+  Polish + relatório" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">Semana <span class="hljs-number">0</span> (pré-projeto):
+  C<span class="hljs-comment"># moderno + LINQ + async/await</span>
+  + Criar primeira Web API <span class="hljs-string">&quot;Hello World&quot;</span>
+
+Semana <span class="hljs-number">1</span>:
+  EF Core (DbContext, Migrations)
+  <span class="hljs-keyword">JWT </span>Authentication (gerar e validar tokens)
+  Hash com <span class="hljs-keyword">BCrypt
+</span>
+Semana <span class="hljs-number">2</span>:
+  Repository + Service Pattern
+  AutoMapper + DTOs
+  Upload de ficheiros (IFormFile)
+
+Semana <span class="hljs-number">3</span>:
+  FluentValidation
+  Exception Middleware
+  <span class="hljs-keyword">Swagger </span>documentado com <span class="hljs-keyword">Bearer
+</span>
+Semana <span class="hljs-number">4</span>:
+  Polish + relatório</code></pre>
+</div><h3 id="99-cursos-completos-recomendados-escolher-1-ou-2"><a class="heading-anchor" href="#99-cursos-completos-recomendados-escolher-1-ou-2" aria-hidden="true">#</a>9.9. Cursos completos recomendados (escolher 1 ou 2)</h3>
+<ul>
+<li>🇬🇧 <strong><a href="https://www.youtube.com/c/Elfocrash">Nick Chapsas — Building a complete REST API in .NET 8</a></strong> (YouTube grátis)</li>
+<li>🇬🇧 <strong><a href="https://www.youtube.com/@patrickgod">Patrick God — .NET 8 Web API &amp; Entity Framework Tutorial (Full Course)</a></strong> (YouTube grátis)</li>
+<li>🇧🇷 <strong><a href="https://www.macoratti.net/">Lucas Montano / balta.io / Macoratti.net</a></strong> (PT-BR)</li>
+<li>🇬🇧 <strong>Microsoft Learn — Build web APIs with ASP.NET Core</strong> (oficial, grátis)</li>
+<li>🇬🇧 <strong>Milan Jovanović — Pragmatic Clean Architecture</strong> (curso pago avançado, opcional)</li>
+</ul>
+<hr>
+<h2 id="10-o-que-estudar-e-dominar-frontend"><a class="heading-anchor" href="#10-o-que-estudar-e-dominar-frontend" aria-hidden="true">#</a>10. O Que Estudar e Dominar — Frontend</h2>
+<blockquote>
+<p><strong>Audiência:</strong> FE-Dev 1, FE-Dev 2, FE-Dev 3. Tópicos ordenados por <strong>prioridade</strong> para a 2.ª Parcelar.</p>
+</blockquote>
+<h3 id="101-fundamentos-typescript-angular-pre-requisito"><a class="heading-anchor" href="#101-fundamentos-typescript-angular-pre-requisito" aria-hidden="true">#</a>10.1. Fundamentos TypeScript / Angular (Pré-requisito)</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>TypeScript básico (tipos, interfaces, generics, narrowing)</td><td>Toda a app Angular é TypeScript</td><td><strong>The Net Ninja — TypeScript Tutorial for Beginners</strong> (YouTube) · <strong>TypeScript Handbook (oficial)</strong></td></tr>
+<tr><td>Arquitetura Angular (Module, Component, Service, Directive, Pipe)</td><td>Base de tudo</td><td><strong>Angular University — Angular Crash Course</strong> · <strong>Mosh Hamedani — Angular 17 Tutorial</strong> (YouTube)</td></tr>
+<tr><td>Standalone Components (Angular 17+)</td><td>Mais simples que NgModules</td><td>YouTube: <strong>Decoded Frontend</strong> — &quot;Standalone Components Tutorial&quot;</td></tr>
+<tr><td>Component lifecycle (<code>ngOnInit</code>, <code>ngOnDestroy</code>)</td><td>Inicialização e limpeza</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;Lifecycle Hooks&quot;</td></tr>
+<tr><td><code>@Input()</code> e <code>@Output()</code></td><td>Comunicação entre componentes</td><td>YouTube: <strong>Net Ninja</strong> — &quot;Angular Tutorial #11: @Input and @Output&quot;</td></tr></tbody></table></div><h3 id="102-roteamento-e-navegacao"><a class="heading-anchor" href="#102-roteamento-e-navegacao" aria-hidden="true">#</a>10.2. Roteamento e Navegação</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>Angular Router (<code>&lt;router-outlet&gt;</code>, <code>routerLink</code>, <code>Router</code>)</td><td>Toda a navegação</td><td>YouTube: <strong>Decoded Frontend</strong> — &quot;Angular Routing Masterclass&quot;</td></tr>
+<tr><td><strong>Lazy loading</strong> (<code>loadChildren</code>)</td><td>Performance e organização</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;Lazy Loading in Angular&quot;</td></tr>
+<tr><td><strong>Route Guards</strong> (<code>CanActivate</code>)</td><td>Proteger rotas autenticadas</td><td>YouTube: <strong>Code Inspire</strong> — &quot;Auth Guard in Angular&quot;</td></tr>
+<tr><td>Parâmetros de rota (<code>/profile/:id</code>)</td><td>Páginas dinâmicas</td><td>YouTube: <strong>Mosh Hamedani</strong> — &quot;Angular Route Parameters&quot;</td></tr></tbody></table></div><h3 id="103-formularios"><a class="heading-anchor" href="#103-formularios" aria-hidden="true">#</a>10.3. Formulários</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td><strong>Reactive Forms</strong> (<code>FormGroup</code>, <code>FormControl</code>, <code>Validators</code>)</td><td>Formulários da app (login, register, posts, comments)</td><td>YouTube: <strong>Angular University</strong> — &quot;Reactive Forms in Depth&quot;</td></tr>
+<tr><td>Validators customizados</td><td>Password forte, confirmar password</td><td>YouTube: <strong>Decoded Frontend</strong> — &quot;Custom Validators&quot;</td></tr>
+<tr><td>Submit + tratamento de erros</td><td>UX em formulários</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;Form Submission Patterns&quot;</td></tr></tbody></table></div><h3 id="104-http-e-comunicacao-com-api"><a class="heading-anchor" href="#104-http-e-comunicacao-com-api" aria-hidden="true">#</a>10.4. HTTP e Comunicação com API</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td><code>HttpClient</code> (<code>get</code>, <code>post</code>, <code>put</code>, <code>delete</code>)</td><td>Toda a comunicação REST</td><td>YouTube: <strong>Net Ninja</strong> — &quot;Angular HttpClient&quot;</td></tr>
+<tr><td><strong>HttpInterceptor</strong></td><td>Injetar JWT automaticamente</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;HTTP Interceptors in Angular&quot;</td></tr>
+<tr><td>Upload de ficheiros com <code>FormData</code></td><td>Upload de fotos/vídeos</td><td>YouTube: <strong>Code Inspire</strong> — &quot;File Upload in Angular&quot;</td></tr></tbody></table></div><h3 id="105-rxjs-observable-pipe-operators"><a class="heading-anchor" href="#105-rxjs-observable-pipe-operators" aria-hidden="true">#</a>10.5. RxJS (Observable, Pipe Operators)</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td><code>Observable</code>, <code>subscribe</code>, <code>unsubscribe</code></td><td>Toda a comunicação assíncrona</td><td>YouTube: <strong>Decoded Frontend</strong> — &quot;RxJS Basics&quot;</td></tr>
+<tr><td>Operators essenciais: <code>map</code>, <code>filter</code>, <code>switchMap</code>, <code>catchError</code>, <code>tap</code></td><td>Manipulação reativa</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;RxJS Operators You Should Know&quot;</td></tr>
+<tr><td><code>BehaviorSubject</code> (estado partilhado, ex: utilizador autenticado)</td><td>Estado da app</td><td>YouTube: <strong>Decoded Frontend</strong> — &quot;BehaviorSubject Explained&quot;</td></tr>
+<tr><td><strong><code>async</code> pipe</strong></td><td>Bind automático no template (evita memory leaks)</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;Use async pipe everywhere&quot;</td></tr></tbody></table></div><h3 id="106-estilizacao-e-responsividade"><a class="heading-anchor" href="#106-estilizacao-e-responsividade" aria-hidden="true">#</a>10.6. Estilização e Responsividade</h3>
+<blockquote>
+<p><strong>Escolher uma ferramenta:</strong> TailwindCSS <strong>ou</strong> Bootstrap 5. Não misturar.</p>
+</blockquote>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td><strong>TailwindCSS</strong> (utility-first)</td><td>Estilização rápida e moderna</td><td>YouTube: <strong>Net Ninja — Tailwind CSS Tutorial</strong> · <strong>Tailwind oficial</strong></td></tr>
+<tr><td><strong>Bootstrap 5</strong> (componentes prontos)</td><td>Estilização tradicional</td><td>YouTube: <strong>The Coding Train</strong> · <strong>Bootstrap oficial</strong></td></tr>
+<tr><td><strong>CSS Grid + Flexbox</strong></td><td>Base de qualquer layout responsivo</td><td>YouTube: <strong>Kevin Powell</strong> — &quot;Learn CSS Grid + Flexbox&quot;</td></tr>
+<tr><td>Mobile-first design + Media queries</td><td>Compatibilidade móvel obrigatória</td><td>YouTube: <strong>Kevin Powell</strong> — &quot;Mobile First CSS&quot;</td></tr></tbody></table></div><h3 id="107-padroes-e-boas-praticas"><a class="heading-anchor" href="#107-padroes-e-boas-praticas" aria-hidden="true">#</a>10.7. Padrões e Boas Práticas</h3>
+<div class="table-wrap"><table><thead><tr><th>Tópico</th><th>Por que importa</th><th>Recursos sugeridos</th></tr></thead><tbody><tr><td>Services + Dependency Injection</td><td>Lógica fora dos componentes</td><td>YouTube: <strong>Decoded Frontend</strong> — &quot;Angular Services Best Practices&quot;</td></tr>
+<tr><td>Componentes reutilizáveis (<code>@Input</code>, <code>@Output</code>, <code>ng-content</code>)</td><td><code>post-card</code>, <code>user-avatar</code>, etc.</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;Reusable Components in Angular&quot;</td></tr>
+<tr><td>Smart vs Presentational Components</td><td>Arquitetura limpa</td><td>Artigo: <strong>Dan Wahlin — Angular Architecture Patterns</strong></td></tr>
+<tr><td><code>trackBy</code> em <code>*ngFor</code></td><td>Performance em listas</td><td>YouTube: <strong>Joshua Morony</strong> — &quot;TrackBy in Angular&quot;</td></tr></tbody></table></div><h3 id="108-roadmap-sugerido-sequencia-de-estudo"><a class="heading-anchor" href="#108-roadmap-sugerido-sequencia-de-estudo" aria-hidden="true">#</a>10.8. Roadmap sugerido (sequência de estudo)</h3>
+<div class="code-block">
+<span class="code-lang">text</span>
+<button class="code-copy" type="button" data-code="Semana 0 (pré-projeto):
+  TypeScript básico
+  + Criar primeiro app Angular &quot;Hello World&quot;
+  + Estrutura de um component (template + class + style)
+
+Semana 1:
+  Reactive Forms (login, register)
+  HttpClient + chamadas básicas
+  Router + AuthGuard
+  HttpInterceptor (injeção de JWT)
+
+Semana 2:
+  Services + BehaviorSubject (utilizador autenticado)
+  Lazy loading de módulos
+  TailwindCSS / Bootstrap (responsividade)
+
+Semana 3:
+  Componentes reutilizáveis (post-card)
+  Upload de ficheiros com FormData
+  RxJS operators (switchMap, catchError)
+  ngx-toastr (feedback ao utilizador)
+
+Semana 4:
+  Polish responsivo
+  Acessibilidade básica (alt, aria-label)
+  Validações finais" aria-label="Copiar codigo">Copiar</button>
+<pre class="hljs"><code class="hljs language-">Semana 0 (<span class="hljs-keyword">pr</span>é-projeto):
+  TypeScript básico
+  + Criar primeiro <span class="hljs-keyword">app</span> Angular <span class="hljs-string">&quot;Hello World&quot;</span>
+  + Estrutura <span class="hljs-keyword">de</span> um component (template + <span class="hljs-keyword">class</span> + style)
+
+Semana 1:
+  Reactive Forms (login, register)
+  HttpClient + chamadas básicas
+  Router + AuthGuard
+  HttpInterceptor (injeção <span class="hljs-keyword">de</span> JWT)
+
+Semana 2:
+  Services + BehaviorSubject (utilizador autenticado)
+  Lazy loading <span class="hljs-keyword">de</span> <span class="hljs-keyword">m</span>ódulos
+  TailwindCSS / <span class="hljs-keyword">Bootstrap</span> (responsividade)
+
+Semana 3:
+  Componentes reutilizáveis (<span class="hljs-keyword">post</span>-card)
+  Upload <span class="hljs-keyword">de</span> ficheiros com FormData
+  RxJS operators (switchMap, catchError)
+  ngx-toastr (feedback ao utilizador)
+
+Semana 4:
+  Polish responsivo
+  Acessibilidade básica (alt, aria-<span class="hljs-keyword">label</span>)
+  Validações finais</code></pre>
+</div><h3 id="109-cursos-completos-recomendados-escolher-1-ou-2"><a class="heading-anchor" href="#109-cursos-completos-recomendados-escolher-1-ou-2" aria-hidden="true">#</a>10.9. Cursos completos recomendados (escolher 1 ou 2)</h3>
+<ul>
+<li>🇬🇧 <strong><a href="https://www.youtube.com/@programmingwithmosh">Mosh Hamedani — Angular Tutorial for Beginners</a></strong> (YouTube, gratuito)</li>
+<li>🇬🇧 <strong><a href="https://www.youtube.com/@NetNinja">Net Ninja — Complete Angular Course</a></strong> (YouTube, gratuito)</li>
+<li>🇬🇧 <strong><a href="https://www.youtube.com/@DecodedFrontend">Decoded Frontend — Angular Masterclass</a></strong> (YouTube, gratuito, avançado)</li>
+<li>🇬🇧 <strong><a href="https://www.youtube.com/@JoshuaMorony">Joshua Morony — Modern Angular Tutorials</a></strong> (YouTube, gratuito, moderno)</li>
+<li>🇧🇷 <strong><a href="https://www.youtube.com/@loianegroner">Loiane Groner — Curso Angular</a></strong> (YouTube PT-BR)</li>
+<li>🇧🇷 <strong><a href="https://www.youtube.com/@FelipeRocha">Felipe Rocha — DevPleno Angular</a></strong> (YouTube PT-BR)</li>
+<li>🇬🇧 <strong>Angular University</strong> (cursos pagos, qualidade alta)</li>
+<li>🇬🇧 <strong>Documentação oficial</strong> — <a href="https://angular.dev">https://angular.dev</a> (a melhor referência absoluta)</li>
+</ul>
+<h3 id="1010-para-os-3-fe-devs-divisao-sugerida-de-estudo"><a class="heading-anchor" href="#1010-para-os-3-fe-devs-divisao-sugerida-de-estudo" aria-hidden="true">#</a>10.10. Para os 3 FE-Devs: divisão sugerida de estudo</h3>
+<div class="table-wrap"><table><thead><tr><th>Dev</th><th>Tópicos prioritários</th><th>Tópicos secundários</th></tr></thead><tbody><tr><td><strong>FE-Dev 1</strong> (Auth + Edit Profile)</td><td>Reactive Forms · Validators customizados · JWT no LocalStorage · HttpInterceptor · AuthGuard</td><td>Upload de foto (FormData)</td></tr>
+<tr><td><strong>FE-Dev 2</strong> (Feed + Posts)</td><td>HttpClient + paginação simples · Componentes reutilizáveis (<code>post-card</code>) · <code>*ngFor</code> + <code>trackBy</code> · Lazy loading</td><td>Upload de imagem/vídeo · <code>&lt;video&gt;</code> HTML5</td></tr>
+<tr><td><strong>FE-Dev 3</strong> (Profile + Comments)</td><td>RxJS (Observable + async pipe) · Comunicação entre componentes (<code>@Input</code>/<code>@Output</code>) · Route Params (<code>/profile/:id</code>)</td><td>Diálogos de confirmação · <code>ng-content</code></td></tr></tbody></table></div><hr>
+<h2 id="11-checklist-2020-da-2-parcelar"><a class="heading-anchor" href="#11-checklist-2020-da-2-parcelar" aria-hidden="true">#</a>11. Checklist 20/20 da 2.ª Parcelar</h2>
+<h3 id="backend"><a class="heading-anchor" href="#backend" aria-hidden="true">#</a>Backend ✓</h3>
+<ul>
+<li><input disabled="" type="checkbox"> Solução .NET com 4 projetos (Api, Application, Domain, Infrastructure)</li>
+<li><input disabled="" type="checkbox"> Arquitetura em camadas: <strong>Controller → Service → Repository</strong></li>
+<li><input disabled="" type="checkbox"> <strong>DTOs em todos os endpoints</strong> (nunca expor entidades)</li>
+<li><input disabled="" type="checkbox"> EF Core Code-First com <code>InitialCreate</code> migration aplicada</li>
+<li><input disabled="" type="checkbox"> <strong>JWT</strong> funcional (register + login)</li>
+<li><input disabled="" type="checkbox"> Password com <strong>BCrypt</strong></li>
+<li><input disabled="" type="checkbox"> Recuperação de senha com <strong>token + expiração</strong></li>
+<li><input disabled="" type="checkbox"> <code>[Authorize]</code> em todos os endpoints privados</li>
+<li><input disabled="" type="checkbox"> <strong>CRUD completo</strong> de Users, Posts, Comments</li>
+<li><input disabled="" type="checkbox"> Follow / Unfollow</li>
+<li><input disabled="" type="checkbox"> <strong>Upload de imagens e vídeos</strong> com validação de tipo e tamanho</li>
+<li><input disabled="" type="checkbox"> <strong>CORS</strong> configurado para <code>http://localhost:4200</code></li>
+<li><input disabled="" type="checkbox"> <strong>Swagger</strong> documentado (com Bearer auth)</li>
+<li><input disabled="" type="checkbox"> Códigos HTTP corretos (200, 201, 400, 401, 403, 404)</li>
+<li><input disabled="" type="checkbox"> Edição/exclusão apenas pelo autor</li>
+</ul>
+<h3 id="frontend"><a class="heading-anchor" href="#frontend" aria-hidden="true">#</a>Frontend ✓</h3>
+<ul>
+<li><input disabled="" type="checkbox"> Estrutura modular (<code>core/</code>, <code>shared/</code>, <code>features/</code>)</li>
+<li><input disabled="" type="checkbox"> <strong>Módulos lazy-loaded</strong> com <code>loadChildren</code></li>
+<li><input disabled="" type="checkbox"> <strong>AuthGuard</strong> + <strong>GuestGuard</strong></li>
+<li><input disabled="" type="checkbox"> <strong>JwtInterceptor</strong> + <strong>ErrorInterceptor</strong></li>
+<li><input disabled="" type="checkbox"> <strong>Modelos TypeScript</strong> espelham os DTOs do backend</li>
+<li><input disabled="" type="checkbox"> <strong>Reactive Forms</strong> com validação client-side</li>
+<li><input disabled="" type="checkbox"> Feed cronológico funcional (paginação simples)</li>
+<li><input disabled="" type="checkbox"> Upload de imagem/vídeo com pré-visualização</li>
+<li><input disabled="" type="checkbox"> CRUD de publicações (criar, ver, editar, apagar)</li>
+<li><input disabled="" type="checkbox"> CRUD de comentários</li>
+<li><input disabled="" type="checkbox"> Perfil próprio e de outros utilizadores</li>
+<li><input disabled="" type="checkbox"> Edição de perfil + alteração de foto</li>
+<li><input disabled="" type="checkbox"> Follow / Unfollow</li>
+<li><input disabled="" type="checkbox"> <strong>Interface responsiva</strong> (mobile, tablet, desktop)</li>
+<li><input disabled="" type="checkbox"> Feedback visual (spinners, toasts)</li>
+<li><input disabled="" type="checkbox"> Botões Editar/Apagar condicionais</li>
+</ul>
+<h3 id="git-e-documentacao"><a class="heading-anchor" href="#git-e-documentacao" aria-hidden="true">#</a>Git e Documentação ✓</h3>
+<ul>
+<li><input disabled="" type="checkbox"> Repositório monorepo (<code>backend/</code>, <code>frontend/</code>, <code>docs/</code>)</li>
+<li><input disabled="" type="checkbox"> Branches protegidas (<code>main</code>, <code>develop</code>)</li>
+<li><input disabled="" type="checkbox"> <strong>PRs com revisão</strong> antes de merge</li>
+<li><input disabled="" type="checkbox"> <strong>Convenção de commits</strong> respeitada</li>
+<li><input disabled="" type="checkbox"> Tag de versão <code>v0.5-parcelar</code></li>
+<li><input disabled="" type="checkbox"> <code>docs/API_CONTRACT.md</code> atualizado para v0.5</li>
+<li><input disabled="" type="checkbox"> <strong>Relatório parcial</strong> com:<ul>
+<li>Análise dos 3 domínios entregues</li>
+<li>Capturas de ecrã (login, feed, perfil, comentário)</li>
+<li>Modelo de dados (ERD parcial)</li>
+<li>Decisões técnicas tomadas</li>
+<li>O que ficou para o Exame Final</li>
+</ul>
+</li>
+</ul>
+<h3 id="demo"><a class="heading-anchor" href="#demo" aria-hidden="true">#</a>Demo ✓</h3>
+<ul>
+<li><input disabled="" type="checkbox"> Gravar vídeo de <strong>3-5 minutos</strong> com:<ol>
+<li>Registo de utilizador novo</li>
+<li>Login</li>
+<li>Edição de perfil + upload de foto</li>
+<li>Criar publicação com imagem</li>
+<li>Editar a publicação</li>
+<li>Comentar na publicação</li>
+<li>Editar/apagar comentário</li>
+<li>Seguir outro utilizador</li>
+</ol>
+</li>
+<li><input disabled="" type="checkbox"> Inserir o vídeo na pasta <code>docs/</code> do repositório (ou link YouTube unlisted)</li>
+</ul>
+<hr>
+<h2 id="12-proximos-passos-apos-a-parcelar"><a class="heading-anchor" href="#12-proximos-passos-apos-a-parcelar" aria-hidden="true">#</a>12. Próximos Passos Após a Parcelar</h2>
+<p>Depois de entregar a 2.ª Parcelar, o foco passa para o <a href="./Plano_Definitivo_NzolaNet.html">Plano Definitivo Completo</a> — secções avançadas que ficam para o <strong>Exame de Época Normal</strong>:</p>
+<div class="table-wrap"><table><thead><tr><th>Área</th><th>Funcionalidade pós-parcelar</th></tr></thead><tbody><tr><td><strong>Interações</strong></td><td>Bazes (toggle com unicidade)</td></tr>
+<tr><td><strong>Feed inteligente</strong></td><td><code>FeedController</code> com publicações de seguidos + paginação</td></tr>
+<tr><td><strong>Notificações</strong></td><td>Geração automática (baze, comentário, novo seguidor) + UI (sino com badge) + polling</td></tr>
+<tr><td><strong>Privacidade</strong></td><td>Lógica condicional de perfil privado (acesso só a seguidores)</td></tr>
+<tr><td><strong>Moderação</strong></td><td>Endpoint admin para remover comentários ofensivos</td></tr>
+<tr><td><strong>Polish</strong></td><td>Acessibilidade, OnPush change detection, optimistic UI, performance, relatório final</td></tr></tbody></table></div><blockquote>
+<p>🚀 <strong>Estima-se 4 semanas adicionais</strong> entre a Parcelar e o Exame para implementar tudo isto e entregar com 20/20 final.</p>
+</blockquote>
+<hr>
+<h3 id="recursos-rapidos"><a class="heading-anchor" href="#recursos-rapidos" aria-hidden="true">#</a>Recursos rápidos</h3>
+<ul>
+<li>📄 <a href="./Plano_Definitivo_NzolaNet.html">Plano Definitivo Completo (HTML)</a></li>
+<li>📄 <a href="./Plano_Definitivo_NzolaNet.md">Plano Definitivo Completo (Markdown)</a></li>
+<li>📄 <a href="./Plano_Definitivo_NzolaNet.pdf">Plano Definitivo Completo (PDF)</a></li>
+<li>📋 <a href="../Enunciado/Enunciado_AW_formatado.txt">Enunciado original</a></li>
+</ul>
+<hr>
+<h2 id="13-glossario-de-termos-tecnicos"><a class="heading-anchor" href="#13-glossario-de-termos-tecnicos" aria-hidden="true">#</a>13. Glossário de Termos Técnicos</h2>
+<blockquote>
+<p>Lista de termos usados ao longo do plano. Se vires um termo que não conheces, consulta aqui antes de procurar fora. Inglês porque é convenção universal na indústria — vê notas técnicas no fim deste glossário.</p>
+</blockquote>
+<h3 id="geral-arquitetura"><a class="heading-anchor" href="#geral-arquitetura" aria-hidden="true">#</a>Geral / Arquitetura</h3>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody><tr><td><strong>API</strong></td><td>Application Programming Interface. Conjunto de endpoints que o backend expõe para o frontend consumir.</td></tr>
+<tr><td><strong>REST</strong></td><td>Representational State Transfer. Estilo de API que usa URLs + verbos HTTP (GET, POST, PUT, DELETE) com JSON.</td></tr>
+<tr><td><strong>Endpoint</strong></td><td>Um ponto da API. Ex: <code>POST /api/auth/login</code> é um endpoint.</td></tr>
+<tr><td><strong>HTTP Method / Verbo</strong></td><td>GET (ler), POST (criar), PUT (atualizar), DELETE (apagar), PATCH (atualizar parcial).</td></tr>
+<tr><td><strong>JSON</strong></td><td>JavaScript Object Notation. Formato de texto para enviar/receber dados.</td></tr>
+<tr><td><strong>CORS</strong></td><td>Cross-Origin Resource Sharing. Mecanismo que permite o frontend (<code>localhost:4200</code>) chamar o backend (<code>localhost:5000</code>).</td></tr>
+<tr><td><strong>Stack</strong></td><td>Conjunto de tecnologias do projeto. A nossa stack: Angular + ASP.NET + SQL Server.</td></tr>
+<tr><td><strong>Camadas</strong></td><td>Divisão do código por responsabilidade. Controller → Service → Repository → BD.</td></tr></tbody></table></div><h3 id="frontend-angular"><a class="heading-anchor" href="#frontend-angular" aria-hidden="true">#</a>Frontend (Angular)</h3>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Component</strong></td><td>Bloco reutilizável de UI (template HTML + classe TypeScript + estilo SCSS). Ex: <code>PostCardComponent</code>.</td></tr>
+<tr><td><strong>Module</strong></td><td>Agrupamento de components/services relacionados. Ex: <code>AuthModule</code>.</td></tr>
+<tr><td><strong>Service</strong></td><td>Classe injetável com lógica reutilizável (não-UI). Ex: <code>AuthService</code> faz login.</td></tr>
+<tr><td><strong>Reactive Forms</strong></td><td>API do Angular para formulários com validação programática. Alternativa: Template-driven forms.</td></tr>
+<tr><td><strong>HttpClient</strong></td><td>Cliente HTTP do Angular. Envia pedidos REST ao backend.</td></tr>
+<tr><td><strong>Observable (RxJS)</strong></td><td>&quot;Promessa&quot; que pode emitir múltiplos valores ao longo do tempo. Usado em <code>HttpClient</code>.</td></tr>
+<tr><td><strong>BehaviorSubject</strong></td><td>Tipo de Observable que guarda o último valor. Útil para estado partilhado (ex: utilizador autenticado).</td></tr>
+<tr><td><strong>Subscribe / Unsubscribe</strong></td><td>Começar/parar de &quot;ouvir&quot; um Observable. Quem subscreve tem de unsubscribe (ou usar <code>async</code> pipe).</td></tr>
+<tr><td><strong>Guard</strong></td><td>Função que decide se uma rota pode ser acedida. Ex: <code>AuthGuard</code> bloqueia se não estiver logado.</td></tr>
+<tr><td><strong>Interceptor</strong></td><td>&quot;Filtro&quot; que modifica todos os pedidos HTTP. Ex: <code>JwtInterceptor</code> injeta o token.</td></tr>
+<tr><td><strong>Lazy Loading</strong></td><td>Carregar um módulo só quando o utilizador navega para ele. Melhora performance.</td></tr>
+<tr><td><strong><code>@Input()</code> / <code>@Output()</code></strong></td><td>Decoradores para passar dados (de pai para filho) e emitir eventos (de filho para pai).</td></tr>
+<tr><td><strong><code>*ngFor</code> / <code>*ngIf</code></strong></td><td>Diretivas estruturais. Repetir elementos em lista / mostrar condicionalmente.</td></tr>
+<tr><td><strong>Pipe</strong></td><td>Transforma um valor no template. Ex: <code>{{ date | timeAgo }}</code> → &quot;há 2 horas&quot;.</td></tr>
+<tr><td><strong>Directive</strong></td><td>Lógica anexada a um elemento. Ex: <code>[(ngModel)]</code> é uma directiva.</td></tr>
+<tr><td><strong>Standalone Component (Angular 17+)</strong></td><td>Component sem precisar de <code>NgModule</code>. Mais simples e moderno.</td></tr>
+<tr><td><strong><code>FormData</code></strong></td><td>Objeto JavaScript que serve para enviar ficheiros (multipart) ao backend.</td></tr>
+<tr><td><strong>Signal (Angular 17+)</strong></td><td>Nova forma reativa de gerir estado, alternativa a <code>BehaviorSubject</code>.</td></tr>
+<tr><td><strong>JWT</strong></td><td>JSON Web Token. String assinada que prova quem és. Composta por header.payload.signature em Base64.</td></tr>
+<tr><td><strong>localStorage</strong></td><td>Armazenamento do browser persistente (sobrevive ao refresh). Usamos para guardar o JWT.</td></tr>
+<tr><td><strong>Smooth Scroll</strong></td><td>Scroll animado entre secções da página.</td></tr>
+<tr><td><strong>Optimistic Update</strong></td><td>Atualizar a UI <strong>antes</strong> da resposta do servidor (rollback em caso de erro). Sensação de rapidez.</td></tr>
+<tr><td><strong>OnPush Change Detection</strong></td><td>Estratégia Angular onde o component só atualiza quando recebe novos inputs. Melhora performance.</td></tr></tbody></table></div><h3 id="backend-aspnet"><a class="heading-anchor" href="#backend-aspnet" aria-hidden="true">#</a>Backend (ASP.NET)</h3>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Controller</strong></td><td>Classe C# que define endpoints REST. Recebe pedidos HTTP e devolve respostas.</td></tr>
+<tr><td><strong>Action</strong></td><td>Método público de um Controller. Cada action = 1 endpoint.</td></tr>
+<tr><td><strong>DTO (Data Transfer Object)</strong></td><td>Classe com apenas dados, usada para enviar/receber via API. Nunca expor entidades de BD diretamente.</td></tr>
+<tr><td><strong>Entity / Modelo</strong></td><td>Classe C# que mapeia para uma tabela. Ex: <code>User</code>, <code>Post</code>, <code>Comment</code>.</td></tr>
+<tr><td><strong>DbContext</strong></td><td>Classe do Entity Framework que representa a sessão com a BD (<code>Users</code>, <code>Posts</code>, etc. são <code>DbSet&lt;&gt;</code>).</td></tr>
+<tr><td><strong>Migration</strong></td><td>Snapshot versionado de mudanças à BD. <code>Add-Migration InitialCreate</code> gera o ficheiro; <code>Update-Database</code> aplica.</td></tr>
+<tr><td><strong>EF Core (Entity Framework)</strong></td><td>ORM (Object-Relational Mapper). Traduz código C# em SQL. Permite escrever LINQ em vez de SQL puro.</td></tr>
+<tr><td><strong>LINQ</strong></td><td>Language Integrated Query. Sintaxe C# para queries (<code>Where</code>, <code>Select</code>, <code>OrderBy</code>...).</td></tr>
+<tr><td><strong>Code-First</strong></td><td>Abordagem onde escreves as classes C# e o EF gera as tabelas. (Alternativa: Database-First.)</td></tr>
+<tr><td><strong>Repository</strong></td><td>Camada que isola o acesso a dados. Esconde detalhes do EF Core.</td></tr>
+<tr><td><strong>Service</strong></td><td>Camada que contém a lógica de negócio (regras). Chama repositórios.</td></tr>
+<tr><td><strong>Dependency Injection (DI)</strong></td><td>Mecanismo .NET que entrega dependências às classes (em vez de criar com <code>new</code>).</td></tr>
+<tr><td><strong>Middleware</strong></td><td>Componente do pipeline ASP.NET. Cada pedido passa por uma cadeia de middlewares (auth, CORS, exceptions, controllers).</td></tr>
+<tr><td><strong><code>[Authorize]</code></strong></td><td>Atributo que protege um endpoint — só utilizadores autenticados acedem.</td></tr>
+<tr><td><strong>Claims</strong></td><td>Pares chave-valor dentro do JWT que identificam o utilizador (<code>sub</code>, <code>email</code>, <code>role</code>).</td></tr>
+<tr><td><strong>BCrypt</strong></td><td>Algoritmo de hashing de passwords. <strong>Nunca</strong> guardar passwords em claro.</td></tr>
+<tr><td><strong>AutoMapper</strong></td><td>Biblioteca que mapeia automaticamente Entidade ↔ DTO.</td></tr>
+<tr><td><strong>FluentValidation</strong></td><td>Biblioteca para validar DTOs com regras encadeadas.</td></tr>
+<tr><td><strong>Swagger / OpenAPI</strong></td><td>Documentação interativa da API. Vês todos os endpoints e testas no browser (<code>/swagger</code>).</td></tr>
+<tr><td><strong><code>IFormFile</code></strong></td><td>Tipo .NET que representa um ficheiro enviado via multipart.</td></tr>
+<tr><td><strong><code>async</code>/<code>await</code></strong></td><td>Sintaxe C# para código assíncrono não-bloqueante. Toda a API deve ser <code>async</code>.</td></tr></tbody></table></div><h3 id="base-de-dados-sql-server"><a class="heading-anchor" href="#base-de-dados-sql-server" aria-hidden="true">#</a>Base de Dados (SQL Server)</h3>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Tabela</strong></td><td>Conjunto de linhas com a mesma estrutura. Ex: <code>Users</code>.</td></tr>
+<tr><td><strong>PK (Primary Key)</strong></td><td>Coluna(s) que identificam unicamente cada linha. Ex: <code>Id</code>.</td></tr>
+<tr><td><strong>FK (Foreign Key)</strong></td><td>Coluna que aponta para a PK de outra tabela (ex: <code>Posts.UserId</code> → <code>Users.Id</code>).</td></tr>
+<tr><td><strong>UNIQUE constraint</strong></td><td>Garante que valores duma coluna (ou combinação) não se repetem. Ex: <code>(PostId, UserId)</code> em <code>Bazes</code>.</td></tr>
+<tr><td><strong>CHECK constraint</strong></td><td>Validação a nível de BD. Ex: <code>FollowerId &lt;&gt; FollowedId</code>.</td></tr>
+<tr><td><strong>Índice (Index)</strong></td><td>Estrutura que acelera queries em colunas. Ex: <code>IX_Posts_CreatedAt</code>.</td></tr>
+<tr><td><strong>3FN (Terceira Forma Normal)</strong></td><td>Critério de normalização. Sem dados duplicados, dependências apenas da PK.</td></tr>
+<tr><td><strong>JOIN</strong></td><td>Operação SQL que combina linhas de duas tabelas.</td></tr>
+<tr><td><strong><code>GETUTCDATE()</code></strong></td><td>Função SQL Server que devolve a data/hora UTC atual.</td></tr>
+<tr><td><strong>SSMS</strong></td><td>SQL Server Management Studio. Ferramenta gráfica para inspecionar a BD.</td></tr></tbody></table></div><h3 id="git-colaboracao"><a class="heading-anchor" href="#git-colaboracao" aria-hidden="true">#</a>Git / Colaboração</h3>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Repositório (repo)</strong></td><td>Pasta versionada com Git.</td></tr>
+<tr><td><strong>Branch</strong></td><td>&quot;Ramo&quot; paralelo de desenvolvimento. Ex: <code>develop</code>, <code>feature/auth</code>.</td></tr>
+<tr><td><strong>Commit</strong></td><td>Snapshot guardado no histórico.</td></tr>
+<tr><td><strong>Push / Pull</strong></td><td>Enviar / receber commits do/para o remote (GitHub).</td></tr>
+<tr><td><strong>Merge</strong></td><td>Juntar uma branch a outra.</td></tr>
+<tr><td><strong>Pull Request (PR)</strong></td><td>Pedido formal para juntar uma branch (<code>feature/auth</code>) à <code>develop</code>, com revisão.</td></tr>
+<tr><td><strong>Conflito</strong></td><td>Quando dois commits alteram a mesma linha de um ficheiro. Resolve-se manualmente.</td></tr>
+<tr><td><strong>Tag</strong></td><td>Marca um commit como versão. Ex: <code>v0.5-parcelar</code>.</td></tr>
+<tr><td><strong>Monorepo</strong></td><td>Um único repositório para backend + frontend (ao contrário de 2 repos separados).</td></tr></tbody></table></div><h3 id="estrutura-de-dominio-nzolanet"><a class="heading-anchor" href="#estrutura-de-dominio-nzolanet" aria-hidden="true">#</a>Estrutura de domínio NzolaNet</h3>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Baze</strong></td><td>Reação do utilizador a uma publicação (equivalente cultural angolano do &quot;like&quot;). Aceita-se manter este nome no código por ser termo do domínio.</td></tr>
+<tr><td><strong>Follow</strong></td><td>Relação onde um utilizador segue outro.</td></tr>
+<tr><td><strong>Feed</strong></td><td>Lista cronológica de publicações.</td></tr>
+<tr><td><strong>Notification</strong></td><td>Aviso gerado automaticamente (novo baze, comentário, seguidor).</td></tr></tbody></table></div><blockquote>
+<p><strong>Nota técnica sobre inglês:</strong> todo o código (classes, métodos, tabelas, ficheiros) está em inglês porque é convenção universal — frameworks como Entity Framework, ASP.NET e Angular esperam nomes em inglês, a documentação oficial e Stack Overflow estão em inglês, e termos como <code>Repository</code>, <code>Service</code>, <code>Controller</code>, <code>Middleware</code>, <code>Token</code> não traduzem bem. A excepção é <strong><code>Baze</code></strong> (e potencialmente outros termos do domínio NzolaNet) que são culturalmente específicos. <strong>Comentários e mensagens ao utilizador final</strong> ficam em português.</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><em>Foco. Disciplina. Entrega. May the code be with you.</em></p>
+</blockquote>
+
+    </article>
+  </main>
+</div>
+
+<button class="back-top" id="back-top" aria-label="Voltar ao topo">↑</button>
+
+<script>
+(function () {
+  var THEME_KEY = "nzolanet-theme";
+  var root = document.documentElement;
+  var saved = localStorage.getItem(THEME_KEY);
+  if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    root.setAttribute("data-theme", "dark");
+  }
+  document.getElementById("theme-toggle").addEventListener("click", function () {
+    var current = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    var next = current === "dark" ? "light" : "dark";
+    if (next === "dark") root.setAttribute("data-theme", "dark");
+    else root.removeAttribute("data-theme");
+    localStorage.setItem(THEME_KEY, next);
+    updateThemeIcon();
+  });
+  function updateThemeIcon() {
+    var dark = root.getAttribute("data-theme") === "dark";
+    var ic = document.getElementById("theme-icon"); if (ic) ic.textContent = dark ? "☀" : "☾";
+    var lb = document.getElementById("theme-label"); if (lb) lb.textContent = dark ? "Claro" : "Escuro";
+  }
+  updateThemeIcon();
+
+  var sidebar = document.getElementById("sidebar");
+  var overlay = document.getElementById("sidebar-overlay");
+  var menuBtn = document.getElementById("menu-toggle");
+  function closeSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("visible"); }
+  function openSidebar() { sidebar.classList.add("open"); overlay.classList.add("visible"); }
+  menuBtn.addEventListener("click", function () {
+    if (sidebar.classList.contains("open")) closeSidebar(); else openSidebar();
+  });
+  overlay.addEventListener("click", closeSidebar);
+  sidebar.addEventListener("click", function (e) {
+    if (e.target.classList && e.target.classList.contains("toc-link") && window.innerWidth <= 1024) {
+      closeSidebar();
+    }
+  });
+
+  document.querySelectorAll(".code-copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var code = btn.getAttribute("data-code") || "";
+      var ta = document.createElement("textarea"); ta.innerHTML = code; var raw = ta.value;
+      navigator.clipboard.writeText(raw).then(function () {
+        btn.textContent = "Copiado!"; btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = "Copiar"; btn.classList.remove("copied"); }, 1600);
+      });
+    });
+  });
+
+  var backTop = document.getElementById("back-top");
+  var progress = document.getElementById("scroll-progress");
+  window.addEventListener("scroll", function () {
+    var scrolled = window.scrollY;
+    var height = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + "%";
+    if (scrolled > 400) backTop.classList.add("visible");
+    else backTop.classList.remove("visible");
+  }, { passive: true });
+  backTop.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  var tocLinks = document.querySelectorAll(".toc-link");
+  var tocMap = {};
+  tocLinks.forEach(function (link) {
+    var id = link.getAttribute("data-target");
+    if (id) tocMap[id] = link;
+  });
+  var headings = document.querySelectorAll(".content h2[id], .content h3[id]");
+  var visibleHeadings = new Set();
+  function setActive(id) {
+    tocLinks.forEach(function (l) { l.classList.remove("active"); });
+    if (tocMap[id]) {
+      tocMap[id].classList.add("active");
+      var parent = document.getElementById("sidebar");
+      var linkTop = tocMap[id].offsetTop;
+      var linkHeight = tocMap[id].offsetHeight;
+      if (linkTop < parent.scrollTop || linkTop + linkHeight > parent.scrollTop + parent.clientHeight) {
+        parent.scrollTo({ top: linkTop - parent.clientHeight / 2 + linkHeight / 2, behavior: "smooth" });
+      }
+    }
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) visibleHeadings.add(entry.target.id);
+      else visibleHeadings.delete(entry.target.id);
+    });
+    if (visibleHeadings.size > 0) {
+      var first = null;
+      headings.forEach(function (h) { if (!first && visibleHeadings.has(h.id)) first = h.id; });
+      if (first) setActive(first);
+    }
+  }, { rootMargin: "-20% 0px -70% 0px", threshold: 0 });
+  headings.forEach(function (h) { observer.observe(h); });
+  if (headings.length > 0) setActive(headings[0].id);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (e.key === "t" || e.key === "T") { document.getElementById("theme-toggle").click(); }
+  });
+})();
+</script>
+
+</body>
+</html>

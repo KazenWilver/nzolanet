@@ -1,0 +1,89 @@
+Projecto AW
+Página 1 de 4
+NzolaNet
+Nos dias de hoje as redes sociais tornaram-se ferramentas essenciais para comunicação, partilha de informações e interações entre utilizadores. Empresas e comunidades utilizam essas plataformas para divulgação de conteúdos, troca de ideias e fortalecimento da comunicação digital.
+Neste contexto, pretende-se desenvolver uma Aplicação Web NzolaNet que vai permitir que utilizadores publiquem conteúdos, interajam através de bazes e comentários e mantenham um perfil pessoal dentro da NzolaNet.
+1. Requisitos Funcionais
+O sistema deve permitir fazer a gestão de Utilizadores, Publicações, Bazes, Comentários, Feed de Notícias e Notificações
+1.1. Utilizadores
+O sistema deve permitir:
+• Registo de novos utilizadores
+• Recuperação da senha de acesso
+• Edição do Perfil
+• Alteração da foto de perfil
+• Seguir/Deixar de seguir um utilizador
+1.2. Publicações
+O sistema deve permitir:
+• Criar publicações;
+• Editar publicações próprias
+• Excluir publicações próprias
+• Adicionar texto e às publicações
+• Fazer upload de imagens e vídeos
+• Visualizar conteúdos multimédia publicados(vídeos)
+• Visualizar publicações em ordem cronológica.
+Projecto AW
+Página 2 de 4
+Uma publicação é composta por nome do autor, foto do autor, data da publicação, texto, imagem(opcional), vídeo(opcional) , número de bazes e número de comentários
+1.3. Bazes
+O sistema deve permitir:
+• Dar baze em publicações;
+• Remover baze;
+• Visualizar quantidade de bazes;
+• Impedir múltiplos bazes do mesmo utilizador na mesma publicação.
+1.4. Comentários
+O sistema deverá permitir:
+• Adicionar comentários;
+• Editar comentários próprios;
+• Excluir comentários próprios;
+• Visualizar lista de comentários por publicação.
+1.5. Feed de Notícias
+O sistema deverá apresentar:
+• Feed principal com publicações recentes;
+• Publicações de utilizadores seguidos;
+• Ordenação cronológica;
+• Atualização dinâmica do feed.
+1.6. Notificações
+O sistema deve gerar notificações quando:
+• Um utilizador receber um baze;
+• Um utilizador receber um comentário;
+• Um utilizador ganhar um novo seguidor.
+As regras de negócio do sistema definem o comportamento e as permissões dos utilizadores dentro da plataforma, garantindo segurança, organização e integridade das informações publicadas. Dessa forma, apenas utilizadores devidamente autenticados poderão realizar publicações na plataforma, assegurando que todo o conteúdo partilhado esteja associado a um utilizador registado no sistema.
+Projecto AW
+Página 3 de 4
+Além disso, cada utilizador terá permissão apenas para editar ou excluir conteúdos de sua própria autoria, impedindo alterações indevidas em publicações de outros membros da plataforma. No sistema de interações, cada utilizador poderá reagir a uma publicação apenas uma única vez, evitando duplicação de reações e garantindo maior consistência nos dados de interação.
+Com o objetivo de manter um ambiente saudável e respeitoso entre os utilizadores, comentários considerados ofensivos, inadequados ou que violem as políticas da plataforma poderão ser removidos pelo administrador do sistema. Por fim, os utilizadores poderão definir a privacidade dos seus perfis, escolhendo entre perfis públicos, visíveis para todos os membros da plataforma, ou perfis privados, acessíveis apenas a utilizadores autorizados.
+2. Requisitos Não Funcionais
+O sistema deverá atender aos seguintes requisitos:
+• Interface responsiva;
+• Segurança na autenticação;
+• Proteção contra acessos não autorizados;
+• Boa performance no carregamento das publicações;
+• Compatibilidade com dispositivos móveis;
+• Usabilidade intuitiva.
+3. Requisitos Técnicos
+• FrontEnd
+o Angular
+• Backend
+o ASP.NET Web API
+o PHP Laravel
+o PHP
+• Base de Dados
+o SQL Server
+o MySQL
+o PostgreSQL
+Projecto AW
+Página 4 de 4
+• Deve ser utilizada uma arquitetura de separação de camadas (Ex: Repositórios, Serviços, Controllers etc.)
+• Deve ser utilizadoS DTOS (Data Transfer Object) para o envia de informação do Back-End para o Front-End e vice-versa
+4. Datas de Entrega do Projecto
+• Até a Segunda Parcelar
+o Gestão de Utilizadores
+o Gestão de Publicações
+o Gestão de Comentários
+• Até ao exame de época normal
+o Toda aplicação a funcionar
+o Relatório sobre a aplicação (atenção relatório)
+O Projecto deve ser realizado em grupos de no máximo 4 elementos
+Nota: Projectos iguais ou semelhantes terão cotação 0
+Nota: O Projecto poderá sofrer alterações
+May The Code Be With You

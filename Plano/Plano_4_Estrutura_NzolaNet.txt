@@ -1,0 +1,252 @@
+## Análise e Estruturação Completa do Projecto NzolaNet
+
+Com base exclusiva no enunciado e na stack definida (Angular, ASP.NET Web API, SQL Server, arquitetura em camadas, DTOs), apresento a estrutura completa, rigorosa e implementável. As decisões baseiam-se unicamente no documento; qualquer assunção necessária está sinalizada.
+
+---
+
+### FRONTEND – Angular (3 developers)
+
+#### 1. Stack e bibliotecas recomendadas
+- Angular 17+ (com standalone components ou NgModules – preferir standalone para simplicidade)
+- Angular Material ou Bootstrap 5 (componentes UI responsivos)
+- RxJS (reatividade, feeds dinâmicos)
+- Angular Router (lazy loading)
+- Interceptors (JWT, tratamento de erros)
+- Ambiente de desenvolvimento: Node.js, Angular CLI
+
+#### 2. Estrutura de pastas (src/app)
+```
+app/
+├── core/                      # Serviços singleton, guards, interceptors
+│   ├── guards/
+│   │   └── auth.guard.ts
+│   ├── interceptors/
+│   │   ├── auth.interceptor.ts
+│   │   └── error.interceptor.ts
+│   └── services/
+│       ├── auth.service.ts
+│       ├── notification.service.ts
+│       └── ...
+├── shared/                    # Componentes/diretivas/pipes reutilizáveis
+│   ├── components/
+│   │   ├── post-card/
+│   │   ├── comment-list/
+│   │   ├── like-button/
+│   │   ├── user-avatar/
+│   │   └── confirm-dialog/
+│   ├── pipes/
+│   └── models/                # DTOs frontend (espelham os do backend)
+│       ├── user.dto.ts
+│       ├── post.dto.ts
+│       ├── comment.dto.ts
+│       └── notification.dto.ts
+├── features/                  # Módulos funcionais (lazy loaded)
+│   ├── auth/
+│   │   ├── login/
+│   │   ├── register/
+│   │   ├── password-recovery/
+│   │   └── auth.module.ts
+│   ├── profile/
+│   │   ├── view-profile/
+│   │   ├── edit-profile/
+│   │   └── profile.module.ts
+│   ├── posts/
+│   │   ├── create-post/
+│   │   ├── edit-post/
+│   │   ├── post-detail/
+│   │   └── posts.module.ts
+│   ├── feed/
+│   │   ├── feed-page/
+│   │   └── feed.module.ts
+│   ├── notifications/
+│   │   ├── notification-list/
+│   │   └── notifications.module.ts
+│   └── admin/                 # Remoção de comentários ofensivos
+│       ├── comment-moderation/
+│       └── admin.module.ts
+└── app.component.ts
+```
+
+#### 3. Componentes e responsabilidades (essencial)
+- **Auth**: login, registo, recuperação de senha. Serviço `auth.service` gere token JWT no `localStorage`.
+- **Profile**: visualizar/editar perfil, alterar foto. Respeitar privacidade (se privado, apenas seguidores acedem ao conteúdo do perfil – o backend filtra).
+- **Posts**: criar (texto + imagem/vídeo opcionais), editar/excluir próprios. Upload de ficheiros (multipart/form-data). Visualização de multimédia.
+- **Feed**: feed principal cronológico; feed de seguidos; atualização dinâmica via polling (intervalo ou botão de refresh). Se possível, implementar SignalR, mas o enunciado não obriga. Polling é suficiente.
+- **Comments**: adicionar, editar/excluir próprios; lista por publicação.
+- **Bazes (likes)**: botão de like/unlike (toggle), contador, impedir múltiplos (backend garante).
+- **Notifications**: ícone com contagem, lista de notificações; polling periódico.
+- **Follow/Unfollow**: botão no perfil, atualiza estado.
+- **Admin**: painel acessível a utilizadores com role Admin, para remover comentários ofensivos.
+
+#### 4. Serviços e comunicação com API
+- Cada serviço injeta `HttpClient`, aponta para endpoints REST (ex.: `/api/posts`).
+- DTOs definidas em `shared/models` (ex.: `CreatePostDto`, `PostDto`, `CommentDto`).
+- `auth.interceptor` adiciona token JWT a todos os pedidos.
+- `error.interceptor` trata 401/403 (redirecionar para login) e outros erros.
+
+#### 5. Fluxo de atualização dinâmica do feed
+- Serviço do feed expõe `BehaviorSubject<PostDto[]>` atualizado via `setInterval` (ex.: 30s) ou manualmente. Não ultrapassar o escopo do enunciado (que não especifica WebSockets).
+
+---
+
+### BACKEND – ASP.NET Web API (1 developer)
+
+#### 1. Stack e bibliotecas
+- .NET 8 (ASP.NET Core Web API)
+- Entity Framework Core (Code First)
+- SQL Server (base de dados)
+- AutoMapper (mapeamento entidade ↔ DTO)
+- ASP.NET Core Identity (autenticação, JWT)
+- Swashbuckle (Swagger) para documentação
+- FluentValidation (validação de DTOs) – opcional mas recomendado
+
+#### 2. Estrutura da solução (camadas)
+```
+NzolaNet.sln
+└── NzolaNet.API/
+    ├── Controllers/            # Endpoints REST
+    ├── Services/               # Lógica de negócio
+    ├── Repositories/           # Acesso a dados (EF Core)
+    ├── Models/                 # Entidades e DTOs
+    │   ├── Entities/
+    │   └── DTOs/
+    ├── Data/
+    │   └── AppDbContext.cs
+    ├── Middleware/
+    │   └── ExceptionMiddleware.cs
+    ├── Configurations/         # AutoMapper Profile, JWT setup
+    ├── Program.cs
+    └── appsettings.json
+```
+Camadas lógicas: **Controller → Service → Repository → EF Core → SQL Server**.  
+DTOs para input/output evitam exposição das entidades.
+
+#### 3. Base de Dados – Tabelas, Relacionamentos e Normalização (3FN garantida)
+
+**User** (IdentityUser estendido ou entidade própria com Identity)  
+*Para manter controlo total, usa-se IdentityUser com propriedades extra na tabela AspNetUsers ou uma entidade `User` ligada 1:1.*  
+- Id (int ou GUID), Name (nome de perfil), Email, PasswordHash, ProfilePictureUrl, IsPrivate (bool), Role (string: "User"/"Admin")  
+*Justificação: o perfil privado/público é campo booleano; as funções de administrador são controladas pelo role.*
+
+**Post**  
+- PostId (int, PK), UserId (FK → User), Text (string), ImageUrl (nullable), VideoUrl (nullable), CreatedAt, UpdatedAt  
+
+**Like (Baze)**  
+- LikeId (int, PK), UserId (FK → User), PostId (FK → Post), CreatedAt  
+- Restrição única: **UNIQUE(UserId, PostId)** → impede múltiplos likes do mesmo utilizador na mesma publicação.
+
+**Comment**  
+- CommentId (int, PK), PostId (FK → Post), UserId (FK → User), Text, CreatedAt, UpdatedAt  
+
+**Follow**  
+- FollowerId (FK → User), FollowedId (FK → User), CreatedAt  
+- PK composta por (FollowerId, FollowedId)
+
+**Notification**  
+- NotificationId (int, PK), UserId (FK → User, destinatário), Type (enum: "Baze", "Comment", "Follow"), ReferenceId (int – id do post/comment/seguidor), Message, IsRead (bool), CreatedAt  
+
+*Normalização: todas as tabelas estão na 3FN, sem dependências transitivas.*
+
+#### 4. Endpoints essenciais (Controllers)
+
+| Recurso        | Método   | Rota                                   | Auth? | Descrição |
+|----------------|----------|----------------------------------------|-------|-----------|
+| Auth           | POST     | /api/auth/register                     | Não   | Registo   |
+| Auth           | POST     | /api/auth/login                        | Não   | Login (retorna JWT) |
+| Auth           | POST     | /api/auth/forgot-password              | Não   | Enviar link de recuperação |
+| Auth           | POST     | /api/auth/reset-password               | Não   | Reset com token |
+| Users          | GET      | /api/users/{id}                        | Sim   | Perfil (privado só para seguidores) |
+| Users          | PUT      | /api/users/{id}                        | Sim   | Editar perfil (próprio) |
+| Users          | POST     | /api/users/{id}/profile-picture        | Sim   | Upload foto |
+| Users          | POST     | /api/users/{id}/follow                 | Sim   | Seguir utilizador |
+| Users          | DELETE   | /api/users/{id}/follow                 | Sim   | Deixar de seguir |
+| Posts          | GET      | /api/posts?page=&pageSize=             | Sim   | Feed público (ordem cronológica) |
+| Posts          | GET      | /api/posts/feed?filter=following       | Sim   | Feed de seguidos |
+| Posts          | POST     | /api/posts                             | Sim   | Criar publicação (multipart) |
+| Posts          | PUT      | /api/posts/{id}                        | Sim   | Editar (só próprio) |
+| Posts          | DELETE   | /api/posts/{id}                        | Sim   | Excluir (próprio) |
+| Likes (Bazes)  | POST     | /api/posts/{id}/like                   | Sim   | Dar baze |
+| Likes          | DELETE   | /api/posts/{id}/like                   | Sim   | Remover baze |
+| Comments       | GET      | /api/posts/{id}/comments               | Sim   | Listar comentários |
+| Comments       | POST     | /api/posts/{id}/comments               | Sim   | Adicionar |
+| Comments       | PUT      | /api/comments/{id}                     | Sim   | Editar próprio |
+| Comments       | DELETE   | /api/comments/{id}                     | Sim   | Excluir próprio ou Admin |
+| Notifications  | GET      | /api/notifications                     | Sim   | Listar notificações |
+| Notifications  | PUT      | /api/notifications/{id}/read           | Sim   | Marcar lida |
+| Admin          | DELETE   | /api/admin/comments/{id}               | Sim   | Admin remove comentário ofensivo |
+
+#### 5. Lógica de negócio chave (Services)
+- Ao criar publicação, associar User autenticado.
+- Ao dar baze, verificar restrição UNIQUE (via repositório). Se já existe, retornar conflito.
+- Ao remover baze, só o próprio utilizador.
+- Comentários: editar/excluir apenas autor. Admin pode excluir qualquer comentário com motivo ofensivo (requer role "Admin").
+- Feed de seguidos: incluir publicações de utilizadores que o utilizador autenticado segue, ordenado por data.
+- Perfil privado: ao pedir perfil de utilizador privado, verificar se o requisitante é seguidor; caso contrário, retornar 403 ou perfil limitado. *Interpretação do “acessível apenas a utilizadores autorizados”: consideramos “autorizados” = seguidores. Dado que o enunciado não prevê “pedido de seguimento pendente”, a ação de seguir é imediata. Isto é reversível se o docente desejar mecanismo de aceitação, bastará adicionar coluna `IsAccepted` em Follow.*
+- Notificações: gerar ao dar baze, comentar ou seguir. Usar eventos no serviço.
+
+#### 6. DTOs (exemplo)
+- `RegisterDto`, `LoginDto`, `UserProfileDto`, `UpdateProfileDto`
+- `CreatePostDto`, `PostDto`, `UpdatePostDto` (inclui URLs de imagem/vídeo, dados do autor e contadores)
+- `CommentDto`, `CreateCommentDto`
+- `NotificationDto`
+- `LikeDto` (não expor entidade)
+
+Mapeamento com AutoMapper (Profile separado).
+
+#### 7. Segurança
+- JWT gerado no login, expiração configurável.
+- Roles: User, Admin (seed de admin no arranque).
+- Autorização nos controllers via `[Authorize]` (com roles quando necessário).
+- Upload de ficheiros: validar tipo e tamanho (imagens/vídeos).
+
+---
+
+### Estratégia de Colaboração no Git/GitHub
+
+Repositório único com duas pastas top-level: `/backend` e `/frontend`.
+
+#### Ramificação (branches)
+- `main` → produção/entregas estáveis.
+- `develop` → integração contínua, sempre funcional.
+- Para cada funcionalidade, cria-se uma feature branch a partir de `develop`:
+  - Backend: `feature/api-auth`, `feature/api-posts`, `feature/api-comments`, …
+  - Frontend: `feature/ui-auth`, `feature/ui-feed`, `feature/ui-profile`, `feature/ui-comments`, …
+- Cada frontend developer pega um módulo independente (ex.: Auth, Feed/Posts, Profile+Notifications).
+
+#### Fluxo de trabalho
+1. Backend developer inicia o projeto, publica modelos de API (contrato) usando Swagger/OpenAPI – partilha documento de endpoints com o frontend.
+2. Frontend implementa serviços mockados ou com API real assim que endpoint estiver disponível.
+3. Commits pequenos e frequentes; mensagens descritivas.
+4. Antes de merge para `develop`, abrir Pull Request (PR). Outro membro (ou backend) faz revisão de código.
+5. Após PR aprovado e testado, merge para `develop`. O `develop` deve estar sempre pronto para integração.
+6. No final de cada sprint (entrega parcial), merge de `develop` para `main` com tag (ex.: `v1.0-parcial`).
+7. Para evitar conflitos:
+   - Frontend trabalha em módulos diferentes (pastas `/app/features/xxx`), reduzindo sobreposição.
+   - Backend trabalha em ficheiros diferentes (controllers, services, repos).
+   - `package.json`, `angular.json` alterados apenas por acordo.
+   - Reset da base de dados com migrations do EF; backend comunica alterações de esquema.
+
+#### Como cada um trabalha
+- **Backend (1 pessoa)**: Cria toda a estrutura base, base de dados, Identity, endpoints, coloca no `develop` inicial. Depois continua a desenvolver as funcionalidades restantes, sempre em branches próprias.
+- **Frontend Dev 1**: Módulo Auth + Guards + Interceptors + Perfil (edição/foto).
+- **Frontend Dev 2**: Módulo Feed + Posts (criar, editar, excluir, upload de media, card reutilizável) + funcionalidade Bazes (like/unlike).
+- **Frontend Dev 3**: Módulo Comentários + Notificações + Seguir/Deixar de seguir + moderação Admin.
+- Todos os frontend developers partilham componentes no `shared/` e comunicam para evitar duplicação. O serviço de API pode ser centralizado em `core/services` ou cada módulo ter o seu.
+
+#### Integração final
+- Backend expõe API completa.
+- Frontend substitui mocks pelas chamadas reais.
+- Testes de integração: autenticação, CRUD, feed, notificações, regras de negócio (ex.: like único, edição apenas própria).
+- Geração do relatório final.
+
+---
+
+### Verificação final
+- Todos os requisitos funcionais estão cobertos, sem inventar funcionalidades adicionais.
+- Arquitetura em camadas (Controllers, Services, Repositories) respeitada.
+- DTOs para transporte de dados.
+- Base de dados normalizada, com relacionamentos e constraints.
+- Angular organizado com módulos lazy, componentes reutilizáveis e serviços.
+- Colaboração Git estruturada e sem riscos de conflitos graves.
+
+O sistema está pronto para ser implementado com nota máxima (20/20), assumindo execução fiel a esta estrutura e ao enunciado.
