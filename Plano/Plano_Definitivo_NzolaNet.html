@@ -312,6 +312,28 @@ body {
 .content li::marker { color: var(--c-accent); }
 .content ul li input[type="checkbox"] { margin-right: 8px; transform: translateY(1px); }
 
+/* Checklists interativas (markdown GFM) */
+.content ul li > input.nz-task-checkbox {
+  cursor: pointer;
+  width: 1.05em;
+  height: 1.05em;
+  accent-color: var(--c-accent);
+}
+.content ul li.nz-task-complete {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: var(--c-text-muted);
+  opacity: 0.58;
+  transition: opacity 0.2s ease;
+}
+.content ul li.nz-task-complete strong,
+.content ul li.nz-task-complete code {
+  text-decoration: line-through;
+  text-decoration-color: var(--c-text-muted);
+  color: inherit;
+}
+[data-theme="dark"] .content ul li.nz-task-complete { opacity: 0.5; }
+
 .content blockquote {
   margin: 1.2em 0; padding: 14px 20px;
   border-left: 4px solid var(--c-blockquote-border);
@@ -483,7 +505,7 @@ body {
 :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; border-radius: 4px; }
 </style>
 </head>
-<body>
+<body data-nz-doc="Plano_Definitivo_NzolaNet.html">
 
 <div class="scroll-progress" id="scroll-progress"></div>
 
@@ -3260,65 +3282,65 @@ git stash list                      <span class="hljs-comment"># listar stashes<
 <h1 id="9-checklist-final-para-2020"><a class="heading-anchor" href="#9-checklist-final-para-2020" aria-hidden="true">#</a>9. Checklist Final para 20/20</h1>
 <h3 id="backend"><a class="heading-anchor" href="#backend" aria-hidden="true">#</a>Backend ✓</h3>
 <ul>
-<li><input disabled="" type="checkbox"> Solução .NET com 4 projetos (Api, Application, Domain, Infrastructure)</li>
-<li><input disabled="" type="checkbox"> Arquitetura em camadas: <strong>Controller → Service → Repository</strong></li>
-<li><input disabled="" type="checkbox"> <strong>DTOs em todos os endpoints</strong> (nunca expor entidades diretamente)</li>
-<li><input disabled="" type="checkbox"> Entity Framework Core Code-First + Migrations + Seed (admin inicial)</li>
-<li><input disabled="" type="checkbox"> Base de dados SQL Server <strong>normalizada (3FN)</strong> com índices nos campos pesquisados</li>
-<li><input disabled="" type="checkbox"> Constraint <strong>UNIQUE</strong> em <code>Bazes(PostId, UserId)</code> e <code>Follows(FollowerId, FollowedId)</code></li>
-<li><input disabled="" type="checkbox"> Constraint <strong>CHECK</strong> em <code>Follows</code> (não seguir a si próprio)</li>
-<li><input disabled="" type="checkbox"> <strong>JWT Authentication</strong> funcional (register + login + refresh opcional)</li>
-<li><input disabled="" type="checkbox"> Hash de password com <strong>BCrypt</strong></li>
-<li><input disabled="" type="checkbox"> Recuperação de senha com <strong>token + expiração</strong></li>
-<li><input disabled="" type="checkbox"> Atributo <code>[Authorize]</code> em todos os endpoints privados; <code>[Authorize(Policy=&quot;AdminOnly&quot;)]</code> em moderação</li>
-<li><input disabled="" type="checkbox"> <strong>CRUD completo</strong> de Users, Posts, Comments</li>
-<li><input disabled="" type="checkbox"> <strong>Toggle de Baze</strong> com unicidade garantida (constraint + lógica)</li>
-<li><input disabled="" type="checkbox"> <strong>Feed paginado</strong> (publicações próprias + de seguidos, ordem cronológica)</li>
-<li><input disabled="" type="checkbox"> <strong>Follow/Unfollow</strong> entre utilizadores</li>
-<li><input disabled="" type="checkbox"> <strong>Notificações automáticas</strong> (baze, comentário, novo seguidor) — nunca auto-notificar</li>
-<li><input disabled="" type="checkbox"> <strong>Moderação</strong> de comentários por admin</li>
-<li><input disabled="" type="checkbox"> <strong>Privacidade</strong> de perfil (público/privado com regra de seguidores)</li>
-<li><input disabled="" type="checkbox"> <strong>Upload de imagens e vídeos</strong> com validação de tipo e tamanho</li>
-<li><input disabled="" type="checkbox"> <strong>CORS</strong> configurado para <code>http://localhost:4200</code></li>
-<li><input disabled="" type="checkbox"> <strong>Swagger</strong> completo (com Bearer auth)</li>
-<li><input disabled="" type="checkbox"> <strong>Middleware global de exceções</strong> (respostas JSON padronizadas)</li>
-<li><input disabled="" type="checkbox"> <strong>AutoMapper</strong> para mapeamento Entidade ↔ DTO</li>
-<li><input disabled="" type="checkbox"> <strong>FluentValidation</strong> nos DTOs de entrada</li>
-<li><input disabled="" type="checkbox"> Códigos HTTP corretos (200, 201, 400, 401, 403, 404, 409)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Solução .NET com 4 projetos (Api, Application, Domain, Infrastructure)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Arquitetura em camadas: <strong>Controller → Service → Repository</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>DTOs em todos os endpoints</strong> (nunca expor entidades diretamente)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Entity Framework Core Code-First + Migrations + Seed (admin inicial)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Base de dados SQL Server <strong>normalizada (3FN)</strong> com índices nos campos pesquisados</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Constraint <strong>UNIQUE</strong> em <code>Bazes(PostId, UserId)</code> e <code>Follows(FollowerId, FollowedId)</code></li>
+<li><input type="checkbox" class="nz-task-checkbox"> Constraint <strong>CHECK</strong> em <code>Follows</code> (não seguir a si próprio)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>JWT Authentication</strong> funcional (register + login + refresh opcional)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Hash de password com <strong>BCrypt</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> Recuperação de senha com <strong>token + expiração</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> Atributo <code>[Authorize]</code> em todos os endpoints privados; <code>[Authorize(Policy=&quot;AdminOnly&quot;)]</code> em moderação</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>CRUD completo</strong> de Users, Posts, Comments</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Toggle de Baze</strong> com unicidade garantida (constraint + lógica)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Feed paginado</strong> (publicações próprias + de seguidos, ordem cronológica)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Follow/Unfollow</strong> entre utilizadores</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Notificações automáticas</strong> (baze, comentário, novo seguidor) — nunca auto-notificar</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Moderação</strong> de comentários por admin</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Privacidade</strong> de perfil (público/privado com regra de seguidores)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Upload de imagens e vídeos</strong> com validação de tipo e tamanho</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>CORS</strong> configurado para <code>http://localhost:4200</code></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Swagger</strong> completo (com Bearer auth)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Middleware global de exceções</strong> (respostas JSON padronizadas)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>AutoMapper</strong> para mapeamento Entidade ↔ DTO</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>FluentValidation</strong> nos DTOs de entrada</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Códigos HTTP corretos (200, 201, 400, 401, 403, 404, 409)</li>
 </ul>
 <h3 id="frontend"><a class="heading-anchor" href="#frontend" aria-hidden="true">#</a>Frontend ✓</h3>
 <ul>
-<li><input disabled="" type="checkbox"> Estrutura modular (<code>core/</code>, <code>shared/</code>, <code>features/</code>, <code>layouts/</code>)</li>
-<li><input disabled="" type="checkbox"> <strong>Módulos lazy-loaded</strong> com <code>loadChildren</code></li>
-<li><input disabled="" type="checkbox"> <strong>AuthGuard</strong> + <strong>GuestGuard</strong> + (opcional) <strong>AdminGuard</strong></li>
-<li><input disabled="" type="checkbox"> <strong>JwtInterceptor</strong> + <strong>ErrorInterceptor</strong></li>
-<li><input disabled="" type="checkbox"> <strong>Modelos TypeScript</strong> que espelham os DTOs do backend</li>
-<li><input disabled="" type="checkbox"> <strong>Reactive Forms</strong> com validação client-side em todos os formulários</li>
-<li><input disabled="" type="checkbox"> <strong>Feed cronológico</strong> com paginação ou infinite scroll</li>
-<li><input disabled="" type="checkbox"> <strong>Upload de imagem/vídeo</strong> com pré-visualização e validação</li>
-<li><input disabled="" type="checkbox"> <strong>Toggle de baze</strong> com <strong>atualização otimista da UI</strong></li>
-<li><input disabled="" type="checkbox"> <strong>Componentes reutilizáveis</strong> (<code>post-card</code>, <code>user-avatar</code>, <code>notification-bell</code>, <code>comment-item</code>)</li>
-<li><input disabled="" type="checkbox"> <strong>Perfil privado</strong> com mensagem apropriada para não seguidores</li>
-<li><input disabled="" type="checkbox"> <strong>Notificações</strong> com contador e marcação como lida</li>
-<li><input disabled="" type="checkbox"> <strong>Botões Editar/Apagar</strong> condicionais (só para o autor)</li>
-<li><input disabled="" type="checkbox"> <strong>Interface responsiva</strong> (mobile-first, breakpoints testados)</li>
-<li><input disabled="" type="checkbox"> <strong>Feedback visual</strong> (spinners, toasts, skeleton loaders)</li>
-<li><input disabled="" type="checkbox"> <strong>Acessibilidade</strong> (<code>alt</code>, <code>aria-label</code>, navegação por teclado)</li>
-<li><input disabled="" type="checkbox"> <strong>Pipes</strong> (<code>timeAgo</code>, <code>safeUrl</code>) para apresentação</li>
-<li><input disabled="" type="checkbox"> <strong>OnPush</strong> change detection nos componentes presentacionais</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Estrutura modular (<code>core/</code>, <code>shared/</code>, <code>features/</code>, <code>layouts/</code>)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Módulos lazy-loaded</strong> com <code>loadChildren</code></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>AuthGuard</strong> + <strong>GuestGuard</strong> + (opcional) <strong>AdminGuard</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>JwtInterceptor</strong> + <strong>ErrorInterceptor</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Modelos TypeScript</strong> que espelham os DTOs do backend</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Reactive Forms</strong> com validação client-side em todos os formulários</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Feed cronológico</strong> com paginação ou infinite scroll</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Upload de imagem/vídeo</strong> com pré-visualização e validação</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Toggle de baze</strong> com <strong>atualização otimista da UI</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Componentes reutilizáveis</strong> (<code>post-card</code>, <code>user-avatar</code>, <code>notification-bell</code>, <code>comment-item</code>)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Perfil privado</strong> com mensagem apropriada para não seguidores</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Notificações</strong> com contador e marcação como lida</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Botões Editar/Apagar</strong> condicionais (só para o autor)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Interface responsiva</strong> (mobile-first, breakpoints testados)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Feedback visual</strong> (spinners, toasts, skeleton loaders)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Acessibilidade</strong> (<code>alt</code>, <code>aria-label</code>, navegação por teclado)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Pipes</strong> (<code>timeAgo</code>, <code>safeUrl</code>) para apresentação</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>OnPush</strong> change detection nos componentes presentacionais</li>
 </ul>
 <h3 id="git-e-documentacao"><a class="heading-anchor" href="#git-e-documentacao" aria-hidden="true">#</a>Git e Documentação ✓</h3>
 <ul>
-<li><input disabled="" type="checkbox"> Repositório monorepo (<code>backend/</code>, <code>frontend/</code>, <code>docs/</code>)</li>
-<li><input disabled="" type="checkbox"> Branches protegidas (<code>main</code> e <code>develop</code>)</li>
-<li><input disabled="" type="checkbox"> <strong>Branch por feature</strong> por developer</li>
-<li><input disabled="" type="checkbox"> <strong>PRs com revisão obrigatória</strong> antes de merge</li>
-<li><input disabled="" type="checkbox"> <strong>Convenção de commits</strong> (Conventional Commits) respeitada</li>
-<li><input disabled="" type="checkbox"> <strong>Tags de versão</strong> (<code>v1.0-parcelar</code>, <code>v2.0-final</code>)</li>
-<li><input disabled="" type="checkbox"> <code>docs/API_CONTRACT.md</code> mantido <strong>atualizado</strong></li>
-<li><input disabled="" type="checkbox"> <code>docs/database/erd.png</code> com diagrama ER</li>
-<li><input disabled="" type="checkbox"> <code>README.md</code> com instruções de setup (clone, install, run)</li>
-<li><input disabled="" type="checkbox"> <strong>Relatório técnico</strong> final em <code>docs/relatorio-final.pdf</code> com:<ul>
+<li><input type="checkbox" class="nz-task-checkbox"> Repositório monorepo (<code>backend/</code>, <code>frontend/</code>, <code>docs/</code>)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> Branches protegidas (<code>main</code> e <code>develop</code>)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Branch por feature</strong> por developer</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>PRs com revisão obrigatória</strong> antes de merge</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Convenção de commits</strong> (Conventional Commits) respeitada</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Tags de versão</strong> (<code>v1.0-parcelar</code>, <code>v2.0-final</code>)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <code>docs/API_CONTRACT.md</code> mantido <strong>atualizado</strong></li>
+<li><input type="checkbox" class="nz-task-checkbox"> <code>docs/database/erd.png</code> com diagrama ER</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <code>README.md</code> com instruções de setup (clone, install, run)</li>
+<li><input type="checkbox" class="nz-task-checkbox"> <strong>Relatório técnico</strong> final em <code>docs/relatorio-final.pdf</code> com:<ul>
 <li>Análise de requisitos</li>
 <li>Arquitetura adotada e justificação</li>
 <li>Modelo de dados (ERD)</li>
@@ -3602,6 +3624,45 @@ Semana <span class="hljs-number">8</span> — Polish + Relatório Final
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     if (e.key === "t" || e.key === "T") { document.getElementById("theme-toggle").click(); }
   });
+
+  /** Checklists GFM: clicaveis, persistencia local por documento (localStorage) */
+  (function taskChecklists() {
+    var docId = document.body.getAttribute("data-nz-doc") || "default";
+    var storageKey = "nzolanet-taskchecks:" + docId;
+    function loadStore() {
+      try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch (e) { return {}; }
+    }
+    function saveStore(o) {
+      try { localStorage.setItem(storageKey, JSON.stringify(o)); } catch (e) {}
+    }
+    function hashText(s) {
+      var h = 0;
+      for (var i = 0; i < Math.min(s.length, 500); i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
+      return (h >>> 0).toString(36);
+    }
+    function applyRow(cb) {
+      var li = cb.closest("li");
+      if (!li) return;
+      li.classList.toggle("nz-task-complete", cb.checked);
+    }
+    var store = loadStore();
+    var boxes = document.querySelectorAll(".content ul li > input.nz-task-checkbox[type=checkbox]");
+    boxes.forEach(function (cb, idx) {
+      var li = cb.closest("li");
+      var label = (li && li.innerText) ? li.innerText.replace(/\s+/g, " ").trim() : "";
+      var tid = "t" + idx + "_" + hashText(label);
+      cb.setAttribute("data-nz-task-id", tid);
+      if (Object.prototype.hasOwnProperty.call(store, tid)) {
+        cb.checked = !!store[tid];
+      }
+      applyRow(cb);
+      cb.addEventListener("change", function () {
+        store[tid] = cb.checked;
+        saveStore(store);
+        applyRow(cb);
+      });
+    });
+  })();
 })();
 </script>
 

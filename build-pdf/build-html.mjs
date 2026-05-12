@@ -474,6 +474,28 @@ body {
 .content li::marker { color: var(--c-accent); }
 .content ul li input[type="checkbox"] { margin-right: 8px; transform: translateY(1px); }
 
+/* Checklists interativas (markdown GFM) */
+.content ul li > input.nz-task-checkbox {
+  cursor: pointer;
+  width: 1.05em;
+  height: 1.05em;
+  accent-color: var(--c-accent);
+}
+.content ul li.nz-task-complete {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: var(--c-text-muted);
+  opacity: 0.58;
+  transition: opacity 0.2s ease;
+}
+.content ul li.nz-task-complete strong,
+.content ul li.nz-task-complete code {
+  text-decoration: line-through;
+  text-decoration-color: var(--c-text-muted);
+  color: inherit;
+}
+[data-theme="dark"] .content ul li.nz-task-complete { opacity: 0.5; }
+
 .content blockquote {
   margin: 1.2em 0; padding: 14px 20px;
   border-left: 4px solid var(--c-blockquote-border);
@@ -748,6 +770,45 @@ const JS = String.raw`
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     if (e.key === "t" || e.key === "T") { document.getElementById("theme-toggle").click(); }
   });
+
+  /** Checklists GFM: clicaveis, persistencia local por documento (localStorage) */
+  (function taskChecklists() {
+    var docId = document.body.getAttribute("data-nz-doc") || "default";
+    var storageKey = "nzolanet-taskchecks:" + docId;
+    function loadStore() {
+      try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch (e) { return {}; }
+    }
+    function saveStore(o) {
+      try { localStorage.setItem(storageKey, JSON.stringify(o)); } catch (e) {}
+    }
+    function hashText(s) {
+      var h = 0;
+      for (var i = 0; i < Math.min(s.length, 500); i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
+      return (h >>> 0).toString(36);
+    }
+    function applyRow(cb) {
+      var li = cb.closest("li");
+      if (!li) return;
+      li.classList.toggle("nz-task-complete", cb.checked);
+    }
+    var store = loadStore();
+    var boxes = document.querySelectorAll(".content ul li > input.nz-task-checkbox[type=checkbox]");
+    boxes.forEach(function (cb, idx) {
+      var li = cb.closest("li");
+      var label = (li && li.innerText) ? li.innerText.replace(/\s+/g, " ").trim() : "";
+      var tid = "t" + idx + "_" + hashText(label);
+      cb.setAttribute("data-nz-task-id", tid);
+      if (Object.prototype.hasOwnProperty.call(store, tid)) {
+        cb.checked = !!store[tid];
+      }
+      applyRow(cb);
+      cb.addEventListener("change", function () {
+        store[tid] = cb.checked;
+        saveStore(store);
+        applyRow(cb);
+      });
+    });
+  })();
 })();
 `;
 
@@ -775,7 +836,12 @@ function buildOne(target) {
   const headings = [];
   const slugUsed = new Map();
   const marked = buildMarked(headings, slugUsed);
-  const bodyHtml = marked.parse(md);
+  let bodyHtml = marked.parse(md);
+  // GFM task lists: remover disabled para checklist interativa + classe
+  bodyHtml = bodyHtml
+    .replace(/<input\s+checked=""?\s+disabled=""?\s+type="checkbox"\s*>/gi, '<input type="checkbox" class="nz-task-checkbox" checked="">')
+    .replace(/<input\s+disabled=""?\s+checked=""?\s+type="checkbox"\s*>/gi, '<input type="checkbox" class="nz-task-checkbox" checked="">')
+    .replace(/<input\s+disabled=""?\s+type="checkbox"\s*>/gi, '<input type="checkbox" class="nz-task-checkbox">');
   const tocHtml = buildToc(headings);
 
   const chips1 = target.chips1.map(c => `<span class="chip">${c}</span>`).join("");
@@ -791,7 +857,7 @@ function buildOne(target) {
 <title>NzolaNet · ${target.title}</title>
 <style>${CSS}</style>
 </head>
-<body>
+<body data-nz-doc="${basename(target.outputHtml)}">
 
 <div class="scroll-progress" id="scroll-progress"></div>
 
