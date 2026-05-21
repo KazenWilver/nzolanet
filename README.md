@@ -12,7 +12,7 @@ Localmente, podes abrir os seguintes ficheiros no browser:
 - 🏠 **[index.html](./index.html)** — Página inicial com acesso aos dois planos
 - 📘 **[Plano Definitivo Completo (HTML)](./Plano/Plano_Definitivo_NzolaNet.html)** — projeto inteiro até ao Exame de Época Normal
 - 📗 **[Plano da 2.ª Parcelar (HTML)](./Plano/Plano_2_Parcelar_NzolaNet.html)** — foco na primeira entrega (Users + Posts + Comments)
-
+ 
 Versões PDF e Markdown também disponíveis na pasta `Plano/`.
 
 ## 🗂️ Estrutura do Repositório
