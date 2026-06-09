@@ -1,0 +1,123 @@
+
+    <div class="login__content">
+      <div class="login__header">
+        <h1 class="login__titulo">
+          {{ contasSalvas.length > 0 && !modoOutraConta ? 'Bem-vindo de volta' : 'Entra na tua conta NzolaNet' }}
+        </h1>
+        <p class="login__subtitulo">
+          {{ contasSalvas.length > 0 && !modoOutraConta ? 'Escolhe a conta para iniciar sessão ou entra com outra conta.' : 'Faz login com o email e a senha da tua conta.' }}
+        </p>
+      </div>
+
+      <ng-container *ngIf="contasSalvas.length > 0 && !modoOutraConta">
+        <div class="login__contas-salvas">
+          <p class="login__label-contas">Entra com uma conta guardada</p>
+          <div class="login__grid-contas">
+            <button type="button" class="login__cartao-conta" *ngFor="let conta of contasSalvas" (click)="selecionarConta(conta)">
+              <div class="login__avatar-grande" [style.background-image]="conta.fotoPerfil ? 'url(' + conta.fotoPerfil + ')' : ''">
+                <span *ngIf="!conta.fotoPerfil" class="login__iniciais">{{ (conta.nome.split(' ')[0][0] + conta.nome.split(' ')[conta.nome.split(' ').length-1][0]).toUpperCase() }}</span>
+              </div>
+              <div class="login__detalhe-conta">
+                <span class="login__nome-conta">{{ conta.nome }}</span>
+                <span class="login__email-conta">{{ conta.email }}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="login__opcoes">
+          <button type="button" class="login__btn login__btn--ghost" (click)="usarOutraConta()">Usar outra conta</button>
+          <a routerLink="/auth/registar" class="login__btn login__btn--secondary">Criar nova conta</a>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="modoOutraConta || contasSalvas.length === 0">
+        <button type="button" class="login__voltar" *ngIf="contasSalvas.length > 0" (click)="voltarContas()">← Voltar</button>
+        <form class="login__formulario" (ngSubmit)="entrar()" #formulario="ngForm" novalidate>
+          <div class="login__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
+
+          <div class="campo">
+            <label class="campo__label" for="email">Email</label>
+            <input id="email" class="campo__input" type="email" placeholder="o.teu@email.com"
+              [(ngModel)]="credenciais.email" name="email" required email
+              [class.campo__input--erro]="campoEmail.invalid && campoEmail.touched" #campoEmail="ngModel" />
+            <span class="campo__erro" *ngIf="campoEmail.invalid && campoEmail.touched">Email inválido</span>
+          </div>
+
+          <div class="campo">
+            <label class="campo__label" for="senha">Senha</label>
+            <div class="campo__senha-wrap">
+              <input id="senha" class="campo__input" [type]="senhaVisivel ? 'text' : 'password'"
+                placeholder="A tua senha" [(ngModel)]="credenciais.senha" name="senha" required minlength="6"
+                [class.campo__input--erro]="campoSenha.invalid && campoSenha.touched" #campoSenha="ngModel" />
+              <button type="button" class="campo__toggle-senha" (click)="senhaVisivel = !senhaVisivel">
+                <svg *ngIf="!senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg *ngIf="senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </button>
+            </div>
+            <span class="campo__erro" *ngIf="campoSenha.invalid && campoSenha.touched">Mínimo 6 caracteres</span>
+          </div>
+
+          <a class="login__recuperar" routerLink="/auth/recuperar-senha">Esqueceste a senha?</a>
+
+          <button type="submit" class="login__btn" [disabled]="formulario.invalid || aEntrar">
+            <app-loading-spinner *ngIf="aEntrar" tamanho="sm" />
+            <span *ngIf="!aEntrar">Entrar</span>
+          </button>
+        </form>
+
+        <p class="login__registo">
+          Ainda não tens conta? <a routerLink="/auth/registar">Regista-te</a>
+        </p>
+      </ng-container>
+    </div>
+
+    <div *ngIf="contaSelecionada" class="login__popup-overlay">
+      <div class="login__popup-card">
+        <button type="button" class="login__popup-close" (click)="cancelarConta()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        <div class="login__avatar-grande" [style.background-image]="contaSelecionada.fotoPerfil ? 'url(' + contaSelecionada.fotoPerfil + ')' : ''">
+          <span *ngIf="!contaSelecionada.fotoPerfil" class="login__iniciais">{{ (contaSelecionada.nome.split(' ')[0][0] + contaSelecionada.nome.split(' ')[contaSelecionada.nome.split(' ').length-1][0]).toUpperCase() }}</span>
+        </div>
+        <p class="login__popup-nome">{{ contaSelecionada.nome }}</p>
+        <p class="login__popup-subtitulo">Insere a senha para continuar</p>
+
+        <form class="login__formulario login__formulario--popup" (ngSubmit)="entrar()" #modalFormulario="ngForm" novalidate>
+          <div class="login__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
+          <div class="campo">
+            <label class="campo__label" for="senha-modal">Senha</label>
+            <div class="campo__senha-wrap">
+              <input id="senha-modal" class="campo__input" [type]="senhaVisivel ? 'text' : 'password'"
+                placeholder="A tua senha" [(ngModel)]="credenciais.senha" name="senha" required minlength="6"
+                [class.campo__input--erro]="campoSenhaModal.invalid && campoSenhaModal.touched" #campoSenhaModal="ngModel" />
+              <button type="button" class="campo__toggle-senha" (click)="senhaVisivel = !senhaVisivel">
+                <svg *ngIf="!senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg *ngIf="senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </button>
+            </div>
+            <span class="campo__erro" *ngIf="campoSenhaModal.invalid && campoSenhaModal.touched">Mínimo 6 caracteres</span>
+          </div>
+
+          <button type="submit" class="login__btn" [disabled]="modalFormulario.invalid || aEntrar">
+            <app-loading-spinner *ngIf="aEntrar" tamanho="sm" />
+            <span *ngIf="!aEntrar">Entrar</span>
+          </button>
+          <div class="login__popup-actions">
+            <a class="login__recuperar" routerLink="/auth/recuperar-senha">Esqueceste a senha?</a>
+          </div>
+        </form>
+      </div>
+    </div>

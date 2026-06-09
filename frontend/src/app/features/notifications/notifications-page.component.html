@@ -1,0 +1,28 @@
+<section class="notifications-page">
+  <header class="notifications-page__header">
+    <div>
+      <h1>Notificações</h1>
+      <p>Recebe avisos de bazes, comentários e novos seguidores.</p>
+    </div>
+    <button type="button" class="notifications-page__mark-read" (click)="marcarComoLidas()">Marcar todas como lidas</button>
+  </header>
+
+  <div *ngIf="aCarregar" class="notifications-page__loading">
+    <app-loading-spinner />
+  </div>
+
+  <div *ngIf="!aCarregar && notificacoes.length === 0" class="notifications-page__empty">
+    <p>Sem notificações por enquanto. Volta mais tarde para ver as novidades.</p>
+  </div>
+
+  <ul *ngIf="!aCarregar && notificacoes.length > 0" class="notifications-page__list">
+    <li *ngFor="let notificacao of notificacoes" class="notifications-page__item" [class.notifications-page__item--unread]="!notificacao.lida">
+      <div>
+        <strong>{{ notificacao.utilizadorNome }}</strong>
+        <span>{{ notificacao.tipo | titlecase }}</span>
+        <p *ngIf="notificacao.postId">Publicação relacionada: {{ notificacao.postId }}</p>
+      </div>
+      <button type="button" (click)="remover(notificacao.id)">Eliminar</button>
+    </li>
+  </ul>
+</section>

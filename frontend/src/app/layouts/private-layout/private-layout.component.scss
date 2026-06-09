@@ -1,0 +1,98 @@
+﻿@use '../../styles/variables' as vars;
+
+.layout-privado {
+  min-height: 100vh;
+  background: vars.$color-background;
+  font-family: vars.$font-family-primary;
+
+  &__container {
+    display: flex;
+    padding-top: vars.$nav-height;
+    min-height: calc(100vh - #{vars.$nav-height});
+    gap: 0;
+  }
+
+  &__sidebar-left {
+    width: vars.$sidebar-width;
+    flex-shrink: 0;
+    position: sticky;
+    top: vars.$nav-height;
+    height: calc(100vh - #{vars.$nav-height});
+    overflow-y: auto;
+    padding: vars.$spacing-lg;
+    border-right: 1px solid vars.$color-border-default;
+
+    @media (max-width: 1024px) {
+      display: none;
+    }
+
+    // Scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(vars.$color-primary-text, 0.1);
+      border-radius: vars.$radius-full;
+
+      &:hover {
+        background: rgba(vars.$color-primary-text, 0.2);
+      }
+    }
+  }
+
+  &__main {
+    flex: 1;
+    max-width: 620px;
+    padding: vars.$spacing-lg;
+    margin: 0 auto;
+
+    @media (min-width: 1024px) {
+      padding: vars.$spacing-xl;
+    }
+
+    @media (max-width: 768px) {
+      max-width: 100%;
+      padding: vars.$spacing-base;
+    }
+  }
+
+  &__sidebar-right {
+    width: vars.$sidebar-right-width;
+    flex-shrink: 0;
+    position: sticky;
+    top: vars.$nav-height;
+    height: calc(100vh - #{vars.$nav-height});
+    overflow-y: auto;
+    padding: vars.$spacing-lg;
+
+    @media (max-width: 1280px) {
+      display: none;
+    }
+
+    // Scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(vars.$color-primary-text, 0.1);
+      border-radius: vars.$radius-full;
+
+      &:hover {
+        background: rgba(vars.$color-primary-text, 0.2);
+      }
+    }
+  }
+}
+
+
+

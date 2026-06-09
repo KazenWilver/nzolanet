@@ -1,0 +1,76 @@
+.notifications-page {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      color: #23251d;
+    }
+
+    p {
+      margin: 0.25rem 0 0;
+      color: #5b5f54;
+    }
+  }
+
+  &__mark-read {
+    border: none;
+    background: #b17816;
+    color: white;
+    border-radius: 999px;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    transition: transform 150ms ease, background 150ms ease;
+
+    &:hover { background: #9e620f; transform: translateY(-1px); }
+  }
+
+  &__loading,
+  &__empty {
+    padding: 2rem;
+    border-radius: 16px;
+    background: #f5f5f1;
+    text-align: center;
+    color: #5b5f54;
+  }
+
+  &__list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    align-items: center;
+
+    &--unread {
+      border: 1px solid #b17816;
+    }
+
+    button {
+      border: none;
+      background: transparent;
+      color: #b17816;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  }
+}

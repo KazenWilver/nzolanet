@@ -1,0 +1,81 @@
+﻿@use '../../../styles/variables' as vars;
+
+.feed-pagina {
+  padding: vars.$spacing-xl vars.$spacing-lg vars.$spacing-2xl;
+}
+
+.feed-pagina__carregando {
+  display: flex;
+  justify-content: center;
+  padding: vars.$spacing-3xl 0;
+}
+
+.feed-pagina__vazio {
+  text-align: center;
+  padding: vars.$spacing-2xl vars.$spacing-xl;
+  border-radius: vars.$radius-lg;
+  border: 1px solid vars.$color-border-default;
+  background: vars.$color-surface;
+  color: vars.$color-concrete;
+  box-shadow: 0 2px 8px rgba(34, 31, 26, 0.08);
+  margin-bottom: vars.$spacing-xl;
+
+  svg {
+    margin: 0 auto vars.$spacing-lg;
+    display: block;
+    color: vars.$color-disabled-text;
+  }
+
+  p {
+    font-size: vars.$font-size-body;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.feed-pagina__mais {
+  display: flex;
+  justify-content: center;
+  padding: vars.$spacing-lg 0 vars.$spacing-2xl;
+}
+
+.feed-pagina__btn-mais {
+  height: 40px;
+  padding: 0 vars.$spacing-2xl;
+  background: vars.$color-surface;
+  border: 1px solid vars.$color-secondary-text;
+  border-radius: vars.$radius-sm;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-button;
+  font-weight: vars.$font-weight-extrabold;
+  color: vars.$color-primary-text;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-base;
+  transition: all vars.$transition-base;
+
+  &:hover:not(:disabled) {
+    border-color: vars.$color-primary-text;
+    background: vars.$color-surface-secondary;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+
+.feed-pagina__btn-mais:hover:not(:disabled) {
+  border-color: #000;
+  background: #EEEFE9;
+}
+
+.feed-pagina__btn-mais:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+

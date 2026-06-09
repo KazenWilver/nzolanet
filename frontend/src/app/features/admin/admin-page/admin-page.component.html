@@ -1,0 +1,98 @@
+<div class="admin-page">
+  <section class="admin-page__hero">
+    <div>
+      <p class="admin-page__subtitle">Visão geral e moderação</p>
+      <h2>Dashboard do Administrador</h2>
+      <p class="admin-page__hero-copy">
+        Os indicadores abaixo mostram os principais contadores do sistema. Nesta tela você pode visualizar o contexto de comentários denunciados e apagar rapidamente os casos ofensivos.
+      </p>
+    </div>
+    <button class="admin-page__btn admin-page__btn--primary" type="button" (click)="atualizarDashboard()" [disabled]="carregandoMetrics || carregandoComentarios">
+      Atualizar dados
+    </button>
+  </section>
+
+  <section class="admin-page__status">
+    <div class="admin-page__status-header">
+      <div>
+        <h3>Indicadores do sistema</h3>
+        <p>Resumo de utilizadores, publicações, comentários, denúncias e bazes.</p>
+      </div>
+      <span class="admin-page__badge">Última atualização automática</span>
+    </div>
+
+    <div *ngIf="metrics; else semMetrics" class="admin-page__cards">
+      <div class="admin-page__card admin-page__card--highlight">
+        <strong>{{ metrics.totalUtilizadores }}</strong>
+        <span>Utilizadores totais</span>
+      </div>
+      <div class="admin-page__card">
+        <strong>{{ metrics.totalPublicacoes }}</strong>
+        <span>Publicações</span>
+      </div>
+      <div class="admin-page__card">
+        <strong>{{ metrics.totalComentarios }}</strong>
+        <span>Comentários</span>
+      </div>
+      <div class="admin-page__card admin-page__card--warning">
+        <strong>{{ metrics.totalComentariosDenunciados }}</strong>
+        <span>Comentários denunciados</span>
+      </div>
+      <div class="admin-page__card">
+        <strong>{{ metrics.totalBazes }}</strong>
+        <span>Total de bazes</span>
+      </div>
+    </div>
+
+    <ng-template #semMetrics>
+      <p>Carregando indicadores...</p>
+    </ng-template>
+    <div *ngIf="erroMetrics" class="admin-page__erro">{{ erroMetrics }}</div>
+  </section>
+
+  <section class="admin-page__reports">
+    <div class="admin-page__reports-header">
+      <div>
+        <h2>Comentários denunciados</h2>
+        <p>Reveja cada comentário sinalizado e decida se deve removê-lo.</p>
+      </div>
+      <button class="admin-page__btn admin-page__btn--ghost" type="button" (click)="carregarComentariosDenunciados()" [disabled]="carregandoComentarios">
+        Recarregar lista
+      </button>
+    </div>
+
+    <div *ngIf="mensagemSucesso" class="admin-page__toast admin-page__toast--success">{{ mensagemSucesso }}</div>
+    <div *ngIf="erroComentarios" class="admin-page__toast admin-page__toast--error">{{ erroComentarios }}</div>
+    <p *ngIf="!comentarios?.length && !carregandoComentarios && !erroComentarios" class="admin-page__empty-state">Nenhum comentário denunciado no momento.</p>
+
+    <article *ngFor="let comentario of comentarios" class="admin-page__report-card" [class.admin-page__report-card--flagged]="comentario.reportsCount >= 3">
+      <div class="admin-page__report-header">
+        <div>
+          <p class="admin-page__report-author">{{ comentario.autorNome }} (@{{ comentario.autorNomeUtilizador }})</p>
+          <p class="admin-page__report-meta">Post #{{ comentario.postId }} · {{ comentario.criadoEm | date:'short' }}</p>
+        </div>
+        <span class="admin-page__report-count">{{ comentario.reportsCount }} denúncia{{ comentario.reportsCount === 1 ? '' : 's' }}</span>
+      </div>
+
+      <p class="admin-page__report-text">{{ comentario.texto }}</p>
+
+      <div class="admin-page__report-meta-row">
+        <span class="admin-page__badge admin-page__badge--neutral">Relatórios</span>
+        <span class="admin-page__report-date">Atualizado {{ comentario.atualizadoEm ? (comentario.atualizadoEm | date:'short') : '---' }}</span>
+      </div>
+
+      <ul class="admin-page__report-list">
+        <li *ngFor="let report of comentario.reports">
+          <strong>{{ report.motivo }}</strong>
+          <span>{{ report.criadoEm | date:'short' }}</span>
+        </li>
+      </ul>
+
+      <div class="admin-page__report-actions">
+        <button class="admin-page__btn admin-page__btn--danger" type="button" (click)="confirmarRemoverComentario(comentario)" [disabled]="carregandoRemocao">
+          Apagar comentário
+        </button>
+      </div>
+    </article>
+  </section>
+</div>

@@ -1,0 +1,92 @@
+.registo {
+  width: 100%;
+  max-width: 400px;
+
+  &__titulo { font-family: 'IBM Plex Sans', sans-serif; font-size: 24px; font-weight: 800; color: #000000; margin-bottom: 4px; }
+  &__subtitulo { font-size: 15px; color: #4D4F46; margin-bottom: 32px; }
+
+  &__erro {
+    background: rgba(233, 47, 47, 0.08);
+    border: 1px solid rgba(233, 47, 47, 0.3);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #E92F2F;
+    margin-bottom: 20px;
+  }
+
+  &__formulario { display: flex; flex-direction: column; gap: 16px; }
+
+  &__btn {
+    width: 100%;
+    height: 40px;
+    background: #B17816;
+    color: #23251D;
+    border: none;
+    border-radius: 4px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 200ms ease;
+    margin-top: 8px;
+
+    &:hover:not(:disabled) { background: #CD8407; }
+    &:disabled { background: #B6B7AF; cursor: not-allowed; }
+  }
+
+  &__login {
+    font-size: 14px;
+    color: #4D4F46;
+    text-align: center;
+    margin-top: 24px;
+    a { color: #B17816; font-weight: 500; text-decoration: none; &:hover { text-decoration: underline; } }
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &__label { font-size: 13px; font-weight: 500; color: #23251D; }
+
+  &__input {
+    width: 100%;
+    height: 36px;
+    background: #FFFFFF;
+    border: 1px solid #B6B7AF;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    color: #23251D;
+    outline: none;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+
+    &::placeholder { color: #9EA096; }
+    &:focus { border-color: #B17816; box-shadow: 0 0 0 3px rgba(177, 120, 22, 0.1); }
+    &--erro { border-color: #E92F2F; }
+    &--com-prefixo { padding-left: 28px; }
+  }
+
+  &__prefixo-wrap { position: relative; }
+  &__prefixo { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #9EA096; pointer-events: none; }
+
+  &__senha-wrap {
+    position: relative;
+    .campo__input { padding-right: 40px; }
+  }
+
+  &__toggle-senha {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: #9EA096; cursor: pointer; display: flex; align-items: center;
+    transition: color 150ms ease;
+    &:hover { color: #23251D; }
+  }
+
+  &__erro { font-size: 12px; color: #E92F2F; font-weight: 500; }
+}

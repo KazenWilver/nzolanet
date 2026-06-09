@@ -1,0 +1,30 @@
+<div class="report-dialog">
+  <div class="report-dialog__overlay" (click)="!submitting && !disabled ? cancelar() : null"></div>
+  <div class="report-dialog__modal">
+    <h3 class="report-dialog__titulo">Denunciar {{ tipo === 'comentario' ? 'comentário' : 'publicação' }}</h3>
+    <p class="report-dialog__descricao">Por favor, indique o motivo da denúncia:</p>
+    
+    <div class="report-dialog__opcoes">
+      <label *ngFor="let m of motivos" class="report-dialog__opcao">
+        <input type="radio" name="motivo" [value]="m" [(ngModel)]="motivoSelecionado" [disabled]="disabled || submitting" />
+        <span>{{ m }}</span>
+      </label>
+    </div>
+
+    <textarea 
+      *ngIf="motivoSelecionado === 'Outro'" 
+      class="report-dialog__textarea" 
+      placeholder="Descreva o motivo da denúncia..." 
+      [(ngModel)]="motivoOutro"
+      [disabled]="disabled || submitting"
+      rows="3">
+    </textarea>
+
+    <div class="report-dialog__acoes">
+      <button class="report-dialog__btn report-dialog__btn--cancelar" (click)="!submitting && !disabled ? cancelar() : null" [disabled]="submitting || disabled">Cancelar</button>
+      <button class="report-dialog__btn report-dialog__btn--denunciar" (click)="confirmar()" [disabled]="!motivoFinal.trim() || submitting || disabled">
+        {{ submitting ? 'A enviar...' : 'Enviar Denúncia' }}
+      </button>
+    </div>
+  </div>
+</div>

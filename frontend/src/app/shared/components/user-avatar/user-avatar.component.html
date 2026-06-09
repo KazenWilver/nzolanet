@@ -1,0 +1,6 @@
+<div class="avatar" [ngClass]="'avatar--' + tamanho">
+  <img *ngIf="foto; else iniciais" [src]="foto" [alt]="nome" class="avatar__imagem" />
+  <ng-template #iniciais>
+    <span class="avatar__iniciais">{{ obterIniciais() }}</span>
+  </ng-template>
+</div>

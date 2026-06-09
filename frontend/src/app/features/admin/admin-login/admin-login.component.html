@@ -1,0 +1,68 @@
+<div class="admin-login">
+  <div class="admin-login__container">
+    <div class="admin-login__box">
+      <div class="admin-login__header">
+        <h1 class="admin-login__titulo">Painel do Administrador</h1>
+        <p class="admin-login__subtitulo">Acesso Restrito</p>
+      </div>
+
+      <form class="admin-login__form" (ngSubmit)="entrar()">
+        <div class="admin-login__grupo">
+          <label class="admin-login__label">Email de Administrador</label>
+          <input
+            type="email"
+            class="admin-login__input"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="Insira seu email de admin"
+            [disabled]="carregando"
+          />
+        </div>
+
+        <div class="admin-login__grupo">
+          <label class="admin-login__label">Senha</label>
+          <div class="admin-login__senha-grupo">
+            <input
+              [type]="mostrarSenha ? 'text' : 'password'"
+              class="admin-login__input"
+              [(ngModel)]="senha"
+              name="senha"
+              placeholder="Insira sua senha de admin"
+              [disabled]="carregando"
+            />
+            <button
+              type="button"
+              class="admin-login__toggle-senha"
+              (click)="alternarMostrarSenha()"
+              [disabled]="carregando"
+            >
+              {{ mostrarSenha ? '🙈' : '👁️' }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="mensagemErro" class="admin-login__erro">
+          {{ mensagemErro }}
+        </div>
+
+        <button
+          type="submit"
+          class="admin-login__btn"
+          [disabled]="carregando"
+        >
+          {{ carregando ? 'A fazer login...' : 'Entrar' }}
+        </button>
+      </form>
+
+      <div class="admin-login__footer">
+        <button
+          type="button"
+          class="admin-login__link-voltar"
+          (click)="voltarParaApp()"
+        >
+          ← Voltar à aplicação
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

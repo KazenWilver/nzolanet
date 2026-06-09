@@ -1,0 +1,21 @@
+<form class="comentario-form" (ngSubmit)="enviar()" #formulario="ngForm">
+  <app-user-avatar [foto]="fotoUtilizador" [nome]="nomeUtilizador" tamanho="sm" />
+  <div class="comentario-form__campo">
+    <textarea
+      class="comentario-form__input"
+      placeholder="Escreve um comentário..."
+      [(ngModel)]="texto"
+      name="texto"
+      required
+      rows="1"
+      (input)="ajustarAltura($event)"
+      (keydown.enter)="enviarComTecla($event)">
+    </textarea>
+    <button type="submit" class="comentario-form__enviar" [disabled]="!texto.trim() || aEnviar">
+      <app-loading-spinner *ngIf="aEnviar" tamanho="sm" />
+      <svg *ngIf="!aEnviar" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</form>

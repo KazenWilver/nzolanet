@@ -1,0 +1,21 @@
+.media-preview {
+  overflow: hidden;
+  background: #EEEFE9;
+
+  &__imagem {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+    &:hover { opacity: 0.95; }
+  }
+
+  &__video {
+    width: 100%;
+    max-height: 400px;
+    display: block;
+    background: #000;
+  }
+}

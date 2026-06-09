@@ -1,0 +1,69 @@
+<div class="registo">
+  <h1 class="registo__titulo">Criar conta</h1>
+  <p class="registo__subtitulo">Junta-te à NzolaNet hoje</p>
+
+  <div class="registo__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
+
+  <form class="registo__formulario" (ngSubmit)="registar()" #formulario="ngForm" novalidate>
+    <div class="campo">
+      <label class="campo__label" for="nome">Nome completo</label>
+      <input id="nome" class="campo__input" type="text" placeholder="O teu nome"
+        [(ngModel)]="dados.nome" name="nome" required minlength="2"
+        [class.campo__input--erro]="campoNome.invalid && campoNome.touched" #campoNome="ngModel" />
+      <span class="campo__erro" *ngIf="campoNome.invalid && campoNome.touched">Mínimo 2 caracteres</span>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="nomeUtil">Nome de utilizador</label>
+      <div class="campo__prefixo-wrap">
+        <span class="campo__prefixo">@</span>
+        <input id="nomeUtil" class="campo__input campo__input--com-prefixo" type="text"
+          placeholder="nome.utilizador" [(ngModel)]="dados.nomeUtilizador" name="nomeUtilizador"
+          required minlength="3" pattern="^[a-zA-Z0-9._]+$"
+          [class.campo__input--erro]="campoUtil.invalid && campoUtil.touched" #campoUtil="ngModel" />
+      </div>
+      <span class="campo__erro" *ngIf="campoUtil.invalid && campoUtil.touched">Mínimo 3 caracteres, só letras, números, pontos e underscores</span>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="emailReg">Email</label>
+      <input id="emailReg" class="campo__input" type="email" placeholder="o.teu@email.com"
+        [(ngModel)]="dados.email" name="email" required email
+        [class.campo__input--erro]="campoEmail.invalid && campoEmail.touched" #campoEmail="ngModel" />
+      <span class="campo__erro" *ngIf="campoEmail.invalid && campoEmail.touched">Email inválido</span>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="senhaReg">Senha</label>
+      <div class="campo__senha-wrap">
+        <input id="senhaReg" class="campo__input" [type]="senhaVisivel ? 'text' : 'password'"
+          placeholder="Mínimo 6 caracteres" [(ngModel)]="dados.senha" name="senha" required minlength="6"
+          [class.campo__input--erro]="campoSenha.invalid && campoSenha.touched" #campoSenha="ngModel" />
+        <button type="button" class="campo__toggle-senha" (click)="senhaVisivel = !senhaVisivel">
+          <svg *ngIf="!senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg *ngIf="senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="confirmar">Confirmar senha</label>
+      <input id="confirmar" class="campo__input" type="password" placeholder="Repete a senha"
+        [(ngModel)]="dados.confirmarSenha" name="confirmarSenha" required
+        [class.campo__input--erro]="senhasNaoCoincidem()" />
+      <span class="campo__erro" *ngIf="senhasNaoCoincidem()">As senhas não coincidem</span>
+    </div>
+
+    <button type="submit" class="registo__btn" [disabled]="formulario.invalid || senhasNaoCoincidem() || aRegistar">
+      <app-loading-spinner *ngIf="aRegistar" tamanho="sm" />
+      <span *ngIf="!aRegistar">Criar conta</span>
+    </button>
+  </form>
+
+  <p class="registo__login">Já tens conta? <a routerLink="/auth/login">Entra aqui</a></p>
+</div>

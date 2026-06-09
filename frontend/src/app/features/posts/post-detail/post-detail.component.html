@@ -1,0 +1,41 @@
+<div class="detalhe-post" *ngIf="post; else aCarregar">
+  <div class="detalhe-post__voltar">
+    <button class="detalhe-post__btn-voltar" (click)="voltar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Publicação
+    </button>
+  </div>
+
+  <app-post-card [post]="post" (eliminado)="voltar()" />
+
+  <div class="detalhe-post__comentarios" id="comentarios">
+    <h2 class="detalhe-post__titulo-coment">
+      Comentários <span class="detalhe-post__total">{{ comentarios.length }}</span>
+    </h2>
+
+    <app-comment-form
+      [postId]="post.id"
+      [fotoUtilizador]="utilizadorAtual?.fotoPerfil"
+      [nomeUtilizador]="utilizadorAtual?.nome"
+      (comentarioCriado)="adicionarComentario($event)" />
+
+    <div class="detalhe-post__carregando-coment" *ngIf="aCarregarComentarios">
+      <app-loading-spinner tamanho="sm" />
+    </div>
+
+    <div class="detalhe-post__sem-coment" *ngIf="!aCarregarComentarios && comentarios.length === 0">
+      Ainda não há comentários. Sê o primeiro!
+    </div>
+
+    <app-comment-item
+      *ngFor="let comentario of comentarios; trackBy: trackPorId"
+      [comentario]="comentario"
+      (eliminado)="removerComentario($event)" />
+  </div>
+</div>
+
+<ng-template #aCarregar>
+  <div class="detalhe-post__carregando"><app-loading-spinner tamanho="lg" /></div>
+</ng-template>

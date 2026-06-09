@@ -1,0 +1,94 @@
+.admin-layout {
+  min-height: 100vh;
+  background: #f5f5f2;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-layout__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #d8d7d1;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.admin-layout__eyebrow {
+  margin: 0 0 6px;
+  color: #6b6a63;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.admin-layout__title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+  color: #23251d;
+}
+
+.admin-layout__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-layout__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 700;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.admin-layout__btn--ghost {
+  background: #f7f5ef;
+  color: #23251d;
+  border: 1px solid #d8d7d1;
+}
+
+.admin-layout__btn--ghost:hover {
+  background: #e9e6dd;
+}
+
+.admin-layout__btn--primary {
+  background: #b17816;
+  color: #ffffff;
+}
+
+.admin-layout__btn--primary:hover {
+  background: #cd8407;
+}
+
+.admin-layout__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .admin-layout {
+    padding: 16px;
+  }
+
+  .admin-layout__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-layout__actions {
+    width: 100%;
+  }
+}
