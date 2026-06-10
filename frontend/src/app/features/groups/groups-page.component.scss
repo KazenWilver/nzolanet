@@ -1,0 +1,66 @@
+.groups-page {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+
+  &__header {
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      color: #23251d;
+    }
+
+    p {
+      margin: 0.5rem 0 0;
+      color: #5b5f54;
+    }
+  }
+
+  &__list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  &__card {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    align-items: center;
+
+    h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin: 0 0 0.5rem;
+      color: #5b5f54;
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: #7d7f7c;
+    }
+
+    button {
+      border: none;
+      background: #b17816;
+      color: white;
+      border-radius: 999px;
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      transition: background 150ms ease;
+
+      &:hover { background: #9e620f; }
+    }
+  }
+}

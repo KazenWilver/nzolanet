@@ -1,0 +1,40 @@
+<aside class="sidebar-sugestoes">
+  <div class="widget">
+    <h3 class="widget__titulo">Sugestões para ti</h3>
+    
+    <div class="widget__sugestoes">
+      <div *ngFor="let user of sugestoesAoSeguir" class="sugestao-item" (click)="visitarPerfil(user.id)">
+        <div class="sugestao-item__avatar">
+          <div class="avatar-initials">{{ getInitials(user.nome) }}</div>
+        </div>
+        <div class="sugestao-item__info">
+          <div class="sugestao-item__nome">{{ user.nome }}</div>
+          <div class="sugestao-item__sub">{{ user.seguidores | number }} seguidores</div>
+        </div>
+        <button class="sugestao-item__btn" type="button" (click)="seguir(user.id); $event.stopPropagation()">
+          {{ user.seguido ? 'Seguindo' : 'Seguir' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget">
+    <h3 class="widget__titulo">Tendências</h3>
+    
+    <div class="widget__tendencias">
+      <button *ngFor="let trend of tendencias" type="button" class="tendencia-item" (click)="pesquisarHashtag(trend.hashtag)">
+        <div class="tendencia-item__hashtag">{{ trend.hashtag }}</div>
+        <div class="tendencia-item__posts">{{ trend.posts }} posts</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="widget widget--info">
+    <p class="widget__footer-text">
+      © 2026 NzolaNet • 
+      <a href="#">Sobre</a> •
+      <a href="#">Privacidade</a> •
+      <a href="#">Termos</a>
+    </p>
+  </div>
+</aside>

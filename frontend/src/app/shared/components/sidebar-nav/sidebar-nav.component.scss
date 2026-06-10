@@ -1,0 +1,91 @@
+﻿@use '../../../styles/variables' as vars;
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$spacing-3xl;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-lg;
+
+    &--online {
+      margin-top: vars.$spacing-xl;
+    }
+  }
+
+  &__label {
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-extrabold;
+    letter-spacing: 1.5px;
+    color: vars.$color-tertiary-text;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 0 vars.$spacing-md;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-md;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-lg;
+    padding: vars.$spacing-base vars.$spacing-md;
+    color: vars.$color-secondary-text;
+    font-size: vars.$font-size-label;
+    font-weight: vars.$font-weight-medium;
+    text-decoration: none;
+    border-radius: vars.$radius-md;
+    transition: vars.$transition-base;
+    cursor: pointer;
+
+    svg {
+      flex-shrink: 0;
+      color: inherit;
+    }
+
+    &:hover {
+      background: rgba(vars.$color-accent, 0.05);
+      color: vars.$color-primary-text;
+    }
+
+    &.active {
+      color: vars.$color-accent;
+      background: rgba(vars.$color-accent, 0.08);
+      font-weight: vars.$font-weight-bold;
+
+      svg {
+        color: vars.$color-accent;
+      }
+    }
+  }
+
+  &__label-item {
+    flex: 1;
+  }
+
+  &__amigos {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-md;
+  }
+
+  &__vazio {
+    font-size: vars.$font-size-caption;
+    color: vars.$color-tertiary-text;
+    text-align: center;
+    padding: vars.$spacing-lg vars.$spacing-md;
+    margin: 0;
+  }
+}
+
+
+

@@ -1,0 +1,257 @@
+﻿@use '../../../styles/variables' as vars;
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: vars.$nav-height;
+  background: rgba(vars.$color-surface, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid vars.$color-border-default;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0 vars.$spacing-2xl;
+  gap: vars.$spacing-lg;
+
+  &__marca {
+    font-family: vars.$font-family-primary;
+    font-size: 20px;
+    font-weight: vars.$font-weight-extrabold;
+    color: vars.$color-primary-text;
+    cursor: pointer;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+
+  &__pesquisa {
+    flex: 1;
+    max-width: 320px;
+    position: relative;
+
+    svg {
+      position: absolute;
+      left: vars.$spacing-md;
+      top: 50%;
+      transform: translateY(-50%);
+      color: vars.$color-tertiary-text;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      background: vars.$color-surface-secondary;
+      border: 1px solid vars.$color-disabled-text;
+      border-radius: vars.$radius-sm;
+      padding: vars.$spacing-base vars.$spacing-md vars.$spacing-base vars.$spacing-2xl;
+      font-family: vars.$font-family-primary;
+      font-size: vars.$font-size-button;
+      color: vars.$color-primary-text;
+      outline: none;
+      transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
+
+      &::placeholder { color: vars.$color-tertiary-text; }
+      &:focus {
+        border-color: vars.$color-accent;
+        box-shadow: 0 0 0 3px rgba(vars.$color-accent, 0.1);
+      }
+    }
+  }
+
+  &__acoes {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-sm;
+  }
+
+  &__btn {
+    width: 36px;
+    height: 36px;
+    border-radius: vars.$radius-sm;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: vars.$color-secondary-text;
+    cursor: pointer;
+    transition: background vars.$transition-fast, color vars.$transition-fast;
+    position: relative;
+
+    &:hover { 
+      background: vars.$color-surface-secondary; 
+      color: vars.$color-primary-text; 
+    }
+    &--ativo { 
+      color: vars.$color-accent; 
+      background: rgba(vars.$color-accent, 0.08); 
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    background: vars.$color-error;
+    color: vars.$color-pure-white;
+    font-size: 10px;
+    font-weight: vars.$font-weight-extrabold;
+    border-radius: vars.$radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 2px solid vars.$color-pure-white;
+  }
+
+  &__avatar-wrap {
+    position: relative;
+    cursor: pointer;
+    margin-left: vars.$spacing-sm;
+  }
+
+  &__menu-utilizador {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: vars.$color-surface;
+    border: 1px solid vars.$color-border-default;
+    border-radius: vars.$radius-sm;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    min-width: 180px;
+    padding: vars.$spacing-sm;
+    z-index: 100;
+  }
+
+  &__menu-item {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-base;
+    padding: vars.$spacing-base vars.$spacing-md;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-medium;
+    color: vars.$color-primary-text;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    text-decoration: none;
+    transition: background vars.$transition-fast;
+
+    &:hover { background: vars.$color-surface-secondary; }
+    &--sair { color: vars.$color-error; }
+    &--sair:hover { background: rgba(vars.$color-error, 0.06); }
+  }
+
+  &__menu-divider {
+    height: 1px;
+    background: vars.$color-border-default;
+    margin: vars.$spacing-sm 0;
+  }
+
+  &__notificacoes {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(360px, 100vw - 32px);
+    background: vars.$color-surface;
+    border: 1px solid vars.$color-border-default;
+    border-radius: vars.$radius-sm;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
+    padding: vars.$spacing-sm;
+    z-index: 1100;
+  }
+
+  &__notificacoes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: vars.$spacing-sm;
+    margin-bottom: vars.$spacing-sm;
+    padding-bottom: vars.$spacing-xs;
+    border-bottom: 1px solid vars.$color-border-default;
+  }
+
+  &__notificacoes-lidas {
+    background: transparent;
+    border: 1px solid vars.$color-border-default;
+    border-radius: vars.$radius-full;
+    color: vars.$color-secondary-text;
+    font-size: vars.$font-size-caption;
+    padding: 0.45rem 0.8rem;
+    cursor: pointer;
+    transition: background vars.$transition-fast, color vars.$transition-fast;
+
+    &:hover {
+      background: vars.$color-surface-secondary;
+      color: vars.$color-primary-text;
+    }
+  }
+
+  &__notificacoes-list {
+    display: grid;
+    gap: 0.5rem;
+    max-height: 340px;
+    overflow: auto;
+    padding-right: 0.25rem;
+  }
+
+  &__notificacoes-empty {
+    color: vars.$color-tertiary-text;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+  }
+
+  &__notificacoes-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.85rem 0.95rem;
+    border-radius: vars.$radius-md;
+    text-decoration: none;
+    color: inherit;
+    background: vars.$color-surface-secondary;
+    border: 1px solid transparent;
+    transition: background vars.$transition-fast, border-color vars.$transition-fast;
+
+    &:hover {
+      background: rgba(vars.$color-accent, 0.06);
+      border-color: vars.$color-border-default;
+    }
+  }
+
+  &__notificacoes-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: vars.$color-accent;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  &__notificacoes-title {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-xs;
+    font-size: vars.$font-size-caption;
+    color: vars.$color-primary-text;
+  }
+
+  &__notificacoes-ver-todas {
+    display: block;
+    margin-top: vars.$spacing-sm;
+    text-align: center;
+    color: vars.$color-accent;
+    font-weight: vars.$font-weight-semibold;
+    text-decoration: none;
+  }
+}
+
+

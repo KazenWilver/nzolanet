@@ -1,0 +1,70 @@
+.dialogo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 150ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dialogo {
+  background: #FFFFFF;
+  border: 1px solid #B6B7AF;
+  border-radius: 4px;
+  padding: 24px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: surgir 150ms ease;
+
+  &__mensagem {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 22.5px;
+    color: #23251D;
+    margin-bottom: 20px;
+  }
+
+  &__acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  &__btn {
+    padding: 0 24px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 200ms ease;
+    border: none;
+    height: 32px;
+
+    &--cancelar {
+      background: transparent;
+      color: #23251D;
+      border: 1px solid #4D4F46;
+      &:hover { border-color: #000; background: #EEEFE9; }
+    }
+
+    &--confirmar {
+      background: #E92F2F;
+      color: #FFFFFF;
+      &:hover { background: #c42828; }
+    }
+  }
+}
+
+@keyframes surgir {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}

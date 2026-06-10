@@ -1,0 +1,131 @@
+.layout-publico {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 1.2fr) minmax(360px, 1fr);
+  background: linear-gradient(180deg, #F7F5EE 0%, #F6F3E9 100%);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__hero {
+    position: relative;
+    background: #23251D;
+    color: #F8F6ED;
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(177, 120, 22, 0.22), transparent 32%),
+                  radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.12), transparent 24%);
+      pointer-events: none;
+    }
+  }
+
+  &__marca {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__logo {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: #F2C46B;
+    letter-spacing: -1px;
+  }
+
+  &__slogan {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #D9D5C4;
+    max-width: 340px;
+  }
+
+  &__descricao {
+    position: relative;
+    z-index: 1;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  &__descricao h2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: clamp(32px, 3vw, 40px);
+    font-weight: 900;
+    line-height: 1.05;
+    margin: 0;
+    color: #FFFFFF;
+  }
+
+  &__descricao p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: #D3D0BF;
+    max-width: 380px;
+  }
+
+  &__vantagens {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+    color: #E8E6D7;
+
+    li {
+      position: relative;
+      padding-left: 28px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #B17816;
+    }
+  }
+
+  &__formulario {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 40px;
+    background: transparent;
+  }
+
+  &__cartao {
+    width: 100%;
+    max-width: 460px;
+    background: #FFFFFF;
+    border-radius: 28px;
+    box-shadow: 0 28px 80px rgba(27, 29, 25, 0.12);
+    padding: 40px;
+    border: 1px solid rgba(189, 183, 168, 0.18);
+  }
+
+  @media (max-width: 1024px) {
+    .layout-publico__hero { display: none; }
+    .layout-publico__formulario { min-height: 100vh; padding: 32px 20px; }
+    .layout-publico__cartao { padding: 32px 24px; }
+  }
+}

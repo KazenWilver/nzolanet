@@ -1,0 +1,164 @@
+﻿@use '../../../styles/variables' as vars;
+
+.sidebar-sugestoes {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$spacing-lg;
+}
+
+.widget {
+  background: vars.$color-surface;
+  border: 1px solid vars.$color-border-default;
+  border-radius: vars.$radius-md;
+  padding: vars.$spacing-lg;
+
+  &--info {
+    background: rgba(vars.$color-accent, 0.04);
+    border-color: rgba(vars.$color-accent, 0.1);
+  }
+
+  &__titulo {
+    font-size: vars.$font-size-label;
+    font-weight: vars.$font-weight-extrabold;
+    color: vars.$color-secondary-text;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 vars.$spacing-lg 0;
+    padding: 0;
+  }
+
+  &__sugestoes {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-md;
+  }
+
+  &__tendencias {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  &__footer-text {
+    font-size: vars.$font-size-caption;
+    color: vars.$color-tertiary-text;
+    margin: 0;
+    line-height: 1.5;
+
+    a {
+      color: vars.$color-accent;
+      text-decoration: none;
+      transition: vars.$transition-fast;
+
+      &:hover {
+        text-decoration: underline;
+        color: vars.$color-accent-hover;
+      }
+    }
+  }
+}
+
+.sugestao-item {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-md;
+  padding: vars.$spacing-md;
+  border-radius: vars.$radius-md;
+  transition: vars.$transition-fast;
+
+  &:hover {
+    background: rgba(vars.$color-accent, 0.04);
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__nome {
+    font-size: vars.$font-size-label;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__sub {
+    font-size: vars.$font-size-caption;
+    color: vars.$color-tertiary-text;
+  }
+
+  &__btn {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    background: vars.$color-accent;
+    color: vars.$color-pure-white;
+    border: none;
+    border-radius: vars.$radius-sm;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-semibold;
+    cursor: pointer;
+    transition: vars.$transition-base;
+
+    &:hover {
+      background: vars.$color-accent-hover;
+    }
+  }
+}
+
+.avatar-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, vars.$color-accent-light, vars.$color-accent-lighter);
+  color: vars.$color-primary-text;
+  font-weight: vars.$font-weight-extrabold;
+  font-size: 12px;
+}
+
+.tendencia-item {
+  display: block;
+    width: 100%;
+    padding: vars.$spacing-md;
+    border-bottom: 1px solid rgba(vars.$color-primary-text, 0.05);
+    background: transparent;
+    text-decoration: none;
+    border: none;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(vars.$color-accent, 0.04);
+  }
+
+  &__hashtag {
+    font-size: vars.$font-size-label;
+    font-weight: vars.$font-weight-bold;
+    color: vars.$color-accent;
+  }
+
+  &__posts {
+    font-size: vars.$font-size-caption;
+    color: vars.$color-tertiary-text;
+    margin-top: 2px;
+  }
+}
+
+
+

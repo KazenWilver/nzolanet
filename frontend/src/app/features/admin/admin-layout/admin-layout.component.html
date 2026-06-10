@@ -1,0 +1,17 @@
+<div class="admin-layout">
+  <header class="admin-layout__header">
+    <div>
+      <p class="admin-layout__eyebrow">Área exclusiva de administração</p>
+      <h1 class="admin-layout__title">Painel do Administrador NzolaNet</h1>
+    </div>
+
+    <div class="admin-layout__actions">
+      <a routerLink="/feed" class="admin-layout__btn admin-layout__btn--ghost">Voltar ao Feed</a>
+      <button type="button" class="admin-layout__btn admin-layout__btn--primary" (click)="terminarSessao()">Terminar sessão</button>
+    </div>
+  </header>
+
+  <main class="admin-layout__main">
+    <router-outlet />
+  </main>
+</div>

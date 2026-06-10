@@ -1,0 +1,71 @@
+<div class="editar-perfil" *ngIf="utilizador; else aCarregar">
+  <div class="editar-perfil__cabecalho">
+    <button class="editar-perfil__btn-voltar" (click)="voltar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Voltar
+    </button>
+    <h1 class="editar-perfil__titulo">Editar perfil</h1>
+  </div>
+
+  <div class="editar-perfil__secao">
+    <div class="editar-perfil__foto-wrap">
+      <app-user-avatar [foto]="previsaoFoto || utilizador.fotoPerfil" [nome]="utilizador.nome" tamanho="xl" />
+      <label class="editar-perfil__btn-foto">
+        <input type="file" accept="image/*" (change)="selecionarFoto($event)" hidden />
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Alterar foto
+      </label>
+    </div>
+  </div>
+
+  <form class="editar-perfil__formulario" (ngSubmit)="guardar()" #formulario="ngForm" novalidate>
+    <div class="campo">
+      <label class="campo__label" for="nomeEdit">Nome completo</label>
+      <input id="nomeEdit" class="campo__input" type="text" [(ngModel)]="formDados.nome" name="nome"
+        required minlength="2" [class.campo__input--erro]="campoNome.invalid && campoNome.touched" #campoNome="ngModel" />
+      <span class="campo__erro" *ngIf="campoNome.invalid && campoNome.touched">Nome inválido</span>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="nomeUtilEdit">Nome de utilizador</label>
+      <div class="campo__prefixo-wrap">
+        <span class="campo__prefixo">@</span>
+        <input id="nomeUtilEdit" class="campo__input campo__input--com-prefixo" type="text"
+          [(ngModel)]="formDados.nomeUtilizador" name="nomeUtilizador" required minlength="3"
+          pattern="^[a-zA-Z0-9._]+$"
+          [class.campo__input--erro]="campoUtil.invalid && campoUtil.touched" #campoUtil="ngModel" />
+      </div>
+      <span class="campo__erro" *ngIf="campoUtil.invalid && campoUtil.touched">Nome de utilizador inválido</span>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="bioEdit">Bio</label>
+      <textarea id="bioEdit" class="campo__textarea" [(ngModel)]="formDados.bio" name="bio"
+        rows="3" maxlength="160" placeholder="Fala um pouco sobre ti..."></textarea>
+      <span class="campo__contador">{{ formDados.bio.length || 0 }}/160</span>
+    </div>
+
+    <div class="campo">
+      <label class="campo__label" for="locEdit">Localização</label>
+      <input id="locEdit" class="campo__input" type="text" [(ngModel)]="formDados.localizacao"
+        name="localizacao" placeholder="Ex: Luanda, Angola" maxlength="60" />
+    </div>
+
+    <div class="editar-perfil__acoes">
+      <button type="button" class="editar-perfil__btn-cancelar" (click)="voltar()">Cancelar</button>
+      <button type="submit" class="editar-perfil__btn-guardar" [disabled]="formulario.invalid || aGuardar">
+        <app-loading-spinner *ngIf="aGuardar" tamanho="sm" />
+        <span *ngIf="!aGuardar">Guardar</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<ng-template #aCarregar>
+  <div class="editar-perfil__carregando"><app-loading-spinner tamanho="lg" /></div>
+</ng-template>

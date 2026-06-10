@@ -1,0 +1,24 @@
+<nav class="sidebar-nav">
+  <div class="sidebar-nav__section">
+    <h2 class="sidebar-nav__label">Menu</h2>
+    <ul class="sidebar-nav__list">
+      <li *ngFor="let item of menuItems">
+        <a [routerLink]="item.route" 
+           routerLinkActive="active" 
+           [routerLinkActiveOptions]="{ exact: true }"
+           class="sidebar-nav__link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" [innerHTML]="getIconSvg(item.icon)"></svg>
+          <span class="sidebar-nav__label-item">{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="sidebar-nav__section sidebar-nav__section--online">
+    <h3 class="sidebar-nav__label">Amigos Online</h3>
+    <div class="sidebar-nav__amigos">
+      <!-- Será preenchido dinamicamente -->
+      <p class="sidebar-nav__vazio">Carregando...</p>
+    </div>
+  </div>
+</nav>

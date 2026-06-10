@@ -1,0 +1,38 @@
+<div class="lista-seguidores">
+  <div class="lista-seguidores__cabecalho">
+    <button class="lista-seguidores__btn-voltar" (click)="voltar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Voltar
+    </button>
+    <div class="lista-seguidores__abas">
+      <button class="lista-seguidores__aba" [class.lista-seguidores__aba--ativa]="modo === 'seguidores'" (click)="trocarModo('seguidores')">
+        Seguidores
+      </button>
+      <button class="lista-seguidores__aba" [class.lista-seguidores__aba--ativa]="modo === 'seguindo'" (click)="trocarModo('seguindo')">
+        A seguir
+      </button>
+    </div>
+  </div>
+
+  <div class="lista-seguidores__carregando" *ngIf="aCarregar">
+    <app-loading-spinner tamanho="md" />
+  </div>
+
+  <div class="lista-seguidores__vazio" *ngIf="!aCarregar && utilizadores.length === 0">
+    <p *ngIf="modo === 'seguidores'">Ainda sem seguidores.</p>
+    <p *ngIf="modo === 'seguindo'">Não está a seguir ninguém.</p>
+  </div>
+
+  <div class="lista-seguidores__lista">
+    <div class="lista-seguidores__item" *ngFor="let u of utilizadores">
+      <app-user-avatar [foto]="u.fotoPerfil" [nome]="u.nome" tamanho="md" />
+      <div class="lista-seguidores__info">
+        <a class="lista-seguidores__nome" [routerLink]="['/perfil', u.id]">{{ u.nome }}</a>
+        <span class="lista-seguidores__nomeutil">@{{ u.nomeUtilizador }}</span>
+      </div>
+      <a class="lista-seguidores__btn-perfil" [routerLink]="['/perfil', u.id]">Ver perfil</a>
+    </div>
+  </div>
+</div>
