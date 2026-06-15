@@ -377,10 +377,32 @@
         <span class="pill">🗄️ <strong>SQL Server</strong></span>
         <span class="pill">🧪 <strong>Entity Framework Core</strong></span>
         <span class="pill">🔐 <strong>JWT Auth</strong></span>
+        <span class="pill">🏛️ <strong>Arquitetura em Camadas</strong></span>
       </div>
     </header>
 
     <main>
+      <article class="card" style="margin-bottom:1.5rem;background:linear-gradient(135deg, rgba(32,210,122,.10), rgba(0,212,255,.06));border-color:rgba(32,210,122,.3)">
+        <div class="card-icon" style="background:var(--gradient-1);background:linear-gradient(135deg,#20d27a 0%,#00d4ff 100%);box-shadow:0 10px 30px -8px rgba(32,210,122,.5)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div class="card-tag">Começa por aqui</div>
+        <h2>Guia Passo a Passo — que ficheiros preencher e como testar</h2>
+        <p>Roteiro direcionado do <strong>primeiro ao último ficheiro</strong>: Setup → Domínio → Infraestrutura/BD → Aplicação → API (testar no Swagger) → Frontend → integração → demo. Com checkpoints de teste no fim de cada fase.</p>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="Guia_NzolaNet.html" style="background:linear-gradient(135deg,#20d27a 0%,#00d4ff 100%);box-shadow:0 8px 24px -8px rgba(32,210,122,.6)">
+            Abrir o Guia
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="extras/Guia/Guia_NzolaNet.txt" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Versão TXT
+          </a>
+        </div>
+      </article>
+
       <div class="grid">
         <!-- Plano da 2ª Parcelar -->
         <article class="card warm">
@@ -391,22 +413,23 @@
           </div>
           <div class="card-tag">Entrega 1 — Foco imediato</div>
           <h2>Plano da 2.ª Parcelar</h2>
-          <p>Documento focado nos 3 domínios da primeira entrega: Utilizadores, Publicações e Comentários. Cronograma de 4 semanas com tudo o que cada dev tem de estudar e construir.</p>
+          <p>Documento focado nos 3 domínios da primeira entrega: Utilizadores, Publicações e Comentários. Inclui a decisão de arquitetura (Camadas, não MVC) e a estrutura real do repositório já criada como esqueleto.</p>
           <div class="meta">
             <span class="meta-item">⏱️ 4 semanas</span>
-            <span class="meta-item">📐 ~1100 linhas</span>
+            <span class="meta-item">🏛️ Camadas + DTOs</span>
+            <span class="meta-item">📂 Esqueleto criado</span>
             <span class="meta-item">📚 Roadmap de estudos</span>
           </div>
           <div class="card-actions">
-            <a class="btn btn-primary" href="Plano/Plano_2_Parcelar_NzolaNet.html">
+            <a class="btn btn-primary" href="extras/Plano/Plano_2_Parcelar_NzolaNet.html">
               Ler Online
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
-            <a class="btn btn-ghost" href="Plano/Plano_2_Parcelar_NzolaNet.pdf" download>
+            <a class="btn btn-ghost" href="extras/Plano/Plano_2_Parcelar_NzolaNet.pdf" download>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               PDF
             </a>
-            <a class="btn btn-ghost" href="Plano/Plano_2_Parcelar_NzolaNet.md" download>
+            <a class="btn btn-ghost" href="extras/Plano/Plano_2_Parcelar_NzolaNet.md" download>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
               Markdown
             </a>
@@ -429,15 +452,15 @@
             <span class="meta-item">🎯 Objetivo: 20/20</span>
           </div>
           <div class="card-actions">
-            <a class="btn btn-primary" href="Plano/Plano_Definitivo_NzolaNet.html">
+            <a class="btn btn-primary" href="extras/Plano/Plano_Definitivo_NzolaNet.html">
               Ler Online
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
-            <a class="btn btn-ghost" href="Plano/Plano_Definitivo_NzolaNet.pdf" download>
+            <a class="btn btn-ghost" href="extras/Plano/Plano_Definitivo_NzolaNet.pdf" download>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               PDF
             </a>
-            <a class="btn btn-ghost" href="Plano/Plano_Definitivo_NzolaNet.md" download>
+            <a class="btn btn-ghost" href="extras/Plano/Plano_Definitivo_NzolaNet.md" download>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
               Markdown
             </a>

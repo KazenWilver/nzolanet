@@ -1,0 +1,241 @@
+================================================================================
+NZOLANET - GUIA PASSO A PASSO (2.ª PARCELAR)
+Por onde comecar, que ficheiros preencher (do 1.º ao ultimo) e como testar tudo.
+================================================================================
+
+REGRA DE OURO
+-------------
+1. Constroi de BAIXO PARA CIMA no backend: Dominio -> Infraestrutura -> Aplicacao -> API.
+2. So depois fazes o frontend.
+3. TESTA NO FIM DE CADA FASE. Nunca avances com erros acumulados.
+
+Legenda:  [BE] Backend (Willfredy)   [FE] Frontend (Emer/Jeovani/Manuel)   [ALL] Todos
+
+Ambito desta entrega: Utilizadores, Publicacoes e Comentarios (+ Autenticacao e Seguir).
+Fora de ambito (Exame Final): Bazes, Notificacoes, Feed personalizado.
+
+--------------------------------------------------------------------------------
+FASE 0 - SETUP INICIAL                                              [ALL] ~2-4h
+--------------------------------------------------------------------------------
+Objetivo: preparar a solucao .NET e o projeto Angular.
+
+Backend (por ordem):
+  1) backend/NzolaNet.sln + os 4 *.csproj (criar solucao e referencias)
+  2) backend/NzolaNet.Api/appsettings.json  (connection string SQL Server + JWT)
+  3) backend/NzolaNet.Api/Properties/launchSettings.json  (porta, ex.: 5000)
+
+  Comandos (a partir de backend/):
+    dotnet new sln -n NzolaNet
+    dotnet new webapi   -n NzolaNet.Api
+    dotnet new classlib -n NzolaNet.Application
+    dotnet new classlib -n NzolaNet.Domain
+    dotnet new classlib -n NzolaNet.Infrastructure
+    (referencias: Api->Application, Application->Domain, Infrastructure->Application+Domain)
+    NuGet: EFCore.SqlServer, EFCore.Tools, JwtBearer, BCrypt.Net-Next,
+           AutoMapper, FluentValidation, Swashbuckle
+
+Frontend:
+    ng new nzolanet --style=scss --routing=true
+    instalar: TailwindCSS ou Bootstrap, ngx-toastr, date-fns, jwt-decode
+
+TESTAR:
+  - Backend: "dotnet build" compila sem erros.
+  - Frontend: "ng serve" abre http://localhost:4200.
+
+--------------------------------------------------------------------------------
+FASE 1 - BACKEND - DOMINIO (a base de tudo)                         [BE] ~2h
+--------------------------------------------------------------------------------
+Objetivo: entidades + contratos de repositorio (nao depende de ninguem).
+
+Preencher por ordem:
+  1) Domain/Entities/User.cs
+  2) Domain/Entities/Post.cs
+  3) Domain/Entities/Comment.cs
+  4) Domain/Entities/Follow.cs
+  5) Domain/Entities/PasswordResetToken.cs
+  6) Domain/Interfaces/Repositories/IUserRepository.cs
+     depois IPostRepository, ICommentRepository, IFollowRepository,
+     IPasswordResetTokenRepository
+  (campos: ver Seccao 5.3 do Plano da 2.ª Parcelar)
+
+TESTAR: "dotnet build" do Domain compila.
+
+--------------------------------------------------------------------------------
+FASE 2 - BACKEND - INFRAESTRUTURA + BASE DE DADOS                   [BE] ~4-5h
+--------------------------------------------------------------------------------
+Objetivo: ligar ao SQL Server (EF Core), criar tabelas e implementar repos/servicos.
+
+Preencher por ordem:
+  1) Infrastructure/Data/ApplicationDbContext.cs (DbSets)
+  2) Infrastructure/Data/Configurations/*Configuration.cs (Fluent API: PK, indices, UNIQUE, CHECK)
+  3) Infrastructure/Services/PasswordHasher.cs (BCrypt)
+  4) Infrastructure/Services/JwtTokenService.cs
+  5) Infrastructure/Services/LocalFileStorageService.cs (upload)
+  6) Infrastructure/Services/EmailService.cs (recuperacao senha - pode ser simulado/log)
+  7) Infrastructure/Repositories/*Repository.cs (implementacoes)
+  8) Infrastructure/Data/Seed/DbSeeder.cs (admin + exemplos)
+
+  Migration (a partir do projeto Api):
+    dotnet ef migrations add InitialCreate -p ../NzolaNet.Infrastructure -s .
+    dotnet ef database update -p ../NzolaNet.Infrastructure -s .
+
+TESTAR:
+  - No SSMS, a base NzolaNetDB tem Users, Posts, Comments, Follows, PasswordResetTokens.
+  - O seed criou pelo menos 1 utilizador.
+
+--------------------------------------------------------------------------------
+FASE 3 - BACKEND - APLICACAO (regras de negocio)                    [BE] ~5-6h
+--------------------------------------------------------------------------------
+Objetivo: DTOs, mapeamentos, validacoes e a logica nos Services.
+
+Preencher por ordem:
+  1) Application/DTOs/Common/ (PagedResultDto, MessageDto)
+  2) Application/DTOs/Auth/ -> Users/ -> Posts/ -> Comments/
+  3) Application/Exceptions/ (NotFound, Forbidden, BadRequest, Conflict)
+  4) Application/Mappings/AutoMapperProfile.cs
+  5) Application/Interfaces/ (todas as I*Service)
+  6) Application/Validators/ (Register, CreatePost, CreateComment)
+  7) Application/Services/ : AuthService -> UserService -> FollowService
+                             -> PostService -> CommentService
+
+REGRAS CRITICAS: editar/apagar so pelo autor; nao seguir-se a si proprio;
+password com BCrypt; NUNCA devolver entidades - sempre DTOs.
+
+TESTAR: "dotnet build" de toda a solucao compila.
+
+--------------------------------------------------------------------------------
+FASE 4 - BACKEND - API (Controllers) - 1.ª COISA TESTAVEL A SERIO   [BE] ~3-4h
+--------------------------------------------------------------------------------
+Objetivo: expor a API por HTTP + JWT/CORS/Swagger.
+
+Preencher por ordem:
+  1) Api/Program.cs (DI repos/services, JWT, CORS p/ localhost:4200, Swagger, UseStaticFiles)
+  2) Api/Middleware/ExceptionHandlingMiddleware.cs (excecoes -> codigos HTTP)
+  3) Api/Controllers/AuthController.cs
+  4) Api/Controllers/UsersController.cs
+  5) Api/Controllers/PostsController.cs
+  6) Api/Controllers/CommentsController.cs
+
+  Correr:  dotnet run --project NzolaNet.Api   (abrir /swagger)
+
+TESTAR (no Swagger):
+  - POST /auth/register cria user -> POST /auth/login devolve token JWT.
+  - "Authorize" com o token -> POST /posts (com imagem) cria publicacao.
+  - GET /posts lista por ordem cronologica; PUT/DELETE so no proprio.
+  - POST /posts/{id}/comments e editar/apagar comentario proprio.
+  - POST /users/{id}/follow segue; impede seguir-se a si proprio.
+
+>>> MARCO 1: backend testavel via Swagger. Atualizar docs/API_CONTRACT.md.
+
+--------------------------------------------------------------------------------
+FASE 5 - FRONTEND - FUNDACOES                                       [FE] ~4-5h
+--------------------------------------------------------------------------------
+Objetivo: config, modelos, servicos base, interceptors e guards.
+
+Preencher por ordem:
+  1) src/environments/environment.ts + proxy.conf.json (apiUrl)
+  2) src/styles.scss (Tailwind/Bootstrap + variaveis)
+  3) core/models/ (user, post, comment, auth, paged-result) - espelham os DTOs
+  4) core/services/auth.service.ts (login/register/logout/token)
+  5) core/interceptors/jwt.interceptor.ts + error.interceptor.ts
+  6) core/guards/auth.guard.ts + guest.guard.ts
+  7) app.config.ts + app.routes.ts + app.component.*
+
+TESTAR:
+  - App arranca sem erros de consola.
+  - O jwt.interceptor anexa "Authorization: Bearer ..." (ver aba Network).
+
+--------------------------------------------------------------------------------
+FASE 6 - FRONTEND - AUTENTICACAO (Emer)                            [FE] ~5-6h
+--------------------------------------------------------------------------------
+Objetivo: registar, entrar, recuperar senha.
+
+Preencher por ordem:
+  1) layouts/public-layout/
+  2) shared/components/loading-spinner/
+  3) features/auth/login/
+  4) features/auth/register/
+  5) features/auth/forgot-password/ + reset-password/
+  6) features/auth/auth.routes.ts
+
+TESTAR:
+  - Registar novo utilizador -> entra / vai para login.
+  - Login valido guarda token e redireciona; invalido mostra erro (toast).
+  - Sem login, rota privada redireciona para /auth/login.
+
+>>> MARCO 2: autenticacao ponta-a-ponta a funcionar.
+
+--------------------------------------------------------------------------------
+FASE 7 - FRONTEND - PERFIL + SEGUIR (Manuel)                       [FE] ~5-6h
+--------------------------------------------------------------------------------
+Objetivo: ver/editar perfil, foto, seguir/deixar de seguir.
+
+Preencher por ordem:
+  1) shared/components/user-avatar/ + navbar/
+  2) layouts/private-layout/ (moldura com navbar)
+  3) core/services/user.service.ts + upload.service.ts
+  4) features/profile/profile-page/
+  5) features/profile/edit-profile/
+  6) features/profile/followers-list/
+  7) features/profile/profile.routes.ts
+
+TESTAR:
+  - Editar nome/bio guarda e reflete.
+  - Upload de foto aparece imediatamente.
+  - Seguir muda botao para "Deixar de seguir" e atualiza contadores.
+
+--------------------------------------------------------------------------------
+FASE 8 - FRONTEND - PUBLICACOES + COMENTARIOS (Jeovani)           [FE] ~6-8h
+--------------------------------------------------------------------------------
+Objetivo: feed, criar/editar/apagar posts, comentar.
+
+Preencher por ordem:
+  1) core/services/post.service.ts + comment.service.ts
+  2) shared/pipes/time-ago.pipe.ts ("ha 2 horas")
+  3) shared/components/media-preview/ (imagem/video)
+  4) shared/components/post-card/ (reutilizavel)
+  5) features/feed/feed-page/ + create-post/ + feed.routes.ts
+  6) shared/components/comment-item/ + comment-form/ + confirm-dialog/
+  7) features/posts/post-detail/ + edit-post/ + posts.routes.ts
+
+TESTAR:
+  - Criar post (texto + imagem/video) aparece no topo do feed (cronologico).
+  - Botoes Editar/Apagar so nos proprios.
+  - Detalhe do post: adicionar/editar/apagar comentario proprio.
+  - Video reproduz no player; imagem mostra-se bem.
+
+>>> MARCO 3: os 3 dominios da 2.ª Parcelar funcionam.
+
+--------------------------------------------------------------------------------
+FASE 9 - INTEGRACAO PONTA-A-PONTA                                  [ALL] ~4-6h
+--------------------------------------------------------------------------------
+Checklist de teste end-to-end:
+  - Fluxo: registar -> login -> editar perfil + foto -> criar post c/ imagem
+           -> editar post -> comentar -> editar/apagar comentario -> seguir user.
+  - Seguranca: sem token -> 401; editar conteudo de outro -> 403.
+  - Responsividade: 320px (telemovel), 768px (tablet), 1024px (desktop).
+  - Feedback: spinners nas chamadas, toasts em sucesso/erro.
+  - Validacoes: email valido, password min. 8, campos obrigatorios.
+
+--------------------------------------------------------------------------------
+FASE 10 - DOCUMENTACAO + DEMO + ENTREGA                           [ALL] ~3-4h
+--------------------------------------------------------------------------------
+Preencher por ordem:
+  1) docs/API_CONTRACT.md (rever - estavel desde o Marco 1)
+  2) docs/database/schema.sql + docs/database/erd.md
+  3) docs/relatorio/Relatorio_2_Parcelar.md (decisoes, capturas, o que ficou p/ Exame)
+
+Antes de entregar:
+  - Gravar demo de 3-5 min com o fluxo completo.
+  - Git: develop -> merge para main com tag v0.5-parcelar.
+  - Confirmar backend/, frontend/ e docs/ preenchidos.
+
+================================================================================
+RESUMO DA ORDEM
+Setup -> Dominio -> Infraestrutura/BD -> Aplicacao -> API (testar no Swagger)
+-> Frontend (fundacoes -> auth -> perfil -> posts/comentarios)
+-> integracao -> docs/demo.
+
+Apoio: extras/Plano/Plano_2_Parcelar_NzolaNet.html  |  Guia_NzolaNet.html
+NzolaNet - Grupo LODA - ISPTEC 2026 - May the code be with you.
+================================================================================

@@ -54,7 +54,7 @@ Antes de mergulhar no plano, segue estes passos consoante a tua função:
 
 - **1.** [O Que Tem de Funcionar na 2.ª Parcelar](#1-o-que-tem-de-funcionar-na-2-parcelar)
 - **1.5.** [Fluxo End-to-End (exemplo: criar publicação)](#15-fluxo-end-to-end-exemplo-criar-publicacao)
-- **2.** [Arquitetura Resumida (foco parcelar)](#2-arquitetura-resumida-foco-parcelar)
+- **2.** [Arquitetura: Camadas vs MVC + Estrutura do Repositório](#2-arquitetura-camadas-vs-mvc-estrutura-do-repositorio)
 - **3.** [Divisão da Equipa nesta Fase](#3-divisao-da-equipa-nesta-fase)
 - **4.** [FRONTEND — O Que Construir](#4-frontend-o-que-construir)
 - **5.** [BACKEND — O Que Construir](#5-backend-o-que-construir)
@@ -167,7 +167,35 @@ Para perceber como tudo se interliga, segue o caminho de um clique até à base 
 
 ---
 
-## 2. Arquitetura Resumida (foco parcelar)
+## 2. Arquitetura: Camadas vs MVC + Estrutura do Repositório
+
+### 2.0. O enunciado pede MVC? **Não.** Qual é a melhor estrutura?
+
+> **Pergunta crítica respondida:** o enunciado **não exige MVC** (Model-View-Controller). O que está escrito, na secção *Requisitos Técnicos*, é:
+> *"Deve ser utilizada uma **arquitetura de separação de camadas** (Ex: Repositórios, Serviços, Controllers etc.)"* e *"Deve ser utilizado **DTOs**"*.
+
+**Porque é que MVC clássico NÃO é a estrutura certa aqui:**
+
+- O **MVC clássico** assume que o servidor também gera as **Views** (HTML renderizado no backend, como ASP.NET MVC com Razor). No nosso caso, **a View é o Angular** — uma SPA independente que corre no browser.
+- O backend é uma **ASP.NET Web API**: só devolve **JSON**, nunca HTML. Logo não há camada "View" no servidor — só existiria a parte "Controller" do MVC, o que torna o rótulo "MVC" enganador e incompleto.
+- Forçar MVC obrigaria a misturar responsabilidades (acesso a dados dentro dos controllers, por exemplo) — exatamente o oposto do que o enunciado premeia.
+
+**A melhor estrutura (e a que adotamos): Arquitetura em Camadas (N-Tier / Clean-lite).**
+
+| Camada | Projeto .NET | Responsabilidade |
+|---|---|---|
+| **Apresentação** | `NzolaNet.Api` | Controllers REST, Middleware, `Program.cs`. Recebe HTTP, devolve DTOs. *Sem lógica de negócio.* |
+| **Aplicação** | `NzolaNet.Application` | Services (regras de negócio), DTOs, Validators, Mappings, Interfaces. *Sem EF Core.* |
+| **Domínio** | `NzolaNet.Domain` | Entidades puras + interfaces de Repositório. *Sem dependências externas.* |
+| **Infraestrutura** | `NzolaNet.Infrastructure` | EF Core (DbContext, Migrations), Repositórios, JWT, Hash, Upload, Email. |
+
+> ✅ Esta divisão **cumpre literalmente** o enunciado ("Repositórios, Serviços, Controllers") e isola cada responsabilidade. O fluxo é sempre **Controller → Service → Repository → EF Core → SQL Server**, com **DTOs** a entrar e sair da API (nunca expomos entidades).
+
+**No frontend** a estrutura certa não é MVC mas sim a **arquitetura modular do Angular**: `core/` (singletons, guards, interceptors), `shared/` (componentes reutilizáveis), `layouts/` e `features/` (módulos por domínio, lazy-loaded).
+
+> 📌 **Conclusão:** *MVC não é pedido nem é o ideal.* A combinação **Camadas (backend) + Arquitetura Modular Angular (frontend) + DTOs** é a leitura mais fiel do enunciado e a mais segura para 20/20.
+
+### 2.1. Diagrama de Camadas
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -198,14 +226,26 @@ Para perceber como tudo se interliga, segue o caminho de um clique até à base 
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Repositório (monorepo):**
+### 2.2. Estrutura real do repositório (já criada — esqueleto vazio)
+
+> O esqueleto de pastas/ficheiros **já existe no repositório** (ficheiros vazios, prontos a preencher). O âmbito está limitado **apenas à 2.ª Parcelar** (Utilizadores, Publicações, Comentários + Autenticação e Seguir). Bazes, Notificações e Feed personalizado **não** foram criados nesta fase.
 
 ```
-nzolanet/
-├── backend/          ← ASP.NET Web API     (Willfredy)
-├── frontend/         ← Angular             (3 colegas)
-├── docs/             ← API_CONTRACT.md, ERD, relatório
-└── README.md
+NzolaNet/
+├── index.html              ← Landing page (GitHub Pages) com acesso aos planos
+├── README.md
+├── .gitignore
+├── backend/                ← ASP.NET Web API (Willfredy) — arquitetura em camadas
+│   ├── NzolaNet.sln
+│   ├── NzolaNet.Api/             (Controllers, Middleware, Program.cs, appsettings)
+│   ├── NzolaNet.Application/     (Services, DTOs, Validators, Mappings, Interfaces, Exceptions)
+│   ├── NzolaNet.Domain/          (Entities, Interfaces/Repositories)
+│   └── NzolaNet.Infrastructure/  (Data/EF Core, Repositories, Services: JWT/Hash/Email/Storage)
+├── frontend/               ← Angular (3 colegas) — arquitetura modular
+│   ├── proxy.conf.json
+│   └── src/ (styles, environments, app/{core,shared,layouts,features})
+├── docs/                   ← API_CONTRACT.md, database/ (schema + ERD), relatorio/
+└── extras/                 ← Documentação do projeto (Enunciado, Planos, build-pdf)
 ```
 
 ---
@@ -243,70 +283,38 @@ nzolanet/
 
 ### 4.2. Estrutura mínima de pastas (Frontend — 2.ª Parcelar)
 
+> **Nota de implementação:** usamos **Standalone Components (Angular 17+)** com **rotas por feature** (`*.routes.ts` + `loadChildren`/`loadComponent`) em vez de `NgModule`. É a abordagem moderna e mais simples. Cada componente tem `.ts`, `.html` e `.scss`. Os **comentários** não têm feature próprio: vivem como componentes partilhados (`comment-item`, `comment-form`) usados no `post-detail`.
+
 ```
-nzolanet-frontend/
-├── src/
-│   ├── app/
-│   │   ├── core/
-│   │   │   ├── guards/
-│   │   │   │   ├── auth.guard.ts
-│   │   │   │   └── guest.guard.ts
-│   │   │   ├── interceptors/
-│   │   │   │   ├── jwt.interceptor.ts
-│   │   │   │   └── error.interceptor.ts
-│   │   │   ├── models/
-│   │   │   │   ├── user.model.ts
-│   │   │   │   ├── post.model.ts
-│   │   │   │   ├── comment.model.ts
-│   │   │   │   └── auth.model.ts
-│   │   │   └── services/
-│   │   │       ├── auth.service.ts
-│   │   │       ├── user.service.ts
-│   │   │       ├── post.service.ts
-│   │   │       ├── comment.service.ts
-│   │   │       └── upload.service.ts
-│   │   ├── shared/
-│   │   │   ├── components/
-│   │   │   │   ├── navbar/
-│   │   │   │   ├── post-card/
-│   │   │   │   ├── comment-item/
-│   │   │   │   ├── comment-form/
-│   │   │   │   ├── user-avatar/
-│   │   │   │   ├── media-preview/
-│   │   │   │   ├── loading-spinner/
-│   │   │   │   └── confirm-dialog/
-│   │   │   └── pipes/
-│   │   │       └── time-ago.pipe.ts
-│   │   ├── layouts/
-│   │   │   ├── public-layout/
-│   │   │   └── private-layout/
-│   │   └── features/
-│   │       ├── auth/
-│   │       │   ├── login/
-│   │       │   ├── register/
-│   │       │   ├── forgot-password/
-│   │       │   └── auth.module.ts
-│   │       ├── feed/
-│   │       │   ├── feed-page/
-│   │       │   ├── create-post/
-│   │       │   └── feed.module.ts
-│   │       ├── posts/
-│   │       │   ├── post-detail/
-│   │       │   ├── edit-post/
-│   │       │   └── posts.module.ts
-│   │       ├── profile/
-│   │       │   ├── profile-page/
-│   │       │   ├── edit-profile/
-│   │       │   ├── followers-list/
-│   │       │   └── profile.module.ts
-│   │       └── comments/
-│   │           └── comments.module.ts
-│   ├── environments/
-│   │   ├── environment.ts            # apiUrl: 'http://localhost:5000/api'
-│   │   └── environment.prod.ts
-│   └── styles/
-└── proxy.conf.json
+frontend/
+├── proxy.conf.json                   # /api → http://localhost:5000
+└── src/
+    ├── styles.scss
+    ├── environments/
+    │   ├── environment.ts            # apiUrl: 'http://localhost:5000/api'
+    │   └── environment.prod.ts
+    └── app/
+        ├── app.component.{ts,html,scss}
+        ├── app.config.ts             # providers (HttpClient, interceptors, router)
+        ├── app.routes.ts             # rotas raiz + lazy loading dos features
+        ├── core/
+        │   ├── guards/               # auth.guard.ts, guest.guard.ts
+        │   ├── interceptors/         # jwt.interceptor.ts, error.interceptor.ts
+        │   ├── models/               # user, post, comment, auth, paged-result (.model.ts)
+        │   └── services/             # auth, user, post, comment, upload (.service.ts)
+        ├── shared/
+        │   ├── components/           # navbar, post-card, comment-item, comment-form,
+        │   │                         #   user-avatar, media-preview, loading-spinner, confirm-dialog
+        │   └── pipes/                # time-ago.pipe.ts
+        ├── layouts/                  # public-layout, private-layout
+        └── features/
+            ├── auth/                 # login, register, forgot-password, reset-password + auth.routes.ts
+            ├── feed/                 # feed-page, create-post + feed.routes.ts
+            ├── posts/                # post-detail, edit-post + posts.routes.ts
+            └── profile/              # profile-page, edit-profile, followers-list + profile.routes.ts
 ```
+
+> ⚙️ **Como inicializar:** corre `ng new` num diretório temporário e copia os ficheiros gerados (`angular.json`, `package.json`, `tsconfig*.json`, `main.ts`, `index.html`) para `frontend/`, mantendo a árvore `src/app/` já criada. Ou gera os componentes com `ng generate component features/auth/login --standalone` apontando para estas pastas.
 
 ### 4.3. Ecrãs mínimos (10 ecrãs) que têm de existir
 
@@ -452,12 +460,37 @@ export const authGuard: CanActivateFn = () => {
 ### 5.2. Estrutura da solução
 
 ```
-NzolaNet.sln
-├── NzolaNet.Api/                 ← Controllers, Middleware, Program.cs
-├── NzolaNet.Application/         ← Services, DTOs, Validators, Exceptions, Mappings
-├── NzolaNet.Domain/              ← Entities, Enums, Interfaces (Repositories)
-└── NzolaNet.Infrastructure/      ← DbContext, Migrations, Repositories, JWT, Storage
+backend/
+├── NzolaNet.sln
+├── NzolaNet.Api/                 ← Camada de Apresentação
+│   ├── Program.cs · appsettings.json · Properties/launchSettings.json
+│   ├── Controllers/             # AuthController, UsersController, PostsController, CommentsController
+│   ├── Middleware/              # ExceptionHandlingMiddleware
+│   └── wwwroot/                 # uploads servidos estaticamente (gitignored)
+├── NzolaNet.Application/         ← Camada de Aplicação (regras de negócio)
+│   ├── Interfaces/              # IAuthService, IUserService, IPostService, ICommentService,
+│   │                           #   IFollowService, IStorageService, IJwtTokenService,
+│   │                           #   IPasswordHasher, IEmailService
+│   ├── Services/                # AuthService, UserService, PostService, CommentService, FollowService
+│   ├── DTOs/                    # Auth/ · Users/ · Posts/ · Comments/ · Common/ (PagedResult, Message)
+│   ├── Validators/             # RegisterDto, CreatePostDto, CreateCommentDto (FluentValidation)
+│   ├── Mappings/               # AutoMapperProfile
+│   └── Exceptions/             # NotFound, Forbidden, BadRequest, Conflict
+├── NzolaNet.Domain/             ← Camada de Domínio (pura)
+│   ├── Entities/               # User, Post, Comment, Follow, PasswordResetToken
+│   └── Interfaces/Repositories/ # IUserRepository, IPostRepository, ICommentRepository,
+│                                #   IFollowRepository, IPasswordResetTokenRepository
+└── NzolaNet.Infrastructure/     ← Camada de Infraestrutura
+    ├── Data/
+    │   ├── ApplicationDbContext.cs
+    │   ├── Configurations/     # Fluent API por entidade
+    │   ├── Migrations/         # geradas pelo EF Core
+    │   └── Seed/               # DbSeeder
+    ├── Repositories/           # implementações EF Core dos repositórios
+    └── Services/               # JwtTokenService, PasswordHasher, EmailService, LocalFileStorageService
 ```
+
+> 🔗 **Dependências entre projetos:** `Api → Application → Domain` e `Infrastructure → Application + Domain`. O `Domain` **não depende de ninguém**. As interfaces de serviços de infraestrutura (JWT, Hash, Email, Storage) ficam em `Application/Interfaces` e são implementadas em `Infrastructure/Services` — assim a Aplicação depende de **abstrações**, não de detalhes técnicos.
 
 ### 5.3. Base de Dados — Tabelas mínimas (2.ª Parcelar)
 
