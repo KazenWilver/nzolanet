@@ -1,9 +1,9 @@
 // Representa um comentário associado a uma publicação
 // Nota: evitado o nome "Comment" por conflito com o tipo nativo do DOM no TypeScript
 export interface Comentario {
-  id: number;
-  postId: number;
-  autorId: number;
+  id: string;
+  postId: string;
+  autorId: string;
   autorNome: string;
   autorFoto?: string;
   autorNomeUtilizador: string;
@@ -12,12 +12,12 @@ export interface Comentario {
   atualizadoEm?: string;
   reportsCount?: number;
   reportadoPorMim?: boolean;
-  reports?: Array<{ userId: number; motivo: string; criadoEm: string }>;
+  reports?: Array<{ userId: string; motivo: string; criadoEm: string }>;
 }
 
 // DTOs que separam os dados de entrada dos dados de saída (requisito técnico do enunciado)
 export interface CriarComentarioDto {
-  postId: number;
+  postId: string;
   texto: string;
 }
 

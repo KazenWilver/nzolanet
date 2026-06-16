@@ -1,7 +1,7 @@
 // Representa uma publicação completa com dados do autor desnormalizados para exibição directa
 export interface Post {
-  id: number;
-  autorId: number;
+  id: string;
+  autorId: string;
   autorNome: string;
   autorFoto?: string;
   autorNomeUtilizador: string;

@@ -1,6 +1,6 @@
 // Representa o utilizador completo tal como vem do backend
 export interface User {
-  id: number;
+  id: string;
   nome: string;
   nomeUtilizador: string;
   email: string;
@@ -14,6 +14,7 @@ export interface User {
   privado: boolean;
   eAdmin: boolean;
   estaASeguir?: boolean;
+  estaPendente?: boolean;
   criadoEm: string;
 }
 
