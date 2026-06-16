@@ -35,14 +35,14 @@ export class PostDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.utilizador$.subscribe((u: User | null) => this.utilizadorAtual = u);
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.postService.obterPorId(id).subscribe((p: Post) => {
       this.post = p;
       this.carregarComentarios(id);
     });
   }
 
-  carregarComentarios(postId: number): void {
+  carregarComentarios(postId: string): void {
     this.commentService.obterPorPost(postId).subscribe({
       next: (lista: Comentario[]) => { this.comentarios = lista; this.aCarregarComentarios = false; },
       error: () => { this.aCarregarComentarios = false; }
@@ -54,12 +54,12 @@ export class PostDetailComponent implements OnInit {
     if (this.post) this.post.totalComentarios++;
   }
 
-  removerComentario(id: number): void {
+  removerComentario(id: string): void {
     this.comentarios = this.comentarios.filter(c => c.id !== id);
     if (this.post) this.post.totalComentarios--;
   }
 
   voltar(): void { this.router.navigate(['/feed']); }
 
-  trackPorId(_: number, comentario: Comentario): number { return comentario.id; }
+  trackPorId(_: number, comentario: Comentario): string { return comentario.id; }
 }
