@@ -13,6 +13,7 @@ interface FormPerfil {
   nomeUtilizador: string;
   bio: string;
   localizacao: string;
+  privado: boolean;
 }
 
 @Component({
@@ -24,7 +25,7 @@ interface FormPerfil {
 })
 export class EditProfileComponent implements OnInit {
   utilizador: User | null = null;
-  formDados: FormPerfil = { nome: '', nomeUtilizador: '', bio: '', localizacao: '' };
+  formDados: FormPerfil = { nome: '', nomeUtilizador: '', bio: '', localizacao: '', privado: false };
   fotoSelecionada: File | null = null;
   previsaoFoto: string | null = null;
   aGuardar = false;
@@ -43,7 +44,8 @@ export class EditProfileComponent implements OnInit {
         nome: u.nome,
         nomeUtilizador: u.nomeUtilizador,
         bio: u.bio ?? '',
-        localizacao: u.localizacao ?? ''
+        localizacao: u.localizacao ?? '',
+        privado: u.privado || false
       };
     });
   }
@@ -64,10 +66,15 @@ export class EditProfileComponent implements OnInit {
     formulario.append('nomeUtilizador', this.formDados.nomeUtilizador);
     formulario.append('bio', this.formDados.bio);
     formulario.append('localizacao', this.formDados.localizacao);
+    formulario.append('privado', String(this.formDados.privado));
     if (this.fotoSelecionada) formulario.append('foto', this.fotoSelecionada);
 
     this.userService.editarPerfil(this.utilizador.id, formulario).subscribe({
-      next: () => this.voltar(),
+      next: (usuarioAtualizado: User) => {
+        // Atualiza a sessão local com os novos dados
+        this.authService.atualizarUtilizadorAtual(usuarioAtualizado);
+        this.voltar();
+      },
       error: () => { this.aGuardar = false; }
     });
   }
