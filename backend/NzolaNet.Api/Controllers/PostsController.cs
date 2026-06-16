@@ -19,14 +19,14 @@ public class PostsController : ControllerBase
         _postService = postService;
     }
 
-    // Obter o feed de publicações (ordem cronológica, mais recentes primeiro)
-    [HttpGet("feed")]
-    public async Task<IActionResult> GetFeed()
+    // Listar TODAS as publicações em ordem cronológica (público)
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
     {
         try
         {
-            var feed = await _postService.GetFeedAsync();
-            return Ok(feed);
+            var posts = await _postService.GetAllAsync();
+            return Ok(posts);
         }
         catch (Exception)
         {
@@ -34,7 +34,28 @@ public class PostsController : ControllerBase
         }
     }
 
-    // Criar uma nova publicação (requer autenticação)
+    // Listar publicações de utilizadores seguidos em ordem cronológica (requer autenticação)
+    [Authorize]
+    [HttpGet("feed")]
+    public async Task<IActionResult> GetFeed()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var feed = await _postService.GetFeedAsync(userId);
+            return Ok(feed);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { Message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { Message = "Ocorreu um erro interno no servidor." });
+        }
+    }
+
+    // Criar uma nova publicação com upload de imagem/vídeo (requer autenticação)
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreatePostDto createDto)
@@ -43,7 +64,7 @@ public class PostsController : ControllerBase
         {
             var userId = GetCurrentUserId();
             var post = await _postService.CreateAsync(userId, createDto);
-            return CreatedAtAction(nameof(GetFeed), new { id = post.Id }, post);
+            return CreatedAtAction(nameof(GetAll), new { id = post.Id }, post);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -59,7 +80,7 @@ public class PostsController : ControllerBase
         }
     }
 
-    // Editar uma publicação existente (apenas o dono pode editar)
+    // Editar apenas o texto da própria publicação (requer autenticação)
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePostDto updateDto)
@@ -70,7 +91,7 @@ public class PostsController : ControllerBase
             var post = await _postService.UpdateAsync(userId, id, updateDto);
             return Ok(post);
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
             return Forbid();
         }
@@ -84,7 +105,7 @@ public class PostsController : ControllerBase
         }
     }
 
-    // Eliminar uma publicação (apenas o dono pode eliminar)
+    // Eliminar apenas a própria publicação (requer autenticação)
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
@@ -99,7 +120,7 @@ public class PostsController : ControllerBase
             }
             return BadRequest(new { Message = "Não foi possível eliminar a publicação." });
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
             return Forbid();
         }
