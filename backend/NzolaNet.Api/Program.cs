@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NzolaNet.Domain.Entities;
+using NzolaNet.Domain.Interfaces.Repositories;
 using NzolaNet.Infrastructure.Data;
+using NzolaNet.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +30,10 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// 3. Adiciona os controladores da API
+// 3. Registo de Repositórios (Injeção de Dependências)
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// 4. Adiciona os controladores da API
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
