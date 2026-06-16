@@ -27,7 +27,7 @@ export class EditPostComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.postService.obterPorId(id).subscribe((p: Post) => {
       this.post = p;
       this.textoEditado = p.texto;
