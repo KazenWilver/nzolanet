@@ -22,19 +22,31 @@ export class AuthService {
   }
 
   login(dados: LoginDto): Observable<RespostaAutenticacao> {
-    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/login`, dados).pipe(
+    const payload = {
+      usernameOrEmail: dados.email,
+      password: dados.senha
+    };
+    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/login`, payload).pipe(
       tap(resposta => this.guardarSessao(resposta))
     );
   }
 
   registar(dados: RegistoDto): Observable<RespostaAutenticacao> {
-    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/register`, dados).pipe(
+    const payload = {
+      username: dados.nomeUtilizador,
+      email: dados.email,
+      password: dados.senha
+    };
+    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/register`, payload).pipe(
       tap(resposta => this.guardarSessao(resposta))
     );
   }
 
   recuperarSenha(dados: RecuperarSenhaDto): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/recuperar-senha`, dados);
+    const payload = {
+      email: dados.email
+    };
+    return this.http.post<void>(`${this.baseUrl}/recuperar-senha`, payload);
   }
 
   // Limpa o token e redireciona para o login — usado pelo error interceptor no 401

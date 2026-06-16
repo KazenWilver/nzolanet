@@ -263,8 +263,9 @@ const notificacoes = [
 ];
 
 app.post('/api/auth/login', (req, res) => {
-  const { email, senha } = req.body;
-  const user = users.find(u => u.email === email);
+  const email = req.body.email || req.body.usernameOrEmail;
+  const senha = req.body.senha || req.body.password;
+  const user = users.find(u => u.email === email || u.nomeUtilizador === email);
   if (!user || senha !== 'senha123') {
     return res.status(401).json({ message: 'Email ou senha incorrectos.' });
   }
@@ -274,16 +275,20 @@ app.post('/api/auth/login', (req, res) => {
   return res.json({ token: criarTokenParaUtilizador(user), utilizador: transformarUtilizador(utilizadorSemFlag) });
 });
 
-app.post('/api/auth/registar', (req, res) => {
-  const { nome, nomeUtilizador, email, senha } = req.body;
-  if (!nome || !nomeUtilizador || !email || !senha) {
+const handleRegister = (req, res) => {
+  const nome = req.body.nome || req.body.username;
+  const nomeUtilizador = req.body.nomeUtilizador || req.body.username;
+  const email = req.body.email;
+  const senha = req.body.senha || req.body.password;
+  
+  if (!nomeUtilizador || !email || !senha) {
     return res.status(400).json({ message: 'Dados inválidos.' });
   }
   const exists = users.some(u => u.email === email || u.nomeUtilizador === nomeUtilizador);
   if (exists) return res.status(400).json({ message: 'Utilizador já existe.' });
   const novo = {
     id: users.length + 1,
-    nome,
+    nome: nome || nomeUtilizador,
     nomeUtilizador,
     email,
     fotoPerfil: '',
@@ -299,7 +304,10 @@ app.post('/api/auth/registar', (req, res) => {
   };
   users.push(novo);
   return res.json({ token: criarTokenParaUtilizador(novo), utilizador: transformarUtilizador(novo) });
-});
+};
+
+app.post('/api/auth/registar', handleRegister);
+app.post('/api/auth/register', handleRegister);
 
 app.post('/api/auth/recuperar-senha', (req, res) => {
   return res.status(200).json({});
