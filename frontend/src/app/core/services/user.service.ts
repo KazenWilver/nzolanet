@@ -108,4 +108,12 @@ export class UserService {
   rejeitarPedido(followerId: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/follow-requests/${followerId}/reject`, {});
   }
+
+  pesquisar(termo: string): Observable<User[]> {
+    const query = termo.trim().toLowerCase();
+    if (!query) return of([]);
+    return this.http.get<any[]>(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`).pipe(
+      map(users => users.map(u => this.mapUser(u)))
+    );
+  }
 }

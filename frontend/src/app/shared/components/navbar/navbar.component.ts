@@ -25,6 +25,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   notificacoesAberto = false;
   notificacoesPreview: Notificacao[] = [];
   private destroy$ = new Subject<void>();
+  modoEscuro = true;
 
   constructor(
     private authService: AuthService,
@@ -33,10 +34,29 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    const savedTheme = localStorage.getItem('nzolanet_theme');
+    if (savedTheme === 'light') {
+      this.modoEscuro = false;
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+
     this.authService.utilizador$.pipe(takeUntil(this.destroy$)).subscribe((u: User | null) => {
       this.utilizadorAtual = u;
       if (u) this.carregarNotificacoes();
     });
+  }
+
+  alternarTema(): void {
+    this.modoEscuro = !this.modoEscuro;
+    if (this.modoEscuro) {
+      document.body.classList.remove('light-theme');
+      localStorage.setItem('nzolanet_theme', 'dark');
+    } else {
+      document.body.classList.add('light-theme');
+      localStorage.setItem('nzolanet_theme', 'light');
+    }
   }
 
   ngOnDestroy(): void {

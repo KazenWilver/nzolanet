@@ -49,6 +49,36 @@
           </svg>
         </button>
       </div>
+      <div class="campo__requisitos" *ngIf="dados.senha.length > 0">
+        <p class="campo__requisito" [class.campo__requisito--ok]="temTamanhoMinimo()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline *ngIf="temTamanhoMinimo()" points="20 6 9 17 4 12"/>
+            <line *ngIf="!temTamanhoMinimo()" x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+          Mínimo de 6 caracteres
+        </p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temMaiuscula()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline *ngIf="temMaiuscula()" points="20 6 9 17 4 12"/>
+            <line *ngIf="!temMaiuscula()" x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+          Uma letra maiúscula
+        </p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temMinuscula()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline *ngIf="temMinuscula()" points="20 6 9 17 4 12"/>
+            <line *ngIf="!temMinuscula()" x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+          Uma letra minúscula
+        </p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temNumero()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline *ngIf="temNumero()" points="20 6 9 17 4 12"/>
+            <line *ngIf="!temNumero()" x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+          Um número
+        </p>
+      </div>
     </div>
 
     <div class="campo">
@@ -59,7 +89,7 @@
       <span class="campo__erro" *ngIf="senhasNaoCoincidem()">As senhas não coincidem</span>
     </div>
 
-    <button type="submit" class="registo__btn" [disabled]="formulario.invalid || senhasNaoCoincidem() || aRegistar">
+    <button type="submit" class="registo__btn" [disabled]="formulario.invalid || senhasNaoCoincidem() || !senhaValida() || aRegistar">
       <app-loading-spinner *ngIf="aRegistar" tamanho="sm" />
       <span *ngIf="!aRegistar">Criar conta</span>
     </button>

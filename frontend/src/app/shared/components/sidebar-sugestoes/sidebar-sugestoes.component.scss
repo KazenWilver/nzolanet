@@ -11,6 +11,7 @@
   border: 1px solid vars.$color-border-subtle;
   border-radius: vars.$radius-md;
   padding: vars.$spacing-lg;
+  animation: fadeIn 0.4s ease-out;
 
   &--info {
     background: rgba(vars.$color-accent, 0.04);
@@ -132,7 +133,7 @@
   display: block;
     width: 100%;
     padding: vars.$spacing-md;
-    border-bottom: 1px solid rgba(vars.$color-primary-text, 0.05);
+    border-bottom: 1px solid var(--border-subtle);
     background: transparent;
     text-decoration: none;
     border: none;

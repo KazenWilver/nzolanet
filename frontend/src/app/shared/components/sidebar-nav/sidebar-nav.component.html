@@ -17,8 +17,13 @@
   <div class="sidebar-nav__section sidebar-nav__section--online">
     <h3 class="sidebar-nav__label">Amigos Online</h3>
     <div class="sidebar-nav__amigos">
-      <!-- Será preenchido dinamicamente -->
-      <p class="sidebar-nav__vazio">Carregando...</p>
+      <div *ngFor="let amigo of amigosOnline" class="sidebar-nav__amigo-item">
+        <div class="sidebar-nav__amigo-avatar-wrap">
+          <app-user-avatar [foto]="amigo.fotoPerfil" [nome]="amigo.nome" tamanho="sm" />
+          <span class="sidebar-nav__online-dot"></span>
+        </div>
+        <span class="sidebar-nav__amigo-nome" [title]="amigo.nome">{{ amigo.nome }}</span>
+      </div>
     </div>
   </div>
 </nav>

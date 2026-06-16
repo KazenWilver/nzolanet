@@ -36,6 +36,22 @@ public class UsersController : ControllerBase
         return Ok(profile);
     }
 
+    // GET /api/users/search – Pesquisar utilizadores
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        var users = await _userService.SearchUsersAsync(q ?? string.Empty, currentUserId);
+        return Ok(users);
+    }
+
     // PUT /api/users/profile – Editar perfil do utilizador autenticado
     [Authorize]
     [HttpPut("profile")]

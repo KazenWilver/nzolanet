@@ -58,21 +58,29 @@
   }
 
   &__button {
-    min-width: 140px;
-    padding: 0 1.75rem;
+    min-width: 150px;
+    padding: 0.85rem 1.75rem;
     border: none;
     border-radius: vars.$radius-md;
     background: vars.$color-accent;
     color: #ffffff;
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: vars.$font-weight-semibold;
     letter-spacing: 0.02em;
     cursor: pointer;
-    transition: background vars.$transition-base;
-  }
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background vars.$transition-base, transform vars.$transition-fast;
 
-  &__button:hover {
-    background: vars.$color-accent-hover;
+    &:hover {
+      background: vars.$color-accent-hover;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
   &__conteudo {
@@ -88,5 +96,67 @@
     border-radius: vars.$radius-lg;
     color: vars.$color-secondary-text;
     text-align: center;
+  }
+
+  &__section {
+    margin-bottom: vars.$spacing-xl;
+  }
+
+  &__section-titulo {
+    font-size: vars.$font-size-h3;
+    font-weight: vars.$font-weight-bold;
+    color: vars.$color-primary-text;
+    margin-bottom: vars.$spacing-lg;
+    padding-bottom: vars.$spacing-base;
+    border-bottom: 1px solid vars.$color-border-subtle;
+  }
+
+  &__users {
+    display: grid;
+    gap: vars.$spacing-md;
+  }
+
+  &__user-card {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-lg;
+    padding: vars.$spacing-lg;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    text-decoration: none;
+    transition: border-color vars.$transition-base, transform vars.$transition-base, box-shadow vars.$transition-base;
+    animation: fadeIn 0.35s ease-out;
+
+    &:hover {
+      border-color: vars.$color-border-strong;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &__user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__user-nome {
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
+    font-size: vars.$font-size-body;
+  }
+
+  &__user-handle {
+    font-size: vars.$font-size-caption;
+    color: vars.$color-secondary-text;
+  }
+
+  &__user-btn {
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-accent;
+    white-space: nowrap;
   }
 }

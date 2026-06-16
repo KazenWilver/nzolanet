@@ -40,7 +40,7 @@
   </div>
 
   <footer class="post-card__rodape">
-    <button class="post-card__acao post-card__acao--baze" [class.post-card__acao--ativo]="post.utilizadorDeuBaze" (click)="alternarBaze()">
+    <button class="post-card__acao post-card__acao--baze" [class.post-card__acao--ativo]="post.utilizadorDeuBaze" (click)="alternarBaze()" [disabled]="eMinhaPub()" [title]="eMinhaPub() ? 'Não podes dar Baze na tua própria publicação' : ''">
       <svg width="16" height="16" viewBox="0 0 24 24"
         [attr.fill]="post.utilizadorDeuBaze ? 'currentColor' : 'none'"
         stroke="currentColor" stroke-width="2">

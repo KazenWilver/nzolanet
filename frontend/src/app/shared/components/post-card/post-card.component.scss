@@ -8,6 +8,7 @@
   margin-bottom: vars.$spacing-lg;
   overflow: hidden;
   transition: box-shadow vars.$transition-base, transform vars.$transition-base;
+  animation: fadeIn 0.3s ease-out;
 
   &:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(113, 112, 255, 0.1);
@@ -73,7 +74,7 @@
   transition: background vars.$transition-fast, color vars.$transition-fast;
 
   &:hover {
-    background: rgba(vars.$color-primary-text, 0.05);
+    background: var(--bg-hover);
     color: vars.$color-primary-text;
   }
 }
@@ -180,6 +181,21 @@
       color: vars.$color-engagement-pink;
       border-color: rgba(vars.$color-engagement-pink, 0.2);
       background: rgba(vars.$color-engagement-pink, 0.05);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      
+      &:hover {
+        color: vars.$color-secondary-text;
+        border-color: transparent;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      svg {
+        transform: none !important;
+      }
     }
 
     &.post-card__acao--ativo {

@@ -1,4 +1,4 @@
-﻿@use '../../../styles/variables' as vars;
+@use '../../../styles/variables' as vars;
 
 .sidebar-nav {
   display: flex;
@@ -78,12 +78,42 @@
     gap: vars.$spacing-md;
   }
 
-  &__vazio {
+  &__amigo-item {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-md;
+    padding: vars.$spacing-xs vars.$spacing-md;
+    border-radius: vars.$radius-md;
+    transition: background vars.$transition-fast;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+  }
+
+  &__amigo-avatar-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  &__online-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #22C55E;
+    border: 2px solid var(--bg-surface, #0F1011);
+    border-radius: 50%;
+  }
+
+  &__amigo-nome {
     font-size: vars.$font-size-caption;
-    color: vars.$color-tertiary-text;
-    text-align: center;
-    padding: vars.$spacing-lg vars.$spacing-md;
-    margin: 0;
+    font-weight: vars.$font-weight-medium;
+    color: vars.$color-primary-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

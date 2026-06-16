@@ -11,6 +11,10 @@
       [(ngModel)]="texto" name="texto" rows="3" (input)="ajustarAltura($event)">
     </textarea>
 
+    <div class="criar-post__erro" *ngIf="erro">
+      {{ erro }}
+    </div>
+
     <div class="criar-post__previsao" *ngIf="previsaoUrl">
       <button type="button" class="criar-post__remover" (click)="removerMedia()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

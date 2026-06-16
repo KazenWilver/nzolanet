@@ -15,6 +15,7 @@
     font-size: 13px;
     color: vars.$color-error;
     margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-out;
   }
 
   &__formulario { display: flex; flex-direction: column; gap: 16px; }
@@ -95,4 +96,30 @@
   }
 
   &__erro { font-size: 12px; color: vars.$color-error; font-weight: 500; }
+}
+
+.campo__requisitos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.campo__requisito {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: vars.$color-error;
+  transition: color 0.2s ease;
+  margin: 0;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &--ok {
+    color: #22C55E;
+  }
 }

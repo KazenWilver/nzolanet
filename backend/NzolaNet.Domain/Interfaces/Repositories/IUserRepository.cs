@@ -13,4 +13,5 @@ public interface IUserRepository
     Task<bool> ExistsByUsernameAsync(string username);
     Task<bool> CreateAsync(User user, string password);
     Task<bool> UpdateAsync(User user);
+    Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query);
 }

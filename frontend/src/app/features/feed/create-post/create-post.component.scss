@@ -195,3 +195,16 @@
   color: rgba(255, 255, 255, 0.3);
   cursor: not-allowed;
 }
+
+.criar-post__erro {
+  background: rgba(vars.$color-error, 0.08);
+  border: 1px solid rgba(vars.$color-error, 0.2);
+  border-radius: vars.$radius-md;
+  color: vars.$color-error;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-caption;
+  font-weight: vars.$font-weight-medium;
+  padding: vars.$spacing-md;
+  margin-top: vars.$spacing-sm;
+  animation: fadeIn 0.3s ease-out;
+}

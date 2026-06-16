@@ -4,7 +4,7 @@
       <h1>Pesquisar</h1>
       <p *ngIf="termo; else semTermo">Resultados para "{{ termo }}"</p>
       <ng-template #semTermo>
-        <p>Use a barra de pesquisa no topo para encontrar publicações.</p>
+        <p>Use a barra de pesquisa para encontrar utilizadores e publicações.</p>
       </ng-template>
     </div>
 
@@ -12,12 +12,17 @@
       <input
         class="search-page__input"
         type="search"
-        placeholder="Buscar publicações, hashtags ou utilizadores"
+        placeholder="Buscar utilizadores ou publicações..."
         [(ngModel)]="termo"
         name="searchTerm"
         autocomplete="off"
       />
-      <button class="search-page__button" type="submit">Pesquisar</button>
+      <button class="search-page__button" type="submit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Pesquisar
+      </button>
     </form>
   </div>
 
@@ -26,12 +31,34 @@
       <app-loading-spinner />
     </div>
 
-    <div *ngIf="!aCarregar && termo && posts.length === 0" class="search-page__empty">
-      <p>Nenhum resultado encontrado para "{{ termo }}".</p>
+    <!-- Seção de Utilizadores -->
+    <div *ngIf="!aCarregar && utilizadores.length > 0" class="search-page__section">
+      <h2 class="search-page__section-titulo">Utilizadores</h2>
+      <div class="search-page__users">
+        <a *ngFor="let u of utilizadores" class="search-page__user-card" [routerLink]="['/perfil', u.id]">
+          <app-user-avatar [foto]="u.fotoPerfil" [nome]="u.nome" tamanho="md" />
+          <div class="search-page__user-info">
+            <span class="search-page__user-nome">{{ u.nome }}</span>
+            <span class="search-page__user-handle">@{{ u.nomeUtilizador }}</span>
+          </div>
+          <span class="search-page__user-btn">Ver perfil</span>
+        </a>
+      </div>
     </div>
 
-    <div *ngFor="let post of posts; trackBy: trackPorId" class="search-page__post">
-      <app-post-card [post]="post" />
+    <!-- Seção de Publicações -->
+    <div *ngIf="!aCarregar && posts.length > 0" class="search-page__section">
+      <h2 class="search-page__section-titulo">Publicações</h2>
+      <div *ngFor="let post of posts; trackBy: trackPorId" class="search-page__post">
+        <app-post-card [post]="post" />
+      </div>
+    </div>
+
+    <div *ngIf="!aCarregar && termo && posts.length === 0 && utilizadores.length === 0" class="search-page__empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; color: var(--text-tertiary);">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <p>Nenhum resultado encontrado para "{{ termo }}".</p>
     </div>
   </div>
 </section>

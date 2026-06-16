@@ -3,7 +3,7 @@
     <h3 class="widget__titulo">Sugestões para ti</h3>
     
     <div class="widget__sugestoes">
-      <div *ngFor="let user of sugestoesAoSeguir" class="sugestao-item" (click)="visitarPerfil(user.id)">
+      <div *ngFor="let user of sugestoesAoSeguir" class="sugestao-item">
         <div class="sugestao-item__avatar">
           <div class="avatar-initials">{{ getInitials(user.nome) }}</div>
         </div>

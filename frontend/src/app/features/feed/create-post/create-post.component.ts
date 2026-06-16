@@ -25,6 +25,7 @@ export class CreatePostComponent implements OnInit {
   tipoMedia: 'imagem' | 'video' | null = null;
   previsaoUrl: string | null = null;
   aPublicar = false;
+  erro = '';
 
   constructor(private postService: PostService, private authService: AuthService) {}
 
@@ -37,6 +38,7 @@ export class CreatePostComponent implements OnInit {
   cancelar(): void {
     this.formularioAberto = false;
     this.texto = '';
+    this.erro = '';
     this.removerMedia();
   }
 
@@ -47,6 +49,7 @@ export class CreatePostComponent implements OnInit {
     this.ficheiroSelecionado = ficheiro;
     this.tipoMedia = tipo;
     this.previsaoUrl = URL.createObjectURL(ficheiro);
+    this.erro = '';
   }
 
   removerMedia(): void {
@@ -59,6 +62,7 @@ export class CreatePostComponent implements OnInit {
   publicar(): void {
     if (!this.texto.trim() || this.aPublicar) return;
     this.aPublicar = true;
+    this.erro = '';
     const dados = {
       texto: this.texto.trim(),
       imagem: this.tipoMedia === 'imagem' ? this.ficheiroSelecionado ?? undefined : undefined,
@@ -66,7 +70,15 @@ export class CreatePostComponent implements OnInit {
     };
     this.postService.criar(dados).subscribe({
       next: (novoPost: Post) => { this.postCriado.emit(novoPost); this.cancelar(); this.aPublicar = false; },
-      error: () => { this.aPublicar = false; }
+      error: (err: any) => {
+        this.aPublicar = false;
+        this.erro = 'Erro ao publicar. Verifica se o ficheiro é válido e tenta novamente (máx. 30MB para vídeos).';
+        setTimeout(() => {
+          if (this.erro === 'Erro ao publicar. Verifica se o ficheiro é válido e tenta novamente (máx. 30MB para vídeos).') {
+            this.erro = '';
+          }
+        }, 6000);
+      }
     });
   }
 

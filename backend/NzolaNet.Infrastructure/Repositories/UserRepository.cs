@@ -70,4 +70,17 @@ public class UserRepository : IUserRepository
         var affectedRows = await _context.SaveChangesAsync();
         return affectedRows > 0;
     }
+
+    public async Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return System.Linq.Enumerable.Empty<User>();
+        }
+        var upperQuery = query.ToUpper();
+        return await _context.Users
+            .Where(u => u.NormalizedUserName.Contains(upperQuery) || (u.Bio != null && u.Bio.ToUpper().Contains(upperQuery)))
+            .Take(30)
+            .ToListAsync();
+    }
 }

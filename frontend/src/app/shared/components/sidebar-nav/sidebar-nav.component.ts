@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-sidebar-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, UserAvatarComponent],
   templateUrl: './sidebar-nav.component.html',
   styleUrl: './sidebar-nav.component.scss'
 })
@@ -16,6 +17,13 @@ export class SidebarNavComponent implements OnInit {
     { icon: 'search', label: 'Pesquisar', route: '/pesquisar', active: false },
     { icon: 'bell', label: 'Notificações', route: '/notificacoes', active: false },
     { icon: 'user', label: 'Perfil', route: '/perfil/me', active: false },
+  ];
+
+  amigosOnline = [
+    { id: 'm1', nome: 'António Nzola', fotoPerfil: undefined },
+    { id: 'm2', nome: 'Bela Kiala', fotoPerfil: undefined },
+    { id: 'm3', nome: 'Carlos Mwene', fotoPerfil: undefined },
+    { id: 'm4', nome: 'Deolinda Neto', fotoPerfil: undefined }
   ];
 
   constructor(private sanitizer: DomSanitizer) { }

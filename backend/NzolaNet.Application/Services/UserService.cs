@@ -274,4 +274,15 @@ public class UserService : IUserService
         }
         return dtos;
     }
+
+    public async Task<IEnumerable<UserProfileDto>> SearchUsersAsync(string query, Guid? currentUserId = null)
+    {
+        var users = await _userRepository.SearchAsync(query);
+        var dtos = new List<UserProfileDto>();
+        foreach (var user in users)
+        {
+            dtos.Add(await GetProfileAsync(user.Id, currentUserId));
+        }
+        return dtos;
+    }
 }

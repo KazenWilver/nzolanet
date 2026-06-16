@@ -25,8 +25,28 @@ export class RegisterComponent {
     return !!this.dados.confirmarSenha && this.dados.senha !== this.dados.confirmarSenha;
   }
 
+  temMaiuscula(): boolean {
+    return /[A-Z]/.test(this.dados.senha);
+  }
+
+  temMinuscula(): boolean {
+    return /[a-z]/.test(this.dados.senha);
+  }
+
+  temNumero(): boolean {
+    return /[0-9]/.test(this.dados.senha);
+  }
+
+  temTamanhoMinimo(): boolean {
+    return this.dados.senha.length >= 6;
+  }
+
+  senhaValida(): boolean {
+    return this.temMaiuscula() && this.temMinuscula() && this.temNumero() && this.temTamanhoMinimo();
+  }
+
   registar(): void {
-    if (this.senhasNaoCoincidem()) return;
+    if (this.senhasNaoCoincidem() || !this.senhaValida()) return;
     this.erroGeral = '';
     this.aRegistar = true;
     this.authService.registar(this.dados).subscribe({
