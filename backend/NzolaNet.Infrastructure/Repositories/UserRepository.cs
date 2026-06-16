@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,12 @@ public class UserRepository : IUserRepository
     public async Task<bool> CreateAsync(User user, string password)
     {
         var result = await _userManager.CreateAsync(user, password);
-        return result.Succeeded;
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(" ", result.Errors.Select(e => e.Description));
+            throw new ArgumentException($"Erro ao criar o utilizador: {errors}");
+        }
+        return true;
     }
 
     public async Task<bool> UpdateAsync(User user)
