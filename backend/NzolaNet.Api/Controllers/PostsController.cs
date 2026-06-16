@@ -35,6 +35,54 @@ public class PostsController : ControllerBase
         return Ok(posts);
     }
 
+    // GET /api/posts/{id} – Obter uma publicação específica por ID
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        var post = await _postService.GetByIdAsync(id, currentUserId);
+        if (post == null)
+        {
+            return NotFound(new { Message = "Publicação não encontrada." });
+        }
+
+        return Ok(post);
+    }
+
+    // GET /api/posts/utilizador/{utilizadorId} – Listar publicações de um utilizador específico (suporta privado)
+    [HttpGet("utilizador/{utilizadorId}")]
+    public async Task<IActionResult> GetByUserId(Guid utilizadorId)
+    {
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        try
+        {
+            var posts = await _postService.GetByUserIdAsync(utilizadorId, currentUserId);
+            return Ok(posts);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(); // Ou StatusCode(403, new { Message = ex.Message })
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+    }
+
     // GET /api/posts/feed – Listar publicações de utilizadores seguidos em ordem cronológica (requer autenticação)
     [Authorize]
     [HttpGet("feed")]

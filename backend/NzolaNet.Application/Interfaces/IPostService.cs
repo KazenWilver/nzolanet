@@ -12,4 +12,6 @@ public interface IPostService
     Task<bool> DeleteAsync(Guid userId, Guid postId);
     Task<IEnumerable<PostDto>> GetAllAsync(Guid? currentUserId = null);
     Task<IEnumerable<PostDto>> GetFeedAsync(Guid userId);
+    Task<IEnumerable<PostDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
+    Task<PostDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
 }

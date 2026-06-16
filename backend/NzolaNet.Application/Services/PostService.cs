@@ -148,6 +148,56 @@ public class PostService : IPostService
         return posts.Select(MapToDto);
     }
 
+    public async Task<PostDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
+    {
+        var post = await _postRepository.GetByIdAsync(id);
+        if (post == null) return null;
+
+        var author = post.User;
+        if (author != null && author.IsPrivate && author.Id != currentUserId)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, author.Id);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+        }
+
+        return MapToDto(post);
+    }
+
+    public async Task<IEnumerable<PostDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
+    {
+        var targetUser = await _userRepository.GetByIdAsync(targetUserId);
+        if (targetUser == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        if (targetUser.IsPrivate && targetUserId != currentUserId)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, targetUserId);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+        }
+
+        var posts = await _postRepository.GetAllAsync();
+        var userPosts = posts.Where(p => p.UserId == targetUserId);
+        return userPosts.Select(MapToDto);
+    }
+
     private PostDto MapToDto(Post post)
     {
         return new PostDto
