@@ -13,4 +13,8 @@ public interface IFollowRepository
     Task<IEnumerable<Guid>> GetFollowedUserIdsAsync(Guid userId);
     Task<bool> AddFollowAsync(Follow follow);
     Task<bool> RemoveFollowAsync(Guid followerId, Guid followedId);
+    Task<IEnumerable<Follow>> GetPendingFollowRequestsAsync(Guid userId);
+    Task<Follow?> GetFollowRequestAsync(Guid followerId, Guid followedId);
+    Task<bool> UpdateFollowAsync(Follow follow);
+    Task<bool> IsFollowPendingAsync(Guid followerId, Guid followedId);
 }

@@ -23,7 +23,15 @@ public class CommentsController : ControllerBase
     [HttpGet("/api/posts/{postId}/comments")]
     public async Task<IActionResult> GetByPost(Guid postId)
     {
-        var comments = await _commentService.GetByPostAsync(postId);
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        var comments = await _commentService.GetByPostAsync(postId, currentUserId);
         return Ok(comments);
     }
 

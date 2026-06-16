@@ -20,23 +20,23 @@ public class FollowRepository : IFollowRepository
 
     public async Task<int> GetFollowersCountAsync(Guid userId)
     {
-        return await _context.Follows.CountAsync(f => f.FollowedId == userId);
+        return await _context.Follows.CountAsync(f => f.FollowedId == userId && f.IsApproved);
     }
 
     public async Task<int> GetFollowingCountAsync(Guid userId)
     {
-        return await _context.Follows.CountAsync(f => f.FollowerId == userId);
+        return await _context.Follows.CountAsync(f => f.FollowerId == userId && f.IsApproved);
     }
 
     public async Task<bool> IsFollowingAsync(Guid followerId, Guid followedId)
     {
-        return await _context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+        return await _context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId && f.IsApproved);
     }
 
     public async Task<IEnumerable<Guid>> GetFollowedUserIdsAsync(Guid userId)
     {
         return await _context.Follows
-            .Where(f => f.FollowerId == userId)
+            .Where(f => f.FollowerId == userId && f.IsApproved)
             .Select(f => f.FollowedId)
             .ToListAsync();
     }
@@ -57,5 +57,31 @@ public class FollowRepository : IFollowRepository
 
         _context.Follows.Remove(follow);
         return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<IEnumerable<Follow>> GetPendingFollowRequestsAsync(Guid userId)
+    {
+        return await _context.Follows
+            .Include(f => f.Follower)
+            .Where(f => f.FollowedId == userId && !f.IsApproved)
+            .OrderByDescending(f => f.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<Follow?> GetFollowRequestAsync(Guid followerId, Guid followedId)
+    {
+        return await _context.Follows
+            .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+    }
+
+    public async Task<bool> UpdateFollowAsync(Follow follow)
+    {
+        _context.Follows.Update(follow);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> IsFollowPendingAsync(Guid followerId, Guid followedId)
+    {
+        return await _context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId && !f.IsApproved);
     }
 }

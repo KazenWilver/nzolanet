@@ -20,11 +20,19 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    // GET /api/users/{id} – Obter perfil público do utilizador
+    // GET /api/users/{id} – Obter perfil público/privado do utilizador
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProfile(Guid id)
     {
-        var profile = await _userService.GetProfileAsync(id);
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        var profile = await _userService.GetProfileAsync(id, currentUserId);
         return Ok(profile);
     }
 
@@ -59,12 +67,12 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> FollowUser(Guid id)
     {
         var currentUserId = GetCurrentUserId();
-        var success = await _userService.FollowUserAsync(currentUserId, id);
-        if (success)
+        var result = await _userService.FollowUserAsync(currentUserId, id);
+        if (result.Success)
         {
-            return Ok(new { Message = "Começou a seguir o utilizador com sucesso." });
+            return Ok(result);
         }
-        return BadRequest(new { Message = "Não foi possível seguir o utilizador." });
+        return BadRequest(new { Message = result.Message });
     }
 
     // DELETE /api/users/{id}/follow – Deixar de seguir um utilizador (requer autenticação)
@@ -79,6 +87,44 @@ public class UsersController : ControllerBase
             return Ok(new { Message = "Deixou de seguir o utilizador com sucesso." });
         }
         return BadRequest(new { Message = "Não foi possível deixar de seguir o utilizador." });
+    }
+
+    // GET /api/users/follow-requests – Listar pedidos de seguimento pendentes (requer autenticação)
+    [Authorize]
+    [HttpGet("follow-requests")]
+    public async Task<IActionResult> GetPendingRequests()
+    {
+        var currentUserId = GetCurrentUserId();
+        var requests = await _userService.GetPendingRequestsAsync(currentUserId);
+        return Ok(requests);
+    }
+
+    // POST /api/users/follow-requests/{followerId}/approve – Aprovar pedido (requer autenticação)
+    [Authorize]
+    [HttpPost("follow-requests/{followerId}/approve")]
+    public async Task<IActionResult> ApproveFollowRequest(Guid followerId)
+    {
+        var currentUserId = GetCurrentUserId();
+        var success = await _userService.ApproveFollowRequestAsync(currentUserId, followerId);
+        if (success)
+        {
+            return Ok(new { Message = "Pedido de seguimento aprovado com sucesso." });
+        }
+        return BadRequest(new { Message = "Não foi possível aprovar o pedido de seguimento." });
+    }
+
+    // POST /api/users/follow-requests/{followerId}/reject – Rejeitar pedido (requer autenticação)
+    [Authorize]
+    [HttpPost("follow-requests/{followerId}/reject")]
+    public async Task<IActionResult> RejectFollowRequest(Guid followerId)
+    {
+        var currentUserId = GetCurrentUserId();
+        var success = await _userService.RejectFollowRequestAsync(currentUserId, followerId);
+        if (success)
+        {
+            return Ok(new { Message = "Pedido de seguimento rejeitado com sucesso." });
+        }
+        return BadRequest(new { Message = "Não foi possível rejeitar o pedido de seguimento." });
     }
 
     private Guid GetCurrentUserId()

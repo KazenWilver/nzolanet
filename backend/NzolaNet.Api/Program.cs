@@ -120,6 +120,22 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Migrate database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao aplicar as migrações da base de dados.");
+    }
+}
+
 // Regista o Middleware de Tratamento de Erros Global
 app.UseMiddleware<ExceptionMiddleware>();
 

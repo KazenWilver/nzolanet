@@ -12,5 +12,7 @@ public class Follow
     public Guid FollowedId { get; set; }
     public virtual User Followed { get; set; } = null!;
 
+    public bool IsApproved { get; set; } = true;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

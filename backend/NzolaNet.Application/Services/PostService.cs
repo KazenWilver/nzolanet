@@ -120,9 +120,24 @@ public class PostService : IPostService
         return await _postRepository.DeleteAsync(post);
     }
 
-    public async Task<IEnumerable<PostDto>> GetAllAsync()
+    public async Task<IEnumerable<PostDto>> GetAllAsync(Guid? currentUserId = null)
     {
         var posts = await _postRepository.GetAllAsync();
+
+        if (currentUserId.HasValue)
+        {
+            var followedIds = (await _followRepository.GetFollowedUserIdsAsync(currentUserId.Value)).ToHashSet();
+            posts = posts.Where(p => 
+                p.UserId == currentUserId.Value || 
+                !p.User.IsPrivate || 
+                followedIds.Contains(p.UserId)
+            );
+        }
+        else
+        {
+            posts = posts.Where(p => !p.User.IsPrivate);
+        }
+
         return posts.Select(MapToDto);
     }
 

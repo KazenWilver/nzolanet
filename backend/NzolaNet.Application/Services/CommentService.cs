@@ -14,15 +14,18 @@ public class CommentService : ICommentService
     private readonly ICommentRepository _commentRepository;
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IFollowRepository _followRepository;
 
     public CommentService(
         ICommentRepository commentRepository,
         IPostRepository postRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IFollowRepository followRepository)
     {
         _commentRepository = commentRepository;
         _postRepository = postRepository;
         _userRepository = userRepository;
+        _followRepository = followRepository;
     }
 
     public async Task<CommentDto> CreateAsync(Guid userId, CreateCommentDto createDto)
@@ -37,6 +40,16 @@ public class CommentService : ICommentService
         if (post == null)
         {
             throw new ArgumentException("Publicação não encontrada.");
+        }
+
+        // Regra de privacidade: Não pode comentar se o autor do post for privado e o utilizador não o seguir (e não for ele próprio)
+        if (post.User.IsPrivate && post.UserId != userId)
+        {
+            var isFollowing = await _followRepository.IsFollowingAsync(userId, post.UserId);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Não podes comentar numa publicação de uma conta privada que não segues.");
+            }
         }
 
         var comment = new Comment
@@ -101,12 +114,30 @@ public class CommentService : ICommentService
         return await _commentRepository.DeleteAsync(comment);
     }
 
-    public async Task<IEnumerable<CommentDto>> GetByPostAsync(Guid postId)
+    public async Task<IEnumerable<CommentDto>> GetByPostAsync(Guid postId, Guid? currentUserId = null)
     {
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
         {
             throw new ArgumentException("Publicação não encontrada.");
+        }
+
+        // Regra de privacidade: Não pode ver os comentários se o autor do post for privado e o utilizador atual não o seguir
+        if (post.User.IsPrivate)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Esta publicação é privada.");
+            }
+
+            if (post.UserId != currentUserId.Value)
+            {
+                var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, post.UserId);
+                if (!isFollowing)
+                {
+                    throw new UnauthorizedAccessException("Esta publicação é privada e não segue o autor.");
+                }
+            }
         }
 
         var comments = await _commentRepository.GetByPostIdAsync(postId);

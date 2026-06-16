@@ -23,7 +23,15 @@ public class PostsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var posts = await _postService.GetAllAsync();
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        var posts = await _postService.GetAllAsync(currentUserId);
         return Ok(posts);
     }
 

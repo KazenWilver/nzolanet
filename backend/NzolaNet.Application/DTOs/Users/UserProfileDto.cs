@@ -12,4 +12,6 @@ public class UserProfileDto
     public string? Bio { get; set; }
     public int FollowersCount { get; set; }
     public int FollowingCount { get; set; }
+    public bool IsFollowing { get; set; }
+    public bool IsPending { get; set; }
 }
