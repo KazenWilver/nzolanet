@@ -90,6 +90,27 @@
     .test ul { margin: .25rem 0 0; padding-left: 1.2rem; }
     .test li { margin: .2rem 0; font-size: .92rem; }
 
+    .commit {
+      margin-top: 1rem; background: rgba(124,92,255,.08); border: 1px solid rgba(124,92,255,.28);
+      border-radius: 12px; padding: .9rem 1.1rem;
+    }
+    .commit .order-title { color: var(--accent); margin-top: 0; }
+    .commit pre { margin-bottom: 0; font-size: .78rem; }
+    .commit-table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: .75rem 0; }
+    .commit-table th, .commit-table td { padding: .5rem .65rem; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .commit-table th { background: rgba(124,92,255,.12); color: var(--text); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+    .commit-table code { font-size: .78rem; }
+
+    .video-map { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .video-map h3 { margin: 0 0 .75rem; font-size: 1.05rem; }
+    .video-map table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .video-map th, .video-map td { padding: .45rem .6rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .video-map th { color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+    .pct { display: inline-block; padding: .15rem .5rem; border-radius: 6px; font-size: .75rem; font-weight: 700; }
+    .pct-yes { background: rgba(32,210,122,.15); color: var(--green); }
+    .pct-part { background: rgba(255,138,76,.15); color: var(--warm); }
+    .pct-no { background: rgba(255,93,115,.12); color: var(--red); }
+
     pre {
       background: #060b16; border: 1px solid var(--border); border-radius: 10px;
       padding: .9rem 1rem; overflow-x: auto; margin: .6rem 0;
@@ -128,6 +149,8 @@
     <div class="toc">
       <h3>Mapa do guia</h3>
       <ol>
+        <li><a href="#git">Git — onde fazer commit</a></li>
+        <li><a href="#video">Vídeo ASP.NET Core (3h) — mapa</a></li>
         <li><a href="#f0">Setup inicial</a></li>
         <li><a href="#f1">Backend · Domínio</a></li>
         <li><a href="#f2">Backend · Infraestrutura + BD</a></li>
@@ -143,11 +166,85 @@
     </div>
 
     <div class="tip">
-      <strong>Como ler cada fase:</strong> <em>Objetivo</em> → <em>Ficheiros a preencher por ordem</em> → <em>Como testar</em>.
+      <strong>Como ler cada fase:</strong> <em>Objetivo</em> → <em>Ficheiros a preencher por ordem</em> → <em>Como testar</em> → <em>🛑 COMMIT GIT</em> (obrigatório antes de avançar).
       Só avanças para a fase seguinte quando o teste da atual passar. ✅
     </div>
 
-    <!-- FASE 0 -->
+    <!-- GIT WORKFLOW -->
+    <section class="phase fin" id="git">
+      <div class="phase-head">
+        <div class="num">⎇</div>
+        <div><h2>Git — onde fazer commit (não acumules tudo num só)</h2><div class="who">Todos · regra obrigatória</div></div>
+      </div>
+      <p class="goal">Faz <strong>1 commit (ou PR) por fase concluída e testada</strong>. Nunca commits gigantes com backend + frontend + docs misturados.</p>
+
+      <div class="order-title">Workflow diário (copiar/colar)</div>
+      <pre>git checkout develop
+git pull origin develop
+git checkout -b NOME_DA_BRANCH    # ver tabela abaixo
+# ... trabalhar só nos ficheiros dessa fase ...
+git add PASTAS_DA_FASE            # ver tabela — NÃO uses "git add ." cegamente
+git commit -m "tipo(escopo): mensagem"
+git push -u origin NOME_DA_BRANCH
+# Abrir Pull Request no GitHub → develop → squash merge</pre>
+
+      <div class="order-title">Tabela de commits — 2.ª Parcelar (14 checkpoints)</div>
+      <table class="commit-table">
+        <thead><tr><th>#</th><th>Quando (após teste OK)</th><th>Branch</th><th>git add (só isto)</th><th>Mensagem de commit</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>Setup compila</td><td><code>chore/setup</code></td><td><code>backend/*.sln backend/**/*.csproj backend/**/appsettings.json backend/**/launchSettings.json frontend/package.json frontend/angular.json frontend/tsconfig*.json</code></td><td><code>chore(setup): inicializa solucao .NET e projeto Angular</code></td></tr>
+          <tr><td>1</td><td>Domain compila</td><td><code>backend/feature/domain</code></td><td><code>backend/NzolaNet.Domain/</code></td><td><code>feat(backend/domain): entidades e interfaces de repositorio</code></td></tr>
+          <tr><td>2</td><td>BD + migration OK</td><td><code>backend/feature/infrastructure</code></td><td><code>backend/NzolaNet.Infrastructure/</code></td><td><code>feat(backend/infrastructure): EF Core, repos, JWT, hash e migration</code></td></tr>
+          <tr><td>3</td><td>Services compilam</td><td><code>backend/feature/application</code></td><td><code>backend/NzolaNet.Application/</code></td><td><code>feat(backend/application): DTOs, services, validators e mappings</code></td></tr>
+          <tr><td>4a</td><td>Auth no Swagger</td><td><code>backend/feature/auth</code></td><td><code>backend/NzolaNet.Api/Program.cs backend/NzolaNet.Api/Middleware/ backend/NzolaNet.Api/Controllers/AuthController.cs docs/API_CONTRACT.md</code></td><td><code>feat(backend/auth): register, login e recuperacao de senha</code></td></tr>
+          <tr><td>4b</td><td>Users no Swagger</td><td><code>backend/feature/users</code></td><td><code>backend/NzolaNet.Api/Controllers/UsersController.cs docs/API_CONTRACT.md</code></td><td><code>feat(backend/users): perfil, foto e follow/unfollow</code></td></tr>
+          <tr><td>4c</td><td>Posts no Swagger</td><td><code>backend/feature/posts</code></td><td><code>backend/NzolaNet.Api/Controllers/PostsController.cs docs/API_CONTRACT.md</code></td><td><code>feat(backend/posts): CRUD de publicacoes com upload</code></td></tr>
+          <tr><td>4d</td><td>Comments no Swagger</td><td><code>backend/feature/comments</code></td><td><code>backend/NzolaNet.Api/Controllers/CommentsController.cs docs/API_CONTRACT.md</code></td><td><code>feat(backend/comments): CRUD de comentarios por publicacao</code></td></tr>
+          <tr><td>5</td><td>App Angular arranca</td><td><code>frontend/feature/core</code></td><td><code>frontend/src/app/core/ frontend/src/app/app.config.ts frontend/src/app/app.routes.ts frontend/src/environments/ frontend/proxy.conf.json frontend/src/styles.scss</code></td><td><code>feat(frontend/core): models, auth service, guards e interceptors</code></td></tr>
+          <tr><td>6</td><td>Login E2E</td><td><code>frontend/feature/auth</code></td><td><code>frontend/src/app/features/auth/ frontend/src/app/layouts/public-layout/</code></td><td><code>feat(frontend/auth): login, registo e recuperacao de senha</code></td></tr>
+          <tr><td>7</td><td>Perfil E2E</td><td><code>frontend/feature/profile</code></td><td><code>frontend/src/app/features/profile/ frontend/src/app/layouts/private-layout/ frontend/src/app/shared/components/navbar/ frontend/src/app/shared/components/user-avatar/</code></td><td><code>feat(frontend/profile): perfil, edicao, foto e seguir</code></td></tr>
+          <tr><td>8</td><td>Feed + posts E2E</td><td><code>frontend/feature/feed-posts</code></td><td><code>frontend/src/app/features/feed/ frontend/src/app/features/posts/ frontend/src/app/shared/components/post-card/ frontend/src/app/shared/components/media-preview/ frontend/src/app/shared/components/comment-*/ frontend/src/app/shared/pipes/</code></td><td><code>feat(frontend/feed-posts): feed, publicacoes e comentarios</code></td></tr>
+          <tr><td>9</td><td>Testes E2E OK</td><td><code>fix/integration</code></td><td>só ficheiros que corrigiste</td><td><code>fix(integration): corrige bugs da integracao ponta-a-ponta</code></td></tr>
+          <tr><td>10</td><td>Demo + docs</td><td><code>docs/parcelar</code></td><td><code>docs/</code></td><td><code>docs(parcelar): API contract, schema, relatorio e demo</code></td></tr>
+          <tr><td>🏁</td><td>Entrega final</td><td><code>main</code></td><td>merge <code>develop</code> → <code>main</code></td><td><code>release(v0.5): 2.ª Parcelar — Users, Posts, Comments</code> + tag <code>v0.5-parcelar</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="warn"><strong>Nunca commites:</strong> <code class="path">appsettings.Development.json</code>, <code class="path">.env</code>, passwords, <code class="path">node_modules/</code>, <code class="path">bin/</code>, <code class="path">obj/</code>, <code class="path">wwwroot/uploads/</code> (conteúdo de utilizadores).</div>
+    </section>
+
+    <!-- VIDEO MAP -->
+    <section class="video-map" id="video">
+      <h3>📺 Vídeo ASP.NET Core (3h) — o que cobre no NzolaNet?</h3>
+      <p class="note" style="margin-bottom:1rem">
+        <a href="https://youtu.be/YbRe4iIVYJk" target="_blank" rel="noopener">ASP.NET Core Full Course For Beginners (.NET 10)</a> — Julio Casal.
+        <strong>Resposta curta: ajuda muito (~55–60% do backend), mas NÃO chega a 100%.</strong> O vídeo usa <em>1 projeto só</em> (Games/Genres); o NzolaNet exige <em>4 camadas</em>, JWT, BCrypt, upload e regras de negócio extra.
+      </p>
+      <table>
+        <thead><tr><th>Timestamp vídeo</th><th>Tópico</th><th>Fase NzolaNet</th><th>Cobertura</th></tr></thead>
+        <tbody>
+          <tr><td>03:08 – 19:20</td><td>Setup + criar projeto .NET</td><td>Fase 0</td><td><span class="pct pct-yes">Sim</span></td></tr>
+          <tr><td>28:44 – 1:17:45</td><td>REST API + endpoints + 404</td><td>Fase 4 (conceito)</td><td><span class="pct pct-part">Parcial</span> — adapta p/ Controllers do NzolaNet</td></tr>
+          <tr><td>1:25:07 – 1:33:00</td><td>Validação de input</td><td>Fase 3 Validators</td><td><span class="pct pct-yes">Sim</span> — usa FluentValidation no NzolaNet</td></tr>
+          <tr><td>1:34:00 – 2:08:03</td><td>EF Core + model + migrations</td><td>Fase 2</td><td><span class="pct pct-yes">Sim</span> — copia padrão p/ ApplicationDbContext</td></tr>
+          <tr><td>2:10:28 – 2:19:50</td><td>Seed + appsettings</td><td>Fase 2 DbSeeder + appsettings</td><td><span class="pct pct-yes">Sim</span></td></tr>
+          <tr><td>2:26:52 – 2:32:52</td><td>Dependency Injection</td><td>Fase 4 Program.cs</td><td><span class="pct pct-yes">Sim</span></td></tr>
+          <tr><td>2:32:52 – 3:14:23</td><td>Async + endpoints com BD</td><td>Fases 2–4</td><td><span class="pct pct-yes">Sim</span> — todos os services async</td></tr>
+          <tr><td>3:14:23 – 3:19:42</td><td>Genres API (CRUD extra)</td><td>Fase 4 Posts/Comments</td><td><span class="pct pct-part">Parcial</span> — mesmo padrão, domínio diferente</td></tr>
+          <tr><td>—</td><td>Arquitetura 4 camadas (Domain/Application/Infra)</td><td>Todo o backend</td><td><span class="pct pct-no">Não</span> — segue o Plano + este guia</td></tr>
+          <tr><td>—</td><td>JWT + BCrypt + [Authorize]</td><td>Fase 2–4 Auth</td><td><span class="pct pct-no">Não</span> — Plano sec. 5 + Nick Chapsas JWT</td></tr>
+          <tr><td>—</td><td>Repository + Service + DTOs</td><td>Fases 1–3</td><td><span class="pct pct-no">Não</span> — enunciado exige; vídeo não separa camadas</td></tr>
+          <tr><td>—</td><td>Upload multipart (imagem/vídeo)</td><td>Fase 4 Posts</td><td><span class="pct pct-no">Não</span> — LocalFileStorageService no plano</td></tr>
+          <tr><td>—</td><td>Follow, regras autor/só próprio</td><td>Fases 3–4</td><td><span class="pct pct-no">Não</span> — regras de negócio NzolaNet</td></tr>
+        </tbody>
+      </table>
+      <div class="tip" style="margin-top:1rem;margin-bottom:0">
+        <strong>Estratégia recomendada:</strong> vê o vídeo para aprender EF Core, DI, async e REST (Fases 0–2 e base da 4).
+        Depois, para JWT, camadas e upload, segue o <a href="./extras/Plano/Plano_2_Parcelar_NzolaNet.html">Plano da 2.ª Parcelar</a> secções 5 e 9.
+      </div>
+    </section>
+
+    <hr class="sep" />
     <section class="phase fin" id="f0">
       <div class="phase-head">
         <div class="num">0</div>
@@ -182,6 +279,16 @@ ng new nzolanet --style=scss --routing=true
           <li>Frontend: <code class="path">ng serve</code> abre a app em branco em <a>http://localhost:4200</a>.</li>
         </ul>
       </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #0 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b chore/setup
+git add backend/NzolaNet.sln backend/NzolaNet.*/NzolaNet.*.csproj
+git add backend/NzolaNet.Api/appsettings.json backend/NzolaNet.Api/Properties/
+git add frontend/package.json frontend/angular.json frontend/tsconfig*.json
+git commit -m "chore(setup): inicializa solucao .NET e projeto Angular"
+git push -u origin chore/setup</pre>
+      </div>
     </section>
 
     <hr class="sep" />
@@ -206,6 +313,14 @@ ng new nzolanet --style=scss --routing=true
       <div class="test">
         <div class="test-title">✅ Como testar</div>
         <ul><li><code class="path">dotnet build</code> do projeto Domain compila. Sem dependências externas aqui.</li></ul>
+      </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #1 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b backend/feature/domain
+git add backend/NzolaNet.Domain/
+git commit -m "feat(backend/domain): entidades e interfaces de repositorio"
+git push -u origin backend/feature/domain</pre>
       </div>
     </section>
 
@@ -237,6 +352,14 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
           <li>O seed criou pelo menos 1 utilizador.</li>
         </ul>
       </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #2 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b backend/feature/infrastructure
+git add backend/NzolaNet.Infrastructure/
+git commit -m "feat(backend/infrastructure): EF Core, repos, JWT, hash e migration"
+git push -u origin backend/feature/infrastructure</pre>
+      </div>
     </section>
 
     <!-- FASE 3 -->
@@ -260,6 +383,14 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
       <div class="test">
         <div class="test-title">✅ Como testar</div>
         <ul><li><code class="path">dotnet build</code> de toda a solução compila. (Teste real de comportamento vem na Fase 4, via Swagger.)</li></ul>
+      </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #3 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b backend/feature/application
+git add backend/NzolaNet.Application/
+git commit -m "feat(backend/application): DTOs, services, validators e mappings"
+git push -u origin backend/feature/application</pre>
       </div>
     </section>
 
@@ -291,6 +422,34 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
         </ul>
       </div>
       <div class="tip"><strong>Marco 1:</strong> backend 100% testável via Swagger. Atualiza agora <code class="path">docs/API_CONTRACT.md</code> com o que ficou estável — os FE-Devs dependem disto.</div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMITS #4a–4d — faz 4 commits separados (não juntes tudo)</div>
+        <pre># 4a — Auth (register + login + forgot/reset)
+git checkout -b backend/feature/auth
+git add backend/NzolaNet.Api/Program.cs backend/NzolaNet.Api/Middleware/
+git add backend/NzolaNet.Api/Controllers/AuthController.cs docs/API_CONTRACT.md
+git commit -m "feat(backend/auth): register, login e recuperacao de senha"
+git push -u origin backend/feature/auth
+# PR → develop → merge → repetir checkout develop
+
+# 4b — Users (perfil, foto, follow)
+git checkout -b backend/feature/users
+git add backend/NzolaNet.Api/Controllers/UsersController.cs docs/API_CONTRACT.md
+git commit -m "feat(backend/users): perfil, foto e follow/unfollow"
+git push -u origin backend/feature/users
+
+# 4c — Posts (CRUD + upload)
+git checkout -b backend/feature/posts
+git add backend/NzolaNet.Api/Controllers/PostsController.cs docs/API_CONTRACT.md
+git commit -m "feat(backend/posts): CRUD de publicacoes com upload"
+git push -u origin backend/feature/posts
+
+# 4d — Comments
+git checkout -b backend/feature/comments
+git add backend/NzolaNet.Api/Controllers/CommentsController.cs docs/API_CONTRACT.md
+git commit -m "feat(backend/comments): CRUD de comentarios por publicacao"
+git push -u origin backend/feature/comments</pre>
+      </div>
     </section>
 
     <hr class="sep" />
@@ -319,6 +478,15 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
           <li>Numa chamada de teste, o <code class="path">jwt.interceptor</code> anexa o header <code class="path">Authorization: Bearer ...</code> (ver na aba Network).</li>
         </ul>
       </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #5 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b frontend/feature/core
+git add frontend/src/app/core/ frontend/src/app/app.config.ts frontend/src/app/app.routes.ts
+git add frontend/src/environments/ frontend/proxy.conf.json frontend/src/styles.scss
+git commit -m "feat(frontend/core): models, auth service, guards e interceptors"
+git push -u origin frontend/feature/core</pre>
+      </div>
     </section>
 
     <!-- FASE 6 -->
@@ -346,6 +514,15 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
         </ul>
       </div>
       <div class="tip"><strong>Marco 2:</strong> autenticação ponta-a-ponta a funcionar (frontend ↔ backend).</div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #6 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b frontend/feature/auth
+git add frontend/src/app/features/auth/ frontend/src/app/layouts/public-layout/
+git add frontend/src/app/shared/components/loading-spinner/
+git commit -m "feat(frontend/auth): login, registo e recuperacao de senha"
+git push -u origin frontend/feature/auth</pre>
+      </div>
     </section>
 
     <!-- FASE 7 -->
@@ -372,6 +549,16 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
           <li>Upload de foto de perfil aparece imediatamente.</li>
           <li>Seguir outro utilizador muda o botão para "Deixar de seguir" e atualiza contadores.</li>
         </ul>
+      </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #7 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b frontend/feature/profile
+git add frontend/src/app/features/profile/ frontend/src/app/layouts/private-layout/
+git add frontend/src/app/shared/components/navbar/ frontend/src/app/shared/components/user-avatar/
+git add frontend/src/app/core/services/user.service.ts frontend/src/app/core/services/upload.service.ts
+git commit -m "feat(frontend/profile): perfil, edicao, foto e seguir"
+git push -u origin frontend/feature/profile</pre>
       </div>
     </section>
 
@@ -402,6 +589,18 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
         </ul>
       </div>
       <div class="tip"><strong>Marco 3:</strong> os 3 domínios da 2.ª Parcelar (Utilizadores, Publicações, Comentários) funcionam.</div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #8 — após teste OK</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b frontend/feature/feed-posts
+git add frontend/src/app/features/feed/ frontend/src/app/features/posts/
+git add frontend/src/app/shared/components/post-card/ frontend/src/app/shared/components/media-preview/
+git add frontend/src/app/shared/components/comment-item/ frontend/src/app/shared/components/comment-form/
+git add frontend/src/app/shared/components/confirm-dialog/ frontend/src/app/shared/pipes/
+git add frontend/src/app/core/services/post.service.ts frontend/src/app/core/services/comment.service.ts
+git commit -m "feat(frontend/feed-posts): feed, publicacoes e comentarios"
+git push -u origin frontend/feature/feed-posts</pre>
+      </div>
     </section>
 
     <hr class="sep" />
@@ -422,6 +621,14 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
           <li>Feedback: spinners durante chamadas, toasts em sucesso/erro.</li>
           <li>Validações client-side: email válido, password mín. 8 caracteres, campos obrigatórios.</li>
         </ul>
+      </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #9 — só correções de bugs</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b fix/integration
+git add caminho/do/ficheiro/corrigido.ts    # NÃO uses git add .
+git commit -m "fix(integration): corrige bugs da integracao ponta-a-ponta"
+git push -u origin fix/integration</pre>
       </div>
     </section>
 
@@ -445,6 +652,19 @@ dotnet ef database update -p ../NzolaNet.Infrastructure -s .</pre>
           <li>Git: tudo em <code class="path">develop</code> → merge para <code class="path">main</code> com tag <code class="path">v0.5-parcelar</code>.</li>
           <li>Confirmar que o repositório tem <code class="path">backend/</code>, <code class="path">frontend/</code> e <code class="path">docs/</code> preenchidos.</li>
         </ul>
+      </div>
+      <div class="commit">
+        <div class="order-title">🛑 COMMIT #10 + entrega final</div>
+        <pre>git checkout develop && git pull origin develop
+git checkout -b docs/parcelar
+git add docs/
+git commit -m "docs(parcelar): API contract, schema, relatorio e demo"
+git push -u origin docs/parcelar
+# Depois de merge em develop:
+git checkout main && git pull origin main
+git merge develop --no-ff -m "release(v0.5): 2.ª Parcelar — Users, Posts, Comments"
+git tag v0.5-parcelar
+git push origin main --tags</pre>
       </div>
     </section>
 
