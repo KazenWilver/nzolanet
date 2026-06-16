@@ -1,0 +1,171 @@
+﻿@use '../../../styles/variables' as vars;
+
+.post-card {
+  background: vars.$color-surface;
+  border: 1px solid vars.$color-border-default;
+  border-radius: vars.$radius-lg;
+  box-shadow: 0 2px 8px rgba(34, 31, 26, 0.08);
+  margin-bottom: vars.$spacing-lg;
+  overflow: hidden;
+  transition: box-shadow vars.$transition-base, transform vars.$transition-base;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(34, 31, 26, 0.12);
+    transform: translateY(-1px);
+  }
+}
+
+.post-card__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-md;
+  padding: vars.$spacing-lg vars.$spacing-lg vars.$spacing-md;
+  position: relative;
+}
+
+.post-card__meta {
+  flex: 1;
+}
+
+.post-card__nome {
+  display: block;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-body;
+  font-weight: vars.$font-weight-semibold;
+  color: vars.$color-primary-text;
+  text-decoration: none;
+  transition: color vars.$transition-fast;
+
+  &:hover {
+    color: vars.$color-accent;
+  }
+}
+
+.post-card__tempo {
+  font-size: vars.$font-size-label;
+  color: vars.$color-tertiary-text;
+  font-weight: vars.$font-weight-medium;
+}
+
+.post-card__editado {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: vars.$font-size-caption;
+  color: vars.$color-accent;
+  font-weight: vars.$font-weight-semibold;
+}
+
+.post-card__opcoes {
+  position: relative;
+}
+
+.post-card__btn-opcoes {
+  width: 34px;
+  height: 34px;
+  border-radius: vars.$radius-md;
+  border: none;
+  background: vars.$color-surface-secondary;
+  color: vars.$color-concrete;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background vars.$transition-fast, color vars.$transition-fast;
+
+  &:hover {
+    background: rgba(vars.$color-primary-text, 0.05);
+    color: vars.$color-primary-text;
+  }
+}
+
+.post-card__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: vars.$color-surface;
+  border: 1px solid vars.$color-border-default;
+  border-radius: vars.$radius-md;
+  box-shadow: 0 10px 30px rgba(34, 31, 26, 0.15);
+  min-width: 160px;
+  padding: vars.$spacing-sm;
+  z-index: 10;
+}
+
+.post-card__menu-item {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-base;
+  padding: vars.$spacing-base vars.$spacing-md;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-button;
+  font-weight: vars.$font-weight-medium;
+  color: vars.$color-primary-text;
+  background: none;
+  border: none;
+  border-radius: vars.$radius-md;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background vars.$transition-fast;
+
+  &:hover {
+    background: vars.$color-surface-secondary;
+  }
+
+  &--perigo {
+    color: vars.$color-error;
+
+    &:hover {
+      background: rgba(vars.$color-error, 0.06);
+    }
+  }
+}
+
+.post-card__corpo {
+  padding: 0 vars.$spacing-lg vars.$spacing-lg;
+}
+
+.post-card__texto {
+  font-size: vars.$font-size-body;
+  line-height: 1.6;
+  color: vars.$color-secondary-text;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: vars.$spacing-base;
+}
+
+.post-card__rodape {
+  border-top: 1px solid vars.$color-border-default;
+  padding: vars.$spacing-md vars.$spacing-lg;
+  display: flex;
+  gap: vars.$spacing-base;
+}
+
+.post-card__acao {
+  display: inline-flex;
+  align-items: center;
+  gap: vars.$spacing-base;
+  padding: vars.$spacing-base vars.$spacing-md;
+  border-radius: vars.$radius-full;
+  background: vars.$color-surface-secondary;
+  border: none;
+  color: vars.$color-secondary-text;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-button;
+  font-weight: vars.$font-weight-medium;
+  cursor: pointer;
+  transition: background vars.$transition-base, color vars.$transition-base;
+
+  &:hover {
+    background: rgba(vars.$color-primary-text, 0.08);
+    color: vars.$color-primary-text;
+  }
+
+  &--ativo {
+    color: vars.$color-accent;
+    background: rgba(vars.$color-accent, 0.08);
+  }
+}
+
+
+

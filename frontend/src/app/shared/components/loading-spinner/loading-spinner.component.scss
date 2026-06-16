@@ -1,0 +1,22 @@
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &--sm { width: 20px; height: 20px; }
+  &--md { width: 32px; height: 32px; }
+  &--lg { width: 48px; height: 48px; }
+
+  &__anel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #EEEFE9;
+    border-top-color: #B17816;
+    animation: girar 0.7s linear infinite;
+  }
+}

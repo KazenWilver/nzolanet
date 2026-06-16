@@ -1,0 +1,13 @@
+<div class="media-preview">
+  <img *ngIf="imagemUrl && !videoUrl"
+       [src]="imagemUrl"
+       alt="Imagem da publicação"
+       class="media-preview__imagem"
+       (click)="abrirImagem()" />
+  <video *ngIf="videoUrl"
+         [src]="videoUrl"
+         class="media-preview__video"
+         controls
+         preload="metadata">
+  </video>
+</div>

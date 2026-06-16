@@ -1,0 +1,81 @@
+// ─── PostHog Design System Color Palette ───
+
+// Primary Colors
+$color-primary-text: #23251D;      // Deep Charcoal
+$color-secondary-text: #4D4F46;    // Stone Gray
+$color-tertiary-text: #9EA096;     // Mid Tone
+$color-disabled-text: #B6B7AF;     // Light Gray
+$color-black: #000000;             // Pure Black
+
+// Accent Colors
+$color-accent: #B17816;            // Warm Amber
+$color-accent-hover: #CD8407;      // Golden Amber
+$color-accent-light: #E1D7C2;      // Light Cream
+$color-accent-lighter: #FFF9F2;    // Very Light Cream
+
+// Semantic Colors
+$color-error: #E92F2F;             // Error Red
+$color-warning: #F1A82C;           // Warning Amber
+$color-success: #00FF00;           // Success Green
+
+// Neutral Scale
+$color-dark-slate: #374151;        // Dark Slate
+$color-concrete: #65675E;          // Concrete
+$color-off-white: #EEEFE9;         // Off-White
+$color-pure-white: #FFFFFF;        // Pure White
+
+// Surface & Borders
+$color-border-default: rgba(34, 31, 26, 0.08);
+$color-border-light: rgba(34, 31, 26, 0.12);
+$color-surface: $color-pure-white;
+$color-surface-secondary: $color-off-white;
+$color-background: $color-off-white;
+
+// Typography
+$font-family-primary: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+$font-family-monospace: 'Source Code Pro', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+
+// Font Sizes
+$font-size-display: 24px;
+$font-size-h2: 21.43px;
+$font-size-h3: 19.29px;
+$font-size-body: 15px;
+$font-size-button: 13px;
+$font-size-label: 13px;
+$font-size-caption: 12px;
+$font-size-code: 14px;
+
+// Font Weights
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+$font-weight-black: 900;
+
+// Spacing
+$spacing-xs: 2px;
+$spacing-sm: 4px;
+$spacing-base: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 24px;
+$spacing-2xl: 32px;
+$spacing-3xl: 48px;
+
+// Border Radius
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 16px;
+$radius-full: 99px;
+$radius-card: 32px;
+
+// Transitions
+$transition-fast: 150ms ease;
+$transition-base: 200ms ease;
+$transition-slow: 300ms ease;
+
+// Layout
+$nav-height: 64px;
+$sidebar-width: 240px;
+$sidebar-right-width: 280px;

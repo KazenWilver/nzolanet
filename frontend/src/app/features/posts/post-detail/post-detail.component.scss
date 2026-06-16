@@ -1,0 +1,54 @@
+.detalhe-post {
+  padding: 16px 0 32px;
+
+  &__voltar { margin-bottom: 12px; }
+
+  &__btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #23251D;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: color 150ms ease;
+    &:hover { color: #B17816; }
+  }
+
+  &__comentarios {
+    background: #FFFFFF;
+    border: 1px solid #B6B7AF;
+    padding: 16px;
+    margin-top: 12px;
+  }
+
+  &__titulo-coment {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #23251D;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #EEEFE9;
+  }
+
+  &__total {
+    background: #EEEFE9;
+    color: #4D4F46;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+
+  &__carregando { display: flex; justify-content: center; padding: 64px 0; }
+  &__carregando-coment { display: flex; justify-content: center; padding: 24px 0; }
+  &__sem-coment { text-align: center; padding: 24px; font-size: 14px; color: #9EA096; }
+}

@@ -1,0 +1,65 @@
+.lista-seguidores {
+  padding: 16px 0 32px;
+
+  &__cabecalho { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  &__btn-voltar {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: none;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 500; color: #4D4F46;
+    cursor: pointer; transition: color 150ms ease;
+    &:hover { color: #B17816; }
+  }
+
+  &__abas {
+    display: flex;
+    background: #FFFFFF;
+    border: 1px solid #B6B7AF;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &__aba {
+    padding: 8px 20px;
+    background: none; border: none;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #4D4F46;
+    cursor: pointer; transition: all 150ms ease;
+    &--ativa { background: #B17816; color: #23251D; }
+  }
+
+  &__carregando { display: flex; justify-content: center; padding: 48px 0; }
+
+  &__vazio {
+    background: #FFFFFF; border: 1px solid #B6B7AF;
+    text-align: center; padding: 48px;
+    font-size: 15px; color: #9EA096;
+  }
+
+  &__lista { background: #FFFFFF; border: 1px solid #B6B7AF; }
+
+  &__item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #EEEFE9;
+    &:last-child { border-bottom: none; }
+  }
+
+  &__info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+
+  &__nome {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #23251D;
+    text-decoration: none;
+    &:hover { color: #B17816; }
+  }
+
+  &__nomeutil { font-size: 13px; color: #9EA096; font-weight: 500; }
+
+  &__btn-perfil {
+    height: 32px; padding: 0 16px;
+    background: transparent; border: 1px solid #4D4F46; border-radius: 4px;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 500; color: #23251D;
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+    transition: all 200ms ease;
+    &:hover { border-color: #B17816; color: #B17816; }
+  }
+}

@@ -1,0 +1,64 @@
+// Import design system variables
+@use 'app/styles/variables' as vars;
+@use 'app/styles/global';
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800;900&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-body;
+  line-height: 1.6;
+  color: vars.$color-primary-text;
+  background: vars.$color-background;
+  min-height: 100vh;
+}
+
+// Legacy CSS Variable Tokens (for compatibility)
+:root {
+  --cor-charcoal:    #{vars.$color-primary-text};
+  --cor-stone:       #{vars.$color-secondary-text};
+  --cor-amber:       #{vars.$color-accent};
+  --cor-amber-hover: #{vars.$color-accent-hover};
+  --cor-off-white:   #{vars.$color-off-white};
+  --cor-cream:       #{vars.$color-accent-light};
+  --cor-light-gray:  #{vars.$color-disabled-text};
+  --cor-mid-tone:    #{vars.$color-tertiary-text};
+  --cor-branco:      #{vars.$color-pure-white};
+  --cor-preto:       #{vars.$color-black};
+  --cor-erro:        #{vars.$color-error};
+}
+
+a { 
+  color: inherit;
+  transition: color vars.$transition-fast;
+}
+
+button, input, textarea, select { 
+  font-family: inherit; 
+}
+
+img { 
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent unwanted outline on focused elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid vars.$color-accent;
+  outline-offset: 2px;
+}

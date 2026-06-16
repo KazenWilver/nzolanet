@@ -1,0 +1,37 @@
+<section class="search-page">
+  <div class="search-page__topo">
+    <div>
+      <h1>Pesquisar</h1>
+      <p *ngIf="termo; else semTermo">Resultados para "{{ termo }}"</p>
+      <ng-template #semTermo>
+        <p>Use a barra de pesquisa no topo para encontrar publicações.</p>
+      </ng-template>
+    </div>
+
+    <form class="search-page__form" (ngSubmit)="pesquisar()" novalidate>
+      <input
+        class="search-page__input"
+        type="search"
+        placeholder="Buscar publicações, hashtags ou utilizadores"
+        [(ngModel)]="termo"
+        name="searchTerm"
+        autocomplete="off"
+      />
+      <button class="search-page__button" type="submit">Pesquisar</button>
+    </form>
+  </div>
+
+  <div class="search-page__conteudo">
+    <div *ngIf="aCarregar" class="search-page__loading">
+      <app-loading-spinner />
+    </div>
+
+    <div *ngIf="!aCarregar && termo && posts.length === 0" class="search-page__empty">
+      <p>Nenhum resultado encontrado para "{{ termo }}".</p>
+    </div>
+
+    <div *ngFor="let post of posts; trackBy: trackPorId" class="search-page__post">
+      <app-post-card [post]="post" />
+    </div>
+  </div>
+</section>
