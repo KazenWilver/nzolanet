@@ -23,7 +23,7 @@ export class ProfilePageComponent implements OnInit {
   posts: Post[] = [];
   aCarregarPosts = true;
   aAlterarSeguir = false;
-  private utilizadorLogadoId?: number;
+  private utilizadorLogadoId?: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -36,12 +36,12 @@ export class ProfilePageComponent implements OnInit {
     this.authService.utilizador$.subscribe((u: User | null) => this.utilizadorLogadoId = u?.id);
     // Reage a mudanças de parâmetro na URL (ex: navegar de um perfil para outro)
     this.route.paramMap.subscribe(params => {
-      const id = Number(params.get('id'));
+      const id = params.get('id') ?? '';
       this.carregarPerfil(id);
     });
   }
 
-  carregarPerfil(id: number): void {
+  carregarPerfil(id: string): void {
     this.aCarregarPosts = true;
     this.userService.obterPorId(id).subscribe((u: User) => {
       this.utilizador = u;
@@ -67,16 +67,31 @@ export class ProfilePageComponent implements OnInit {
   alternarSeguir(): void {
     if (!this.utilizador) return;
     this.aAlterarSeguir = true;
+    
+    // Se a conta for privada, o seguimento fica em estado pendente até aprovação
     const acao = this.utilizador.estaASeguir
       ? this.userService.deixarDeSeguir(this.utilizador.id)
       : this.userService.seguir(this.utilizador.id);
 
     acao.subscribe({
-      next: () => {
+      next: (resposta: any) => {
         if (this.utilizador) {
-          this.utilizador.estaASeguir = !this.utilizador.estaASeguir;
-          // Actualiza o contador localmente para feedback imediato
-          this.utilizador.totalSeguidores += this.utilizador.estaASeguir ? 1 : -1;
+          if (this.utilizador.estaASeguir) {
+            // Se já seguia, deixa de seguir imediatamente
+            this.utilizador.estaASeguir = false;
+            this.utilizador.estaPendente = false;
+            this.utilizador.totalSeguidores = Math.max(0, this.utilizador.totalSeguidores - 1);
+          } else {
+            // Se não seguia
+            if (this.utilizador.privado) {
+              // Se for privado, fica pendente
+              this.utilizador.estaPendente = true;
+            } else {
+              // Se for público, segue imediatamente
+              this.utilizador.estaASeguir = true;
+              this.utilizador.totalSeguidores++;
+            }
+          }
         }
         this.aAlterarSeguir = false;
       },
@@ -84,10 +99,10 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
-  removerPost(id: number): void {
+  removerPost(id: string): void {
     this.posts = this.posts.filter(p => p.id !== id);
     if (this.utilizador) this.utilizador.totalPublicacoes--;
   }
 
-  trackPorId(_: number, post: Post): number { return post.id; }
+  trackPorId(_: number, post: Post): string { return post.id; }
 }
