@@ -10,5 +10,6 @@ public interface IPostService
     Task<PostDto> CreateAsync(Guid userId, CreatePostDto createDto);
     Task<PostDto> UpdateAsync(Guid userId, Guid postId, UpdatePostDto updateDto);
     Task<bool> DeleteAsync(Guid userId, Guid postId);
-    Task<IEnumerable<PostDto>> GetFeedAsync();
+    Task<IEnumerable<PostDto>> GetAllAsync();
+    Task<IEnumerable<PostDto>> GetFeedAsync(Guid userId);
 }

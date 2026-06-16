@@ -13,15 +13,18 @@ public class PostService : IPostService
 {
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IFollowRepository _followRepository;
     private readonly IStorageService _storageService;
 
     public PostService(
         IPostRepository postRepository, 
-        IUserRepository userRepository, 
+        IUserRepository userRepository,
+        IFollowRepository followRepository,
         IStorageService storageService)
     {
         _postRepository = postRepository;
         _userRepository = userRepository;
+        _followRepository = followRepository;
         _storageService = storageService;
     }
 
@@ -36,13 +39,11 @@ public class PostService : IPostService
         string? imagePath = null;
         string? videoPath = null;
 
-        // Fazer upload da imagem se enviada
         if (createDto.Image != null && createDto.Image.Length > 0)
         {
             imagePath = await _storageService.SaveFileAsync(createDto.Image, "uploads/posts/images");
         }
 
-        // Fazer upload do vídeo se enviado
         if (createDto.Video != null && createDto.Video.Length > 0)
         {
             videoPath = await _storageService.SaveFileAsync(createDto.Video, "uploads/posts/videos");
@@ -63,7 +64,6 @@ public class PostService : IPostService
             throw new ArgumentException("Não foi possível publicar.");
         }
 
-        // Carregar o utilizador no objeto do post para o mapeamento
         post.User = user;
 
         return MapToDto(post);
@@ -77,7 +77,6 @@ public class PostService : IPostService
             throw new ArgumentException("Publicação não encontrada.");
         }
 
-        // Regra de Negócio: Apenas o dono pode editar a sua própria publicação
         if (post.UserId != userId)
         {
             throw new UnauthorizedAccessException("Não tens permissão para editar esta publicação.");
@@ -103,13 +102,11 @@ public class PostService : IPostService
             throw new ArgumentException("Publicação não encontrada.");
         }
 
-        // Regra de Negócio: Apenas o dono pode eliminar a sua própria publicação
         if (post.UserId != userId)
         {
             throw new UnauthorizedAccessException("Não tens permissão para eliminar esta publicação.");
         }
 
-        // Eliminar os ficheiros físicos associados (imagem/vídeo)
         if (!string.IsNullOrEmpty(post.ImagePath))
         {
             _storageService.DeleteFile(post.ImagePath);
@@ -123,13 +120,19 @@ public class PostService : IPostService
         return await _postRepository.DeleteAsync(post);
     }
 
-    public async Task<IEnumerable<PostDto>> GetFeedAsync()
+    public async Task<IEnumerable<PostDto>> GetAllAsync()
     {
-        var posts = await _postRepository.GetFeedAsync();
+        var posts = await _postRepository.GetAllAsync();
         return posts.Select(MapToDto);
     }
 
-    // Mapeamento manual de Post para PostDto (Rápido, seguro e sem bibliotecas externas)
+    public async Task<IEnumerable<PostDto>> GetFeedAsync(Guid userId)
+    {
+        var followedIds = await _followRepository.GetFollowedUserIdsAsync(userId);
+        var posts = await _postRepository.GetFeedByFollowedUsersAsync(followedIds);
+        return posts.Select(MapToDto);
+    }
+
     private PostDto MapToDto(Post post)
     {
         return new PostDto

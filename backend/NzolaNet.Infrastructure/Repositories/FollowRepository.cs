@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NzolaNet.Domain.Entities;
@@ -29,6 +31,14 @@ public class FollowRepository : IFollowRepository
     public async Task<bool> IsFollowingAsync(Guid followerId, Guid followedId)
     {
         return await _context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+    }
+
+    public async Task<IEnumerable<Guid>> GetFollowedUserIdsAsync(Guid userId)
+    {
+        return await _context.Follows
+            .Where(f => f.FollowerId == userId)
+            .Select(f => f.FollowedId)
+            .ToListAsync();
     }
 
     public async Task<bool> AddFollowAsync(Follow follow)

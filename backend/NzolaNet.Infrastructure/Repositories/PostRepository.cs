@@ -26,11 +26,21 @@ public class PostRepository : IPostRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<IEnumerable<Post>> GetFeedAsync()
+    public async Task<IEnumerable<Post>> GetAllAsync()
     {
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Comments)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Post>> GetFeedByFollowedUsersAsync(IEnumerable<Guid> followedUserIds)
+    {
+        return await _context.Posts
+            .Include(p => p.User)
+            .Include(p => p.Comments)
+            .Where(p => followedUserIds.Contains(p.UserId))
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
     }
