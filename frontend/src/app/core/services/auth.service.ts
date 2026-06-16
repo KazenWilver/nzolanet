@@ -28,7 +28,7 @@ export class AuthService {
   }
 
   registar(dados: RegistoDto): Observable<RespostaAutenticacao> {
-    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/registar`, dados).pipe(
+    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/register`, dados).pipe(
       tap(resposta => this.guardarSessao(resposta))
     );
   }
@@ -62,11 +62,33 @@ export class AuthService {
     return this.utilizadorAtual$.getValue();
   }
 
-  private guardarSessao(resposta: RespostaAutenticacao): void {
-    localStorage.setItem(this.CHAVE_TOKEN, resposta.token);
-    localStorage.setItem(this.CHAVE_UTILIZADOR, JSON.stringify(resposta.utilizador));
-    this.utilizadorAtual$.next(resposta.utilizador);
-    this.guardarContaSalva(resposta.utilizador);
+  atualizarUtilizadorAtual(utilizador: User): void {
+    localStorage.setItem(this.CHAVE_UTILIZADOR, JSON.stringify(utilizador));
+    this.utilizadorAtual$.next(utilizador);
+  }
+
+  private guardarSessao(resposta: any): void {
+    const token = resposta.token;
+    const backendUser = resposta.utilizador;
+    const utilizador: User = {
+      id: backendUser.id,
+      nome: backendUser.username,
+      nomeUtilizador: backendUser.username,
+      email: backendUser.email,
+      fotoPerfil: backendUser.profilePhoto || undefined,
+      privado: backendUser.isPrivate || false,
+      bio: backendUser.bio || undefined,
+      totalSeguidores: backendUser.followersCount || 0,
+      totalSeguindo: backendUser.followingCount || 0,
+      totalPublicacoes: 0,
+      eAdmin: false,
+      criadoEm: backendUser.createdAt
+    };
+
+    localStorage.setItem(this.CHAVE_TOKEN, token);
+    localStorage.setItem(this.CHAVE_UTILIZADOR, JSON.stringify(utilizador));
+    this.utilizadorAtual$.next(utilizador);
+    this.guardarContaSalva(utilizador);
   }
 
   private guardarContaSalva(utilizador: User): void {
@@ -94,7 +116,21 @@ export class AuthService {
         if (!res.ok) {
           throw res;
         }
-        const utilizador = (await res.json()) as User;
+        const backendUser = await res.json();
+        const utilizador: User = {
+          id: backendUser.id,
+          nome: backendUser.username,
+          nomeUtilizador: backendUser.username,
+          email: backendUser.email,
+          fotoPerfil: backendUser.profilePhoto || undefined,
+          privado: backendUser.isPrivate || false,
+          bio: backendUser.bio || undefined,
+          totalSeguidores: backendUser.followersCount || 0,
+          totalSeguindo: backendUser.followingCount || 0,
+          totalPublicacoes: 0,
+          eAdmin: false,
+          criadoEm: backendUser.createdAt
+        };
         this.utilizadorAtual$.next(utilizador);
       })
       .catch(() => {
