@@ -25,7 +25,7 @@ public class CommentService : ICommentService
         _userRepository = userRepository;
     }
 
-    public async Task<CommentDto> CreateAsync(Guid userId, Guid postId, CreateCommentDto createDto)
+    public async Task<CommentDto> CreateAsync(Guid userId, CreateCommentDto createDto)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -33,7 +33,7 @@ public class CommentService : ICommentService
             throw new ArgumentException("Utilizador não encontrado.");
         }
 
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetByIdAsync(createDto.PostId);
         if (post == null)
         {
             throw new ArgumentException("Publicação não encontrada.");
@@ -42,7 +42,7 @@ public class CommentService : ICommentService
         var comment = new Comment
         {
             UserId = userId,
-            PostId = postId,
+            PostId = createDto.PostId,
             Text = createDto.Text,
             CreatedAt = DateTime.UtcNow
         };
@@ -54,6 +54,32 @@ public class CommentService : ICommentService
         }
 
         comment.User = user;
+
+        return MapToDto(comment);
+    }
+
+    public async Task<CommentDto> UpdateAsync(Guid userId, Guid commentId, UpdateCommentDto updateDto)
+    {
+        var comment = await _commentRepository.GetByIdAsync(commentId);
+        if (comment == null)
+        {
+            throw new ArgumentException("Comentário não encontrado.");
+        }
+
+        // Regra de Negócio: Apenas o autor do comentário pode editá-lo
+        if (comment.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("Não tens permissão para editar este comentário.");
+        }
+
+        comment.Text = updateDto.Text;
+        comment.UpdatedAt = DateTime.UtcNow;
+
+        var updated = await _commentRepository.UpdateAsync(comment);
+        if (!updated)
+        {
+            throw new ArgumentException("Não foi possível atualizar o comentário.");
+        }
 
         return MapToDto(comment);
     }
@@ -75,7 +101,7 @@ public class CommentService : ICommentService
         return await _commentRepository.DeleteAsync(comment);
     }
 
-    public async Task<IEnumerable<CommentDto>> GetByPostIdAsync(Guid postId)
+    public async Task<IEnumerable<CommentDto>> GetByPostAsync(Guid postId)
     {
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)

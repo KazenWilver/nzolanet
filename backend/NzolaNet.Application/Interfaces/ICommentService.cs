@@ -7,7 +7,8 @@ namespace NzolaNet.Application.Interfaces;
 
 public interface ICommentService
 {
-    Task<CommentDto> CreateAsync(Guid userId, Guid postId, CreateCommentDto createDto);
+    Task<CommentDto> CreateAsync(Guid userId, CreateCommentDto createDto);
+    Task<CommentDto> UpdateAsync(Guid userId, Guid commentId, UpdateCommentDto updateDto);
     Task<bool> DeleteAsync(Guid userId, Guid commentId);
-    Task<IEnumerable<CommentDto>> GetByPostIdAsync(Guid postId);
+    Task<IEnumerable<CommentDto>> GetByPostAsync(Guid postId);
 }

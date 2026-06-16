@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NzolaNet.Domain.Entities;
@@ -36,6 +37,12 @@ public class CommentRepository : ICommentRepository
     public async Task<bool> CreateAsync(Comment comment)
     {
         _context.Comments.Add(comment);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> UpdateAsync(Comment comment)
+    {
+        _context.Comments.Update(comment);
         return await _context.SaveChangesAsync() > 0;
     }
 
