@@ -212,4 +212,66 @@ public class UserService : IUserService
     {
         return await _followRepository.RemoveFollowAsync(followerId, followedId);
     }
+
+    public async Task<IEnumerable<UserProfileDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        if (user.IsPrivate && userId != currentUserId)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, userId);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+        }
+
+        var followers = user.Followers.Where(f => f.IsApproved).Select(f => f.Follower);
+        var dtos = new List<UserProfileDto>();
+        foreach (var f in followers)
+        {
+            dtos.Add(await GetProfileAsync(f.Id, currentUserId));
+        }
+        return dtos;
+    }
+
+    public async Task<IEnumerable<UserProfileDto>> GetFollowingAsync(Guid userId, Guid? currentUserId = null)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        if (user.IsPrivate && userId != currentUserId)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, userId);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+        }
+
+        var following = user.Following.Where(f => f.IsApproved).Select(f => f.Followed);
+        var dtos = new List<UserProfileDto>();
+        foreach (var f in following)
+        {
+            dtos.Add(await GetProfileAsync(f.Id, currentUserId));
+        }
+        return dtos;
+    }
 }

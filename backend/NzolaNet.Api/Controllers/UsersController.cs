@@ -89,6 +89,60 @@ public class UsersController : ControllerBase
         return BadRequest(new { Message = "Não foi possível deixar de seguir o utilizador." });
     }
 
+    // GET /api/users/{id}/seguidores – Listar seguidores de um utilizador específico (suporta privado)
+    [HttpGet("{id}/seguidores")]
+    public async Task<IActionResult> GetFollowers(Guid id)
+    {
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        try
+        {
+            var followers = await _userService.GetFollowersAsync(id, currentUserId);
+            return Ok(followers);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+    }
+
+    // GET /api/users/{id}/seguindo – Listar utilizadores seguidos por um utilizador específico (suporta privado)
+    [HttpGet("{id}/seguindo")]
+    public async Task<IActionResult> GetFollowing(Guid id)
+    {
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            currentUserId = parsedId;
+        }
+
+        try
+        {
+            var following = await _userService.GetFollowingAsync(id, currentUserId);
+            return Ok(following);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+    }
+
     // GET /api/users/follow-requests – Listar pedidos de seguimento pendentes (requer autenticação)
     [Authorize]
     [HttpGet("follow-requests")]
