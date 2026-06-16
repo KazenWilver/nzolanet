@@ -11,6 +11,7 @@ using NzolaNet.Application.Services;
 using NzolaNet.Infrastructure.Data;
 using NzolaNet.Infrastructure.Repositories;
 using NzolaNet.Infrastructure.Services;
+using NzolaNet.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,6 +119,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+// Regista o Middleware de Tratamento de Erros Global
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configura o pipeline de pedidos HTTP (Swagger)
 if (app.Environment.IsDevelopment())

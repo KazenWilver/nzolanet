@@ -17,39 +17,19 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    // POST /api/auth/register – Registo de novo utilizador
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        try
-        {
-            var token = await _authService.RegisterAsync(registerDto);
-            return Ok(new { Token = token, Message = "Utilizador registado com sucesso!" });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { Message = ex.Message });
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, new { Message = "Ocorreu um erro interno no servidor." });
-        }
+        var token = await _authService.RegisterAsync(registerDto);
+        return Ok(new { Token = token, Message = "Utilizador registado com sucesso!" });
     }
 
+    // POST /api/auth/login – Login de utilizador
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        try
-        {
-            var token = await _authService.LoginAsync(loginDto);
-            return Ok(new { Token = token, Message = "Login efetuado com sucesso!" });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { Message = ex.Message });
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, new { Message = "Ocorreu um erro interno no servidor." });
-        }
+        var token = await _authService.LoginAsync(loginDto);
+        return Ok(new { Token = token, Message = "Login efetuado com sucesso!" });
     }
 }
