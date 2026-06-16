@@ -61,10 +61,13 @@ builder.Services.AddAuthentication(options =>
 // 4. Registo de Repositórios e Serviços (Injeção de Dependências)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IFollowRepository, FollowRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // 5. Adiciona os controladores da API
 builder.Services.AddControllers();
