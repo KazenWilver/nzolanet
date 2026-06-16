@@ -38,7 +38,7 @@ export class NotificationsPageComponent implements OnInit {
     });
   }
 
-  remover(id: number): void {
+  remover(id: string): void {
     this.notificationService.remover(id).subscribe({
       next: () => { this.notificacoes = this.notificacoes.filter(n => n.id !== id); },
       error: () => {}

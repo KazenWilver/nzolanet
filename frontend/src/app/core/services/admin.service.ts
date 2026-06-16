@@ -39,7 +39,7 @@ export class AdminService {
     });
   }
 
-  removerComentario(id: number): Observable<void> {
+  removerComentario(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/comments/${id}`, {
       headers: this.getAdminHeaders()
     });

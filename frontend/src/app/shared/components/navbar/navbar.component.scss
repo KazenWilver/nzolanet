@@ -1,4 +1,4 @@
-﻿@use '../../../styles/variables' as vars;
+@use '../../../styles/variables' as vars;
 
 .navbar {
   position: fixed;
@@ -6,9 +6,9 @@
   left: 0;
   right: 0;
   height: vars.$nav-height;
-  background: rgba(vars.$color-surface, 0.95);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid vars.$color-border-default;
+  background: vars.$color-surface-nav;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid vars.$color-border-subtle;
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -41,8 +41,8 @@
 
     input {
       width: 100%;
-      background: vars.$color-surface-secondary;
-      border: 1px solid vars.$color-disabled-text;
+      background: vars.$color-canvas-background;
+      border: 1px solid vars.$color-border-strong;
       border-radius: vars.$radius-sm;
       padding: vars.$spacing-base vars.$spacing-md vars.$spacing-base vars.$spacing-2xl;
       font-family: vars.$font-family-primary;
@@ -54,7 +54,7 @@
       &::placeholder { color: vars.$color-tertiary-text; }
       &:focus {
         border-color: vars.$color-accent;
-        box-shadow: 0 0 0 3px rgba(vars.$color-accent, 0.1);
+        box-shadow: 0 0 0 3px vars.$color-glow-aurora;
       }
     }
   }
@@ -105,7 +105,7 @@
     align-items: center;
     justify-content: center;
     padding: 0 3px;
-    border: 2px solid vars.$color-pure-white;
+    border: 2px solid vars.$color-surface-card;
   }
 
   &__avatar-wrap {
@@ -118,10 +118,10 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    background: vars.$color-surface;
-    border: 1px solid vars.$color-border-default;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
     border-radius: vars.$radius-sm;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px vars.$color-border-subtle;
     min-width: 180px;
     padding: vars.$spacing-sm;
     z-index: 100;
@@ -145,14 +145,14 @@
     text-decoration: none;
     transition: background vars.$transition-fast;
 
-    &:hover { background: vars.$color-surface-secondary; }
+    &:hover { background: rgba(255, 255, 255, 0.04); }
     &--sair { color: vars.$color-error; }
-    &--sair:hover { background: rgba(vars.$color-error, 0.06); }
+    &--sair:hover { background: rgba(vars.$color-error, 0.08); }
   }
 
   &__menu-divider {
     height: 1px;
-    background: vars.$color-border-default;
+    background: vars.$color-border-subtle;
     margin: vars.$spacing-sm 0;
   }
 
@@ -161,10 +161,10 @@
     top: calc(100% + 8px);
     right: 0;
     width: min(360px, 100vw - 32px);
-    background: vars.$color-surface;
-    border: 1px solid vars.$color-border-default;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
     border-radius: vars.$radius-sm;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px vars.$color-border-subtle;
     padding: vars.$spacing-sm;
     z-index: 1100;
   }
@@ -176,12 +176,12 @@
     gap: vars.$spacing-sm;
     margin-bottom: vars.$spacing-sm;
     padding-bottom: vars.$spacing-xs;
-    border-bottom: 1px solid vars.$color-border-default;
+    border-bottom: 1px solid vars.$color-border-subtle;
   }
 
   &__notificacoes-lidas {
     background: transparent;
-    border: 1px solid vars.$color-border-default;
+    border: 1px solid vars.$color-border-subtle;
     border-radius: vars.$radius-full;
     color: vars.$color-secondary-text;
     font-size: vars.$font-size-caption;
@@ -190,7 +190,7 @@
     transition: background vars.$transition-fast, color vars.$transition-fast;
 
     &:hover {
-      background: vars.$color-surface-secondary;
+      background: rgba(255, 255, 255, 0.04);
       color: vars.$color-primary-text;
     }
   }
@@ -217,13 +217,13 @@
     border-radius: vars.$radius-md;
     text-decoration: none;
     color: inherit;
-    background: vars.$color-surface-secondary;
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid transparent;
     transition: background vars.$transition-fast, border-color vars.$transition-fast;
 
     &:hover {
       background: rgba(vars.$color-accent, 0.06);
-      border-color: vars.$color-border-default;
+      border-color: vars.$color-border-subtle;
     }
   }
 

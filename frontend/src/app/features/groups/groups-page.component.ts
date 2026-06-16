@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface Grupo {
-  id: number;
+  id: string;
   nome: string;
   descricao: string;
   membros: number;
@@ -18,9 +18,9 @@ interface Grupo {
 })
 export class GroupsPageComponent {
   grupos: Grupo[] = [
-    { id: 1, nome: 'Comunidade NzolaNet', descricao: 'Partilha notícias, ideias e dicas com membros activos.', membros: 1240, seguido: true },
-    { id: 2, nome: 'Criadores de Conteúdo', descricao: 'Grupos para quem publica fotos, vídeos e textos regularmente.', membros: 870, seguido: false },
-    { id: 3, nome: 'Tecnologia e Inovação', descricao: 'Discussões sobre inovação digital e aplicações modernas.', membros: 532, seguido: false }
+    { id: '1', nome: 'Comunidade NzolaNet', descricao: 'Partilha notícias, ideias e dicas com membros activos.', membros: 1240, seguido: true },
+    { id: '2', nome: 'Criadores de Conteúdo', descricao: 'Grupos para quem publica fotos, vídeos e textos regularmente.', membros: 870, seguido: false },
+    { id: '3', nome: 'Tecnologia e Inovação', descricao: 'Discussões sobre inovação digital e aplicações modernas.', membros: 532, seguido: false }
   ];
 
   alternarSeguir(grupo: Grupo): void {

@@ -1,7 +1,10 @@
+@use '../../../styles/variables' as vars;
+
 .dialogo-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -15,50 +18,54 @@
 }
 
 .dialogo {
-  background: #FFFFFF;
-  border: 1px solid #B6B7AF;
-  border-radius: 4px;
-  padding: 24px;
+  background: vars.$color-surface-card;
+  border: 1px solid vars.$color-border-strong;
+  border-radius: vars.$radius-lg;
+  padding: vars.$spacing-xl;
   max-width: 360px;
   width: 90%;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px vars.$color-border-subtle;
   animation: surgir 150ms ease;
 
   &__mensagem {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
-    line-height: 22.5px;
-    color: #23251D;
-    margin-bottom: 20px;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    line-height: 1.5;
+    color: vars.$color-primary-text;
+    margin-bottom: vars.$spacing-xl;
   }
 
   &__acoes {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: vars.$spacing-base;
   }
 
   &__btn {
-    padding: 0 24px;
-    border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+    padding: 0 vars.$spacing-xl;
+    border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-semibold;
     cursor: pointer;
-    transition: all 200ms ease;
+    transition: all vars.$transition-base;
     border: none;
-    height: 32px;
+    height: 36px;
 
     &--cancelar {
       background: transparent;
-      color: #23251D;
-      border: 1px solid #4D4F46;
-      &:hover { border-color: #000; background: #EEEFE9; }
+      color: vars.$color-secondary-text;
+      border: 1px solid vars.$color-border-strong;
+      &:hover {
+        border-color: vars.$color-primary-text;
+        background: rgba(255, 255, 255, 0.04);
+        color: vars.$color-primary-text;
+      }
     }
 
     &--confirmar {
-      background: #E92F2F;
-      color: #FFFFFF;
+      background: vars.$color-error;
+      color: vars.$color-pure-white;
       &:hover { background: #c42828; }
     }
   }

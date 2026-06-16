@@ -4,11 +4,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface Notificacao {
-  id: number;
+  id: string;
   tipo: 'baze' | 'comentario' | 'seguidor';
-  utilizadorId: number;
+  utilizadorId: string;
   utilizadorNome: string;
-  postId?: number;
+  postId?: string;
   lida: boolean;
   criadoEm: string;
 }
@@ -29,7 +29,7 @@ export class NotificationService {
     return this.http.post<void>(`${this.baseUrl}/marcar-lidas`, {});
   }
 
-  remover(id: number): Observable<void> {
+  remover(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

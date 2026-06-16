@@ -1,14 +1,18 @@
-﻿@use '../../styles/variables' as vars;
+@use '../../styles/variables' as vars;
 
 .layout-privado {
   min-height: 100vh;
-  background: vars.$color-background;
+  background: vars.$color-canvas-background;
   font-family: vars.$font-family-primary;
 
   &__container {
     display: flex;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
     padding-top: vars.$nav-height;
     min-height: calc(100vh - #{vars.$nav-height});
+    width: 100%;
     gap: 0;
   }
 
@@ -20,7 +24,7 @@
     height: calc(100vh - #{vars.$nav-height});
     overflow-y: auto;
     padding: vars.$spacing-lg;
-    border-right: 1px solid vars.$color-border-default;
+    border-right: 1px solid vars.$color-border-subtle;
 
     @media (max-width: 1024px) {
       display: none;
@@ -47,9 +51,9 @@
 
   &__main {
     flex: 1;
-    max-width: 620px;
+    max-width: 640px;
+    width: 100%;
     padding: vars.$spacing-lg;
-    margin: 0 auto;
 
     @media (min-width: 1024px) {
       padding: vars.$spacing-xl;
@@ -69,6 +73,7 @@
     height: calc(100vh - #{vars.$nav-height});
     overflow-y: auto;
     padding: vars.$spacing-lg;
+    border-left: 1px solid vars.$color-border-subtle;
 
     @media (max-width: 1280px) {
       display: none;

@@ -1,4 +1,4 @@
-﻿@use '../../../styles/variables' as vars;
+@use '../../../styles/variables' as vars;
 
 .feed-pagina {
   padding: vars.$spacing-xl vars.$spacing-lg vars.$spacing-2xl;
@@ -14,10 +14,10 @@
   text-align: center;
   padding: vars.$spacing-2xl vars.$spacing-xl;
   border-radius: vars.$radius-lg;
-  border: 1px solid vars.$color-border-default;
-  background: vars.$color-surface;
-  color: vars.$color-concrete;
-  box-shadow: 0 2px 8px rgba(34, 31, 26, 0.08);
+  border: 1px solid vars.$color-border-subtle;
+  background: vars.$color-surface-card;
+  color: vars.$color-secondary-text;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: vars.$spacing-xl;
 
   svg {
@@ -42,12 +42,12 @@
 .feed-pagina__btn-mais {
   height: 40px;
   padding: 0 vars.$spacing-2xl;
-  background: vars.$color-surface;
-  border: 1px solid vars.$color-secondary-text;
-  border-radius: vars.$radius-sm;
+  background: vars.$color-surface-card;
+  border: 1px solid vars.$color-border-strong;
+  border-radius: vars.$radius-md;
   font-family: vars.$font-family-primary;
   font-size: vars.$font-size-button;
-  font-weight: vars.$font-weight-extrabold;
+  font-weight: vars.$font-weight-semibold;
   color: vars.$color-primary-text;
   cursor: pointer;
   display: flex;
@@ -56,8 +56,8 @@
   transition: all vars.$transition-base;
 
   &:hover:not(:disabled) {
-    border-color: vars.$color-primary-text;
-    background: vars.$color-surface-secondary;
+    border-color: vars.$color-accent;
+    background: rgba(255, 255, 255, 0.04);
   }
 
   &:disabled {
@@ -65,17 +65,3 @@
     cursor: not-allowed;
   }
 }
-
-
-.feed-pagina__btn-mais:hover:not(:disabled) {
-  border-color: #000;
-  background: #EEEFE9;
-}
-
-.feed-pagina__btn-mais:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-
-

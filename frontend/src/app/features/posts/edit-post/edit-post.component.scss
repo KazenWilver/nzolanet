@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 .editar-post {
   padding: 16px 0 32px;
 
@@ -7,22 +9,29 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: none;
-    border: none;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: #4D4F46;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: vars.$radius-md;
+    padding: 6px 14px;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
     cursor: pointer;
-    transition: color 150ms ease;
-    &:hover { color: #B17816; }
+    transition: all vars.$transition-fast;
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+      color: vars.$color-accent;
+    }
   }
 
-  &__titulo { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #23251D; }
+  &__titulo { font-family: vars.$font-family-primary; font-size: vars.$font-size-h3; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; }
 
   &__formulario {
-    background: #FFFFFF;
-    border: 1px solid #B6B7AF;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -30,43 +39,50 @@
   }
 
   &__autor { display: flex; align-items: center; gap: 10px; }
-  &__nome { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #23251D; }
+  &__nome { font-family: vars.$font-family-primary; font-size: vars.$font-size-body; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text; }
 
   &__textarea {
     width: 100%;
-    background: #EEEFE9;
-    border: 1px solid #B6B7AF;
-    border-radius: 4px;
+    background: vars.$color-canvas-background;
+    border: 1px solid vars.$color-border-strong;
+    border-radius: vars.$radius-sm;
     padding: 12px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
-    line-height: 22.5px;
-    color: #23251D;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    line-height: 1.6;
+    color: vars.$color-primary-text;
     resize: vertical;
     min-height: 120px;
     outline: none;
-    transition: border-color 200ms ease, box-shadow 200ms ease;
-    &:focus { border-color: #B17816; box-shadow: 0 0 0 3px rgba(177, 120, 22, 0.1); }
-    &::placeholder { color: #9EA096; }
+    transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
+    &:focus { border-color: vars.$color-accent; box-shadow: 0 0 0 3px vars.$color-glow-aurora; }
+    &::placeholder { color: vars.$color-tertiary-text; }
   }
 
-  &__acoes { display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid #EEEFE9; }
+  &__acoes { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; border-top: 1px solid vars.$color-border-subtle; }
 
   &__btn-cancelar {
     height: 36px; padding: 0 20px;
-    background: transparent; border: 1px solid #4D4F46; border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #23251D;
+    background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text;
     cursor: pointer; transition: all 200ms ease;
-    &:hover { border-color: #000; background: #EEEFE9; }
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+    }
   }
 
   &__btn-guardar {
     height: 36px; padding: 0 24px;
-    background: #B17816; border: none; border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #23251D;
+    background: vars.$color-accent; border: none; border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: #FFFFFF;
     cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 200ms ease;
-    &:hover:not(:disabled) { background: #CD8407; }
-    &:disabled { background: #B6B7AF; cursor: not-allowed; }
+    &:hover:not(:disabled) { background: vars.$color-accent-hover; }
+    &:disabled {
+      background: vars.$color-disabled-text;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+    }
   }
 
   &__carregando { display: flex; justify-content: center; padding: 64px 0; }

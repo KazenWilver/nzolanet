@@ -20,7 +20,7 @@ import { ReportDialogComponent } from '../report-dialog/report-dialog.component'
 })
 export class CommentItemComponent {
   @Input({ required: true }) comentario!: Comentario;
-  @Output() eliminado = new EventEmitter<number>();
+  @Output() eliminado = new EventEmitter<string>();
 
   aEditar = false;
   textoEditado = '';

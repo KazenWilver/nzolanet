@@ -1,6 +1,9 @@
+@use '../../../styles/variables' as vars;
+
 .media-preview {
   overflow: hidden;
-  background: #EEEFE9;
+  background: vars.$color-canvas-background;
+  border-radius: vars.$radius-md;
 
   &__imagem {
     width: 100%;
@@ -8,8 +11,8 @@
     object-fit: cover;
     display: block;
     cursor: pointer;
-    transition: opacity 200ms ease;
-    &:hover { opacity: 0.95; }
+    transition: opacity vars.$transition-base;
+    &:hover { opacity: 0.92; }
   }
 
   &__video {

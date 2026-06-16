@@ -61,7 +61,7 @@ export class AdminPageComponent implements OnInit {
     this.removerComentario(comentario.id);
   }
 
-  removerComentario(id: number): void {
+  removerComentario(id: string): void {
     this.carregandoRemocao = true;
     this.erroComentarios = '';
     this.mensagemSucesso = '';

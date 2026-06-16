@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 .comentario-form {
   display: flex;
   align-items: flex-start;
@@ -9,15 +11,15 @@
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    background: #EEEFE9;
-    border: 1px solid #B6B7AF;
-    border-radius: 4px;
+    background: vars.$color-canvas-background;
+    border: 1px solid vars.$color-border-strong;
+    border-radius: vars.$radius-sm;
     padding: 8px 12px;
-    transition: border-color 200ms ease, box-shadow 200ms ease;
+    transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
 
     &:focus-within {
-      border-color: #B17816;
-      box-shadow: 0 0 0 3px rgba(177, 120, 22, 0.1);
+      border-color: vars.$color-accent;
+      box-shadow: 0 0 0 3px vars.$color-glow-aurora;
     }
   }
 
@@ -26,31 +28,35 @@
     background: none;
     border: none;
     outline: none;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14px;
-    color: #23251D;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    color: vars.$color-primary-text;
     resize: none;
     line-height: 20px;
     max-height: 120px;
     overflow-y: auto;
-    &::placeholder { color: #9EA096; }
+    &::placeholder { color: vars.$color-tertiary-text; }
   }
 
   &__enviar {
     width: 28px;
     height: 28px;
-    border-radius: 4px;
+    border-radius: vars.$radius-sm;
     border: none;
-    background: #B17816;
+    background: vars.$color-accent;
     color: #FFFFFF;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: background 200ms ease;
+    transition: background vars.$transition-base;
 
-    &:hover:not(:disabled) { background: #CD8407; }
-    &:disabled { background: #B6B7AF; cursor: not-allowed; }
+    &:hover:not(:disabled) { background: vars.$color-accent-hover; }
+    &:disabled {
+      background: vars.$color-disabled-text;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+    }
   }
 }

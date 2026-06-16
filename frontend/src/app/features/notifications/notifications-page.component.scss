@@ -1,3 +1,5 @@
+@use '../../styles/variables' as vars;
+
 .notifications-page {
   display: grid;
   gap: 1rem;
@@ -9,41 +11,47 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1.5rem;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border-radius: vars.$radius-lg;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
     h1 {
       margin: 0;
       font-size: 1.75rem;
-      color: #23251d;
+      color: #FFFFFF;
+      font-family: vars.$font-family-primary;
+      font-weight: vars.$font-weight-bold;
     }
 
     p {
       margin: 0.25rem 0 0;
-      color: #5b5f54;
+      color: vars.$color-secondary-text;
     }
   }
 
   &__mark-read {
     border: none;
-    background: #b17816;
+    background: vars.$color-accent;
     color: white;
-    border-radius: 999px;
+    border-radius: vars.$radius-md;
     padding: 0.75rem 1.25rem;
     cursor: pointer;
-    transition: transform 150ms ease, background 150ms ease;
+    font-family: vars.$font-family-primary;
+    font-weight: vars.$font-weight-semibold;
+    transition: background 150ms ease;
 
-    &:hover { background: #9e620f; transform: translateY(-1px); }
+    &:hover { background: vars.$color-accent-hover; }
   }
 
   &__loading,
   &__empty {
     padding: 2rem;
-    border-radius: 16px;
-    background: #f5f5f1;
+    border-radius: vars.$radius-lg;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
     text-align: center;
-    color: #5b5f54;
+    color: vars.$color-secondary-text;
   }
 
   &__list {
@@ -56,21 +64,26 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    border-radius: vars.$radius-lg;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     align-items: center;
 
     &--unread {
-      border: 1px solid #b17816;
+      border: 1px solid vars.$color-accent;
     }
 
     button {
       border: none;
       background: transparent;
-      color: #b17816;
+      color: vars.$color-accent;
       cursor: pointer;
       font-weight: 600;
+      font-family: vars.$font-family-primary;
+      transition: color 150ms ease;
+
+      &:hover { color: vars.$color-accent-hover; }
     }
   }
 }

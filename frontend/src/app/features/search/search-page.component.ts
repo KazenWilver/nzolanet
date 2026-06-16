@@ -57,7 +57,7 @@ export class SearchPageComponent implements OnInit {
     });
   }
 
-  trackPorId(_: number, post: Post): number {
+  trackPorId(_: number, post: Post): string {
     return post.id;
   }
 }

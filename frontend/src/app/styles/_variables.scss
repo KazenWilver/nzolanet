@@ -1,17 +1,17 @@
-// ─── PostHog Design System Color Palette ───
+// ─── Carbon Aurora & Glassmorphic Twilight Color Palette ───
 
-// Primary Colors
-$color-primary-text: #23251D;      // Deep Charcoal
-$color-secondary-text: #4D4F46;    // Stone Gray
-$color-tertiary-text: #9EA096;     // Mid Tone
-$color-disabled-text: #B6B7AF;     // Light Gray
+// Primary Text Colors
+$color-primary-text: #FFFFFF;      // Pure White
+$color-secondary-text: #9C9C9D;    // Muted Cool Gray
+$color-tertiary-text: #50617A;     // Muted Gray (metadata, timestamps)
+$color-disabled-text: #3A4454;     // Disabled / Border Neutral
 $color-black: #000000;             // Pure Black
 
-// Accent Colors
-$color-accent: #B17816;            // Warm Amber
-$color-accent-hover: #CD8407;      // Golden Amber
-$color-accent-light: #E1D7C2;      // Light Cream
-$color-accent-lighter: #FFF9F2;    // Very Light Cream
+// Brand & Engagement Colors
+$color-accent: #7170FF;            // Radiant Purple/Indigo (brand-accent)
+$color-accent-hover: #8C8AFF;      // brand-accent-hover
+$color-engagement-pink: #EC4899;   // engagement-pink (like button, badges)
+$color-glow-aurora: rgba(113, 112, 255, 0.15); // soft aurora glow
 
 // Semantic Colors
 $color-error: #E92F2F;             // Error Red
@@ -19,20 +19,26 @@ $color-warning: #F1A82C;           // Warning Amber
 $color-success: #00FF00;           // Success Green
 
 // Neutral Scale
-$color-dark-slate: #374151;        // Dark Slate
+$color-dark-slate: #2F3031;        // border-strong
 $color-concrete: #65675E;          // Concrete
 $color-off-white: #EEEFE9;         // Off-White
 $color-pure-white: #FFFFFF;        // Pure White
 
 // Surface & Borders
-$color-border-default: rgba(34, 31, 26, 0.08);
-$color-border-light: rgba(34, 31, 26, 0.12);
-$color-surface: $color-pure-white;
-$color-surface-secondary: $color-off-white;
-$color-background: $color-off-white;
+$color-canvas-background: #07080A; // canvas-background
+$color-surface-card: #0F1011;      // surface-card
+$color-surface-nav: rgba(11, 12, 14, 0.75); // surface-nav
+$color-border-subtle: rgba(255, 255, 255, 0.06); // border-subtle
+$color-border-strong: #2F3031;     // border-strong
+
+$color-border-default: $color-border-subtle;
+$color-border-light: $color-border-subtle;
+$color-surface: $color-surface-card;
+$color-surface-secondary: #161719;
+$color-background: $color-canvas-background;
 
 // Typography
-$font-family-primary: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+$font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 $font-family-monospace: 'Source Code Pro', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
 
 // Font Sizes
@@ -66,9 +72,10 @@ $spacing-3xl: 48px;
 // Border Radius
 $radius-sm: 4px;
 $radius-md: 8px;
-$radius-lg: 16px;
+$radius-lg: 12px;
 $radius-full: 99px;
-$radius-card: 32px;
+$radius-pill: 9999px;
+$radius-card: 12px;
 
 // Transitions
 $transition-fast: 150ms ease;

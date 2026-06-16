@@ -1,11 +1,14 @@
+@use '../../../styles/variables' as vars;
+
 .avatar {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: #E1D7C2;
+  background: linear-gradient(135deg, #1a1b2e, #2a2a3a);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid vars.$color-border-subtle;
 
   &--xs { width: 28px; height: 28px; }
   &--sm { width: 36px; height: 36px; }
@@ -20,9 +23,9 @@
   }
 
   &__iniciais {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-weight: 700;
-    color: #B17816;
+    font-family: vars.$font-family-primary;
+    font-weight: vars.$font-weight-extrabold;
+    color: vars.$color-accent;
     text-transform: uppercase;
     line-height: 1;
     font-size: 0.45em;

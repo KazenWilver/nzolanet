@@ -17,7 +17,7 @@ export class FollowersListComponent implements OnInit {
   utilizadores: User[] = [];
   modo: 'seguidores' | 'seguindo' = 'seguidores';
   aCarregar = true;
-  private utilizadorId!: number;
+  private utilizadorId!: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -26,7 +26,7 @@ export class FollowersListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.utilizadorId = Number(this.route.snapshot.paramMap.get('id'));
+    this.utilizadorId = this.route.snapshot.paramMap.get('id') ?? '';
     // Determina o modo pelo último segmento da rota actual
     const segmento = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
     this.modo = segmento === 'seguindo' ? 'seguindo' : 'seguidores';

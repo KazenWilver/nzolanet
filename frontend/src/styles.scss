@@ -2,7 +2,7 @@
 @use 'app/styles/variables' as vars;
 @use 'app/styles/global';
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -21,7 +21,7 @@ body {
   font-size: vars.$font-size-body;
   line-height: 1.6;
   color: vars.$color-primary-text;
-  background: vars.$color-background;
+  background: vars.$color-canvas-background;
   min-height: 100vh;
 }
 
@@ -31,8 +31,8 @@ body {
   --cor-stone:       #{vars.$color-secondary-text};
   --cor-amber:       #{vars.$color-accent};
   --cor-amber-hover: #{vars.$color-accent-hover};
-  --cor-off-white:   #{vars.$color-off-white};
-  --cor-cream:       #{vars.$color-accent-light};
+  --cor-off-white:   #{vars.$color-canvas-background};
+  --cor-cream:       #{vars.$color-surface-secondary};
   --cor-light-gray:  #{vars.$color-disabled-text};
   --cor-mid-tone:    #{vars.$color-tertiary-text};
   --cor-branco:      #{vars.$color-pure-white};

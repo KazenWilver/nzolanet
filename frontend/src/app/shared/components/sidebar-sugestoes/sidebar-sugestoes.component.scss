@@ -1,4 +1,4 @@
-﻿@use '../../../styles/variables' as vars;
+@use '../../../styles/variables' as vars;
 
 .sidebar-sugestoes {
   display: flex;
@@ -7,8 +7,8 @@
 }
 
 .widget {
-  background: vars.$color-surface;
-  border: 1px solid vars.$color-border-default;
+  background: vars.$color-surface-card;
+  border: 1px solid vars.$color-border-subtle;
   border-radius: vars.$radius-md;
   padding: vars.$spacing-lg;
 
@@ -18,7 +18,7 @@
   }
 
   &__titulo {
-    font-size: vars.$font-size-label;
+    font-size: vars.$font-size-caption;
     font-weight: vars.$font-weight-extrabold;
     color: vars.$color-secondary-text;
     text-transform: uppercase;
@@ -67,7 +67,7 @@
   transition: vars.$transition-fast;
 
   &:hover {
-    background: rgba(vars.$color-accent, 0.04);
+    background: rgba(255, 255, 255, 0.04);
   }
 
   &__avatar {
@@ -101,7 +101,7 @@
     flex-shrink: 0;
     padding: 6px 14px;
     background: vars.$color-accent;
-    color: vars.$color-pure-white;
+    color: #FFFFFF;
     border: none;
     border-radius: vars.$radius-sm;
     font-size: vars.$font-size-caption;
@@ -121,10 +121,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, vars.$color-accent-light, vars.$color-accent-lighter);
+  background: linear-gradient(135deg, #1f1f2e, #2a2a3a);
   color: vars.$color-primary-text;
   font-weight: vars.$font-weight-extrabold;
   font-size: 12px;
+  border: 1px solid vars.$color-border-subtle;
 }
 
 .tendencia-item {

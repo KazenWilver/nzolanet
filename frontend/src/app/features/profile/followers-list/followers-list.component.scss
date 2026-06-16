@@ -1,65 +1,145 @@
-.lista-seguidores {
-  padding: 16px 0 32px;
+@use '../../../styles/variables' as vars;
 
-  &__cabecalho { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.lista-seguidores {
+  padding: vars.$spacing-lg 0 vars.$spacing-2xl;
+
+  &__cabecalho {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-lg;
+    margin-bottom: vars.$spacing-lg;
+    flex-wrap: wrap;
+  }
 
   &__btn-voltar {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: none; border: none;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 500; color: #4D4F46;
-    cursor: pointer; transition: color 150ms ease;
-    &:hover { color: #B17816; }
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid vars.$color-border-strong;
+    border-radius: vars.$radius-md;
+    padding: 6px vars.$spacing-md;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    font-weight: vars.$font-weight-medium;
+    color: vars.$color-secondary-text;
+    cursor: pointer;
+    transition: all vars.$transition-fast;
+    &:hover {
+      color: vars.$color-accent;
+      border-color: vars.$color-accent;
+      background: rgba(vars.$color-accent, 0.05);
+    }
   }
 
   &__abas {
     display: flex;
-    background: #FFFFFF;
-    border: 1px solid #B6B7AF;
-    border-radius: 4px;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-strong;
+    border-radius: vars.$radius-md;
     overflow: hidden;
   }
 
   &__aba {
-    padding: 8px 20px;
-    background: none; border: none;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #4D4F46;
-    cursor: pointer; transition: all 150ms ease;
-    &--ativa { background: #B17816; color: #23251D; }
+    padding: vars.$spacing-base vars.$spacing-xl;
+    background: none;
+    border: none;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-medium;
+    color: vars.$color-secondary-text;
+    cursor: pointer;
+    transition: all vars.$transition-fast;
+
+    &:hover {
+      color: vars.$color-primary-text;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    &--ativa {
+      background: vars.$color-accent;
+      color: vars.$color-pure-white;
+      font-weight: vars.$font-weight-semibold;
+    }
   }
 
-  &__carregando { display: flex; justify-content: center; padding: 48px 0; }
+  &__carregando {
+    display: flex;
+    justify-content: center;
+    padding: vars.$spacing-3xl 0;
+  }
 
   &__vazio {
-    background: #FFFFFF; border: 1px solid #B6B7AF;
-    text-align: center; padding: 48px;
-    font-size: 15px; color: #9EA096;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    text-align: center;
+    padding: vars.$spacing-3xl;
+    font-size: vars.$font-size-body;
+    color: vars.$color-tertiary-text;
   }
 
-  &__lista { background: #FFFFFF; border: 1px solid #B6B7AF; }
+  &__lista {
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    overflow: hidden;
+  }
 
   &__item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px;
-    border-bottom: 1px solid #EEEFE9;
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-md;
+    padding: vars.$spacing-md vars.$spacing-lg;
+    border-bottom: 1px solid vars.$color-border-subtle;
+    transition: background vars.$transition-fast;
+
     &:last-child { border-bottom: none; }
+    &:hover { background: rgba(255, 255, 255, 0.02); }
   }
 
-  &__info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-xs;
+  }
 
   &__nome {
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #23251D;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
     text-decoration: none;
-    &:hover { color: #B17816; }
+    transition: color vars.$transition-fast;
+    &:hover { color: vars.$color-accent; }
   }
 
-  &__nomeutil { font-size: 13px; color: #9EA096; font-weight: 500; }
+  &__nomeutil {
+    font-size: vars.$font-size-button;
+    color: vars.$color-tertiary-text;
+    font-weight: vars.$font-weight-medium;
+  }
 
   &__btn-perfil {
-    height: 32px; padding: 0 16px;
-    background: transparent; border: 1px solid #4D4F46; border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 500; color: #23251D;
-    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
-    transition: all 200ms ease;
-    &:hover { border-color: #B17816; color: #B17816; }
+    height: 32px;
+    padding: 0 vars.$spacing-lg;
+    background: transparent;
+    border: 1px solid vars.$color-border-strong;
+    border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all vars.$transition-base;
+    &:hover {
+      border-color: vars.$color-accent;
+      color: vars.$color-accent;
+      background: rgba(vars.$color-accent, 0.05);
+    }
   }
 }

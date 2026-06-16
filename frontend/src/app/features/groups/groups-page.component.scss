@@ -1,66 +1,87 @@
+@use '../../styles/variables' as vars;
+
 .groups-page {
   display: grid;
-  gap: 1rem;
-  padding: 1rem;
+  gap: vars.$spacing-lg;
+  padding: vars.$spacing-lg;
 
   &__header {
-    padding: 1.5rem;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    padding: vars.$spacing-xl;
+    border-radius: vars.$radius-lg;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 
     h1 {
       margin: 0;
-      font-size: 1.75rem;
-      color: #23251d;
+      font-family: vars.$font-family-primary;
+      font-size: vars.$font-size-display;
+      font-weight: vars.$font-weight-extrabold;
+      color: vars.$color-primary-text;
     }
 
     p {
-      margin: 0.5rem 0 0;
-      color: #5b5f54;
+      margin: vars.$spacing-base 0 0;
+      color: vars.$color-secondary-text;
+      font-size: vars.$font-size-body;
     }
   }
 
   &__list {
     display: grid;
-    gap: 1rem;
+    gap: vars.$spacing-lg;
   }
 
   &__card {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1.25rem;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    gap: vars.$spacing-lg;
+    padding: vars.$spacing-xl;
+    border-radius: vars.$radius-lg;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     align-items: center;
+    transition: border-color vars.$transition-base, transform vars.$transition-base;
+
+    &:hover {
+      border-color: vars.$color-border-strong;
+      transform: translateY(-1px);
+    }
 
     h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1.1rem;
+      margin: 0 0 vars.$spacing-base;
+      font-family: vars.$font-family-primary;
+      font-size: vars.$font-size-h3;
+      font-weight: vars.$font-weight-bold;
+      color: vars.$color-primary-text;
     }
 
     p {
-      margin: 0 0 0.5rem;
-      color: #5b5f54;
+      margin: 0 0 vars.$spacing-base;
+      color: vars.$color-secondary-text;
+      font-size: vars.$font-size-body;
     }
 
     span {
-      font-size: 0.9rem;
-      color: #7d7f7c;
+      font-size: vars.$font-size-caption;
+      color: vars.$color-tertiary-text;
     }
 
     button {
       border: none;
-      background: #b17816;
-      color: white;
-      border-radius: 999px;
-      padding: 0.75rem 1.25rem;
+      background: vars.$color-accent;
+      color: vars.$color-pure-white;
+      border-radius: vars.$radius-pill;
+      padding: vars.$spacing-md vars.$spacing-xl;
+      font-family: vars.$font-family-primary;
+      font-size: vars.$font-size-button;
+      font-weight: vars.$font-weight-semibold;
       cursor: pointer;
-      transition: background 150ms ease;
+      transition: background vars.$transition-fast;
+      flex-shrink: 0;
 
-      &:hover { background: #9e620f; }
+      &:hover { background: vars.$color-accent-hover; }
     }
   }
 }

@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 @keyframes girar {
   to { transform: rotate(360deg); }
 }
@@ -15,8 +17,8 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 2px solid #EEEFE9;
-    border-top-color: #B17816;
+    border: 2px solid vars.$color-border-strong;
+    border-top-color: vars.$color-accent;
     animation: girar 0.7s linear infinite;
   }
 }

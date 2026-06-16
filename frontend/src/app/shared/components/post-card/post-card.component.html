@@ -40,7 +40,7 @@
   </div>
 
   <footer class="post-card__rodape">
-    <button class="post-card__acao" [class.post-card__acao--ativo]="post.utilizadorDeuBaze" (click)="alternarBaze()">
+    <button class="post-card__acao post-card__acao--baze" [class.post-card__acao--ativo]="post.utilizadorDeuBaze" (click)="alternarBaze()">
       <svg width="16" height="16" viewBox="0 0 24 24"
         [attr.fill]="post.utilizadorDeuBaze ? 'currentColor' : 'none'"
         stroke="currentColor" stroke-width="2">
@@ -50,7 +50,7 @@
       <span>{{ post.totalBazes }}</span>
     </button>
 
-    <button class="post-card__acao" [routerLink]="['/publicacoes', post.id]">
+    <button class="post-card__acao post-card__acao--comentario" [routerLink]="['/publicacoes', post.id]">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>

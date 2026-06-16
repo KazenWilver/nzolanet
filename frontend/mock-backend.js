@@ -18,7 +18,7 @@ app.use((req, res, next) => {
       const texto = p.texto?.toLowerCase() ?? '';
       return q === '' || texto.includes(q) || autor.includes(q);
     });
-    return res.json(resultado.slice(start, start + porPagina));
+    return res.json(resultado.slice(start, start + porPagina).map(transformarPost));
   }
   next();
 });
@@ -193,12 +193,49 @@ function criarTokenParaUtilizador(utilizador) {
   return `${TOKEN_PREFIX}${utilizador.id}`;
 }
 
+const followRequests = [];
+
+function transformarUtilizador(u) {
+  if (!u) return u;
+  const mapped = { ...u };
+  mapped.username = u.nomeUtilizador;
+  mapped.profilePhoto = u.fotoPerfil || '';
+  mapped.followersCount = u.totalSeguidores || 0;
+  mapped.followingCount = u.totalSeguindo || 0;
+  mapped.isPrivate = u.privado || false;
+  mapped.createdAt = u.criadoEm;
+  return mapped;
+}
+
+function transformarPost(p) {
+  if (!p) return p;
+  const user = users.find(u => u.id === p.autorId);
+  const mapped = { ...p };
+  mapped.userId = p.autorId;
+  mapped.userName = p.autorNome || (user ? user.nome : 'Utilizador');
+  mapped.userPhoto = p.autorFoto || (user ? user.fotoPerfil : '');
+  mapped.text = p.texto;
+  mapped.imageUrl = p.imagemUrl || '';
+  mapped.videoUrl = p.videoUrl || '';
+  mapped.commentsCount = p.totalComentarios || 0;
+  mapped.createdAt = p.criadoEm;
+  return mapped;
+}
+
 function transformarComentario(comentario, utilizador = null) {
   const reports = Array.isArray(comentario.reports) ? comentario.reports : [];
+  const user = users.find(u => u.id === comentario.autorId || u.id === comentario.utilizadorId);
   return {
     ...comentario,
     reportsCount: reports.length,
-    reportadoPorMim: utilizador ? reports.some(r => r.userId === utilizador.id) : false
+    reportadoPorMim: utilizador ? reports.some(r => r.userId === utilizador.id) : false,
+    
+    // English mapping
+    userId: comentario.autorId || comentario.utilizadorId,
+    userName: comentario.autorNome || comentario.utilizadorNome || (user ? user.nome : 'Utilizador'),
+    userPhoto: comentario.autorFoto || (user ? user.fotoPerfil : ''),
+    text: comentario.texto,
+    createdAt: comentario.criadoEm
   };
 }
 
@@ -234,7 +271,7 @@ app.post('/api/auth/login', (req, res) => {
   // Não expor a flag `eAdmin` diretamente na resposta para evitar revelar existência do painel
   const utilizadorSemFlag = { ...user };
   delete utilizadorSemFlag.eAdmin;
-  return res.json({ token: criarTokenParaUtilizador(user), utilizador: utilizadorSemFlag });
+  return res.json({ token: criarTokenParaUtilizador(user), utilizador: transformarUtilizador(utilizadorSemFlag) });
 });
 
 app.post('/api/auth/registar', (req, res) => {
@@ -261,7 +298,7 @@ app.post('/api/auth/registar', (req, res) => {
     criadoEm: new Date().toISOString()
   };
   users.push(novo);
-  return res.json({ token: criarTokenParaUtilizador(novo), utilizador: novo });
+  return res.json({ token: criarTokenParaUtilizador(novo), utilizador: transformarUtilizador(novo) });
 });
 
 app.post('/api/auth/recuperar-senha', (req, res) => {
@@ -273,7 +310,7 @@ app.get('/api/auth/me', (req, res) => {
   if (!user) return res.status(401).json({ message: 'Token inválido.' });
   const utilizadorSemFlag = { ...user };
   delete utilizadorSemFlag.eAdmin;
-  return res.json(utilizadorSemFlag);
+  return res.json(transformarUtilizador(utilizadorSemFlag));
 });
 
 // Endpoint para verificar, no servidor, se o token pertence a um administrador.
@@ -332,7 +369,7 @@ app.get('/api/posts/feed', (req, res) => {
   const user = findUserByToken(req);
   const followedIds = user ? follows.filter(f => f.followerId === user.id).map(f => f.followingId) : [];
   const feed = posts.filter(p => !users.find(u => u.id === p.autorId)?.privado || followedIds.includes(p.autorId));
-  return res.json(feed.slice(start, start + porPagina));
+  return res.json(feed.slice(start, start + porPagina).map(transformarPost));
 });
 
 // Pesquisa por texto e por autor (nomeUtilizador)
@@ -346,7 +383,7 @@ app.get('/api/posts/search', (req, res) => {
     const texto = p.texto?.toLowerCase() ?? '';
     return q === '' || texto.includes(q) || autor.includes(q);
   });
-  return res.json(resultado.slice(start, start + porPagina));
+  return res.json(resultado.slice(start, start + porPagina).map(transformarPost));
 });
 
 // Rota alternativa para pesquisa (caso haja conflitos com rotas parametrizadas)
@@ -360,7 +397,7 @@ app.get('/api/search/posts', (req, res) => {
     const texto = p.texto?.toLowerCase() ?? '';
     return q === '' || texto.includes(q) || autor.includes(q);
   });
-  return res.json(resultado.slice(start, start + porPagina));
+  return res.json(resultado.slice(start, start + porPagina).map(transformarPost));
 });
 
 // Nota: endpoint de debug removido para evitar exposição das rotas em ambiente de desenvolvimento.
@@ -368,16 +405,16 @@ app.get('/api/search/posts', (req, res) => {
 app.get('/api/posts/:id', (req, res) => {
   const post = posts.find(p => p.id === Number(req.params.id));
   if (!post) return res.status(404).json({ message: 'Post não encontrado.' });
-  return res.json(post);
+  return res.json(transformarPost(post));
 });
 
 app.get('/api/posts/utilizador/:id', (req, res) => {
   const lista = posts.filter(p => p.autorId === Number(req.params.id));
-  return res.json(lista);
+  return res.json(lista.map(transformarPost));
 });
 
 app.post('/api/posts', upload.fields([{ name: 'imagem' }, { name: 'video' }]), (req, res) => {
-  const texto = req.body.texto || '';
+  const texto = req.body.Text || req.body.texto || '';
   const novo = {
     id: posts.length + 1,
     autorId: 1,
@@ -393,7 +430,7 @@ app.post('/api/posts', upload.fields([{ name: 'imagem' }, { name: 'video' }]), (
     criadoEm: new Date().toISOString()
   };
   posts.unshift(novo);
-  return res.json(novo);
+  return res.json(transformarPost(novo));
 });
 
 app.put('/api/posts/:id', (req, res) => {
@@ -404,9 +441,9 @@ app.put('/api/posts/:id', (req, res) => {
   if (Date.now() - criado > limiteEdicao) {
     return res.status(403).json({ message: 'O prazo de edição desta publicação expirou.' });
   }
-  post.texto = req.body.texto ?? post.texto;
+  post.texto = req.body.Text ?? req.body.texto ?? post.texto;
   post.atualizadoEm = new Date().toISOString();
-  return res.json(post);
+  return res.json(transformarPost(post));
 });
 
 app.delete('/api/posts/:id', (req, res) => {
@@ -519,19 +556,19 @@ app.get('/api/admin/comments/reported', (req, res) => {
 app.get('/api/users/:id', (req, res) => {
   const user = users.find(u => u.id === Number(req.params.id));
   if (!user) return res.status(404).json({ message: 'Utilizador não encontrado.' });
-  return res.json(user);
+  return res.json(transformarUtilizador(user));
 });
 
 app.get('/api/users/:id/seguidores', (req, res) => {
   const id = Number(req.params.id);
   const seguidores = follows.filter(f => f.followingId === id).map(f => users.find(u => u.id === f.followerId));
-  return res.json(seguidores.filter(Boolean));
+  return res.json(seguidores.filter(Boolean).map(transformarUtilizador));
 });
 
 app.get('/api/users/:id/seguindo', (req, res) => {
   const id = Number(req.params.id);
   const seguindo = follows.filter(f => f.followerId === id).map(f => users.find(u => u.id === f.followingId));
-  return res.json(seguindo.filter(Boolean));
+  return res.json(seguindo.filter(Boolean).map(transformarUtilizador));
 });
 
 app.post('/api/users/:id/seguir', (req, res) => {
@@ -572,7 +609,7 @@ app.put('/api/users/:id', upload.none(), (req, res) => {
   user.nomeUtilizador = req.body.nomeUtilizador ?? user.nomeUtilizador;
   user.bio = req.body.bio ?? user.bio;
   user.localizacao = req.body.localizacao ?? user.localizacao;
-  return res.json(user);
+  return res.json(transformarUtilizador(user));
 });
 
 app.post('/api/upload/imagem', upload.single('ficheiro'), (req, res) => {

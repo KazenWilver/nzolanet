@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 .login__content,
 .login__form-wrapper {
   display: flex;
@@ -15,7 +17,7 @@
 .login__label-contas {
   font-size: 14px;
   font-weight: 600;
-  color: #5A5D50;
+  color: vars.$color-secondary-text;
 }
 
 .login__contas-salvas {
@@ -33,7 +35,7 @@
   width: fit-content;
   background: transparent;
   border: none;
-  color: #B17816;
+  color: vars.$color-accent;
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
@@ -45,6 +47,7 @@
 
 .login__voltar:hover {
   text-decoration: underline;
+  color: vars.$color-accent-hover;
 }
 
 .login__header {
@@ -61,11 +64,11 @@
 .login__label {
   font-size: 16px;
   font-weight: 800;
-  color: #23251D;
+  color: vars.$color-primary-text;
 }
 
 .login__descricao {
-  color: #5A5D50;
+  color: vars.$color-secondary-text;
   font-size: 14px;
 }
 
@@ -87,16 +90,16 @@
   align-items: center;
   gap: 16px;
   padding: 18px;
-  background: #F8F7F1;
-  border: 1px solid #E8E6D7;
-  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid vars.$color-border-subtle;
+  border-radius: vars.$radius-lg;
   cursor: pointer;
   transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
   text-align: left;
 
   &:hover {
-    border-color: #B17816;
-    background: #FFF9F2;
+    border-color: vars.$color-accent;
+    background: rgba(255, 255, 255, 0.04);
     transform: translateY(-1px);
   }
 }
@@ -111,7 +114,7 @@
 
 .login__nome-conta {
   max-width: 180px;
-  color: #23251D;
+  color: vars.$color-primary-text;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,7 +123,7 @@
 
 .login__email-conta {
   font-size: 13px;
-  color: #7A7D68;
+  color: vars.$color-secondary-text;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -128,13 +131,7 @@
 
 .login__seta {
   font-size: 24px;
-  color: #B17816;
-}
-
-.login__opcoes {
-  display: grid;
-  gap: 12px;
-  margin-top: 14px;
+  color: vars.$color-accent;
 }
 
 .login__link {
@@ -142,7 +139,7 @@
   justify-content: center;
   width: 100%;
   margin-top: 18px;
-  color: #B17816;
+  color: vars.$color-accent;
   font-weight: 700;
   text-decoration: none;
   transition: color 200ms ease;
@@ -151,12 +148,12 @@
 .login__btn {
   width: 100%;
   height: 40px;
-  background: #B17816;
-  color: #23251D;
+  background: vars.$color-accent;
+  color: #FFFFFF;
   border: none;
-  border-radius: 4px;
+  border-radius: vars.$radius-md;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: vars.$font-weight-semibold;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -166,73 +163,70 @@
 
 .login__btn:hover:not(:disabled),
 .login__btn:focus-visible {
-  background: #CD8407;
+  background: vars.$color-accent-hover;
 }
 
 .login__btn:disabled {
-  background: #B6B7AF;
+  background: vars.$color-disabled-text;
+  color: rgba(255, 255, 255, 0.3);
   cursor: not-allowed;
 }
 
 .login__btn--ghost {
-  background: #FFFFFF;
-  color: #23251D;
-  border: 1.5px solid #B17816;
+  background: transparent;
+  color: vars.$color-primary-text;
+  border: 1.5px solid vars.$color-accent;
 }
 
 .login__btn--ghost:hover:not(:disabled),
 .login__btn--ghost:focus-visible {
-  background: #FFF9F2;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: vars.$color-accent-hover;
 }
 
 .login__btn--secondary {
-  background: #F0E5C0;
-  color: #23251D;
-  border: 1px solid #E7D6A7;
+  background: rgba(255, 255, 255, 0.04);
+  color: vars.$color-primary-text;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .login__btn--secondary:hover:not(:disabled),
 .login__btn--secondary:focus-visible {
-  background: #E7D6A7;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .login__link:hover {
-  color: #8D5A09;
+  color: vars.$color-accent-hover;
 }
 
 .login__registo {
   font-size: 14px;
-  color: #5A5D50;
+  color: vars.$color-secondary-text;
   text-align: center;
   margin-top: 14px;
 }
 
 .login__registo a {
-  color: #B17816;
+  color: vars.$color-accent;
   font-weight: 700;
   text-decoration: none;
 }
 
 .login__registo a:hover {
   text-decoration: underline;
+  color: vars.$color-accent-hover;
 }
 
 .login__titulo {
   font-size: 28px;
-  font-weight: 900;
-  color: #23251D;
+  font-weight: 800;
+  color: vars.$color-primary-text;
   margin: 0;
-}
-
-.login__header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .login__subtitulo {
   font-size: 15px;
-  color: #5A5D50;
+  color: vars.$color-secondary-text;
   margin: 8px 0 0;
   line-height: 1.6;
 }
@@ -250,7 +244,7 @@
   font-size: 28px;
   font-weight: 700;
   color: #FFFFFF;
-  background-color: #9EA096;
+  background-color: vars.$color-disabled-text;
 }
 
 .login__iniciais {
@@ -260,10 +254,10 @@
 .login__erro {
   background: rgba(233, 47, 47, 0.08);
   border: 1px solid rgba(233, 47, 47, 0.32);
-  border-radius: 16px;
+  border-radius: vars.$radius-md;
   padding: 14px 16px;
   font-size: 13px;
-  color: #E92F2F;
+  color: vars.$color-error;
 }
 
 .login__formulario {
@@ -280,35 +274,35 @@
 
 .campo__label {
   font-size: 13px;
-  font-weight: 500;
-  color: #23251D;
+  font-weight: vars.$font-weight-medium;
+  color: vars.$color-primary-text;
 }
 
 .campo__input {
   width: 100%;
   height: 36px;
-  background: #FFFFFF;
-  border: 1px solid #B6B7AF;
-  border-radius: 4px;
+  background: vars.$color-canvas-background;
+  border: 1px solid vars.$color-border-strong;
+  border-radius: vars.$radius-sm;
   padding: 8px 12px;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: vars.$font-family-primary;
   font-size: 15px;
-  color: #23251D;
+  color: vars.$color-primary-text;
   outline: none;
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .campo__input::placeholder {
-  color: #9EA096;
+  color: vars.$color-tertiary-text;
 }
 
 .campo__input:focus {
-  border-color: #B17816;
-  box-shadow: 0 0 0 3px rgba(177, 120, 22, 0.1);
+  border-color: vars.$color-accent;
+  box-shadow: 0 0 0 3px vars.$color-glow-aurora;
 }
 
 .campo__input--erro {
-  border-color: #E92F2F;
+  border-color: vars.$color-error;
 }
 
 .campo__senha-wrap {
@@ -326,7 +320,7 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #9EA096;
+  color: vars.$color-tertiary-text;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -334,12 +328,12 @@
 }
 
 .campo__toggle-senha:hover {
-  color: #23251D;
+  color: vars.$color-primary-text;
 }
 
 .campo__erro {
   font-size: 12px;
-  color: #E92F2F;
+  color: vars.$color-error;
   font-weight: 500;
 }
 
@@ -350,7 +344,7 @@
 .login__recuperar {
   font-size: 13px;
   font-weight: 600;
-  color: #B17816;
+  color: vars.$color-accent;
   text-decoration: none;
   text-align: right;
   margin-top: 4px;
@@ -358,14 +352,15 @@
 }
 
 .login__recuperar:hover {
-  color: #8D5A09;
+  color: vars.$color-accent-hover;
   text-decoration: underline;
 }
 
 .login__popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 18, 23, 0.44);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -376,10 +371,11 @@
 .login__popup-card {
   width: 100%;
   max-width: 440px;
-  border-radius: 30px;
-  background: #FFFFFF;
+  border-radius: vars.$radius-lg;
+  background: vars.$color-surface-card;
   padding: 34px 28px 28px;
-  box-shadow: 0 40px 120px rgba(34, 31, 26, 0.18);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+  border: 1px solid vars.$color-border-subtle;
   position: relative;
 }
 
@@ -391,10 +387,18 @@
   height: 38px;
   border-radius: 50%;
   border: none;
-  background: #F3F2EC;
-  color: #4D4F46;
+  background: rgba(255, 255, 255, 0.04);
+  color: vars.$color-primary-text;
   font-size: 22px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all vars.$transition-fast;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .login__popup-nome {
@@ -402,12 +406,12 @@
   text-align: center;
   font-size: 20px;
   font-weight: 800;
-  color: #23251D;
+  color: vars.$color-primary-text;
 }
 
 .login__popup-subtitulo {
   text-align: center;
-  color: #5A5D50;
+  color: vars.$color-secondary-text;
   font-size: 14px;
   margin-bottom: 22px;
 }
@@ -417,4 +421,3 @@
   gap: 12px;
   margin-top: 12px;
 }
-

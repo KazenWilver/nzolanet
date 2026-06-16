@@ -14,7 +14,7 @@ html, body {
 
 body {
   font-family: vars.$font-family-primary;
-  background: vars.$color-background;
+  background: vars.$color-canvas-background;
   color: vars.$color-primary-text;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -125,17 +125,17 @@ textarea,
 select {
   width: 100%;
   padding: vars.$spacing-base vars.$spacing-md;
-  border: 1px solid vars.$color-disabled-text;
+  border: 1px solid vars.$color-border-strong;
   border-radius: vars.$radius-sm;
   font-size: vars.$font-size-body;
   color: vars.$color-primary-text;
-  background: vars.$color-surface;
-  transition: border-color vars.$transition-base;
+  background: vars.$color-canvas-background;
+  transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
 
   &:focus {
     outline: none;
     border-color: vars.$color-accent;
-    box-shadow: 0 0 0 3px rgba(vars.$color-accent, 0.1);
+    box-shadow: 0 0 0 3px vars.$color-glow-aurora;
   }
 
   &::placeholder {

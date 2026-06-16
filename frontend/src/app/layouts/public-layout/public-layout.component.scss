@@ -1,8 +1,10 @@
+@use '../../styles/variables' as vars;
+
 .layout-publico {
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(320px, 1.2fr) minmax(360px, 1fr);
-  background: linear-gradient(180deg, #F7F5EE 0%, #F6F3E9 100%);
+  background: vars.$color-canvas-background;
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -10,21 +12,22 @@
 
   &__hero {
     position: relative;
-    background: #23251D;
-    color: #F8F6ED;
+    background: #090a0c;
+    color: vars.$color-primary-text;
     padding: 64px 56px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 32px;
     overflow: hidden;
+    border-right: 1px solid vars.$color-border-subtle;
 
     &::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at top right, rgba(177, 120, 22, 0.22), transparent 32%),
-                  radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.12), transparent 24%);
+      background: radial-gradient(circle at top right, rgba(113, 112, 255, 0.15), transparent 45%),
+                  radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.08), transparent 35%);
       pointer-events: none;
     }
   }
@@ -38,18 +41,18 @@
   }
 
   &__logo {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: vars.$font-family-primary;
     font-size: 44px;
-    font-weight: 900;
-    color: #F2C46B;
+    font-weight: 800;
+    color: vars.$color-accent;
     letter-spacing: -1px;
   }
 
   &__slogan {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: vars.$font-family-primary;
     font-size: 18px;
     font-weight: 600;
-    color: #D9D5C4;
+    color: vars.$color-secondary-text;
     max-width: 340px;
   }
 
@@ -63,10 +66,10 @@
   }
 
   &__descricao h2 {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: vars.$font-family-primary;
     font-size: clamp(32px, 3vw, 40px);
-    font-weight: 900;
-    line-height: 1.05;
+    font-weight: 800;
+    line-height: 1.1;
     margin: 0;
     color: #FFFFFF;
   }
@@ -74,7 +77,7 @@
   &__descricao p {
     font-size: 16px;
     line-height: 1.75;
-    color: #D3D0BF;
+    color: vars.$color-secondary-text;
     max-width: 380px;
   }
 
@@ -84,7 +87,7 @@
     margin: 0;
     display: grid;
     gap: 14px;
-    color: #E8E6D7;
+    color: vars.$color-secondary-text;
 
     li {
       position: relative;
@@ -101,7 +104,7 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: #B17816;
+      background: vars.$color-accent;
     }
   }
 
@@ -116,11 +119,11 @@
   &__cartao {
     width: 100%;
     max-width: 460px;
-    background: #FFFFFF;
-    border-radius: 28px;
-    box-shadow: 0 28px 80px rgba(27, 29, 25, 0.12);
+    background: vars.$color-surface-card;
+    border-radius: vars.$radius-lg;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
     padding: 40px;
-    border: 1px solid rgba(189, 183, 168, 0.18);
+    border: 1px solid vars.$color-border-subtle;
   }
 
   @media (max-width: 1024px) {

@@ -1,10 +1,12 @@
+@use '../../../styles/variables' as vars;
+
 .perfil {
   padding-bottom: 32px;
 
   &__capa {
     width: calc(100% + 32px);
     height: 180px;
-    background: #23251D;
+    background: vars.$color-canvas-background;
     overflow: hidden;
     margin: 0 -16px;
 
@@ -16,12 +18,12 @@
   &__capa-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #23251D 0%, #4D4F46 100%);
+    background: linear-gradient(135deg, vars.$color-canvas-background 0%, vars.$color-border-strong 100%);
   }
 
   &__info {
-    background: #FFFFFF;
-    border: 1px solid #B6B7AF;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
     border-top: none;
     padding: 0 20px 20px;
     margin: 0 -16px;
@@ -35,7 +37,7 @@
     margin-bottom: 12px;
 
     app-user-avatar {
-      border: 4px solid #FFFFFF;
+      border: 4px solid vars.$color-surface-card;
       border-radius: 50%;
       display: block;
       width: fit-content;
@@ -47,36 +49,60 @@
   &__btn {
     height: 36px;
     padding: 0 20px;
-    border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+    border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-semibold;
     cursor: pointer;
-    transition: all 200ms ease;
+    transition: all vars.$transition-base;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     border: none;
 
-    &--primario  { background: #B17816; color: #23251D; &:hover:not(:disabled) { background: #CD8407; } }
-    &--secundario { background: transparent; color: #23251D; border: 1px solid #4D4F46; &:hover { border-color: #000; background: #EEEFE9; } }
-    &--seguindo  { background: #EEEFE9; color: #23251D; border: 1px solid #4D4F46; &:hover { border-color: #E92F2F; color: #E92F2F; background: rgba(233, 47, 47, 0.06); } }
+    &--primario  {
+      background: vars.$color-accent;
+      color: #FFFFFF;
+      &:hover:not(:disabled) { background: vars.$color-accent-hover; }
+    }
+    
+    &--secundario {
+      background: transparent;
+      color: vars.$color-primary-text;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.04);
+      }
+    }
+    
+    &--seguindo  {
+      background: rgba(255, 255, 255, 0.04);
+      color: vars.$color-primary-text;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      &:hover {
+        border-color: vars.$color-error;
+        color: vars.$color-error;
+        background: rgba(vars.$color-error, 0.06);
+      }
+    }
+    
     &:disabled { opacity: 0.6; cursor: not-allowed; }
   }
 
   &__dados { clear: both; display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
 
-  &__nome { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 800; color: #000000; line-height: 28px; }
-  &__nomeutil { font-size: 14px; color: #9EA096; font-weight: 500; }
-  &__bio { font-size: 15px; line-height: 22.5px; color: #4D4F46; margin-top: 4px; }
-  &__localizacao { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #9EA096; margin-top: 2px; }
+  &__nome { font-family: vars.$font-family-primary; font-size: 20px; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; line-height: 28px; }
+  &__nomeutil { font-size: 14px; color: vars.$color-tertiary-text; font-weight: vars.$font-weight-medium; }
+  &__bio { font-size: 15px; line-height: 1.6; color: vars.$color-secondary-text; margin-top: 4px; }
+  &__localizacao { display: flex; align-items: center; gap: 4px; font-size: 13px; color: vars.$color-tertiary-text; margin-top: 2px; }
 
   &__estatisticas {
     display: flex;
     gap: 24px;
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #EEEFE9;
+    border-top: 1px solid vars.$color-border-subtle;
   }
 
   &__stat {
@@ -86,11 +112,11 @@
     gap: 2px;
     text-decoration: none;
     cursor: pointer;
-    &:hover .perfil__stat-valor { color: #B17816; }
+    &:hover .perfil__stat-valor { color: vars.$color-accent; }
   }
 
-  &__stat-valor { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #23251D; transition: color 150ms ease; }
-  &__stat-label { font-size: 12px; color: #9EA096; font-weight: 500; }
+  &__stat-valor { font-family: vars.$font-family-primary; font-size: 18px; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; transition: color vars.$transition-fast; }
+  &__stat-label { font-size: 12px; color: vars.$color-tertiary-text; font-weight: vars.$font-weight-medium; }
 
   &__publicacoes { margin-top: 12px; }
 
@@ -98,12 +124,13 @@
   &__carregando-pagina { display: flex; justify-content: center; padding: 48px 0; }
 
   &__sem-pub {
-    background: #FFFFFF;
-    border: 1px solid #B6B7AF;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
     text-align: center;
     padding: 48px 24px;
-    color: #9EA096;
-    svg { margin: 0 auto 12px; display: block; color: #B6B7AF; }
+    color: vars.$color-secondary-text;
+    svg { margin: 0 auto 12px; display: block; color: vars.$color-disabled-text; }
     p { font-size: 15px; }
   }
 }

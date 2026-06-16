@@ -21,7 +21,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 export class PostCardComponent {
   @Input({ required: true }) post!: Post;
   // Emite o id da publicação eliminada para o componente pai actualizar a lista
-  @Output() eliminado = new EventEmitter<number>();
+  @Output() eliminado = new EventEmitter<string>();
 
   opcoesAbertas = false;
   dialogoEliminacao = false;

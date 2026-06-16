@@ -55,8 +55,8 @@ export class FeedPageComponent implements OnInit {
   // Adiciona o novo post no topo do feed sem recarregar a página
   adicionarPost(post: Post): void { this.posts = [post, ...this.posts]; }
 
-  removerPost(id: number): void { this.posts = this.posts.filter(p => p.id !== id); }
+  removerPost(id: string): void { this.posts = this.posts.filter(p => p.id !== id); }
 
   // trackBy melhora a performance do *ngFor evitando re-renderização desnecessária
-  trackPorId(_: number, post: Post): number { return post.id; }
+  trackPorId(_: number, post: Post): string { return post.id; }
 }

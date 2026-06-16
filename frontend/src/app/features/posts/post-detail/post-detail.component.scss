@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 .detalhe-post {
   padding: 16px 0 32px;
 
@@ -7,48 +9,55 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: none;
-    border: none;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: #23251D;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: vars.$radius-md;
+    padding: 6px 14px;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
     cursor: pointer;
-    padding: 6px 0;
-    transition: color 150ms ease;
-    &:hover { color: #B17816; }
+    transition: all vars.$transition-fast;
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+      color: vars.$color-accent;
+    }
   }
 
   &__comentarios {
-    background: #FFFFFF;
-    border: 1px solid #B6B7AF;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
     padding: 16px;
     margin-top: 12px;
   }
 
   &__titulo-coment {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: #23251D;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    font-weight: vars.$font-weight-bold;
+    color: vars.$color-primary-text;
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #EEEFE9;
+    border-bottom: 1px solid vars.$color-border-subtle;
   }
 
   &__total {
-    background: #EEEFE9;
-    color: #4D4F46;
+    background: vars.$color-canvas-background;
+    color: vars.$color-secondary-text;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: vars.$font-weight-semibold;
     padding: 2px 8px;
-    border-radius: 99px;
+    border-radius: vars.$radius-pill;
+    border: 1px solid vars.$color-border-subtle;
   }
 
   &__carregando { display: flex; justify-content: center; padding: 64px 0; }
   &__carregando-coment { display: flex; justify-content: center; padding: 24px 0; }
-  &__sem-coment { text-align: center; padding: 24px; font-size: 14px; color: #9EA096; }
+  &__sem-coment { text-align: center; padding: 24px; font-size: 14px; color: vars.$color-tertiary-text; }
 }

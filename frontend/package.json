@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "e2e": "node scripts/run-e2e.js"
   },
   "prettier": {
     "overrides": [
@@ -38,6 +39,7 @@
     "@angular/build": "^20.0.5",
     "@angular/cli": "^20.0.5",
     "@angular/compiler-cli": "^20.0.0",
+    "@playwright/test": "^1.61.0",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.7.0",
     "karma": "~6.4.0",

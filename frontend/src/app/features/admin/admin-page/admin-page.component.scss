@@ -1,42 +1,47 @@
+@use '../../../styles/variables' as vars;
+
 .admin-page {
   display: grid;
-  gap: 24px;
-  padding: 28px;
-  background: linear-gradient(180deg, var(--cor-off-white) 0%, #f7f2e7 100%);
+  gap: vars.$spacing-xl;
+  padding: vars.$spacing-2xl;
   min-height: 100vh;
 }
 
 .admin-page__hero,
 .admin-page__status,
 .admin-page__reports {
-  background: var(--cor-branco);
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 24px 60px rgba(35, 37, 29, 0.08);
-  border: 1px solid rgba(35, 37, 29, 0.08);
+  background: vars.$color-surface-card;
+  border-radius: vars.$radius-lg;
+  padding: vars.$spacing-2xl;
+  border: 1px solid vars.$color-border-subtle;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .admin-page__hero {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 18px;
-  background: linear-gradient(135deg, #fff9eb 0%, #fff7e0 100%);
+  gap: vars.$spacing-lg;
+  background: linear-gradient(135deg, rgba(113, 112, 255, 0.06) 0%, vars.$color-surface-card 100%);
+  border-color: rgba(113, 112, 255, 0.12);
 }
 
 .admin-page__subtitle {
-  margin: 0 0 8px 0;
-  color: var(--cor-mid-tone);
+  margin: 0 0 vars.$spacing-base 0;
+  color: vars.$color-tertiary-text;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 12px;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-caption;
+  font-weight: vars.$font-weight-extrabold;
 }
 
 .admin-page__hero-copy {
-  margin: 10px 0 0;
-  color: var(--cor-stone);
+  margin: vars.$spacing-base 0 0;
+  color: vars.$color-secondary-text;
   max-width: 720px;
   line-height: 1.75;
+  font-size: vars.$font-size-body;
 }
 
 .admin-page__status-header,
@@ -45,187 +50,208 @@
   justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: vars.$spacing-lg;
+  margin-bottom: vars.$spacing-xl;
 }
 
 .admin-page__badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--cor-cream);
-  color: var(--cor-charcoal);
-  font-size: 12px;
-  font-weight: 600;
+  background: rgba(vars.$color-accent, 0.08);
+  color: vars.$color-accent;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-caption;
+  font-weight: vars.$font-weight-bold;
   text-transform: uppercase;
-  padding: 8px 12px;
-  border-radius: 999px;
+  padding: vars.$spacing-base vars.$spacing-md;
+  border-radius: vars.$radius-pill;
+  border: 1px solid rgba(vars.$color-accent, 0.15);
 }
 
 .admin-page__badge--neutral {
-  background: var(--cor-off-white);
-  color: var(--cor-stone);
+  background: vars.$color-surface-secondary;
+  color: vars.$color-secondary-text;
+  border-color: vars.$color-border-subtle;
 }
 
 .admin-page__cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 16px;
+  gap: vars.$spacing-lg;
 }
 
 .admin-page__card {
-  background: var(--cor-off-white);
-  border-radius: 18px;
-  padding: 20px 20px 22px;
+  background: vars.$color-surface-secondary;
+  border-radius: vars.$radius-lg;
+  padding: vars.$spacing-xl vars.$spacing-xl vars.$spacing-xl;
   min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border: 1px solid rgba(35, 37, 29, 0.08);
+  border: 1px solid vars.$color-border-subtle;
+  transition: border-color vars.$transition-base;
+
+  &:hover {
+    border-color: vars.$color-border-strong;
+  }
 }
 
 .admin-page__card--highlight {
-  background: var(--cor-cream);
-  border: 1px solid rgba(177, 120, 22, 0.24);
+  background: rgba(vars.$color-accent, 0.06);
+  border-color: rgba(vars.$color-accent, 0.15);
 }
 
 .admin-page__card--warning {
-  background: #fff3e6;
-  border: 1px solid rgba(177, 120, 22, 0.2);
+  background: rgba(vars.$color-warning, 0.06);
+  border-color: rgba(vars.$color-warning, 0.15);
 }
 
 .admin-page__card strong {
   display: block;
+  font-family: vars.$font-family-primary;
   font-size: 30px;
-  color: var(--cor-charcoal);
-  margin-bottom: 8px;
+  font-weight: vars.$font-weight-black;
+  color: vars.$color-primary-text;
+  margin-bottom: vars.$spacing-base;
 }
 
 .admin-page__card span {
-  color: var(--cor-stone);
-  font-size: 14px;
+  color: vars.$color-secondary-text;
+  font-size: vars.$font-size-body;
 }
 
 .admin-page__btn {
   border: none;
-  border-radius: 999px;
-  padding: 12px 18px;
-  font-weight: 600;
+  border-radius: vars.$radius-pill;
+  padding: vars.$spacing-md vars.$spacing-lg;
+  font-family: vars.$font-family-primary;
+  font-weight: vars.$font-weight-semibold;
+  font-size: vars.$font-size-button;
   cursor: pointer;
-  transition: all 180ms ease;
+  transition: all vars.$transition-base;
 }
 
 .admin-page__btn--primary {
-  background: var(--cor-amber);
-  color: var(--cor-branco);
-  box-shadow: 0 14px 28px rgba(177, 120, 22, 0.18);
-}
+  background: vars.$color-accent;
+  color: vars.$color-pure-white;
+  box-shadow: 0 4px 16px rgba(113, 112, 255, 0.25);
 
-.admin-page__btn--primary:hover {
-  background: var(--cor-amber-hover);
+  &:hover {
+    background: vars.$color-accent-hover;
+    box-shadow: 0 6px 20px rgba(113, 112, 255, 0.35);
+  }
 }
 
 .admin-page__btn--ghost {
   background: transparent;
-  border: 1px solid rgba(35, 37, 29, 0.12);
-  color: var(--cor-charcoal);
-}
+  border: 1px solid vars.$color-border-strong;
+  color: vars.$color-primary-text;
 
-.admin-page__btn--ghost:hover {
-  background: var(--cor-off-white);
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: vars.$color-primary-text;
+  }
 }
 
 .admin-page__btn--danger {
-  background: var(--cor-erro);
-  color: var(--cor-branco);
-}
+  background: vars.$color-error;
+  color: vars.$color-pure-white;
 
-.admin-page__btn--danger:hover {
-  background: #c12020;
+  &:hover { background: #c12020; }
 }
 
 .admin-page__reports {
   display: grid;
-  gap: 16px;
+  gap: vars.$spacing-lg;
 }
 
 .admin-page__toast {
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-size: 14px;
+  border-radius: vars.$radius-md;
+  padding: vars.$spacing-md vars.$spacing-lg;
+  font-family: vars.$font-family-primary;
+  font-size: vars.$font-size-body;
 }
 
 .admin-page__toast--success {
-  background: #eaf5ee;
-  color: #166a28;
+  background: rgba(0, 255, 0, 0.06);
+  color: #4ade80;
+  border: 1px solid rgba(0, 255, 0, 0.1);
 }
 
 .admin-page__toast--error {
-  background: #fde7e7;
-  color: #a52525;
+  background: rgba(vars.$color-error, 0.08);
+  color: #f87171;
+  border: 1px solid rgba(vars.$color-error, 0.15);
 }
 
 .admin-page__empty-state {
-  color: var(--cor-stone);
+  color: vars.$color-tertiary-text;
   margin: 0;
 }
 
 .admin-page__report-card {
-  border: 1px solid rgba(35, 37, 29, 0.08);
-  border-radius: 18px;
-  padding: 22px;
+  border: 1px solid vars.$color-border-subtle;
+  border-radius: vars.$radius-lg;
+  padding: vars.$spacing-xl;
   display: grid;
-  gap: 18px;
-  background: var(--cor-branco);
+  gap: vars.$spacing-lg;
+  background: vars.$color-surface-secondary;
+  transition: border-color vars.$transition-base;
+
+  &:hover {
+    border-color: vars.$color-border-strong;
+  }
 }
 
 .admin-page__report-card--flagged {
-  border-color: rgba(177, 120, 22, 0.35);
-  box-shadow: 0 12px 26px rgba(177, 120, 22, 0.12);
+  border-color: rgba(vars.$color-warning, 0.3);
+  box-shadow: 0 4px 16px rgba(vars.$color-warning, 0.08);
 }
 
 .admin-page__report-header {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: vars.$spacing-lg;
   align-items: flex-start;
 }
 
 .admin-page__report-author {
-  font-weight: 700;
-  color: #23251d;
+  font-family: vars.$font-family-primary;
+  font-weight: vars.$font-weight-bold;
+  color: vars.$color-primary-text;
   margin: 0;
-  font-size: 16px;
+  font-size: vars.$font-size-body;
 }
 
 .admin-page__report-meta {
-  margin: 4px 0 0;
-  color: #65675e;
-  font-size: 13px;
+  margin: vars.$spacing-sm 0 0;
+  color: vars.$color-tertiary-text;
+  font-size: vars.$font-size-button;
 }
 
 .admin-page__report-count {
-  color: #b17816;
-  font-weight: 700;
+  color: vars.$color-accent;
+  font-weight: vars.$font-weight-bold;
   white-space: nowrap;
 }
 
 .admin-page__report-text {
   margin: 0;
-  color: #4d4f46;
+  color: vars.$color-secondary-text;
   line-height: 1.6;
 }
 
 .admin-page__report-meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: vars.$spacing-base;
   align-items: center;
 }
 
 .admin-page__report-date {
-  color: #6e6f63;
-  font-size: 13px;
+  color: vars.$color-tertiary-text;
+  font-size: vars.$font-size-button;
 }
 
 .admin-page__report-list {
@@ -233,18 +259,19 @@
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: vars.$spacing-base;
 }
 
 .admin-page__report-list li {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  background: #f6f3ec;
-  border-radius: 10px;
-  font-size: 13px;
-  color: #4d4f46;
+  gap: vars.$spacing-md;
+  padding: vars.$spacing-md;
+  background: vars.$color-canvas-background;
+  border-radius: vars.$radius-md;
+  font-size: vars.$font-size-button;
+  color: vars.$color-secondary-text;
+  border: 1px solid vars.$color-border-subtle;
 }
 
 .admin-page__report-actions {
@@ -253,8 +280,8 @@
 }
 
 .admin-page__erro {
-  color: #e92f2f;
-  margin-top: 12px;
+  color: vars.$color-error;
+  margin-top: vars.$spacing-md;
 }
 
 @media (max-width: 740px) {

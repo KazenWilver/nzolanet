@@ -15,7 +15,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
   styleUrl: './comment-form.component.scss'
 })
 export class CommentFormComponent {
-  @Input({ required: true }) postId!: number;
+  @Input({ required: true }) postId!: string;
   @Input() fotoUtilizador?: string;
   @Input() nomeUtilizador?: string;
   @Output() comentarioCriado = new EventEmitter<Comentario>();

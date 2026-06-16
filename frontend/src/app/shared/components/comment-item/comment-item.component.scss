@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 .comentario-item {
   display: flex;
   gap: 10px;
@@ -6,8 +8,9 @@
   &__conteudo { flex: 1; min-width: 0; }
 
   &__balao {
-    background: #EEEFE9;
-    border-radius: 0 8px 8px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: 0 vars.$radius-md vars.$radius-md vars.$radius-md;
     padding: 8px 12px;
     display: inline-block;
     max-width: 100%;
@@ -15,27 +18,27 @@
 
   &__autor {
     display: block;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: #23251D;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
     text-decoration: none;
     margin-bottom: 2px;
-    &:hover { color: #B17816; }
+    &:hover { color: vars.$color-accent; }
   }
 
   &__editado {
     display: inline-block;
     margin-bottom: 4px;
     font-size: 11px;
-    color: #B17816;
-    font-weight: 600;
+    color: vars.$color-accent;
+    font-weight: vars.$font-weight-semibold;
   }
 
   &__texto {
-    font-size: 14px;
+    font-size: vars.$font-size-body;
     line-height: 20px;
-    color: #4D4F46;
+    color: vars.$color-secondary-text;
     white-space: pre-wrap;
     word-break: break-word;
   }
@@ -44,13 +47,13 @@
 
   &__textarea {
     width: 100%;
-    background: #FFFFFF;
-    border: 1px solid #B17816;
-    border-radius: 4px;
+    background: vars.$color-canvas-background;
+    border: 1px solid vars.$color-accent;
+    border-radius: vars.$radius-sm;
     padding: 6px 8px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14px;
-    color: #23251D;
+    font-family: vars.$font-family-primary;
+    font-size: vars.$font-size-body;
+    color: vars.$color-primary-text;
     outline: none;
     resize: vertical;
   }
@@ -65,49 +68,54 @@
     padding-left: 4px;
   }
 
-  &__tempo { font-size: 12px; color: #9EA096; font-weight: 500; }
+  &__tempo { font-size: 12px; color: vars.$color-tertiary-text; font-weight: vars.$font-weight-medium; }
 
   &__acoes { display: flex; gap: 8px; align-items: center; }
 
   &__label {
     font-size: 12px;
-    color: #f05a7c;
+    color: vars.$color-engagement-pink;
     font-weight: 700;
   }
 
   &__btn {
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: vars.$radius-sm;
     border: none;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: vars.$font-family-primary;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: vars.$font-weight-medium;
     cursor: pointer;
     transition: background 150ms ease;
 
-    &--guardar { background: #B17816; color: #FFFFFF; &:hover { background: #CD8407; } }
-    &--cancelar { background: #EEEFE9; color: #4D4F46; &:hover { background: #E1D7C2; } }
+    &--guardar { background: vars.$color-accent; color: #FFFFFF; &:hover { background: vars.$color-accent-hover; } }
+    &--cancelar {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: vars.$color-primary-text;
+      &:hover { background: rgba(255, 255, 255, 0.08); }
+    }
   }
 
   &__btn-link {
     background: none;
     border: none;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: vars.$font-family-primary;
     font-size: 12px;
-    font-weight: 500;
-    color: #9EA096;
+    font-weight: vars.$font-weight-medium;
+    color: vars.$color-tertiary-text;
     cursor: pointer;
     padding: 0;
     transition: color 150ms ease;
-    &:hover { color: #23251D; }
-    &--perigo:hover { color: #E92F2F; }
-    &--warning { color: #f05a7c; }
+    &:hover { color: vars.$color-primary-text; }
+    &--perigo:hover { color: vars.$color-error; }
+    &--warning { color: vars.$color-engagement-pink; }
     &--warning:hover { color: #d13d61; }
   }
 
   &__denuncias {
     margin-top: 6px;
-    color: #b17816;
+    color: vars.$color-warning;
     font-size: 12px;
     font-weight: 600;
   }

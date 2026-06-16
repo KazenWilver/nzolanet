@@ -1,3 +1,5 @@
+@use '../../../styles/variables' as vars;
+
 .editar-perfil {
   padding: 16px 0 32px;
 
@@ -5,46 +7,77 @@
 
   &__btn-voltar {
     display: inline-flex; align-items: center; gap: 6px;
-    background: none; border: none;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 500; color: #4D4F46;
-    cursor: pointer; transition: color 150ms ease;
-    &:hover { color: #B17816; }
+    background: transparent; border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: vars.$radius-md;
+    padding: 6px 14px;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text;
+    cursor: pointer; transition: all vars.$transition-fast;
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+      color: vars.$color-accent;
+    }
   }
 
-  &__titulo { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #23251D; }
+  &__titulo { font-family: vars.$font-family-primary; font-size: vars.$font-size-h3; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; }
 
-  &__secao { background: #FFFFFF; border: 1px solid #B6B7AF; padding: 20px; margin-bottom: 12px; }
+  &__secao {
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
 
   &__foto-wrap { display: flex; align-items: center; gap: 16px; }
 
   &__btn-foto {
     display: inline-flex; align-items: center; gap: 6px;
     height: 32px; padding: 0 16px;
-    background: transparent; border: 1px solid #4D4F46; border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #23251D;
+    background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text;
     cursor: pointer; transition: all 200ms ease;
-    &:hover { border-color: #B17816; color: #B17816; background: rgba(177, 120, 22, 0.05); }
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: vars.$color-accent;
+      background: rgba(255, 255, 255, 0.04);
+    }
   }
 
-  &__formulario { background: #FFFFFF; border: 1px solid #B6B7AF; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  &__formulario {
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-  &__acoes { display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid #EEEFE9; }
+  &__acoes { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; border-top: 1px solid vars.$color-border-subtle; }
 
   &__btn-cancelar {
     height: 36px; padding: 0 20px;
-    background: transparent; border: 1px solid #4D4F46; border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #23251D;
+    background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text;
     cursor: pointer; transition: all 200ms ease;
-    &:hover { border-color: #000; background: #EEEFE9; }
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+    }
   }
 
   &__btn-guardar {
     height: 36px; padding: 0 24px;
-    background: #B17816; border: none; border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #23251D;
+    background: vars.$color-accent; border: none; border-radius: vars.$radius-md;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: #FFFFFF;
     cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 200ms ease;
-    &:hover:not(:disabled) { background: #CD8407; }
-    &:disabled { background: #B6B7AF; cursor: not-allowed; }
+    &:hover:not(:disabled) { background: vars.$color-accent-hover; }
+    &:disabled {
+      background: vars.$color-disabled-text;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+    }
   }
 
   &__carregando { display: flex; justify-content: center; padding: 64px 0; }
@@ -53,34 +86,34 @@
 .campo {
   display: flex; flex-direction: column; gap: 6px;
 
-  &__label { font-size: 13px; font-weight: 500; color: #23251D; }
+  &__label { font-size: 13px; font-weight: vars.$font-weight-medium; color: vars.$color-primary-text; }
 
   &__input {
     width: 100%; height: 36px;
-    background: #FFFFFF; border: 1px solid #B6B7AF; border-radius: 4px;
+    background: vars.$color-canvas-background; border: 1px solid vars.$color-border-strong; border-radius: vars.$radius-sm;
     padding: 8px 12px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #23251D;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-body; color: vars.$color-primary-text;
     outline: none; transition: border-color 200ms ease, box-shadow 200ms ease;
 
-    &::placeholder { color: #9EA096; }
-    &:focus { border-color: #B17816; box-shadow: 0 0 0 3px rgba(177, 120, 22, 0.1); }
-    &--erro { border-color: #E92F2F; }
+    &::placeholder { color: vars.$color-tertiary-text; }
+    &:focus { border-color: vars.$color-accent; box-shadow: 0 0 0 3px vars.$color-glow-aurora; }
+    &--erro { border-color: vars.$color-error; }
     &--com-prefixo { padding-left: 28px; }
   }
 
   &__prefixo-wrap { position: relative; }
-  &__prefixo { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #9EA096; pointer-events: none; }
+  &__prefixo { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; color: vars.$color-tertiary-text; pointer-events: none; }
 
   &__textarea {
     width: 100%;
-    background: #FFFFFF; border: 1px solid #B6B7AF; border-radius: 4px;
+    background: vars.$color-canvas-background; border: 1px solid vars.$color-border-strong; border-radius: vars.$radius-sm;
     padding: 10px 12px;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #23251D;
+    font-family: vars.$font-family-primary; font-size: vars.$font-size-body; color: vars.$color-primary-text;
     resize: vertical; outline: none; transition: border-color 200ms ease, box-shadow 200ms ease;
-    &::placeholder { color: #9EA096; }
-    &:focus { border-color: #B17816; box-shadow: 0 0 0 3px rgba(177, 120, 22, 0.1); }
+    &::placeholder { color: vars.$color-tertiary-text; }
+    &:focus { border-color: vars.$color-accent; box-shadow: 0 0 0 3px vars.$color-glow-aurora; }
   }
 
-  &__contador { font-size: 12px; color: #9EA096; text-align: right; margin-top: -2px; }
-  &__erro { font-size: 12px; color: #E92F2F; font-weight: 500; }
+  &__contador { font-size: 12px; color: vars.$color-tertiary-text; text-align: right; margin-top: -2px; }
+  &__erro { font-size: 12px; color: vars.$color-error; font-weight: 500; }
 }
