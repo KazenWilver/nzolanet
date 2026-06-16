@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="NzolaNet.Api/NzolaNet.Api.csproj" />
+  <Project Path="NzolaNet.Application/NzolaNet.Application.csproj" />
+  <Project Path="NzolaNet.Domain/NzolaNet.Domain.csproj" />
+  <Project Path="NzolaNet.Infrastructure/NzolaNet.Infrastructure.csproj" />
+</Solution>
