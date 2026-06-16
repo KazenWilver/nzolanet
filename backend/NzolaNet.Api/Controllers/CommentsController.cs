@@ -19,13 +19,13 @@ public class CommentsController : ControllerBase
         _commentService = commentService;
     }
 
-    // Obter os comentários de uma publicação
-    [HttpGet("post/{postId}")]
-    public async Task<IActionResult> GetByPostId(Guid postId)
+    // GET /api/posts/{postId}/comments – listar comentários de uma publicação
+    [HttpGet("/api/posts/{postId}/comments")]
+    public async Task<IActionResult> GetByPost(Guid postId)
     {
         try
         {
-            var comments = await _commentService.GetByPostIdAsync(postId);
+            var comments = await _commentService.GetByPostAsync(postId);
             return Ok(comments);
         }
         catch (ArgumentException ex)
@@ -38,16 +38,16 @@ public class CommentsController : ControllerBase
         }
     }
 
-    // Criar um comentário numa publicação (requer autenticação)
+    // POST /api/comments – adicionar comentário (requer autenticação)
     [Authorize]
-    [HttpPost("post/{postId}")]
-    public async Task<IActionResult> Create(Guid postId, [FromBody] CreateCommentDto createDto)
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCommentDto createDto)
     {
         try
         {
             var userId = GetCurrentUserId();
-            var comment = await _commentService.CreateAsync(userId, postId, createDto);
-            return CreatedAtAction(nameof(GetByPostId), new { postId = comment.PostId }, comment);
+            var comment = await _commentService.CreateAsync(userId, createDto);
+            return CreatedAtAction(nameof(GetByPost), new { postId = comment.PostId }, comment);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -63,7 +63,32 @@ public class CommentsController : ControllerBase
         }
     }
 
-    // Eliminar um comentário (apenas o autor pode eliminar)
+    // PUT /api/comments/{id} – editar apenas o próprio comentário (requer autenticação)
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCommentDto updateDto)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var comment = await _commentService.UpdateAsync(userId, id, updateDto);
+            return Ok(comment);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { Message = "Ocorreu um erro interno no servidor." });
+        }
+    }
+
+    // DELETE /api/comments/{id} – excluir apenas o próprio comentário (requer autenticação)
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
@@ -78,7 +103,7 @@ public class CommentsController : ControllerBase
             }
             return BadRequest(new { Message = "Não foi possível eliminar o comentário." });
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
             return Forbid();
         }
