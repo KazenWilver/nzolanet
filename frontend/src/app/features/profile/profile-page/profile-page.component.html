@@ -1,69 +1,69 @@
 <div class="perfil" *ngIf="utilizador; else aCarregar">
-  <div class="perfil__capa">
-    <img *ngIf="utilizador.fotoCapa" [src]="utilizador.fotoCapa" alt="Foto de capa" class="perfil__img-capa" />
-    <div *ngIf="!utilizador.fotoCapa" class="perfil__capa-placeholder"></div>
-  </div>
-
-  <div class="perfil__info">
-    <div class="perfil__avatar-wrap">
-      <app-user-avatar [foto]="utilizador.fotoPerfil" [nome]="utilizador.nome" tamanho="xl" />
+  <section class="perfil__card">
+    <div class="perfil__capa">
+      <img *ngIf="utilizador.fotoCapa" [src]="utilizador.fotoCapa" alt="Foto de capa" class="perfil__img-capa" />
+      <div *ngIf="!utilizador.fotoCapa" class="perfil__capa-placeholder"></div>
     </div>
 
-    <div class="perfil__acoes">
-      <ng-container *ngIf="eMeuPerfil(); else acoesTerceiro">
-        <a class="perfil__btn perfil__btn--secundario" [routerLink]="['/perfil', utilizador.id, 'editar']">Editar perfil</a>
-      </ng-container>
-      <ng-template #acoesTerceiro>
-        <button class="perfil__btn"
-          [class.perfil__btn--seguindo]="utilizador.estaASeguir"
-          [class.perfil__btn--primario]="!utilizador.estaASeguir"
-          (click)="alternarSeguir()" [disabled]="aAlterarSeguir">
-          {{ utilizador.estaASeguir ? 'A seguir' : 'Seguir' }}
-        </button>
-      </ng-template>
-    </div>
-
-    <div class="perfil__dados">
-      <h1 class="perfil__nome">{{ utilizador.nome }}</h1>
-      <span class="perfil__nomeutil">@{{ utilizador.nomeUtilizador }}</span>
-      <p *ngIf="utilizador.bio" class="perfil__bio">{{ utilizador.bio }}</p>
-      <p *ngIf="utilizador.localizacao" class="perfil__localizacao">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-        </svg>
-        {{ utilizador.localizacao }}
-      </p>
-    </div>
-
-    <div class="perfil__estatisticas">
-      <div class="perfil__stat">
-        <span class="perfil__stat-valor">{{ utilizador.totalPublicacoes }}</span>
-        <span class="perfil__stat-label">Publicações</span>
+    <div class="perfil__info">
+      <div class="perfil__avatar-wrap">
+        <app-user-avatar [foto]="utilizador.fotoPerfil" [nome]="utilizador.nome" tamanho="xl" />
       </div>
-      <a class="perfil__stat" [routerLink]="['/perfil', utilizador.id, 'seguidores']">
-        <span class="perfil__stat-valor">{{ utilizador.totalSeguidores }}</span>
-        <span class="perfil__stat-label">Seguidores</span>
-      </a>
-      <a class="perfil__stat" [routerLink]="['/perfil', utilizador.id, 'seguindo']">
-        <span class="perfil__stat-valor">{{ utilizador.totalSeguindo }}</span>
-        <span class="perfil__stat-label">A seguir</span>
-      </a>
-    </div>
-  </div>
 
-  <div class="perfil__publicacoes">
+      <div class="perfil__acoes">
+        <ng-container *ngIf="eMeuPerfil(); else acoesTerceiro">
+          <a class="perfil__btn perfil__btn--secundario" [routerLink]="['/perfil', utilizador.id, 'editar']">Editar perfil</a>
+        </ng-container>
+        <ng-template #acoesTerceiro>
+          <button class="perfil__btn"
+            [class.perfil__btn--seguindo]="utilizador.estaASeguir"
+            [class.perfil__btn--primario]="!utilizador.estaASeguir"
+            (click)="alternarSeguir()" [disabled]="aAlterarSeguir">
+            {{ utilizador.estaASeguir ? 'A seguir' : 'Seguir' }}
+          </button>
+        </ng-template>
+      </div>
+
+      <div class="perfil__dados">
+        <h1 class="perfil__nome">{{ utilizador.nome }}</h1>
+        <span class="perfil__nomeutil">@{{ utilizador.nomeUtilizador }}</span>
+        <p *ngIf="utilizador.bio" class="perfil__bio">{{ utilizador.bio }}</p>
+        <p *ngIf="utilizador.localizacao" class="perfil__localizacao">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          {{ utilizador.localizacao }}
+        </p>
+      </div>
+
+      <div class="perfil__estatisticas">
+        <div class="perfil__stat">
+          <strong>{{ utilizador.totalPublicacoes }}</strong>
+          <span>Publicações</span>
+        </div>
+        <a class="perfil__stat" [routerLink]="['/perfil', utilizador.id, 'seguidores']">
+          <strong>{{ utilizador.totalSeguidores }}</strong>
+          <span>Seguidores</span>
+        </a>
+        <a class="perfil__stat" [routerLink]="['/perfil', utilizador.id, 'seguindo']">
+          <strong>{{ utilizador.totalSeguindo }}</strong>
+          <span>A seguir</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="perfil__publicacoes">
+    <h2>Publicações</h2>
     <div class="perfil__carregando" *ngIf="aCarregarPosts">
       <app-loading-spinner tamanho="md" />
     </div>
     <div class="perfil__sem-pub" *ngIf="!aCarregarPosts && posts.length === 0">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-      </svg>
       <p>Ainda sem publicações.</p>
     </div>
     <app-post-card *ngFor="let post of posts; trackBy: trackPorId" [post]="post" (eliminado)="removerPost($event)" />
-  </div>
+  </section>
 </div>
 
 <ng-template #aCarregar>

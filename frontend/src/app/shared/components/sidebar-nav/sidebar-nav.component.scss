@@ -1,70 +1,97 @@
 @use '../../../styles/variables' as vars;
 
 .sidebar-nav {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: vars.$spacing-3xl;
+  background: vars.$color-canvas-background;
 
-  &__section {
+  &__top {
+    height: vars.$nav-height;
     display: flex;
-    flex-direction: column;
-    gap: vars.$spacing-lg;
-
-    &--online {
-      margin-top: vars.$spacing-xl;
-    }
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 vars.$spacing-xl;
+    flex-shrink: 0;
   }
 
-  &__label {
-    font-size: vars.$font-size-caption;
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-md;
+    color: #111827;
+    text-decoration: none;
+  }
+
+  &__brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  &__brand-name {
+    font-size: 22px;
     font-weight: vars.$font-weight-extrabold;
-    letter-spacing: 1.5px;
-    color: vars.$color-tertiary-text;
-    text-transform: uppercase;
-    margin: 0;
-    padding: 0 vars.$spacing-md;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  &__collapse {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #DDE2E8;
+    border-radius: vars.$radius-md;
+    background: transparent;
+    color: #9CA3AF;
+    cursor: pointer;
+
+    &:hover {
+      color: vars.$color-tertiary-text;
+      background: #FFFFFF;
+    }
   }
 
   &__list {
     list-style: none;
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: vars.$spacing-md;
+    padding: vars.$spacing-xl vars.$spacing-lg;
+    display: grid;
+    gap: vars.$spacing-sm;
+    flex: 1;
+    overflow-y: auto;
   }
 
   &__link {
+    min-height: 48px;
     display: flex;
     align-items: center;
-    gap: vars.$spacing-lg;
-    padding: vars.$spacing-base vars.$spacing-md;
-    color: vars.$color-secondary-text;
-    font-size: vars.$font-size-label;
-    font-weight: vars.$font-weight-medium;
-    text-decoration: none;
+    gap: vars.$spacing-md;
+    padding: 0 vars.$spacing-lg;
     border-radius: vars.$radius-md;
-    transition: vars.$transition-base;
-    cursor: pointer;
+    color: #1F2937;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: vars.$font-weight-medium;
+    transition: background vars.$transition-fast, color vars.$transition-fast;
 
     svg {
+      width: 21px;
+      height: 21px;
       flex-shrink: 0;
-      color: inherit;
+      stroke-width: 1.5;
     }
 
     &:hover {
-      background: rgba(vars.$color-accent, 0.05);
-      color: vars.$color-primary-text;
+      background: #F3F4F6;
     }
 
     &.active {
+      background: #FFF0E6;
       color: vars.$color-accent;
-      background: rgba(vars.$color-accent, 0.08);
-      font-weight: vars.$font-weight-bold;
-
-      svg {
-        color: vars.$color-accent;
-      }
+      font-weight: vars.$font-weight-semibold;
     }
   }
 
@@ -72,50 +99,76 @@
     flex: 1;
   }
 
-  &__amigos {
-    display: flex;
-    flex-direction: column;
-    gap: vars.$spacing-md;
+  &__badge {
+    min-width: 24px;
+    height: 24px;
+    border-radius: vars.$radius-full;
+    display: grid;
+    place-items: center;
+    background: vars.$color-accent;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: vars.$font-weight-bold;
   }
 
-  &__amigo-item {
+  &__new-post {
+    min-height: 46px;
+    margin: vars.$spacing-xl vars.$spacing-lg vars.$spacing-lg;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: vars.$spacing-md;
-    padding: vars.$spacing-xs vars.$spacing-md;
+    border: 1px solid vars.$color-accent;
     border-radius: vars.$radius-md;
+    background: #FFFFFF;
+    color: vars.$color-accent;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: vars.$font-weight-medium;
     transition: background vars.$transition-fast;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.02);
+      background: #FFF7F2;
     }
   }
 
-  &__amigo-avatar-wrap {
-    position: relative;
-    display: inline-block;
-  }
-
-  &__online-dot {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
-    background-color: #22C55E;
-    border: 2px solid var(--bg-surface, #0F1011);
-    border-radius: 50%;
-  }
-
-  &__amigo-nome {
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-medium;
+  &__account {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-md;
     color: vars.$color-primary-text;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-decoration: none;
+    padding: 0 vars.$spacing-xl vars.$spacing-xl;
+  }
+
+  &__account-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    flex: 1;
+
+    strong,
+    small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    strong {
+      font-size: 15px;
+      font-weight: vars.$font-weight-bold;
+    }
+
+    small {
+      color: vars.$color-tertiary-text;
+      font-size: vars.$font-size-caption;
+    }
+  }
+
+  &__dots {
+    color: vars.$color-disabled-text;
+    font-size: vars.$font-size-caption;
+    letter-spacing: 1px;
   }
 }
-
-
-

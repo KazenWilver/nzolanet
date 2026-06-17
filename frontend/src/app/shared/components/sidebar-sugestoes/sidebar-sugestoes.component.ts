@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
@@ -18,62 +18,33 @@ interface UserSuggestion {
   templateUrl: './sidebar-sugestoes.component.html',
   styleUrl: './sidebar-sugestoes.component.scss'
 })
-export class SidebarSugestoesComponent implements OnInit {
+export class SidebarSugestoesComponent {
   sugestoesAoSeguir: UserSuggestion[] = [
-    {
-      id: '1',
-      nome: 'João Silva',
-      nomeUtilizador: 'joaosilva',
-      seguidores: 1234,
-      fotoPerfil: undefined,
-      seguido: false
-    },
-    {
-      id: '2',
-      nome: 'Maria Santos',
-      nomeUtilizador: 'mariasantos',
-      seguidores: 5678,
-      fotoPerfil: undefined,
-      seguido: false
-    },
-    {
-      id: '3',
-      nome: 'Pedro Costa',
-      nomeUtilizador: 'pedrocosta',
-      seguidores: 3456,
-      fotoPerfil: undefined,
-      seguido: false
-    },
+    { id: '1', nome: 'João Silva', nomeUtilizador: 'joaosilva', seguidores: 1234, seguido: false },
+    { id: '2', nome: 'Marta Kiala', nomeUtilizador: 'martakiala', seguidores: 892, seguido: false },
+    { id: '3', nome: 'Eric Dodds', nomeUtilizador: 'ericvd', seguidores: 756, seguido: false },
   ];
 
   tendencias = [
-    { hashtag: '#LuandoTech', posts: '30K' },
-    { hashtag: '#StartupAngola', posts: '15K' },
-    { hashtag: '#Desenvolvimento', posts: '8.5K' },
-    { hashtag: '#Inovação', posts: '12K' },
-    { hashtag: '#Tech', posts: '125K' },
+    { hashtag: '#techangola', posts: '1,234' },
+    { hashtag: '#isptec', posts: '892' },
+    { hashtag: '#startups', posts: '756' },
+    { hashtag: '#opensource', posts: '512' },
+    { hashtag: '#uxresearch', posts: '432' },
   ];
 
-  constructor(private router: Router) { }
-
-  ngOnInit(): void {
-  }
+  constructor(private router: Router) {}
 
   seguir(userId: string): void {
     const user = this.sugestoesAoSeguir.find((item) => item.id === userId);
-    if (!user) {
-      return;
+    if (user) {
+      user.seguido = !user.seguido;
     }
-    user.seguido = !user.seguido;
-  }
-
-  visitarPerfil(userId: string): void {
-    this.router.navigate(['/perfil', userId]);
   }
 
   getInitials(nome: string): string {
     return nome.split(' ')
-      .map(n => n[0])
+      .map((n) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);

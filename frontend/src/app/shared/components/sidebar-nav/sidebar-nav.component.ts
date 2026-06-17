@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '../../../core/services/auth.service';
+import { User } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
@@ -12,32 +14,38 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
   styleUrl: './sidebar-nav.component.scss'
 })
 export class SidebarNavComponent implements OnInit {
+  utilizadorAtual: User | null = null;
+
   menuItems = [
-    { icon: 'home', label: 'Feed', route: '/feed', active: true },
-    { icon: 'search', label: 'Pesquisar', route: '/pesquisar', active: false },
-    { icon: 'bell', label: 'Notificações', route: '/notificacoes', active: false },
-    { icon: 'user', label: 'Perfil', route: '/perfil/me', active: false },
+    { icon: 'home', label: 'Feed', route: '/feed', exact: true },
+    { icon: 'hash', label: 'Explore', route: '/pesquisar', exact: false },
+    { icon: 'bell', label: 'Notificações', route: '/notificacoes', exact: false, badge: 3 },
+    { icon: 'mail', label: 'Mensagens', route: '/feed', exact: false },
+    { icon: 'bookmark', label: 'Guardados', route: '/feed', exact: false },
+    { icon: 'user', label: 'Perfil', route: '/perfil/me', exact: false },
+    { icon: 'settings', label: 'Definições', route: '/perfil/me', exact: false },
   ];
 
-  amigosOnline = [
-    { id: 'm1', nome: 'António Nzola', fotoPerfil: undefined },
-    { id: 'm2', nome: 'Bela Kiala', fotoPerfil: undefined },
-    { id: 'm3', nome: 'Carlos Mwene', fotoPerfil: undefined },
-    { id: 'm4', nome: 'Deolinda Neto', fotoPerfil: undefined }
-  ];
-
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.utilizador$.subscribe((utilizador) => {
+      this.utilizadorAtual = utilizador;
+    });
   }
 
   getIconSvg(iconName: string): SafeHtml {
     const icons: { [key: string]: string } = {
-      home: '<path d="M3 12l9-9 9 9M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-10"/>',
-      users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-      search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
-      bell: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
-      user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+      home: '<path d="m3 10.8 9-7.2 9 7.2"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path>',
+      hash: '<path d="M4 9h16"></path><path d="M4 15h16"></path><path d="M10 3 8 21"></path><path d="m16 3-2 18"></path>',
+      bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>',
+      mail: '<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="m22 6-10 7L2 6"></path>',
+      bookmark: '<path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>',
+      user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
+      settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>',
     };
     return this.sanitizer.bypassSecurityTrustHtml(icons[iconName] || '');
   }

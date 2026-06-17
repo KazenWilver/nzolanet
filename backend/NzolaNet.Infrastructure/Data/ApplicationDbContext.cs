@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Post> Posts { get; set; } = null!;
     public DbSet<Comment> Comments { get; set; } = null!;
     public DbSet<Follow> Follows { get; set; } = null!;
+    public DbSet<Like> Likes { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -74,6 +75,23 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
             // Índice Único: Impede que o mesmo utilizador siga a mesma pessoa mais de uma vez
             entity.HasIndex(f => new { f.FollowerId, f.FollowedId }).IsUnique();
+        });
+
+        builder.Entity<Like>(entity =>
+        {
+            entity.HasKey(l => l.Id);
+
+            entity.HasOne(l => l.User)
+                  .WithMany()
+                  .HasForeignKey(l => l.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(l => l.Post)
+                  .WithMany()
+                  .HasForeignKey(l => l.PostId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(l => new { l.UserId, l.PostId }).IsUnique();
         });
     }
 }

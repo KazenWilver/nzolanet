@@ -25,7 +25,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   notificacoesAberto = false;
   notificacoesPreview: Notificacao[] = [];
   private destroy$ = new Subject<void>();
-  modoEscuro = true;
+  modoEscuro = false;
 
   constructor(
     private authService: AuthService,
@@ -35,12 +35,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const savedTheme = localStorage.getItem('nzolanet_theme');
-    if (savedTheme === 'light') {
-      this.modoEscuro = false;
-      document.body.classList.add('light-theme');
-    } else {
-      document.body.classList.remove('light-theme');
-    }
+    this.modoEscuro = savedTheme === 'dark';
+    document.body.classList.toggle('light-theme', !this.modoEscuro);
 
     this.authService.utilizador$.pipe(takeUntil(this.destroy$)).subscribe((u: User | null) => {
       this.utilizadorAtual = u;
@@ -100,6 +96,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   terminarSessao(): void {
     this.menuAberto = false;
     this.authService.terminarSessao();
+  }
+
+  get tituloPagina(): string {
+    const url = this.router.url;
+    if (url.startsWith('/pesquisar')) return 'Explore';
+    if (url.startsWith('/notificacoes')) return 'Notificações';
+    if (url.startsWith('/perfil')) return 'Perfil';
+    if (url.startsWith('/publicacoes')) return 'Publicação';
+    return 'Feed';
   }
 
   @HostListener('document:click', ['$event'])

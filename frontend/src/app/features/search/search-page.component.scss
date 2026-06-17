@@ -1,162 +1,152 @@
 @use '../../styles/variables' as vars;
 
 .search-page {
-  padding: 1rem;
   display: grid;
-  gap: 1rem;
+  gap: vars.$spacing-xl;
 
   &__topo {
-    padding: 1.8rem 1.2rem;
+    display: grid;
+    gap: vars.$spacing-lg;
+    padding: vars.$spacing-xl;
     background: vars.$color-surface-card;
     border: 1px solid vars.$color-border-subtle;
     border-radius: vars.$radius-lg;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(18px);
 
     h1 {
-      margin: 0 0 0.5rem;
-      font-size: 2rem;
-      color: #FFFFFF;
-      font-family: vars.$font-family-primary;
-      font-weight: vars.$font-weight-bold;
+      margin: 0 0 vars.$spacing-sm;
+      color: vars.$color-primary-text;
+      font-size: vars.$font-size-display;
+      font-weight: vars.$font-weight-extrabold;
     }
 
     p {
       margin: 0;
       color: vars.$color-secondary-text;
-      font-size: 0.98rem;
+      font-size: vars.$font-size-body;
     }
+  }
 
-    &__form {
-      display: flex;
-      align-items: stretch;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
+  &__form {
+    display: flex;
+    gap: vars.$spacing-md;
+    flex-wrap: wrap;
   }
 
   &__input {
     flex: 1;
-    min-width: 260px;
-    padding: 1rem 1.25rem;
-    border: 1px solid vars.$color-border-strong;
+    min-width: 220px;
+    height: 42px;
+    border: 1px solid vars.$color-border-subtle;
     border-radius: vars.$radius-md;
-    font-size: 1rem;
-    color: #FFFFFF;
     background: vars.$color-canvas-background;
-    transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
+    color: vars.$color-primary-text;
+    padding: 0 vars.$spacing-lg;
 
     &:focus {
-      outline: none;
       border-color: vars.$color-accent;
       box-shadow: 0 0 0 3px vars.$color-glow-aurora;
-    }
-    
-    &::placeholder {
-      color: vars.$color-tertiary-text;
     }
   }
 
   &__button {
-    min-width: 150px;
-    padding: 0.85rem 1.75rem;
-    border: none;
+    height: 42px;
+    padding: 0 vars.$spacing-xl;
+    border: 1px solid vars.$color-accent;
     border-radius: vars.$radius-md;
     background: vars.$color-accent;
-    color: #ffffff;
-    font-size: 1rem;
-    font-weight: vars.$font-weight-semibold;
-    letter-spacing: 0.02em;
+    color: #FFFFFF;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-bold;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background vars.$transition-base, transform vars.$transition-fast;
 
     &:hover {
       background: vars.$color-accent-hover;
-      transform: translateY(-1px);
-    }
-
-    &:active {
-      transform: translateY(0);
+      border-color: vars.$color-accent-hover;
     }
   }
 
-  &__conteudo {
+  &__conteudo,
+  &__section,
+  &__users {
     display: grid;
-    gap: 1rem;
-  }
-
-  &__empty,
-  &__loading {
-    padding: 2rem;
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
-    color: vars.$color-secondary-text;
-    text-align: center;
-  }
-
-  &__section {
-    margin-bottom: vars.$spacing-xl;
+    gap: vars.$spacing-lg;
   }
 
   &__section-titulo {
-    font-size: vars.$font-size-h3;
-    font-weight: vars.$font-weight-bold;
+    margin: 0;
     color: vars.$color-primary-text;
-    margin-bottom: vars.$spacing-lg;
-    padding-bottom: vars.$spacing-base;
-    border-bottom: 1px solid vars.$color-border-subtle;
+    font-size: vars.$font-size-h3;
   }
 
-  &__users {
-    display: grid;
-    gap: vars.$spacing-md;
+  &__user-card,
+  &__empty,
+  &__loading {
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(18px);
   }
 
   &__user-card {
+    min-height: 78px;
     display: flex;
     align-items: center;
     gap: vars.$spacing-lg;
     padding: vars.$spacing-lg;
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
+    color: inherit;
     text-decoration: none;
-    transition: border-color vars.$transition-base, transform vars.$transition-base, box-shadow vars.$transition-base;
-    animation: fadeIn 0.35s ease-out;
 
     &:hover {
       border-color: vars.$color-border-strong;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
   }
 
   &__user-info {
+    min-width: 0;
+    display: grid;
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
 
-  &__user-nome {
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    font-size: vars.$font-size-body;
-  }
+    strong,
+    small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-  &__user-handle {
-    font-size: vars.$font-size-caption;
-    color: vars.$color-secondary-text;
+    strong {
+      color: vars.$color-primary-text;
+      font-size: vars.$font-size-label;
+    }
+
+    small {
+      color: vars.$color-tertiary-text;
+      font-size: vars.$font-size-caption;
+    }
   }
 
   &__user-btn {
-    font-size: vars.$font-size-button;
-    font-weight: vars.$font-weight-semibold;
     color: vars.$color-accent;
-    white-space: nowrap;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-bold;
+  }
+
+  &__empty,
+  &__loading {
+    padding: vars.$spacing-2xl;
+    color: vars.$color-secondary-text;
+    text-align: center;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .search-page__button {
+    width: 100%;
   }
 }

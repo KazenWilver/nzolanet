@@ -3,7 +3,8 @@
 .media-preview {
   overflow: hidden;
   background: vars.$color-canvas-background;
-  border-radius: vars.$radius-md;
+  border-radius: vars.$radius-lg;
+  border: 1px solid vars.$color-border-subtle;
 
   &__imagem {
     width: 100%;

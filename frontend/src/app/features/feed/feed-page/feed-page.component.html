@@ -1,4 +1,4 @@
-﻿<div class="feed-pagina">
+<div class="feed-pagina">
   <app-create-post (postCriado)="adicionarPost($event)" />
 
   <div class="feed-pagina__carregando" *ngIf="aCarregar">
@@ -7,9 +7,10 @@
 
   <div class="feed-pagina__vazio" *ngIf="!aCarregar && posts.length === 0">
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
     </svg>
     <p>O teu feed está vazio. Segue utilizadores para ver as suas publicações.</p>
   </div>

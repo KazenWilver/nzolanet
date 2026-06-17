@@ -1,67 +1,65 @@
 @use '../../../styles/variables' as vars;
 
 .feed-pagina {
-  padding: vars.$spacing-xl vars.$spacing-lg vars.$spacing-2xl;
-}
+  display: grid;
+  gap: vars.$spacing-lg;
 
-.feed-pagina__carregando {
-  display: flex;
-  justify-content: center;
-  padding: vars.$spacing-3xl 0;
-}
-
-.feed-pagina__vazio {
-  text-align: center;
-  padding: vars.$spacing-2xl vars.$spacing-xl;
-  border-radius: vars.$radius-lg;
-  border: 1px solid vars.$color-border-subtle;
-  background: vars.$color-surface-card;
-  color: vars.$color-secondary-text;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  margin-bottom: vars.$spacing-xl;
-
-  svg {
-    margin: 0 auto vars.$spacing-lg;
-    display: block;
-    color: vars.$color-disabled-text;
+  &__carregando {
+    display: flex;
+    justify-content: center;
+    padding: vars.$spacing-3xl 0;
   }
 
-  p {
-    font-size: vars.$font-size-body;
-    line-height: 1.6;
-    margin: 0;
-  }
-}
+  &__vazio {
+    text-align: center;
+    padding: vars.$spacing-2xl vars.$spacing-xl;
+    border-radius: vars.$radius-lg;
+    border: 1px solid vars.$color-border-subtle;
+    background: #FFFFFF;
+    color: vars.$color-secondary-text;
+    box-shadow: var(--shadow-card);
 
-.feed-pagina__mais {
-  display: flex;
-  justify-content: center;
-  padding: vars.$spacing-lg 0 vars.$spacing-2xl;
-}
+    svg {
+      margin: 0 auto vars.$spacing-lg;
+      display: block;
+      color: vars.$color-tertiary-text;
+    }
 
-.feed-pagina__btn-mais {
-  height: 40px;
-  padding: 0 vars.$spacing-2xl;
-  background: vars.$color-surface-card;
-  border: 1px solid vars.$color-border-strong;
-  border-radius: vars.$radius-md;
-  font-family: vars.$font-family-primary;
-  font-size: vars.$font-size-button;
-  font-weight: vars.$font-weight-semibold;
-  color: vars.$color-primary-text;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: vars.$spacing-base;
-  transition: all vars.$transition-base;
-
-  &:hover:not(:disabled) {
-    border-color: vars.$color-accent;
-    background: rgba(255, 255, 255, 0.04);
+    p {
+      font-size: vars.$font-size-body;
+      line-height: 1.6;
+      margin: 0;
+    }
   }
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  &__mais {
+    display: flex;
+    justify-content: center;
+    padding: vars.$spacing-lg 0 vars.$spacing-2xl;
+  }
+
+  &__btn-mais {
+    height: 40px;
+    padding: 0 vars.$spacing-2xl;
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-strong;
+    border-radius: vars.$radius-md;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-semibold;
+    color: vars.$color-primary-text;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-base;
+
+    &:hover:not(:disabled) {
+      border-color: vars.$color-accent;
+      color: vars.$color-accent;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 }

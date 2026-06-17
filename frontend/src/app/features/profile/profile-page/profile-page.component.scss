@@ -1,136 +1,180 @@
 @use '../../../styles/variables' as vars;
 
 .perfil {
-  padding-bottom: 32px;
+  display: grid;
+  gap: vars.$spacing-xl;
 
-  &__capa {
-    width: calc(100% + 32px);
-    height: 180px;
-    background: vars.$color-canvas-background;
+  &__card,
+  &__sem-pub {
+    background: vars.$color-surface-card;
+    border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(18px);
     overflow: hidden;
-    margin: 0 -16px;
-
-    @media (min-width: 1024px) { margin: 0 -32px; width: calc(100% + 64px); }
   }
 
-  &__img-capa { width: 100%; height: 100%; object-fit: cover; }
+  &__capa {
+    height: 190px;
+    background: vars.$color-canvas-background;
+    overflow: hidden;
+  }
+
+  &__img-capa {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
   &__capa-placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, vars.$color-canvas-background 0%, vars.$color-border-strong 100%);
+    background:
+      radial-gradient(circle at 24% 34%, rgba(255, 107, 24, 0.32), transparent 12rem),
+      linear-gradient(135deg, rgba(255, 107, 24, 0.12), rgba(255, 255, 255, 0.03));
   }
 
   &__info {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-top: none;
-    padding: 0 20px 20px;
-    margin: 0 -16px;
-    width: calc(100% + 32px);
-
-    @media (min-width: 1024px) { margin: 0 -32px; width: calc(100% + 64px); }
+    position: relative;
+    padding: 0 vars.$spacing-xl vars.$spacing-xl;
   }
 
   &__avatar-wrap {
-    margin-top: -45px;
-    margin-bottom: 12px;
+    margin-top: -46px;
+    width: fit-content;
 
     app-user-avatar {
       border: 4px solid vars.$color-surface-card;
       border-radius: 50%;
       display: block;
-      width: fit-content;
     }
   }
 
-  &__acoes { float: right; margin-top: -80px; }
+  &__acoes {
+    position: absolute;
+    top: vars.$spacing-lg;
+    right: vars.$spacing-xl;
+  }
 
   &__btn {
-    height: 36px;
-    padding: 0 20px;
+    min-height: 38px;
+    padding: 0 vars.$spacing-lg;
     border-radius: vars.$radius-md;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-semibold;
+    font-size: vars.$font-size-button;
+    font-weight: vars.$font-weight-bold;
     cursor: pointer;
-    transition: all vars.$transition-base;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    border: none;
+    border: 1px solid vars.$color-border-subtle;
 
-    &--primario  {
+    &--primario {
       background: vars.$color-accent;
+      border-color: vars.$color-accent;
       color: #FFFFFF;
-      &:hover:not(:disabled) { background: vars.$color-accent-hover; }
     }
-    
-    &--secundario {
+
+    &--secundario,
+    &--seguindo {
       background: transparent;
       color: vars.$color-primary-text;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      &:hover {
-        border-color: rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.04);
-      }
     }
-    
-    &--seguindo  {
-      background: rgba(255, 255, 255, 0.04);
-      color: vars.$color-primary-text;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      &:hover {
-        border-color: vars.$color-error;
-        color: vars.$color-error;
-        background: rgba(vars.$color-error, 0.06);
-      }
+
+    &:hover:not(:disabled) {
+      border-color: vars.$color-accent;
+      color: vars.$color-accent;
     }
-    
-    &:disabled { opacity: 0.6; cursor: not-allowed; }
   }
 
-  &__dados { clear: both; display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  &__dados {
+    display: grid;
+    gap: vars.$spacing-xs;
+    margin-top: vars.$spacing-md;
+  }
 
-  &__nome { font-family: vars.$font-family-primary; font-size: 20px; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; line-height: 28px; }
-  &__nomeutil { font-size: 14px; color: vars.$color-tertiary-text; font-weight: vars.$font-weight-medium; }
-  &__bio { font-size: 15px; line-height: 1.6; color: vars.$color-secondary-text; margin-top: 4px; }
-  &__localizacao { display: flex; align-items: center; gap: 4px; font-size: 13px; color: vars.$color-tertiary-text; margin-top: 2px; }
+  &__nome {
+    margin: 0;
+    color: vars.$color-primary-text;
+    font-size: 22px;
+    font-weight: vars.$font-weight-extrabold;
+  }
+
+  &__nomeutil,
+  &__localizacao {
+    color: vars.$color-tertiary-text;
+    font-size: vars.$font-size-label;
+  }
+
+  &__bio {
+    color: vars.$color-secondary-text;
+    margin: vars.$spacing-md 0 0;
+  }
+
+  &__localizacao {
+    display: inline-flex;
+    align-items: center;
+    gap: vars.$spacing-sm;
+    margin: vars.$spacing-sm 0 0;
+  }
 
   &__estatisticas {
-    display: flex;
-    gap: 24px;
-    margin-top: 16px;
-    padding-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: vars.$spacing-md;
+    margin-top: vars.$spacing-xl;
+    padding-top: vars.$spacing-lg;
     border-top: 1px solid vars.$color-border-subtle;
   }
 
   &__stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
+    display: grid;
+    gap: vars.$spacing-xs;
+    color: inherit;
     text-decoration: none;
-    cursor: pointer;
-    &:hover .perfil__stat-valor { color: vars.$color-accent; }
+
+    strong {
+      color: vars.$color-primary-text;
+      font-size: 18px;
+    }
+
+    span {
+      color: vars.$color-tertiary-text;
+      font-size: vars.$font-size-caption;
+    }
   }
 
-  &__stat-valor { font-family: vars.$font-family-primary; font-size: 18px; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; transition: color vars.$transition-fast; }
-  &__stat-label { font-size: 12px; color: vars.$color-tertiary-text; font-weight: vars.$font-weight-medium; }
+  &__publicacoes {
+    display: grid;
+    gap: vars.$spacing-lg;
 
-  &__publicacoes { margin-top: 12px; }
+    h2 {
+      margin: 0;
+      color: vars.$color-primary-text;
+      font-size: vars.$font-size-h3;
+    }
+  }
 
   &__carregando,
-  &__carregando-pagina { display: flex; justify-content: center; padding: 48px 0; }
+  &__carregando-pagina {
+    display: flex;
+    justify-content: center;
+    padding: vars.$spacing-3xl 0;
+  }
 
   &__sem-pub {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
     text-align: center;
-    padding: 48px 24px;
+    padding: vars.$spacing-2xl;
     color: vars.$color-secondary-text;
-    svg { margin: 0 auto 12px; display: block; color: vars.$color-disabled-text; }
-    p { font-size: 15px; }
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .perfil__acoes {
+    position: static;
+    margin-top: vars.$spacing-lg;
   }
 }

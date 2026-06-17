@@ -2,9 +2,9 @@
   <header class="notifications-page__header">
     <div>
       <h1>Notificações</h1>
-      <p>Recebe avisos de bazes, comentários e novos seguidores.</p>
+      <p>Bazes, comentários e novos seguidores aparecem aqui.</p>
     </div>
-    <button type="button" class="notifications-page__mark-read" (click)="marcarComoLidas()">Marcar todas como lidas</button>
+    <button type="button" class="notifications-page__mark-read" (click)="marcarComoLidas()">Marcar como lidas</button>
   </header>
 
   <div *ngIf="aCarregar" class="notifications-page__loading">
@@ -12,12 +12,13 @@
   </div>
 
   <div *ngIf="!aCarregar && notificacoes.length === 0" class="notifications-page__empty">
-    <p>Sem notificações por enquanto. Volta mais tarde para ver as novidades.</p>
+    <p>Sem notificações por enquanto.</p>
   </div>
 
   <ul *ngIf="!aCarregar && notificacoes.length > 0" class="notifications-page__list">
     <li *ngFor="let notificacao of notificacoes" class="notifications-page__item" [class.notifications-page__item--unread]="!notificacao.lida">
-      <div>
+      <span class="notifications-page__dot"></span>
+      <div class="notifications-page__body">
         <strong>{{ notificacao.utilizadorNome }}</strong>
         <span>{{ notificacao.tipo | titlecase }}</span>
         <p *ngIf="notificacao.postId">Publicação relacionada: {{ notificacao.postId }}</p>

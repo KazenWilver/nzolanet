@@ -1,6 +1,6 @@
 <div class="registo">
   <h1 class="registo__titulo">Criar conta</h1>
-  <p class="registo__subtitulo">Junta-te à NzolaNet hoje</p>
+  <p class="registo__subtitulo">Junta-te ao NzolaNet hoje.</p>
 
   <div class="registo__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
 
@@ -22,7 +22,7 @@
           required minlength="3" pattern="^[a-zA-Z0-9._]+$"
           [class.campo__input--erro]="campoUtil.invalid && campoUtil.touched" #campoUtil="ngModel" />
       </div>
-      <span class="campo__erro" *ngIf="campoUtil.invalid && campoUtil.touched">Mínimo 3 caracteres, só letras, números, pontos e underscores</span>
+      <span class="campo__erro" *ngIf="campoUtil.invalid && campoUtil.touched">Usa pelo menos 3 caracteres: letras, números, pontos ou underscores.</span>
     </div>
 
     <div class="campo">
@@ -40,44 +40,15 @@
           placeholder="Mínimo 6 caracteres" [(ngModel)]="dados.senha" name="senha" required minlength="6"
           [class.campo__input--erro]="campoSenha.invalid && campoSenha.touched" #campoSenha="ngModel" />
         <button type="button" class="campo__toggle-senha" (click)="senhaVisivel = !senhaVisivel">
-          <svg *ngIf="!senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
-          <svg *ngIf="senhaVisivel" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-            <line x1="1" y1="1" x2="23" y2="23"/>
-          </svg>
+          {{ senhaVisivel ? 'Ocultar' : 'Ver' }}
         </button>
       </div>
+
       <div class="campo__requisitos" *ngIf="dados.senha.length > 0">
-        <p class="campo__requisito" [class.campo__requisito--ok]="temTamanhoMinimo()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline *ngIf="temTamanhoMinimo()" points="20 6 9 17 4 12"/>
-            <line *ngIf="!temTamanhoMinimo()" x1="18" y1="6" x2="6" y2="18"/>
-          </svg>
-          Mínimo de 6 caracteres
-        </p>
-        <p class="campo__requisito" [class.campo__requisito--ok]="temMaiuscula()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline *ngIf="temMaiuscula()" points="20 6 9 17 4 12"/>
-            <line *ngIf="!temMaiuscula()" x1="18" y1="6" x2="6" y2="18"/>
-          </svg>
-          Uma letra maiúscula
-        </p>
-        <p class="campo__requisito" [class.campo__requisito--ok]="temMinuscula()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline *ngIf="temMinuscula()" points="20 6 9 17 4 12"/>
-            <line *ngIf="!temMinuscula()" x1="18" y1="6" x2="6" y2="18"/>
-          </svg>
-          Uma letra minúscula
-        </p>
-        <p class="campo__requisito" [class.campo__requisito--ok]="temNumero()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <polyline *ngIf="temNumero()" points="20 6 9 17 4 12"/>
-            <line *ngIf="!temNumero()" x1="18" y1="6" x2="6" y2="18"/>
-          </svg>
-          Um número
-        </p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temTamanhoMinimo()">Mínimo de 6 caracteres</p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temMaiuscula()">Uma letra maiúscula</p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temMinuscula()">Uma letra minúscula</p>
+        <p class="campo__requisito" [class.campo__requisito--ok]="temNumero()">Um número</p>
       </div>
     </div>
 

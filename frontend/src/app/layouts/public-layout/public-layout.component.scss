@@ -3,108 +3,56 @@
 .layout-publico {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(320px, 1.2fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 520px);
   background: vars.$color-canvas-background;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-
   &__hero {
-    position: relative;
-    background: #090a0c;
-    color: vars.$color-primary-text;
-    padding: 64px 56px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 32px;
-    overflow: hidden;
+    justify-content: space-between;
+    padding: vars.$spacing-3xl;
     border-right: 1px solid vars.$color-border-subtle;
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top right, rgba(113, 112, 255, 0.15), transparent 45%),
-                  radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.08), transparent 35%);
-      pointer-events: none;
-    }
   }
 
   &__marca {
-    position: relative;
-    z-index: 1;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+    align-items: center;
+    gap: vars.$spacing-md;
+    color: #111827;
+    text-decoration: none;
 
-  &__logo {
-    font-family: vars.$font-family-primary;
-    font-size: 44px;
-    font-weight: 800;
-    color: vars.$color-accent;
-    letter-spacing: -1px;
-  }
+    img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
 
-  &__slogan {
-    font-family: vars.$font-family-primary;
-    font-size: 18px;
-    font-weight: 600;
-    color: vars.$color-secondary-text;
-    max-width: 340px;
+    span {
+      font-size: 26px;
+      line-height: 1;
+      font-weight: vars.$font-weight-extrabold;
+      letter-spacing: -0.02em;
+    }
   }
 
   &__descricao {
-    position: relative;
-    z-index: 1;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
+    max-width: 520px;
 
-  &__descricao h2 {
-    font-family: vars.$font-family-primary;
-    font-size: clamp(32px, 3vw, 40px);
-    font-weight: 800;
-    line-height: 1.1;
-    margin: 0;
-    color: #FFFFFF;
-  }
-
-  &__descricao p {
-    font-size: 16px;
-    line-height: 1.75;
-    color: vars.$color-secondary-text;
-    max-width: 380px;
-  }
-
-  &__vantagens {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 14px;
-    color: vars.$color-secondary-text;
-
-    li {
-      position: relative;
-      padding-left: 28px;
-      font-size: 15px;
-      line-height: 1.6;
+    h2 {
+      margin: 0 0 vars.$spacing-lg;
+      color: #111827;
+      font-size: clamp(38px, 4vw, 58px);
+      line-height: 1.04;
+      font-weight: vars.$font-weight-black;
+      letter-spacing: -0.02em;
     }
 
-    li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 8px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: vars.$color-accent;
+    p {
+      max-width: 430px;
+      color: vars.$color-tertiary-text;
+      font-size: 17px;
+      line-height: 1.75;
     }
   }
 
@@ -112,23 +60,33 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 64px 40px;
-    background: transparent;
+    padding: vars.$spacing-3xl vars.$spacing-2xl;
   }
 
   &__cartao {
     width: 100%;
     max-width: 460px;
-    background: vars.$color-surface-card;
-    border-radius: vars.$radius-lg;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
-    padding: 40px;
+    background: #FFFFFF;
     border: 1px solid vars.$color-border-subtle;
+    border-radius: vars.$radius-lg;
+    box-shadow: var(--shadow-card);
+    padding: vars.$spacing-2xl;
   }
+}
 
-  @media (max-width: 1024px) {
-    .layout-publico__hero { display: none; }
-    .layout-publico__formulario { min-height: 100vh; padding: 32px 20px; }
-    .layout-publico__cartao { padding: 32px 24px; }
+@media (max-width: 960px) {
+  .layout-publico {
+    grid-template-columns: 1fr;
+
+    &__hero {
+      min-height: 220px;
+      padding: vars.$spacing-2xl;
+      border-right: 0;
+      border-bottom: 1px solid vars.$color-border-subtle;
+    }
+
+    &__formulario {
+      padding: vars.$spacing-2xl vars.$spacing-lg;
+    }
   }
 }

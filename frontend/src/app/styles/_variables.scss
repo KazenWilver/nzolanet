@@ -1,57 +1,55 @@
-// ─── Carbon Aurora & Glassmorphic Twilight Color Palette ───
+// NzolaNet feed UI tokens based on the local reference design.
 
-// Primary Text Colors
-$color-primary-text: var(--text-primary, #FFFFFF);      // Pure White
-$color-secondary-text: var(--text-secondary, #9C9C9D);    // Muted Cool Gray
-$color-tertiary-text: var(--text-tertiary, #50617A);     // Muted Gray (metadata, timestamps)
-$color-disabled-text: var(--text-disabled, #3A4454);     // Disabled / Border Neutral
-$color-black: #000000;             // Pure Black
+// Text
+$color-primary-text: var(--text-primary, #111827);
+$color-secondary-text: var(--text-secondary, #374151);
+$color-tertiary-text: var(--text-tertiary, #6B7280);
+$color-disabled-text: var(--text-disabled, #9CA3AF);
+$color-black: #000000;
 
-// Brand & Engagement Colors
-$color-accent: #7170FF;            // Radiant Purple/Indigo (brand-accent)
-$color-accent-hover: #8C8AFF;      // brand-accent-hover
-$color-engagement-pink: #EC4899;   // engagement-pink (like button, badges)
-$color-glow-aurora: var(--glow-aurora, rgba(113, 112, 255, 0.15)); // soft aurora glow
+// Brand and engagement
+$color-accent: #E25E25;
+$color-accent-hover: #C9521F;
+$color-engagement-pink: #EF4444;
+$color-glow-aurora: var(--glow-aurora, rgba(226, 94, 37, 0.16));
 
-// Semantic Colors
-$color-error: #E92F2F;             // Error Red
-$color-warning: #F1A82C;           // Warning Amber
-$color-success: #00FF00;           // Success Green
+// Semantic
+$color-error: #E92F2F;
+$color-warning: #F59E0B;
+$color-success: #22C55E;
 
-// Neutral Scale
-$color-dark-slate: var(--border-strong, #2F3031);        // border-strong
-$color-concrete: #65675E;          // Concrete
-$color-off-white: var(--bg-canvas, #07080A);         // Off-White
-$color-pure-white: #FFFFFF;        // Pure White
+// Neutral
+$color-dark-slate: var(--border-strong, #D1D5DB);
+$color-concrete: #6B7280;
+$color-off-white: var(--bg-canvas, #F8F9FA);
+$color-pure-white: #FFFFFF;
 
-// Surface & Borders
-$color-canvas-background: var(--bg-canvas, #07080A); // canvas-background
-$color-surface-card: var(--bg-surface, #0F1011);      // surface-card
-$color-surface-nav: var(--bg-nav, rgba(11, 12, 14, 0.75)); // surface-nav
-$color-border-subtle: var(--border-subtle, rgba(255, 255, 255, 0.06)); // border-subtle
-$color-border-strong: var(--border-strong, #2F3031);     // border-strong
+// Surface and borders
+$color-canvas-background: var(--bg-canvas, #F8F9FA);
+$color-surface-card: var(--bg-surface, #FFFFFF);
+$color-surface-nav: var(--bg-nav, rgba(248, 249, 250, 0.88));
+$color-border-subtle: var(--border-subtle, #EAEAEA);
+$color-border-strong: var(--border-strong, #D1D5DB);
 
 $color-border-default: $color-border-subtle;
 $color-border-light: $color-border-subtle;
 $color-surface: $color-surface-card;
-$color-surface-secondary: var(--bg-surface-secondary, #161719);
+$color-surface-secondary: var(--bg-surface-secondary, #F3F4F6);
 $color-background: $color-canvas-background;
 
 // Typography
 $font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 $font-family-monospace: 'Source Code Pro', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
 
-// Font Sizes
 $font-size-display: 24px;
-$font-size-h2: 21.43px;
-$font-size-h3: 19.29px;
+$font-size-h2: 21px;
+$font-size-h3: 18px;
 $font-size-body: 15px;
-$font-size-button: 13px;
-$font-size-label: 13px;
-$font-size-caption: 12px;
+$font-size-button: 14px;
+$font-size-label: 15px;
+$font-size-caption: 13px;
 $font-size-code: 14px;
 
-// Font Weights
 $font-weight-regular: 400;
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
@@ -69,20 +67,20 @@ $spacing-xl: 24px;
 $spacing-2xl: 32px;
 $spacing-3xl: 48px;
 
-// Border Radius
+// Radius
 $radius-sm: 4px;
-$radius-md: 8px;
+$radius-md: 6px;
 $radius-lg: 12px;
 $radius-full: 99px;
 $radius-pill: 9999px;
 $radius-card: 12px;
 
-// Transitions
+// Motion
 $transition-fast: 150ms ease;
 $transition-base: 200ms ease;
 $transition-slow: 300ms ease;
 
 // Layout
 $nav-height: 64px;
-$sidebar-width: 240px;
-$sidebar-right-width: 280px;
+$sidebar-width: 260px;
+$sidebar-right-width: 300px;

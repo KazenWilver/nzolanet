@@ -1,60 +1,98 @@
 @use '../../../styles/variables' as vars;
 
 .sidebar-sugestoes {
-  display: flex;
-  flex-direction: column;
-  gap: vars.$spacing-lg;
+  display: grid;
+  gap: vars.$spacing-xl;
 }
 
 .widget {
-  background: vars.$color-surface-card;
+  background: #FFFFFF;
   border: 1px solid vars.$color-border-subtle;
-  border-radius: vars.$radius-md;
-  padding: vars.$spacing-lg;
-  animation: fadeIn 0.4s ease-out;
-
-  &--info {
-    background: rgba(vars.$color-accent, 0.04);
-    border-color: rgba(vars.$color-accent, 0.1);
-  }
+  border-radius: vars.$radius-lg;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
 
   &__titulo {
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-extrabold;
-    color: vars.$color-secondary-text;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin: 0 0 vars.$spacing-lg 0;
-    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-md;
+    color: vars.$color-primary-text;
+    font-size: 22px;
+    line-height: 1;
+    margin: 0 0 vars.$spacing-lg;
+
+    svg {
+      color: vars.$color-accent;
+    }
   }
 
   &__sugestoes {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: vars.$spacing-md;
   }
 
-  &__tendencias {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+  &__more {
+    margin-top: vars.$spacing-lg;
+    border: 0;
+    background: transparent;
+    color: vars.$color-accent;
+    font-weight: vars.$font-weight-bold;
+    font-size: vars.$font-size-button;
+    padding: 0;
+    cursor: pointer;
   }
 
-  &__footer-text {
-    font-size: vars.$font-size-caption;
+  &--footer {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0 vars.$spacing-md;
     color: vars.$color-tertiary-text;
-    margin: 0;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.7;
 
-    a {
-      color: vars.$color-accent;
-      text-decoration: none;
-      transition: vars.$transition-fast;
+    p {
+      margin: 0 0 vars.$spacing-sm;
+      color: inherit;
+    }
+  }
+}
 
-      &:hover {
-        text-decoration: underline;
-        color: vars.$color-accent-hover;
-      }
+.tendencia-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: vars.$spacing-md;
+  align-items: start;
+  padding: vars.$spacing-md 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover strong {
+    color: vars.$color-accent;
+  }
+
+  &__rank {
+    color: vars.$color-secondary-text;
+    font-size: 15px;
+  }
+
+  &__body {
+    display: grid;
+    gap: 2px;
+
+    strong {
+      color: vars.$color-primary-text;
+      font-size: 17px;
+      transition: color vars.$transition-fast;
+    }
+
+    small {
+      color: vars.$color-tertiary-text;
+      font-size: 14px;
     }
   }
 }
@@ -63,104 +101,58 @@
   display: flex;
   align-items: center;
   gap: vars.$spacing-md;
-  padding: vars.$spacing-md;
-  border-radius: vars.$radius-md;
-  transition: vars.$transition-fast;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
 
   &__avatar {
-    flex-shrink: 0;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(255, 107, 24, 0.25), rgba(255, 187, 122, 0.08));
+    border: 1px solid vars.$color-border-subtle;
+    color: vars.$color-primary-text;
+    font-size: vars.$font-size-caption;
+    font-weight: vars.$font-weight-extrabold;
   }
 
   &__info {
-    flex: 1;
     min-width: 0;
-  }
+    flex: 1;
+    display: grid;
+    line-height: 1.25;
 
-  &__nome {
-    font-size: vars.$font-size-label;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    strong,
+    small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-  &__sub {
-    font-size: vars.$font-size-caption;
-    color: vars.$color-tertiary-text;
+    strong {
+      color: vars.$color-primary-text;
+      font-size: vars.$font-size-button;
+    }
+
+    small {
+      color: vars.$color-tertiary-text;
+      font-size: vars.$font-size-caption;
+    }
   }
 
   &__btn {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    background: vars.$color-accent;
-    color: #FFFFFF;
-    border: none;
-    border-radius: vars.$radius-sm;
-    font-size: vars.$font-size-caption;
+    height: 34px;
+    padding: 0 vars.$spacing-lg;
+    border: 1px solid #D1D5DB;
+    border-radius: vars.$radius-full;
+    background: transparent;
+    color: vars.$color-primary-text;
+    font-size: vars.$font-size-button;
     font-weight: vars.$font-weight-semibold;
     cursor: pointer;
-    transition: vars.$transition-base;
 
     &:hover {
-      background: vars.$color-accent-hover;
+      border-color: vars.$color-accent;
+      color: vars.$color-accent;
     }
   }
 }
-
-.avatar-initials {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #1f1f2e, #2a2a3a);
-  color: vars.$color-primary-text;
-  font-weight: vars.$font-weight-extrabold;
-  font-size: 12px;
-  border: 1px solid vars.$color-border-subtle;
-}
-
-.tendencia-item {
-  display: block;
-    width: 100%;
-    padding: vars.$spacing-md;
-    border-bottom: 1px solid var(--border-subtle);
-    background: transparent;
-    text-decoration: none;
-    border: none;
-    text-align: left;
-    font: inherit;
-    color: inherit;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: rgba(vars.$color-accent, 0.04);
-  }
-
-  &__hashtag {
-    font-size: vars.$font-size-label;
-    font-weight: vars.$font-weight-bold;
-    color: vars.$color-accent;
-  }
-
-  &__posts {
-    font-size: vars.$font-size-caption;
-    color: vars.$color-tertiary-text;
-    margin-top: 2px;
-  }
-}
-
-
-

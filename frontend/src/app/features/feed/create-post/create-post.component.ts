@@ -19,7 +19,7 @@ export class CreatePostComponent implements OnInit {
   @Output() postCriado = new EventEmitter<Post>();
 
   utilizadorAtual: User | null = null;
-  formularioAberto = false;
+  formularioAberto = true;
   texto = '';
   ficheiroSelecionado: File | null = null;
   tipoMedia: 'imagem' | 'video' | null = null;

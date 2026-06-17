@@ -27,25 +27,26 @@ body {
 
 // Themes
 :root {
-  --text-primary: #FFFFFF;
-  --text-secondary: #9C9C9D;
-  --text-tertiary: #50617A;
-  --text-disabled: #3A4454;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-tertiary: #6B7280;
+  --text-disabled: #9CA3AF;
   
-  --bg-canvas: #07080A;
-  --bg-surface: #0F1011;
-  --bg-nav: rgba(11, 12, 14, 0.75);
-  --bg-surface-secondary: #161719;
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-strong: #2F3031;
-  --bg-hover: rgba(255, 255, 255, 0.08);
-  --glow-aurora: rgba(113, 112, 255, 0.15);
+  --bg-canvas: #F8F9FA;
+  --bg-surface: #FFFFFF;
+  --bg-nav: rgba(248, 249, 250, 0.88);
+  --bg-surface-secondary: #F3F4F6;
+  --border-subtle: #EAEAEA;
+  --border-strong: #D1D5DB;
+  --bg-hover: #F3F4F6;
+  --glow-aurora: rgba(226, 94, 37, 0.16);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.025);
 
   // Legacy CSS Variable Tokens (for compatibility)
   --cor-charcoal:    var(--text-primary);
   --cor-stone:       var(--text-secondary);
-  --cor-amber:       #7170FF;
-  --cor-amber-hover: #8C8AFF;
+  --cor-amber:       #E25E25;
+  --cor-amber-hover: #C9521F;
   --cor-off-white:   var(--bg-canvas);
   --cor-cream:       var(--bg-surface-secondary);
   --cor-light-gray:  var(--text-disabled);
@@ -57,18 +58,19 @@ body {
 
 body.light-theme {
   --text-primary: #111827;
-  --text-secondary: #4B5563;
-  --text-tertiary: #9CA3AF;
-  --text-disabled: #D1D5DB;
+  --text-secondary: #374151;
+  --text-tertiary: #6B7280;
+  --text-disabled: #9CA3AF;
   
-  --bg-canvas: #F3F4F6;
+  --bg-canvas: #F8F9FA;
   --bg-surface: #FFFFFF;
-  --bg-nav: rgba(255, 255, 255, 0.85);
-  --bg-surface-secondary: #F9FAFB;
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-strong: #E5E7EB;
-  --bg-hover: rgba(0, 0, 0, 0.06);
-  --glow-aurora: rgba(113, 112, 255, 0.05);
+  --bg-nav: rgba(248, 249, 250, 0.88);
+  --bg-surface-secondary: #F3F4F6;
+  --border-subtle: #EAEAEA;
+  --border-strong: #D1D5DB;
+  --bg-hover: #F3F4F6;
+  --glow-aurora: rgba(226, 94, 37, 0.16);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.025);
 
   --cor-charcoal:    var(--text-primary);
   --cor-stone:       var(--text-secondary);
@@ -76,6 +78,14 @@ body.light-theme {
   --cor-cream:       var(--bg-surface-secondary);
   --cor-light-gray:  var(--text-disabled);
   --cor-mid-tone:    var(--text-tertiary);
+}
+
+body {
+  background: var(--bg-canvas);
+}
+
+body.light-theme {
+  background: var(--bg-canvas);
 }
 
 a { 
