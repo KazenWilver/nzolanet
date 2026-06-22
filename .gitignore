@@ -103,3 +103,6 @@ coverage/
 # ---------- Build-pdf (mantemos os scripts e package.json, mas não o node_modules nem outputs grandes) ----------
 build-pdf/node_modules/
 # Mantemos os PDFs/HTMLs gerados pois ficam servidos pelo GitHub Pages
+
+# ---------- Extras ----------
+extras/
