@@ -1,16 +1,14 @@
 <div class="layout-privado">
-  <app-navbar />
-  <div class="layout-privado__container">
-    <aside class="layout-privado__sidebar-left">
-      <app-sidebar-nav />
-    </aside>
-    
-    <main class="layout-privado__main">
-      <router-outlet />
-    </main>
-    
-    <aside class="layout-privado__sidebar-right">
-      <app-sidebar-sugestoes />
-    </aside>
-  </div>
+  <aside class="layout-privado__sidebar-left">
+    <app-sidebar-nav />
+  </aside>
+
+  <main class="layout-privado__main">
+    <app-navbar />
+    <router-outlet />
+  </main>
+
+  <aside class="layout-privado__sidebar-right">
+    <app-sidebar-sugestoes />
+  </aside>
 </div>

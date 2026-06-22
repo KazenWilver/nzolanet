@@ -1,77 +1,62 @@
 @use '../../styles/variables' as vars;
 
 .layout-privado {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 1220px;
   min-height: 100vh;
-  background: vars.$color-canvas-background;
-  color: vars.$color-primary-text;
-  font-family: vars.$font-family-primary;
+}
 
-  &__container {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: vars.$sidebar-width minmax(0, 1fr) vars.$sidebar-right-width;
-    padding-top: vars.$nav-height;
+.layout-privado__sidebar-left {
+  width: vars.$width-sidebar-left;
+  flex-shrink: 0;
+  border-right: 1px solid vars.$color-border;
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @media (max-width: 988px) {
+    width: 68px;
+    align-items: center;
+    padding: 10px 0;
   }
 
-  &__sidebar-left {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: vars.$sidebar-width;
-    height: 100vh;
-    overflow-y: auto;
-    background: vars.$color-canvas-background;
-    border-right: 1px solid vars.$color-border-subtle;
-    z-index: 1001;
-  }
-
-  &__main {
-    grid-column: 2;
-    min-width: 0;
-    width: min(100%, 600px);
-    justify-self: end;
-    padding: vars.$spacing-xl vars.$spacing-md vars.$spacing-3xl vars.$spacing-xl;
-  }
-
-  &__sidebar-right {
-    grid-column: 3;
-    min-width: 0;
-    width: vars.$sidebar-right-width;
-    padding: vars.$spacing-xl vars.$spacing-xl vars.$spacing-3xl vars.$spacing-md;
+  @media (max-width: 500px) {
+    display: none;
   }
 }
 
-@media (max-width: 1180px) {
-  .layout-privado {
-    &__container {
-      grid-template-columns: vars.$sidebar-width minmax(0, 1fr);
-    }
+.layout-privado__main {
+  width: vars.$width-content;
+  flex-shrink: 0;
+  min-height: 100vh;
+  border-right: 1px solid vars.$color-border;
+  background-color: vars.$color-background;
+  display: flex;
+  flex-direction: column;
 
-    &__main {
-      width: min(100%, 640px);
-      justify-self: center;
-      padding-right: vars.$spacing-xl;
-    }
-
-    &__sidebar-right {
-      display: none;
-    }
+  @media (max-width: 600px) {
+    width: 100%;
+    border-right: none;
+    padding-bottom: 53px; // Safe area for mobile bottom menu
   }
 }
 
-@media (max-width: 900px) {
-  .layout-privado {
-    &__container {
-      display: block;
-      padding-top: vars.$nav-height;
-    }
+.layout-privado__sidebar-right {
+  width: vars.$width-sidebar-right;
+  flex-shrink: 0;
+  padding: 12px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 
-    &__sidebar-left {
-      display: none;
-    }
-
-    &__main {
-      width: 100%;
-      padding: vars.$spacing-lg vars.$spacing-md vars.$spacing-3xl;
-    }
+  @media (max-width: 1024px) {
+    display: none;
   }
 }

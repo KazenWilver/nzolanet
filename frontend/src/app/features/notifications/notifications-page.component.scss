@@ -1,125 +1,141 @@
 @use '../../styles/variables' as vars;
 
 .notifications-page {
-  display: grid;
-  gap: vars.$spacing-xl;
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
 
-  &__header,
-  &__item,
-  &__empty,
-  &__loading {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
-    box-shadow: var(--shadow-card);
-    backdrop-filter: blur(18px);
+.notifications-page__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid vars.$color-border;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: vars.$color-text;
+    margin: 0;
   }
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: vars.$spacing-lg;
-    padding: vars.$spacing-xl;
+  p {
+    font-size: 13px;
+    color: vars.$color-text-secondary;
+    margin: 2px 0 0 0;
+  }
+}
 
-    h1 {
-      margin: 0 0 vars.$spacing-sm;
-      color: vars.$color-primary-text;
-      font-size: vars.$font-size-display;
-      font-weight: vars.$font-weight-extrabold;
-    }
+.notifications-page__mark-read {
+  background: none;
+  border: none;
+  color: vars.$color-primary;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
 
-    p {
-      margin: 0;
-      color: vars.$color-secondary-text;
+  &:hover {
+    background-color: vars.$color-hover;
+  }
+}
+
+.notifications-page__loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.notifications-page__empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: vars.$color-text-secondary;
+  font-size: 15px;
+}
+
+.notifications-page__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notifications-page__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid vars.$color-border;
+  transition: background-color 0.2s;
+  background-color: vars.$color-background;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+
+  &--unread {
+    background-color: #f7f9f9;
+
+    .notifications-page__dot {
+      background-color: vars.$color-primary;
     }
   }
 
-  &__mark-read {
-    height: 40px;
-    padding: 0 vars.$spacing-lg;
-    border: 1px solid vars.$color-accent;
-    border-radius: vars.$radius-md;
-    background: vars.$color-accent;
-    color: #FFFFFF;
-    font-weight: vars.$font-weight-bold;
+  button {
+    background: none;
+    border: none;
+    color: vars.$color-like;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+    margin-left: auto;
+    flex-shrink: 0;
 
     &:hover {
-      background: vars.$color-accent-hover;
-      border-color: vars.$color-accent-hover;
-    }
-  }
-
-  &__loading,
-  &__empty {
-    padding: vars.$spacing-2xl;
-    text-align: center;
-    color: vars.$color-secondary-text;
-
-    p {
-      margin: 0;
-    }
-  }
-
-  &__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: vars.$spacing-lg;
-  }
-
-  &__item {
-    display: grid;
-    grid-template-columns: 10px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: vars.$spacing-lg;
-    padding: vars.$spacing-lg vars.$spacing-xl;
-
-    &--unread {
-      border-color: rgba(255, 107, 24, 0.38);
-    }
-
-    button {
-      border: 0;
-      background: transparent;
-      color: vars.$color-accent;
-      font-weight: vars.$font-weight-bold;
-      cursor: pointer;
-    }
-  }
-
-  &__dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: vars.$color-accent;
-  }
-
-  &__body {
-    min-width: 0;
-
-    strong {
-      color: vars.$color-primary-text;
-      margin-right: vars.$spacing-sm;
-    }
-
-    span,
-    p {
-      color: vars.$color-secondary-text;
-    }
-
-    p {
-      margin: vars.$spacing-xs 0 0;
-      font-size: vars.$font-size-caption;
+      background-color: rgba(224, 36, 94, 0.1);
     }
   }
 }
 
-@media (max-width: 640px) {
-  .notifications-page__header {
-    align-items: stretch;
-    flex-direction: column;
+.notifications-page__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: transparent;
+  flex-shrink: 0;
+}
+
+.notifications-page__body {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: vars.$color-text;
+
+  strong {
+    font-weight: 700;
+    color: vars.$color-text;
+    margin-right: 4px;
+  }
+
+  span {
+    color: vars.$color-text-secondary;
+  }
+
+  p {
+    font-size: 13px;
+    color: vars.$color-text-secondary;
+    margin: 4px 0 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

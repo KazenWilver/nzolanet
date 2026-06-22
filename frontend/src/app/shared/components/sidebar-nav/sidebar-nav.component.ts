@@ -6,6 +6,14 @@ import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
+interface MenuItem {
+  icon: string;
+  label: string;
+  route: string;
+  exact: boolean;
+  badge?: number;
+}
+
 @Component({
   selector: 'app-sidebar-nav',
   standalone: true,
@@ -16,12 +24,9 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 export class SidebarNavComponent implements OnInit {
   utilizadorAtual: User | null = null;
 
-  menuItems = [
+  menuItems: MenuItem[] = [
     { icon: 'home', label: 'Feed', route: '/feed', exact: true },
-    { icon: 'hash', label: 'Explore', route: '/pesquisar', exact: false },
-    { icon: 'bell', label: 'Notificações', route: '/notificacoes', exact: false, badge: 3 },
-    { icon: 'mail', label: 'Mensagens', route: '/feed', exact: false },
-    { icon: 'bookmark', label: 'Guardados', route: '/feed', exact: false },
+    { icon: 'hash', label: 'Pesquisar', route: '/pesquisar', exact: false },
     { icon: 'user', label: 'Perfil', route: '/perfil/me', exact: false },
     { icon: 'settings', label: 'Definições', route: '/perfil/me', exact: false },
   ];

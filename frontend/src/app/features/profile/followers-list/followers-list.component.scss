@@ -1,145 +1,163 @@
 @use '../../../styles/variables' as vars;
 
 .lista-seguidores {
-  padding: vars.$spacing-lg 0 vars.$spacing-2xl;
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
 
-  &__cabecalho {
-    display: flex;
-    align-items: center;
-    gap: vars.$spacing-lg;
-    margin-bottom: vars.$spacing-lg;
-    flex-wrap: wrap;
+.lista-seguidores__cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid vars.$color-border;
+}
+
+.lista-seguidores__btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 19px;
+  font-weight: 700;
+  color: vars.$color-text;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 16px;
+  transition: color 0.2s;
+  width: 100%;
+  text-align: left;
+
+  svg {
+    stroke: currentColor;
+    fill: none;
+    border-radius: 50%;
+    padding: 8px;
+    margin: -8px;
+    transition: background-color 0.2s;
   }
 
-  &__btn-voltar {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: none;
-    border: 1px solid vars.$color-border-strong;
-    border-radius: vars.$radius-md;
-    padding: 6px vars.$spacing-md;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    font-weight: vars.$font-weight-medium;
-    color: vars.$color-secondary-text;
-    cursor: pointer;
-    transition: all vars.$transition-fast;
-    &:hover {
-      color: vars.$color-accent;
-      border-color: vars.$color-accent;
-      background: rgba(vars.$color-accent, 0.05);
+  &:hover {
+    svg {
+      background-color: vars.$color-gray-hover;
     }
   }
+}
 
-  &__abas {
-    display: flex;
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-strong;
-    border-radius: vars.$radius-md;
-    overflow: hidden;
+.lista-seguidores__abas {
+  display: flex;
+}
+
+.lista-seguidores__aba {
+  flex: 1;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: vars.$color-text-secondary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  position: relative;
+
+  &:hover {
+    background-color: vars.$color-gray-hover;
+    color: vars.$color-text;
   }
 
-  &__aba {
-    padding: vars.$spacing-base vars.$spacing-xl;
-    background: none;
-    border: none;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-button;
-    font-weight: vars.$font-weight-medium;
-    color: vars.$color-secondary-text;
-    cursor: pointer;
-    transition: all vars.$transition-fast;
+  &--ativa {
+    color: vars.$color-text;
 
-    &:hover {
-      color: vars.$color-primary-text;
-      background: rgba(255, 255, 255, 0.04);
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 4px;
+      background-color: vars.$color-primary;
+      border-radius: 9999px;
     }
-
-    &--ativa {
-      background: vars.$color-accent;
-      color: vars.$color-pure-white;
-      font-weight: vars.$font-weight-semibold;
-    }
   }
+}
 
-  &__carregando {
-    display: flex;
-    justify-content: center;
-    padding: vars.$spacing-3xl 0;
+.lista-seguidores__carregando {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.lista-seguidores__vazio {
+  padding: 40px 16px;
+  text-align: center;
+  color: vars.$color-text-secondary;
+  font-size: 15px;
+}
+
+.lista-seguidores__lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-seguidores__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid vars.$color-border;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.01);
   }
+}
 
-  &__vazio {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
-    text-align: center;
-    padding: vars.$spacing-3xl;
-    font-size: vars.$font-size-body;
-    color: vars.$color-tertiary-text;
+.lista-seguidores__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lista-seguidores__nome {
+  font-size: 15px;
+  font-weight: 700;
+  color: vars.$color-text;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    text-decoration: underline;
   }
+}
 
-  &__lista {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
-    overflow: hidden;
-  }
+.lista-seguidores__nomeutil {
+  font-size: 14px;
+  color: vars.$color-text-secondary;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: vars.$spacing-md;
-    padding: vars.$spacing-md vars.$spacing-lg;
-    border-bottom: 1px solid vars.$color-border-subtle;
-    transition: background vars.$transition-fast;
+.lista-seguidores__btn-perfil {
+  font-size: 14px;
+  font-weight: 700;
+  color: vars.$color-text;
+  border: 1px solid vars.$color-border;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
 
-    &:last-child { border-bottom: none; }
-    &:hover { background: rgba(255, 255, 255, 0.02); }
-  }
-
-  &__info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: vars.$spacing-xs;
-  }
-
-  &__nome {
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
+  &:hover {
+    background-color: vars.$color-gray-hover;
     text-decoration: none;
-    transition: color vars.$transition-fast;
-    &:hover { color: vars.$color-accent; }
-  }
-
-  &__nomeutil {
-    font-size: vars.$font-size-button;
-    color: vars.$color-tertiary-text;
-    font-weight: vars.$font-weight-medium;
-  }
-
-  &__btn-perfil {
-    height: 32px;
-    padding: 0 vars.$spacing-lg;
-    background: transparent;
-    border: 1px solid vars.$color-border-strong;
-    border-radius: vars.$radius-md;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    transition: all vars.$transition-base;
-    &:hover {
-      border-color: vars.$color-accent;
-      color: vars.$color-accent;
-      background: rgba(vars.$color-accent, 0.05);
-    }
   }
 }

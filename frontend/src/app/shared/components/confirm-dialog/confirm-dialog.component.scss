@@ -2,76 +2,83 @@
 
 .dialogo-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  z-index: 2000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 150ms ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  z-index: 1000;
 }
 
 .dialogo {
-  background: vars.$color-surface-card;
-  border: 1px solid vars.$color-border-strong;
-  border-radius: vars.$radius-lg;
-  padding: vars.$spacing-xl;
-  max-width: 360px;
+  background-color: vars.$color-background;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 320px;
   width: 90%;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px vars.$color-border-subtle;
-  animation: surgir 150ms ease;
+  text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: dialogo-scale 0.2s ease-out;
+}
 
-  &__mensagem {
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    line-height: 1.5;
-    color: vars.$color-primary-text;
-    margin-bottom: vars.$spacing-xl;
-  }
+.dialogo__mensagem {
+  font-size: 16px;
+  font-weight: 700;
+  color: vars.$color-text;
+  line-height: 1.4;
+  margin: 0;
+}
 
-  &__acoes {
-    display: flex;
-    justify-content: flex-end;
-    gap: vars.$spacing-base;
-  }
+.dialogo__acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-  &__btn {
-    padding: 0 vars.$spacing-xl;
-    border-radius: vars.$radius-md;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-button;
-    font-weight: vars.$font-weight-semibold;
-    cursor: pointer;
-    transition: all vars.$transition-base;
-    border: none;
-    height: 36px;
+.dialogo__btn {
+  width: 100%;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
 
-    &--cancelar {
-      background: transparent;
-      color: vars.$color-secondary-text;
-      border: 1px solid vars.$color-border-strong;
-      &:hover {
-        border-color: vars.$color-primary-text;
-        background: rgba(255, 255, 255, 0.04);
-        color: vars.$color-primary-text;
-      }
+  &--confirmar {
+    background-color: vars.$color-like;
+    color: #ffffff;
+
+    &:hover {
+      background-color: #c91a4e;
     }
+  }
 
-    &--confirmar {
-      background: vars.$color-error;
-      color: vars.$color-pure-white;
-      &:hover { background: #c42828; }
+  &--cancelar {
+    background-color: transparent;
+    border: 1px solid vars.$color-border;
+    color: vars.$color-text;
+
+    &:hover {
+      background-color: vars.$color-gray-hover;
     }
   }
 }
 
-@keyframes surgir {
-  from { transform: scale(0.95); opacity: 0; }
-  to   { transform: scale(1);    opacity: 1; }
+@keyframes dialogo-scale {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

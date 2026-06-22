@@ -3,37 +3,61 @@
 .avatar {
   border-radius: 50%;
   overflow: hidden;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(255, 107, 24, 0.24), rgba(255, 187, 122, 0.08));
+  background-color: vars.$color-primary;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid vars.$color-border-subtle;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
 
-  &--xs { width: 28px; height: 28px; }
-  &--sm { width: 36px; height: 36px; }
-  &--md { width: 44px; height: 44px; }
-  &--lg { width: 64px; height: 64px; }
-  &--xl { width: 90px; height: 90px; }
-
-  &__imagem {
+  img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s;
 
-    &--loaded {
+    &.avatar__imagem--loaded {
       opacity: 1;
     }
   }
+}
 
-  &__iniciais {
-    font-family: vars.$font-family-primary;
-    font-weight: vars.$font-weight-extrabold;
-    color: vars.$color-accent;
-    text-transform: uppercase;
-    line-height: 1;
-    font-size: 0.45em;
-  }
+.avatar__iniciais {
+  text-transform: uppercase;
+}
+
+// Avatar sizes matching Twitter
+.avatar--xs {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+
+.avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.avatar--md {
+  width: 48px;
+  height: 48px;
+  font-size: 15px;
+}
+
+.avatar--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 20px;
+}
+
+.avatar--xl {
+  width: 134px;
+  height: 134px;
+  font-size: 40px;
+  border: 4px solid #ffffff; // Border for profile avatar overlapping banner
 }

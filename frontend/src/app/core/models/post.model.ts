@@ -20,6 +20,7 @@ export interface CriarPostDto {
   texto: string;
   imagem?: File;
   video?: File;
+  ficheiro?: File;
 }
 
 export interface EditarPostDto {

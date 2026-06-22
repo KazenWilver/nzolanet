@@ -1,112 +1,50 @@
-// Import design system variables
 @use 'app/styles/variables' as vars;
 @use 'app/styles/global';
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root {
+  // Dark Theme (Default) - Canvas: rgb(7, 8, 10), Surface: #15181c
+  --nz-color-bg-canvas: rgb(7, 8, 10);
+  --nz-color-background: #15181c;
+  --nz-color-text: #ffffff;
+  --nz-color-text-secondary: #8899a6;
+  --nz-color-border: #2f3336;
+  --nz-color-hover: rgba(29, 161, 242, 0.1);
+  --nz-color-gray-hover: rgba(255, 255, 255, 0.08);
 
-*, *::before, *::after {
-  box-sizing: border-box;
+  --nz-color-input-bg: #202327;
+  --nz-color-input-focus-bg: #15181c;
+  --nz-color-btn-follow-bg: #ffffff;
+  --nz-color-btn-follow-text: #0f1419;
+  --nz-color-widget-bg: #202327;
+  --nz-color-widget-hover-bg: #2c2f33;
+  --nz-color-shadow: rgba(255, 255, 255, 0.08);
+  --nz-color-navbar-bg: rgba(21, 24, 28, 0.85);
+}
+
+body.light-theme {
+  // Light Theme - Canvas: #f5f8fa, Surface: #ffffff
+  --nz-color-bg-canvas: #f5f8fa;
+  --nz-color-background: #ffffff;
+  --nz-color-text: #14171a;
+  --nz-color-text-secondary: #657786;
+  --nz-color-border: #e6ecf0;
+  --nz-color-hover: rgba(29, 161, 242, 0.1);
+  --nz-color-gray-hover: rgba(0, 0, 0, 0.05);
+
+  --nz-color-input-bg: #eff3f4;
+  --nz-color-input-focus-bg: #ffffff;
+  --nz-color-btn-follow-bg: #0f1419;
+  --nz-color-btn-follow-text: #ffffff;
+  --nz-color-widget-bg: #f7f9f9;
+  --nz-color-widget-hover-bg: #eff1f1;
+  --nz-color-shadow: rgba(101, 119, 134, 0.2);
+  --nz-color-navbar-bg: rgba(255, 255, 255, 0.85);
+}
+
+body {
+  background-color: var(--nz-color-bg-canvas);
+  font-family: 'Inter', vars.$font-family;
+  color: var(--nz-color-text);
   margin: 0;
   padding: 0;
-}
-
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: vars.$font-family-primary;
-  font-size: vars.$font-size-body;
-  line-height: 1.6;
-  color: vars.$color-primary-text;
-  background: vars.$color-canvas-background;
-  min-height: 100vh;
-}
-
-// Themes
-:root {
-  --text-primary: #111827;
-  --text-secondary: #374151;
-  --text-tertiary: #6B7280;
-  --text-disabled: #9CA3AF;
-  
-  --bg-canvas: #F8F9FA;
-  --bg-surface: #FFFFFF;
-  --bg-nav: rgba(248, 249, 250, 0.88);
-  --bg-surface-secondary: #F3F4F6;
-  --border-subtle: #EAEAEA;
-  --border-strong: #D1D5DB;
-  --bg-hover: #F3F4F6;
-  --glow-aurora: rgba(226, 94, 37, 0.16);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.025);
-
-  // Legacy CSS Variable Tokens (for compatibility)
-  --cor-charcoal:    var(--text-primary);
-  --cor-stone:       var(--text-secondary);
-  --cor-amber:       #E25E25;
-  --cor-amber-hover: #C9521F;
-  --cor-off-white:   var(--bg-canvas);
-  --cor-cream:       var(--bg-surface-secondary);
-  --cor-light-gray:  var(--text-disabled);
-  --cor-mid-tone:    var(--text-tertiary);
-  --cor-branco:      #FFFFFF;
-  --cor-preto:       #000000;
-  --cor-erro:        #E92F2F;
-}
-
-body.light-theme {
-  --text-primary: #111827;
-  --text-secondary: #374151;
-  --text-tertiary: #6B7280;
-  --text-disabled: #9CA3AF;
-  
-  --bg-canvas: #F8F9FA;
-  --bg-surface: #FFFFFF;
-  --bg-nav: rgba(248, 249, 250, 0.88);
-  --bg-surface-secondary: #F3F4F6;
-  --border-subtle: #EAEAEA;
-  --border-strong: #D1D5DB;
-  --bg-hover: #F3F4F6;
-  --glow-aurora: rgba(226, 94, 37, 0.16);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.025);
-
-  --cor-charcoal:    var(--text-primary);
-  --cor-stone:       var(--text-secondary);
-  --cor-off-white:   var(--bg-canvas);
-  --cor-cream:       var(--bg-surface-secondary);
-  --cor-light-gray:  var(--text-disabled);
-  --cor-mid-tone:    var(--text-tertiary);
-}
-
-body {
-  background: var(--bg-canvas);
-}
-
-body.light-theme {
-  background: var(--bg-canvas);
-}
-
-a { 
-  color: inherit;
-  transition: color vars.$transition-fast;
-}
-
-button, input, textarea, select { 
-  font-family: inherit; 
-}
-
-img { 
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Prevent unwanted outline on focused elements */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline: 2px solid vars.$color-accent;
-  outline-offset: 2px;
 }

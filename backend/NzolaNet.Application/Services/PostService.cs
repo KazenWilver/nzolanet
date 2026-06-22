@@ -66,7 +66,7 @@ public class PostService : IPostService
 
         post.User = user;
 
-        return MapToDto(post);
+        return MapToDto(post, userId);
     }
 
     public async Task<PostDto> UpdateAsync(Guid userId, Guid postId, UpdatePostDto updateDto)
@@ -91,7 +91,7 @@ public class PostService : IPostService
             throw new ArgumentException("Não foi possível atualizar a publicação.");
         }
 
-        return MapToDto(post);
+        return MapToDto(post, userId);
     }
 
     public async Task<bool> DeleteAsync(Guid userId, Guid postId)
@@ -138,14 +138,12 @@ public class PostService : IPostService
             posts = posts.Where(p => !p.User.IsPrivate);
         }
 
-        return posts.Select(MapToDto);
+        return posts.Select(p => MapToDto(p, currentUserId));
     }
 
     public async Task<IEnumerable<PostDto>> GetFeedAsync(Guid userId)
     {
-        var followedIds = await _followRepository.GetFollowedUserIdsAsync(userId);
-        var posts = await _postRepository.GetFeedByFollowedUsersAsync(followedIds);
-        return posts.Select(MapToDto);
+        return await GetAllAsync(userId);
     }
 
     public async Task<PostDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
@@ -168,7 +166,7 @@ public class PostService : IPostService
             }
         }
 
-        return MapToDto(post);
+        return MapToDto(post, currentUserId);
     }
 
     public async Task<IEnumerable<PostDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
@@ -195,10 +193,10 @@ public class PostService : IPostService
 
         var posts = await _postRepository.GetAllAsync();
         var userPosts = posts.Where(p => p.UserId == targetUserId);
-        return userPosts.Select(MapToDto);
+        return userPosts.Select(p => MapToDto(p, currentUserId));
     }
 
-    private PostDto MapToDto(Post post)
+    private PostDto MapToDto(Post post, Guid? currentUserId = null)
     {
         return new PostDto
         {
@@ -210,7 +208,9 @@ public class PostService : IPostService
             ImageUrl = post.ImagePath,
             VideoUrl = post.VideoPath,
             CreatedAt = post.CreatedAt,
-            CommentsCount = post.Comments?.Count ?? 0
+            CommentsCount = post.Comments?.Count ?? 0,
+            BazesCount = post.Likes?.Count ?? 0,
+            UserHasBaze = currentUserId.HasValue && post.Likes?.Any(l => l.UserId == currentUserId.Value) == true
         };
     }
 }

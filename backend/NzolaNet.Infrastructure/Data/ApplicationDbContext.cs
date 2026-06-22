@@ -87,7 +87,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(l => l.Post)
-                  .WithMany()
+                  .WithMany(p => p.Likes)
                   .HasForeignKey(l => l.PostId)
                   .OnDelete(DeleteBehavior.Cascade);
 

@@ -1,158 +1,189 @@
 @use '../../../styles/variables' as vars;
 
 .sidebar-sugestoes {
-  display: grid;
-  gap: vars.$spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-sugestoes__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+
+  svg {
+    position: absolute;
+    left: 16px;
+    color: vars.$color-text-secondary;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 12px 12px 48px;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    background-color: var(--nz-color-input-bg);
+    color: vars.$color-text;
+    font-size: 15px;
+    outline: none;
+    transition: background-color 0.2s, border-color 0.2s;
+
+    &:focus {
+      background-color: var(--nz-color-input-focus-bg);
+      border-color: vars.$color-primary;
+      box-shadow: 0 0 0 1px vars.$color-primary;
+    }
+  }
 }
 
 .widget {
-  background: #FFFFFF;
-  border: 1px solid vars.$color-border-subtle;
-  border-radius: vars.$radius-lg;
-  padding: 20px;
-  box-shadow: var(--shadow-card);
+  background-color: var(--nz-color-widget-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
-  &__titulo {
-    display: flex;
-    align-items: center;
-    gap: vars.$spacing-md;
-    color: vars.$color-primary-text;
-    font-size: 22px;
-    line-height: 1;
-    margin: 0 0 vars.$spacing-lg;
+.widget__titulo {
+  font-size: 20px;
+  font-weight: 800;
+  color: vars.$color-text;
+  padding: 12px 16px;
+  margin: 0;
+  border-bottom: 1px solid vars.$color-border;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
-    svg {
-      color: vars.$color-accent;
-    }
-  }
-
-  &__sugestoes {
-    display: grid;
-    gap: vars.$spacing-md;
-  }
-
-  &__more {
-    margin-top: vars.$spacing-lg;
-    border: 0;
-    background: transparent;
-    color: vars.$color-accent;
-    font-weight: vars.$font-weight-bold;
-    font-size: vars.$font-size-button;
-    padding: 0;
-    cursor: pointer;
-  }
-
-  &--footer {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    padding: 0 vars.$spacing-md;
-    color: vars.$color-tertiary-text;
-    font-size: 15px;
-    line-height: 1.7;
-
-    p {
-      margin: 0 0 vars.$spacing-sm;
-      color: inherit;
-    }
+  svg {
+    color: vars.$color-primary;
   }
 }
 
 .tendencia-item {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: vars.$spacing-md;
-  align-items: start;
-  padding: vars.$spacing-md 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  border-bottom: 1px solid vars.$color-border;
   text-align: left;
-  cursor: pointer;
+  transition: background-color 0.2s;
 
-  &:hover strong {
-    color: vars.$color-accent;
+  &:hover {
+    background-color: var(--nz-color-widget-hover-bg);
   }
+}
 
-  &__rank {
-    color: vars.$color-secondary-text;
+.tendencia-item__rank {
+  font-size: 13px;
+  color: vars.$color-text-secondary;
+}
+
+.tendencia-item__body {
+  display: flex;
+  flex-direction: column;
+  
+  strong {
     font-size: 15px;
+    color: vars.$color-text;
   }
 
-  &__body {
-    display: grid;
-    gap: 2px;
-
-    strong {
-      color: vars.$color-primary-text;
-      font-size: 17px;
-      transition: color vars.$transition-fast;
-    }
-
-    small {
-      color: vars.$color-tertiary-text;
-      font-size: 14px;
-    }
+  small {
+    font-size: 13px;
+    color: vars.$color-text-secondary;
   }
+}
+
+.widget__more {
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: vars.$color-primary;
+  text-align: left;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: var(--nz-color-widget-hover-bg);
+  }
+}
+
+.widget__sugestoes {
+  display: flex;
+  flex-direction: column;
 }
 
 .sugestao-item {
   display: flex;
   align-items: center;
-  gap: vars.$spacing-md;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid vars.$color-border;
+  transition: background-color 0.2s;
 
-  &__avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(135deg, rgba(255, 107, 24, 0.25), rgba(255, 187, 122, 0.08));
-    border: 1px solid vars.$color-border-subtle;
-    color: vars.$color-primary-text;
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-extrabold;
+  &:hover {
+    background-color: var(--nz-color-widget-hover-bg);
+  }
+}
+
+.sugestao-item__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: vars.$color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+}
+
+.sugestao-item__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    font-size: 15px;
+    color: vars.$color-text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  &__info {
-    min-width: 0;
-    flex: 1;
-    display: grid;
-    line-height: 1.25;
-
-    strong,
-    small {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    strong {
-      color: vars.$color-primary-text;
-      font-size: vars.$font-size-button;
-    }
-
-    small {
-      color: vars.$color-tertiary-text;
-      font-size: vars.$font-size-caption;
-    }
+  small {
+    font-size: 13px;
+    color: vars.$color-text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+}
 
-  &__btn {
-    height: 34px;
-    padding: 0 vars.$spacing-lg;
-    border: 1px solid #D1D5DB;
-    border-radius: vars.$radius-full;
-    background: transparent;
-    color: vars.$color-primary-text;
-    font-size: vars.$font-size-button;
-    font-weight: vars.$font-weight-semibold;
-    cursor: pointer;
+.sugestao-item__btn {
+  background-color: var(--nz-color-btn-follow-bg);
+  color: var(--nz-color-btn-follow-text);
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity 0.2s;
 
-    &:hover {
-      border-color: vars.$color-accent;
-      color: vars.$color-accent;
-    }
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.widget--footer {
+  background-color: transparent;
+  padding: 0 16px;
+  font-size: 13px;
+  color: vars.$color-text-secondary;
+  line-height: 1.5;
+
+  p {
+    margin-bottom: 4px;
+    color: vars.$color-text-secondary;
   }
 }

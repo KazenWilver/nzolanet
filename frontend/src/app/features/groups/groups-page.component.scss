@@ -1,88 +1,92 @@
 @use '../../styles/variables' as vars;
 
 .groups-page {
-  display: grid;
-  gap: vars.$spacing-lg;
-  padding: vars.$spacing-lg;
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
 
-  &__header {
-    padding: vars.$spacing-xl;
-    border-radius: vars.$radius-lg;
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.groups-page__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid vars.$color-border;
+  padding: 12px 16px;
 
-    h1 {
-      margin: 0;
-      font-family: vars.$font-family-primary;
-      font-size: vars.$font-size-display;
-      font-weight: vars.$font-weight-extrabold;
-      color: vars.$color-primary-text;
-    }
-
-    p {
-      margin: vars.$spacing-base 0 0;
-      color: vars.$color-secondary-text;
-      font-size: vars.$font-size-body;
-    }
+  h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: vars.$color-text;
+    margin: 0;
   }
 
-  &__list {
-    display: grid;
-    gap: vars.$spacing-lg;
+  p {
+    font-size: 13px;
+    color: vars.$color-text-secondary;
+    margin: 2px 0 0 0;
+    line-height: 1.4;
+  }
+}
+
+.groups-page__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.groups-page__card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid vars.$color-border;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.01);
   }
 
-  &__card {
-    display: flex;
-    justify-content: space-between;
-    gap: vars.$spacing-lg;
-    padding: vars.$spacing-xl;
-    border-radius: vars.$radius-lg;
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    align-items: center;
-    transition: border-color vars.$transition-base, transform vars.$transition-base;
-    animation: fadeIn 0.3s ease-out;
+  div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: vars.$color-text;
+    margin: 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: vars.$color-text-secondary;
+    margin: 4px 0 8px 0;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  span {
+    font-size: 13px;
+    color: vars.$color-text-secondary;
+    font-weight: 500;
+  }
+
+  button {
+    font-size: 14px;
+    font-weight: 700;
+    color: vars.$color-text;
+    background-color: vars.$color-background;
+    border: 1px solid vars.$color-border;
+    border-radius: 9999px;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    flex-shrink: 0;
 
     &:hover {
-      border-color: vars.$color-border-strong;
-      transform: translateY(-1px);
-    }
-
-    h2 {
-      margin: 0 0 vars.$spacing-base;
-      font-family: vars.$font-family-primary;
-      font-size: vars.$font-size-h3;
-      font-weight: vars.$font-weight-bold;
-      color: vars.$color-primary-text;
-    }
-
-    p {
-      margin: 0 0 vars.$spacing-base;
-      color: vars.$color-secondary-text;
-      font-size: vars.$font-size-body;
-    }
-
-    span {
-      font-size: vars.$font-size-caption;
-      color: vars.$color-tertiary-text;
-    }
-
-    button {
-      border: none;
-      background: vars.$color-accent;
-      color: vars.$color-pure-white;
-      border-radius: vars.$radius-pill;
-      padding: vars.$spacing-md vars.$spacing-xl;
-      font-family: vars.$font-family-primary;
-      font-size: vars.$font-size-button;
-      font-weight: vars.$font-weight-semibold;
-      cursor: pointer;
-      transition: background vars.$transition-fast;
-      flex-shrink: 0;
-
-      &:hover { background: vars.$color-accent-hover; }
+      background-color: vars.$color-gray-hover;
     }
   }
 }

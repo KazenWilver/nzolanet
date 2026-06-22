@@ -1,89 +1,159 @@
 @use '../../../styles/variables' as vars;
 
 .editar-post {
-  padding: 16px 0 32px;
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
 
-  &__cabecalho { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.editar-post__cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid vars.$color-border;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-  &__btn-voltar {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: vars.$radius-md;
-    padding: 6px 14px;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    cursor: pointer;
-    transition: all vars.$transition-fast;
-    &:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.04);
-      color: vars.$color-accent;
+.editar-post__btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: vars.$color-text-secondary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+
+  svg {
+    stroke: currentColor;
+    fill: none;
+    border-radius: 50%;
+    padding: 6px;
+    margin: -6px;
+    transition: background-color 0.2s;
+  }
+
+  &:hover {
+    color: vars.$color-text;
+
+    svg {
+      background-color: vars.$color-gray-hover;
     }
   }
+}
 
-  &__titulo { font-family: vars.$font-family-primary; font-size: vars.$font-size-h3; font-weight: vars.$font-weight-bold; color: vars.$color-primary-text; }
+.editar-post__titulo {
+  font-size: 19px;
+  font-weight: 800;
+  color: vars.$color-text;
+  margin: 0;
+}
 
-  &__formulario {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.editar-post__formulario {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editar-post__autor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.editar-post__nome {
+  font-weight: 700;
+  font-size: 15px;
+  color: vars.$color-text;
+}
+
+.editar-post__alerta {
+  background-color: rgba(224, 36, 94, 0.1);
+  color: vars.$color-like;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.editar-post__textarea {
+  width: 100%;
+  border: 1px solid vars.$color-border;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: vars.$color-text;
+  background-color: vars.$color-background;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: vars.$color-primary;
+  }
+}
+
+.editar-post__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.editar-post__btn-cancelar {
+  background-color: transparent;
+  border: 1px solid vars.$color-border;
+  color: vars.$color-text;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 9999px;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: vars.$color-gray-hover;
+  }
+}
+
+.editar-post__btn-guardar {
+  background-color: vars.$color-primary;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 9999px;
+  padding: 10px 24px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-primary-hover;
   }
 
-  &__autor { display: flex; align-items: center; gap: 10px; }
-  &__nome { font-family: vars.$font-family-primary; font-size: vars.$font-size-body; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text; }
-
-  &__textarea {
-    width: 100%;
-    background: vars.$color-canvas-background;
-    border: 1px solid vars.$color-border-strong;
-    border-radius: vars.$radius-sm;
-    padding: 12px;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    line-height: 1.6;
-    color: vars.$color-primary-text;
-    resize: vertical;
-    min-height: 120px;
-    outline: none;
-    transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
-    &:focus { border-color: vars.$color-accent; box-shadow: 0 0 0 3px vars.$color-glow-aurora; }
-    &::placeholder { color: vars.$color-tertiary-text; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
+}
 
-  &__acoes { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; border-top: 1px solid vars.$color-border-subtle; }
-
-  &__btn-cancelar {
-    height: 36px; padding: 0 20px;
-    background: transparent; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: vars.$radius-md;
-    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: vars.$color-primary-text;
-    cursor: pointer; transition: all 200ms ease;
-    &:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.04);
-    }
-  }
-
-  &__btn-guardar {
-    height: 36px; padding: 0 24px;
-    background: vars.$color-accent; border: none; border-radius: vars.$radius-md;
-    font-family: vars.$font-family-primary; font-size: vars.$font-size-caption; font-weight: vars.$font-weight-semibold; color: #FFFFFF;
-    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 200ms ease;
-    &:hover:not(:disabled) { background: vars.$color-accent-hover; }
-    &:disabled {
-      background: vars.$color-disabled-text;
-      color: rgba(255, 255, 255, 0.3);
-      cursor: not-allowed;
-    }
-  }
-
-  &__carregando { display: flex; justify-content: center; padding: 64px 0; }
+.editar-post__carregando {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
 }

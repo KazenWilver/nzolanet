@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Post, CriarPostDto, EditarPostDto } from '../models/post.model';
 
-// Serviço responsável por toda a comunicação HTTP relacionada com publicações
 @Injectable({ providedIn: 'root' })
 export class PostService {
   private readonly baseUrl = `${environment.apiUrl}/posts`;
@@ -23,11 +22,6 @@ export class PostService {
   }
 
   private mapPost(p: any): Post {
-    const bazeKey = `baze_${p.id}`;
-    const userBazeKey = `deu_baze_${p.id}`;
-    const totalBazes = parseInt(localStorage.getItem(bazeKey) || '0', 10);
-    const utilizadorDeuBaze = localStorage.getItem(userBazeKey) === 'true';
-
     return {
       id: p.id,
       autorId: p.userId,
@@ -37,14 +31,14 @@ export class PostService {
       texto: p.text,
       imagemUrl: this.formatarUrlMedia(p.imageUrl),
       videoUrl: this.formatarUrlMedia(p.videoUrl),
-      totalBazes: totalBazes,
-      totalComentarios: p.commentsCount || 0,
-      utilizadorDeuBaze: utilizadorDeuBaze,
-      criadoEm: p.createdAt
+      totalBazes: p.bazesCount ?? p.likesCount ?? p.likeCount ?? 0,
+      totalComentarios: p.commentsCount ?? 0,
+      utilizadorDeuBaze: p.userHasBaze ?? p.isLiked ?? false,
+      criadoEm: p.createdAt,
+      atualizadoEm: p.updatedAt
     };
   }
 
-  // Obtém o feed paginado — publicações dos utilizadores seguidos por ordem cronológica
   obterFeed(pagina = 1, porPagina = 10): Observable<Post[]> {
     return this.http.get<any[]>(`${this.baseUrl}/feed`).pipe(
       map(posts => posts.map(p => this.mapPost(p)))
@@ -66,7 +60,6 @@ export class PostService {
   pesquisar(termo: string, pagina = 1, porPagina = 10): Observable<Post[]> {
     const query = termo.trim().toLowerCase();
     if (!query) return of([]);
-    // Faz pesquisa filtrando na listagem pública/acessível
     return this.http.get<any[]>(this.baseUrl).pipe(
       map(posts => posts.map(p => this.mapPost(p)).filter(p =>
         p.texto.toLowerCase().includes(query) ||
@@ -75,7 +68,6 @@ export class PostService {
     );
   }
 
-  // Envia os dados como FormData para suportar upload de imagem e vídeo
   criar(dados: CriarPostDto): Observable<Post> {
     const formulario = new FormData();
     formulario.append('Text', dados.texto);
@@ -96,28 +88,16 @@ export class PostService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  // Regra de negócio: um utilizador só pode dar baze uma vez (simulado com localStorage)
-  darBaze(id: string): Observable<{ totalBazes: number }> {
-    const bazeKey = `baze_${id}`;
-    const userBazeKey = `deu_baze_${id}`;
-    let count = parseInt(localStorage.getItem(bazeKey) || '0', 10);
-    if (localStorage.getItem(userBazeKey) !== 'true') {
-      count++;
-      localStorage.setItem(bazeKey, count.toString());
-      localStorage.setItem(userBazeKey, 'true');
-    }
-    return of({ totalBazes: count });
+  darBaze(id: string): Observable<{ totalBazes: number; utilizadorDeuBaze: boolean }> {
+    return this.http.post<any>(`${environment.apiUrl}/likes/${id}`, {}).pipe(
+      map(res => ({
+        totalBazes: res.likeCount ?? res.bazesCount ?? 0,
+        utilizadorDeuBaze: res.isLiked ?? res.userHasBaze ?? false
+      }))
+    );
   }
 
-  removerBaze(id: string): Observable<{ totalBazes: number }> {
-    const bazeKey = `baze_${id}`;
-    const userBazeKey = `deu_baze_${id}`;
-    let count = parseInt(localStorage.getItem(bazeKey) || '0', 10);
-    if (localStorage.getItem(userBazeKey) === 'true') {
-      count = Math.max(0, count - 1);
-      localStorage.setItem(bazeKey, count.toString());
-      localStorage.setItem(userBazeKey, 'false');
-    }
-    return of({ totalBazes: count });
+  removerBaze(id: string): Observable<{ totalBazes: number; utilizadorDeuBaze: boolean }> {
+    return this.darBaze(id);
   }
 }

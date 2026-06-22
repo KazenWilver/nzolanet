@@ -50,17 +50,10 @@ export class PostCardComponent {
 
   // Toggle de baze: actualiza o estado local imediatamente para feedback instantâneo
   alternarBaze(): void {
-    if (this.post.utilizadorDeuBaze) {
-      this.postService.removerBaze(this.post.id).subscribe((r: { totalBazes: number }) => {
-        this.post.totalBazes = r.totalBazes;
-        this.post.utilizadorDeuBaze = false;
-      });
-    } else {
-      this.postService.darBaze(this.post.id).subscribe((r: { totalBazes: number }) => {
-        this.post.totalBazes = r.totalBazes;
-        this.post.utilizadorDeuBaze = true;
-      });
-    }
+    this.postService.darBaze(this.post.id).subscribe((r) => {
+      this.post.totalBazes = r.totalBazes;
+      this.post.utilizadorDeuBaze = r.utilizadorDeuBaze;
+    });
   }
 
   confirmarEliminacao(): void {

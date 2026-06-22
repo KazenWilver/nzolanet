@@ -48,7 +48,11 @@ export class ProfilePageComponent implements OnInit {
       const podeVerPosts = !u.privado || this.utilizadorLogadoId === u.id || u.estaASeguir;
       if (podeVerPosts) {
         this.postService.obterPorUtilizador(id).subscribe({
-          next: (lista: Post[]) => { this.posts = lista; this.aCarregarPosts = false; },
+          next: (lista: Post[]) => {
+            this.posts = lista;
+            if (this.utilizador) this.utilizador.totalPublicacoes = lista.length;
+            this.aCarregarPosts = false;
+          },
           error: () => { this.aCarregarPosts = false; }
         });
       } else {
@@ -68,27 +72,27 @@ export class ProfilePageComponent implements OnInit {
     if (!this.utilizador) return;
     this.aAlterarSeguir = true;
     
-    // Se a conta for privada, o seguimento fica em estado pendente até aprovação
-    const acao = this.utilizador.estaASeguir
+    const estavaASeguir = this.utilizador.estaASeguir === true;
+    const estavaPendente = this.utilizador.estaPendente === true;
+    const acao = estavaASeguir || estavaPendente
       ? this.userService.deixarDeSeguir(this.utilizador.id)
       : this.userService.seguir(this.utilizador.id);
 
     acao.subscribe({
       next: (resposta: any) => {
         if (this.utilizador) {
-          if (this.utilizador.estaASeguir) {
-            // Se já seguia, deixa de seguir imediatamente
+          if (estavaASeguir || estavaPendente) {
             this.utilizador.estaASeguir = false;
             this.utilizador.estaPendente = false;
-            this.utilizador.totalSeguidores = Math.max(0, this.utilizador.totalSeguidores - 1);
+            if (estavaASeguir) {
+              this.utilizador.totalSeguidores = Math.max(0, this.utilizador.totalSeguidores - 1);
+            }
           } else {
-            // Se não seguia
-            if (this.utilizador.privado) {
-              // Se for privado, fica pendente
+            if (resposta?.isPending || this.utilizador.privado) {
               this.utilizador.estaPendente = true;
             } else {
-              // Se for público, segue imediatamente
               this.utilizador.estaASeguir = true;
+              this.utilizador.estaPendente = false;
               this.utilizador.totalSeguidores++;
             }
           }

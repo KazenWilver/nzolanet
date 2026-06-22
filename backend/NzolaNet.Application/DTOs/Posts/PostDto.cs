@@ -13,4 +13,6 @@ public class PostDto
     public string? VideoUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public int CommentsCount { get; set; }
+    public int BazesCount { get; set; }
+    public bool UserHasBaze { get; set; }
 }

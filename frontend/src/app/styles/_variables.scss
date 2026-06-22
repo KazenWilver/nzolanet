@@ -1,86 +1,18 @@
-// NzolaNet feed UI tokens based on the local reference design.
+// Twitter Clone Theme Variables
 
-// Text
-$color-primary-text: var(--text-primary, #111827);
-$color-secondary-text: var(--text-secondary, #374151);
-$color-tertiary-text: var(--text-tertiary, #6B7280);
-$color-disabled-text: var(--text-disabled, #9CA3AF);
-$color-black: #000000;
+$color-primary: #1DA1F2;
+$color-primary-hover: #1a91da;
+$color-background: var(--nz-color-background, #ffffff);
+$color-bg-canvas: var(--nz-color-bg-canvas, #f5f8fa);
+$color-text: var(--nz-color-text, #14171a);
+$color-text-secondary: var(--nz-color-text-secondary, #657786);
+$color-border: var(--nz-color-border, #e6ecf0);
+$color-like: #e0245e;
+$color-hover: var(--nz-color-hover, rgba(29, 161, 242, 0.1));
+$color-gray-hover: var(--nz-color-gray-hover, rgba(0, 0, 0, 0.05));
 
-// Brand and engagement
-$color-accent: #E25E25;
-$color-accent-hover: #C9521F;
-$color-engagement-pink: #EF4444;
-$color-glow-aurora: var(--glow-aurora, rgba(226, 94, 37, 0.16));
+$font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-// Semantic
-$color-error: #E92F2F;
-$color-warning: #F59E0B;
-$color-success: #22C55E;
-
-// Neutral
-$color-dark-slate: var(--border-strong, #D1D5DB);
-$color-concrete: #6B7280;
-$color-off-white: var(--bg-canvas, #F8F9FA);
-$color-pure-white: #FFFFFF;
-
-// Surface and borders
-$color-canvas-background: var(--bg-canvas, #F8F9FA);
-$color-surface-card: var(--bg-surface, #FFFFFF);
-$color-surface-nav: var(--bg-nav, rgba(248, 249, 250, 0.88));
-$color-border-subtle: var(--border-subtle, #EAEAEA);
-$color-border-strong: var(--border-strong, #D1D5DB);
-
-$color-border-default: $color-border-subtle;
-$color-border-light: $color-border-subtle;
-$color-surface: $color-surface-card;
-$color-surface-secondary: var(--bg-surface-secondary, #F3F4F6);
-$color-background: $color-canvas-background;
-
-// Typography
-$font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-$font-family-monospace: 'Source Code Pro', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
-
-$font-size-display: 24px;
-$font-size-h2: 21px;
-$font-size-h3: 18px;
-$font-size-body: 15px;
-$font-size-button: 14px;
-$font-size-label: 15px;
-$font-size-caption: 13px;
-$font-size-code: 14px;
-
-$font-weight-regular: 400;
-$font-weight-medium: 500;
-$font-weight-semibold: 600;
-$font-weight-bold: 700;
-$font-weight-extrabold: 800;
-$font-weight-black: 900;
-
-// Spacing
-$spacing-xs: 2px;
-$spacing-sm: 4px;
-$spacing-base: 8px;
-$spacing-md: 12px;
-$spacing-lg: 16px;
-$spacing-xl: 24px;
-$spacing-2xl: 32px;
-$spacing-3xl: 48px;
-
-// Radius
-$radius-sm: 4px;
-$radius-md: 6px;
-$radius-lg: 12px;
-$radius-full: 99px;
-$radius-pill: 9999px;
-$radius-card: 12px;
-
-// Motion
-$transition-fast: 150ms ease;
-$transition-base: 200ms ease;
-$transition-slow: 300ms ease;
-
-// Layout
-$nav-height: 64px;
-$sidebar-width: 260px;
-$sidebar-right-width: 300px;
+$width-sidebar-left: 275px;
+$width-content: 600px;
+$width-sidebar-right: 350px;

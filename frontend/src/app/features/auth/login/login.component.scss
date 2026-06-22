@@ -1,269 +1,122 @@
 @use '../../../styles/variables' as vars;
 
-.login__content,
-.login__form-wrapper {
+.login__content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-.login__secao-contas,
-.login__secao-formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.login__label-contas {
-  font-size: 14px;
-  font-weight: 600;
-  color: vars.$color-secondary-text;
-}
-
-.login__contas-salvas {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.login__opcoes {
-  display: grid;
-  gap: 12px;
-}
-
-.login__voltar {
-  width: fit-content;
-  background: transparent;
-  border: none;
-  color: vars.$color-accent;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.login__voltar:hover {
-  text-decoration: underline;
-  color: vars.$color-accent-hover;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid vars.$color-border;
 }
 
 .login__header {
-  margin-bottom: 28px;
-}
-
-.login__contas-titulo {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   margin-bottom: 24px;
 }
 
-.login__label {
-  font-size: 16px;
+.login__titulo {
+  font-size: 26px;
   font-weight: 800;
-  color: vars.$color-primary-text;
+  color: vars.$color-text;
+  margin-bottom: 8px;
 }
 
-.login__descricao {
-  color: vars.$color-secondary-text;
+.login__subtitulo {
   font-size: 14px;
+  color: vars.$color-text-secondary;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.login__erro {
+  background-color: rgba(224, 36, 94, 0.1);
+  border: 1px solid vars.$color-like;
+  color: vars.$color-like;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.login__contas-salvas {
+  margin-bottom: 20px;
+}
+
+.login__label-contas {
+  font-size: 13px;
+  font-weight: 700;
+  color: vars.$color-text-secondary;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .login__grid-contas {
-  display: grid;
-  gap: 12px;
-  margin-bottom: 20px;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 640px) {
-  .login__grid-contas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .login__cartao-conta {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid vars.$color-border-subtle;
-  border-radius: vars.$radius-lg;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid vars.$color-border;
+  border-radius: 9999px;
+  background: #fff;
   cursor: pointer;
-  transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
+  transition: background-color 0.2s;
+  width: 100%;
   text-align: left;
 
   &:hover {
-    border-color: vars.$color-accent;
-    background: rgba(255, 255, 255, 0.04);
-    transform: translateY(-1px);
+    background-color: vars.$color-bg-canvas;
   }
 }
 
-.login__detalhe-conta {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.login__nome-conta {
-  max-width: 180px;
-  color: vars.$color-primary-text;
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.login__email-conta {
-  font-size: 13px;
-  color: vars.$color-secondary-text;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.login__seta {
-  font-size: 24px;
-  color: vars.$color-accent;
-}
-
-.login__link {
-  display: inline-flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 18px;
-  color: vars.$color-accent;
-  font-weight: 700;
-  text-decoration: none;
-  transition: color 200ms ease;
-}
-
-.login__btn {
-  width: 100%;
+.login__avatar-grande {
+  width: 40px;
   height: 40px;
-  background: vars.$color-accent;
-  color: #FFFFFF;
-  border: none;
-  border-radius: vars.$radius-md;
-  font-size: 13px;
-  font-weight: vars.$font-weight-semibold;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
-}
-
-.login__btn:hover:not(:disabled),
-.login__btn:focus-visible {
-  background: vars.$color-accent-hover;
-}
-
-.login__btn:disabled {
-  background: vars.$color-disabled-text;
-  color: rgba(255, 255, 255, 0.3);
-  cursor: not-allowed;
-}
-
-.login__btn--ghost {
-  background: transparent;
-  color: vars.$color-primary-text;
-  border: 1.5px solid vars.$color-accent;
-}
-
-.login__btn--ghost:hover:not(:disabled),
-.login__btn--ghost:focus-visible {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: vars.$color-accent-hover;
-}
-
-.login__btn--secondary {
-  background: rgba(255, 255, 255, 0.04);
-  color: vars.$color-primary-text;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.login__btn--secondary:hover:not(:disabled),
-.login__btn--secondary:focus-visible {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.login__link:hover {
-  color: vars.$color-accent-hover;
-}
-
-.login__registo {
-  font-size: 14px;
-  color: vars.$color-secondary-text;
-  text-align: center;
-  margin-top: 14px;
-}
-
-.login__registo a {
-  color: vars.$color-accent;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.login__registo a:hover {
-  text-decoration: underline;
-  color: vars.$color-accent-hover;
-}
-
-.login__titulo {
-  font-size: 28px;
-  font-weight: 800;
-  color: vars.$color-primary-text;
-  margin: 0;
-}
-
-.login__subtitulo {
-  font-size: 15px;
-  color: vars.$color-secondary-text;
-  margin: 8px 0 0;
-  line-height: 1.6;
-}
-
-.login__avatar-grande,
-.login__popup-avatar {
-  width: 72px;
-  height: 72px;
   border-radius: 50%;
+  background-color: vars.$color-primary;
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  color: #fff;
   font-weight: 700;
-  color: #FFFFFF;
-  background-color: vars.$color-disabled-text;
 }
 
-.login__iniciais {
-  color: #FFFFFF;
+.login__detalhe-conta {
+  display: flex;
+  flex-direction: column;
 }
 
-.login__erro {
-  background: rgba(233, 47, 47, 0.08);
-  border: 1px solid rgba(233, 47, 47, 0.32);
-  border-radius: vars.$radius-md;
-  padding: 14px 16px;
-  font-size: 13px;
-  color: vars.$color-error;
+.login__nome-conta {
+  font-size: 14px;
+  font-weight: 700;
+  color: vars.$color-text;
+}
+
+.login__email-conta {
+  font-size: 12px;
+  color: vars.$color-text-secondary;
+}
+
+.login__opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
 }
 
 .login__formulario {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .campo {
@@ -274,150 +127,178 @@
 
 .campo__label {
   font-size: 13px;
-  font-weight: vars.$font-weight-medium;
-  color: vars.$color-primary-text;
+  font-weight: 700;
+  color: vars.$color-text-secondary;
 }
 
 .campo__input {
   width: 100%;
-  height: 36px;
-  background: vars.$color-canvas-background;
-  border: 1px solid vars.$color-border-strong;
-  border-radius: vars.$radius-sm;
-  padding: 8px 12px;
-  font-family: vars.$font-family-primary;
+  padding: 12px;
+  border: 1px solid vars.$color-border;
+  border-radius: 9999px;
   font-size: 15px;
-  color: vars.$color-primary-text;
   outline: none;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
-}
+  transition: border-color 0.2s, box-shadow 0.2s;
 
-.campo__input::placeholder {
-  color: vars.$color-tertiary-text;
-}
+  &:focus {
+    border-color: vars.$color-primary;
+    box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+  }
 
-.campo__input:focus {
-  border-color: vars.$color-accent;
-  box-shadow: 0 0 0 3px vars.$color-glow-aurora;
-}
-
-.campo__input--erro {
-  border-color: vars.$color-error;
+  &.campo__input--erro {
+    border-color: vars.$color-like;
+  }
 }
 
 .campo__senha-wrap {
   position: relative;
 }
 
-.campo__input.campo__input--com-prefixo {
-  padding-left: 28px;
-}
-
 .campo__toggle-senha {
   position: absolute;
-  right: 10px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: vars.$color-tertiary-text;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: color 150ms ease;
-}
-
-.campo__toggle-senha:hover {
-  color: vars.$color-primary-text;
+  color: vars.$color-primary;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .campo__erro {
   font-size: 12px;
-  color: vars.$color-error;
-  font-weight: 500;
-}
-
-.login__formulario--popup {
-  margin-top: 12px;
+  color: vars.$color-like;
+  margin-top: 2px;
+  padding-left: 12px;
 }
 
 .login__recuperar {
+  align-self: flex-end;
   font-size: 13px;
-  font-weight: 600;
-  color: vars.$color-accent;
-  text-decoration: none;
-  text-align: right;
-  margin-top: 4px;
-  transition: color 200ms ease;
+  font-weight: 700;
+  color: vars.$color-primary;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-.login__recuperar:hover {
-  color: vars.$color-accent-hover;
-  text-decoration: underline;
+.login__btn {
+  background-color: vars.$color-primary;
+  color: #fff;
+  border-radius: 9999px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  transition: background-color 0.2s;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
+.login__btn--ghost {
+  background-color: transparent;
+  color: vars.$color-primary;
+  border: 1px solid vars.$color-primary;
+
+  &:hover {
+    background-color: rgba(29, 161, 242, 0.1);
+  }
+}
+
+.login__btn--secondary {
+  background-color: #f5f8fa;
+  color: vars.$color-text;
+  border: 1px solid vars.$color-border;
+
+  &:hover {
+    background-color: #e6ecf0;
+  }
+}
+
+.login__registo {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: vars.$color-text-secondary;
+
+  a {
+    color: vars.$color-primary;
+    font-weight: 700;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.login__voltar {
+  background: none;
+  border: none;
+  color: vars.$color-primary;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  align-self: flex-start;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Modal styles
 .login__popup-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  z-index: 120;
+  z-index: 1000;
 }
 
 .login__popup-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
   width: 100%;
-  max-width: 440px;
-  border-radius: vars.$radius-lg;
-  background: vars.$color-surface-card;
-  padding: 34px 28px 28px;
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
-  border: 1px solid vars.$color-border-subtle;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .login__popup-close {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.04);
-  color: vars.$color-primary-text;
-  font-size: 22px;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  color: vars.$color-text-secondary;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all vars.$transition-fast;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
 }
 
 .login__popup-nome {
-  margin: 18px 0 6px;
-  text-align: center;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
-  color: vars.$color-primary-text;
+  margin: 12px 0 4px;
 }
 
 .login__popup-subtitulo {
-  text-align: center;
-  color: vars.$color-secondary-text;
   font-size: 14px;
-  margin-bottom: 22px;
-}
-
-.login__popup-actions {
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
+  color: vars.$color-text-secondary;
+  margin-bottom: 20px;
 }

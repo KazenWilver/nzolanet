@@ -12,6 +12,6 @@ public class Post : Baze
     public string? ImagePath { get; set; }
     public string? VideoPath { get; set; }
 
-    // Relações (Navigation Properties)
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 }

@@ -1,266 +1,61 @@
-@use 'sass:color';
 @use './variables' as vars;
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  font-family: vars.$font-family-primary;
-  background: vars.$color-canvas-background;
-  color: vars.$color-primary-text;
-  line-height: 1.6;
+  font-family: 'Inter', vars.$font-family;
+  background-color: vars.$color-bg-canvas;
+  color: vars.$color-text;
+  margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-  color: vars.$color-accent;
+  color: vars.$color-primary;
   text-decoration: none;
-  transition: color vars.$transition-fast;
-
   &:hover {
-    color: vars.$color-accent-hover;
+    text-decoration: underline;
   }
 }
 
 button {
-  font-family: vars.$font-family-primary;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
   cursor: pointer;
 }
 
-input, textarea, select {
-  font-family: vars.$font-family-primary;
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(128, 128, 128, 0.2);
-  border-radius: vars.$radius-full;
-
-  &:hover {
-    background: rgba(128, 128, 128, 0.4);
-  }
-}
-
-/* Headings */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: vars.$font-weight-bold;
-  line-height: 1.2;
-  margin-bottom: vars.$spacing-lg;
-  color: vars.$color-primary-text;
-}
-
-h1 {
-  font-size: vars.$font-size-display;
-  font-weight: vars.$font-weight-black;
-}
-
-h2 {
-  font-size: vars.$font-size-h2;
-}
-
-h3 {
-  font-size: vars.$font-size-h3;
-}
-
-p {
-  margin-bottom: vars.$spacing-lg;
-  color: vars.$color-secondary-text;
-  line-height: 1.6;
-}
-
-/* Links */
-a {
-  color: vars.$color-accent;
-
-  &:visited {
-    color: color.adjust(vars.$color-accent, $lightness: -15%);
-  }
-
-  &:focus {
-    outline: 2px solid vars.$color-accent;
-    outline-offset: 2px;
-  }
-}
-
-/* Code */
-code, pre {
-  font-family: vars.$font-family-monospace;
-  font-size: vars.$font-size-code;
-  background: vars.$color-surface-secondary;
-  padding: 2px 6px;
-  border-radius: vars.$radius-sm;
-  color: vars.$color-primary-text;
-}
-
-pre {
-  padding: vars.$spacing-lg;
-  overflow-x: auto;
-}
-
-/* Forms */
+// Input styles to look like Twitter's
 input[type="text"],
 input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="number"],
-textarea,
-select {
-  width: 100%;
-  padding: vars.$spacing-base vars.$spacing-md;
-  border: 1px solid vars.$color-border-strong;
-  border-radius: vars.$radius-sm;
-  font-size: vars.$font-size-body;
-  color: vars.$color-primary-text;
-  background: vars.$color-canvas-background;
-  transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
+input[type="password"] {
+  border: 1px solid vars.$color-border;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  background-color: var(--nz-color-input-bg);
+  color: vars.$color-text;
+  transition: border-color 0.2s, background-color 0.2s;
 
   &:focus {
-    outline: none;
-    border-color: vars.$color-accent;
-    box-shadow: 0 0 0 3px vars.$color-glow-aurora;
-  }
-
-  &::placeholder {
-    color: vars.$color-tertiary-text;
-  }
-
-  &:disabled {
-    background: vars.$color-surface-secondary;
-    cursor: not-allowed;
+    border-color: vars.$color-primary;
+    background-color: var(--nz-color-input-focus-bg);
   }
 }
 
-/* Lists */
-ul, ol {
-  margin-bottom: vars.$spacing-lg;
-  padding-left: vars.$spacing-2xl;
+// Layout helper
+.layout-privado {
+  display: flex;
+  justify-content: center;
+  max-width: 1220px;
+  margin: 0 auto;
+  min-height: 100vh;
 }
-
-li {
-  margin-bottom: vars.$spacing-base;
-}
-
-/* HR */
-hr {
-  border: none;
-  border-top: 1px solid vars.$color-border-default;
-  margin: vars.$spacing-2xl 0;
-}
-
-/* Utility Classes */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-
-.mt-xs { margin-top: vars.$spacing-xs; }
-.mt-sm { margin-top: vars.$spacing-sm; }
-.mt-md { margin-top: vars.$spacing-md; }
-.mt-lg { margin-top: vars.$spacing-lg; }
-.mt-xl { margin-top: vars.$spacing-xl; }
-.mt-2xl { margin-top: vars.$spacing-2xl; }
-
-.mb-xs { margin-bottom: vars.$spacing-xs; }
-.mb-sm { margin-bottom: vars.$spacing-sm; }
-.mb-md { margin-bottom: vars.$spacing-md; }
-.mb-lg { margin-bottom: vars.$spacing-lg; }
-.mb-xl { margin-bottom: vars.$spacing-xl; }
-.mb-2xl { margin-bottom: vars.$spacing-2xl; }
-
-.p-sm { padding: vars.$spacing-sm; }
-.p-md { padding: vars.$spacing-md; }
-.p-lg { padding: vars.$spacing-lg; }
-.p-xl { padding: vars.$spacing-xl; }
-
-.hidden { display: none !important; }
-.visible { display: block !important; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, 
-    vars.$color-surface-secondary 25%, 
-    rgba(255, 255, 255, 0.05) 50%, 
-    vars.$color-surface-secondary 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite linear;
-}
-

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
 interface UserSuggestion {
@@ -14,11 +15,13 @@ interface UserSuggestion {
 @Component({
   selector: 'app-sidebar-sugestoes',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './sidebar-sugestoes.component.html',
   styleUrl: './sidebar-sugestoes.component.scss'
 })
 export class SidebarSugestoesComponent {
+  termoPesquisa = '';
+
   sugestoesAoSeguir: UserSuggestion[] = [
     { id: '1', nome: 'João Silva', nomeUtilizador: 'joaosilva', seguidores: 1234, seguido: false },
     { id: '2', nome: 'Marta Kiala', nomeUtilizador: 'martakiala', seguidores: 892, seguido: false },
@@ -34,6 +37,15 @@ export class SidebarSugestoesComponent {
   ];
 
   constructor(private router: Router) {}
+
+  pesquisar(): void {
+    const query = this.termoPesquisa.trim();
+    if (query) {
+      this.router.navigate(['/pesquisar'], { queryParams: { q: query } });
+    } else {
+      this.router.navigate(['/pesquisar']);
+    }
+  }
 
   seguir(userId: string): void {
     const user = this.sugestoesAoSeguir.find((item) => item.id === userId);

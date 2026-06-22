@@ -19,7 +19,7 @@ export class CreatePostComponent implements OnInit {
   @Output() postCriado = new EventEmitter<Post>();
 
   utilizadorAtual: User | null = null;
-  formularioAberto = true;
+  formularioAberto = false;
   texto = '';
   ficheiroSelecionado: File | null = null;
   tipoMedia: 'imagem' | 'video' | null = null;
@@ -50,6 +50,22 @@ export class CreatePostComponent implements OnInit {
     this.tipoMedia = tipo;
     this.previsaoUrl = URL.createObjectURL(ficheiro);
     this.erro = '';
+  }
+
+  selecionarAnexo(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const ficheiro = input.files[0];
+    if (ficheiro.type.startsWith('image/')) {
+      this.selecionarFicheiro(evento, 'imagem');
+      return;
+    }
+    if (ficheiro.type.startsWith('video/')) {
+      this.selecionarFicheiro(evento, 'video');
+      return;
+    }
+    this.erro = 'Seleciona uma imagem ou um vídeo válido.';
+    input.value = '';
   }
 
   removerMedia(): void {

@@ -51,7 +51,7 @@
       <span>{{ post.totalComentarios + 3 }}</span>
     </button>
 
-    <button class="post-card__acao post-card__acao--baze" [class.post-card__acao--ativo]="post.utilizadorDeuBaze" (click)="alternarBaze()" [disabled]="eMinhaPub()" [title]="eMinhaPub() ? 'Não podes dar Baze na tua própria publicação' : ''">
+    <button class="post-card__acao post-card__acao--baze" [class.post-card__acao--ativo]="post.utilizadorDeuBaze" (click)="alternarBaze()">
       <svg width="17" height="17" viewBox="0 0 24 24"
         [attr.fill]="post.utilizadorDeuBaze ? 'currentColor' : 'none'"
         stroke="currentColor" stroke-width="1.8">

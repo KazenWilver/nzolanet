@@ -1,105 +1,84 @@
 @use '../../../styles/variables' as vars;
 
 .admin-layout {
+  background-color: vars.$color-bg-canvas;
   min-height: 100vh;
-  background: vars.$color-canvas-background;
-  padding: vars.$spacing-xl;
   display: flex;
   flex-direction: column;
-  gap: vars.$spacing-xl;
 }
 
 .admin-layout__header {
+  background-color: vars.$color-background;
+  border-bottom: 1px solid vars.$color-border;
+  padding: 16px 24px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: vars.$spacing-lg;
-  padding: vars.$spacing-xl;
-  background: vars.$color-surface-card;
-  border: 1px solid vars.$color-border-subtle;
-  border-radius: vars.$radius-lg;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .admin-layout__eyebrow {
-  margin: 0 0 6px;
-  color: vars.$color-tertiary-text;
-  font-family: vars.$font-family-primary;
-  font-size: vars.$font-size-caption;
-  font-weight: vars.$font-weight-extrabold;
-  letter-spacing: 0.15em;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 1px;
+  color: vars.$color-like;
+  margin: 0;
 }
 
 .admin-layout__title {
-  margin: 0;
-  font-family: vars.$font-family-primary;
-  font-size: vars.$font-size-display;
-  font-weight: vars.$font-weight-extrabold;
-  line-height: 1.1;
-  color: vars.$color-primary-text;
+  font-size: 20px;
+  font-weight: 800;
+  color: vars.$color-text;
+  margin: 4px 0 0 0;
 }
 
 .admin-layout__actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: vars.$spacing-base;
+  align-items: center;
+  gap: 12px;
 }
 
 .admin-layout__btn {
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: vars.$radius-pill;
-  font-family: vars.$font-family-primary;
-  font-weight: vars.$font-weight-bold;
-  font-size: vars.$font-size-button;
-  border: none;
-  padding: vars.$spacing-md vars.$spacing-xl;
-  cursor: pointer;
-  transition: all vars.$transition-base;
-}
 
-.admin-layout__btn--ghost {
-  background: vars.$color-surface-secondary;
-  color: vars.$color-primary-text;
-  border: 1px solid vars.$color-border-strong;
+  &--ghost {
+    background-color: transparent;
+    color: vars.$color-text;
+    border: 1px solid vars.$color-border;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: vars.$color-primary-text;
+    &:hover {
+      background-color: vars.$color-gray-hover;
+      text-decoration: none;
+    }
   }
-}
 
-.admin-layout__btn--primary {
-  background: vars.$color-accent;
-  color: vars.$color-pure-white;
-  box-shadow: 0 4px 12px rgba(113, 112, 255, 0.2);
+  &--primary {
+    background-color: vars.$color-primary;
+    color: #ffffff;
+    border: none;
 
-  &:hover {
-    background: vars.$color-accent-hover;
-    box-shadow: 0 6px 20px rgba(113, 112, 255, 0.3);
+    &:hover {
+      background-color: vars.$color-primary-hover;
+    }
   }
 }
 
 .admin-layout__main {
-  display: flex;
   flex: 1;
-  flex-direction: column;
-  gap: vars.$spacing-xl;
-}
-
-@media (max-width: 900px) {
-  .admin-layout {
-    padding: vars.$spacing-lg;
-  }
-
-  .admin-layout__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .admin-layout__actions {
-    width: 100%;
-  }
+  padding: 24px;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }

@@ -1,63 +1,92 @@
 @use '../../../styles/variables' as vars;
 
 .detalhe-post {
-  padding: 16px 0 32px;
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
 
-  &__voltar { margin-bottom: 12px; }
+.detalhe-post__voltar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid vars.$color-border;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+}
 
-  &__btn-voltar {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: vars.$radius-md;
-    padding: 6px 14px;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    cursor: pointer;
-    transition: all vars.$transition-fast;
-    &:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.04);
-      color: vars.$color-accent;
+.detalhe-post__btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 19px;
+  font-weight: 700;
+  color: vars.$color-text;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+
+  svg {
+    stroke: currentColor;
+    fill: none;
+    border-radius: 50%;
+    padding: 8px;
+    margin: -8px;
+    transition: background-color 0.2s;
+  }
+
+  &:hover {
+    svg {
+      background-color: vars.$color-gray-hover;
     }
   }
+}
 
-  &__comentarios {
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: vars.$radius-lg;
-    padding: 16px;
-    margin-top: 12px;
-  }
+.detalhe-post__comentarios {
+  background-color: vars.$color-background;
+}
 
-  &__titulo-coment {
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    font-weight: vars.$font-weight-bold;
-    color: vars.$color-primary-text;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid vars.$color-border-subtle;
-  }
+.detalhe-post__titulo-coment {
+  font-size: 16px;
+  font-weight: 700;
+  color: vars.$color-text;
+  padding: 16px;
+  margin: 0;
+  border-bottom: 1px solid vars.$color-border;
+  display: flex;
+  align-items: center;
+}
 
-  &__total {
-    background: vars.$color-canvas-background;
-    color: vars.$color-secondary-text;
-    font-size: 12px;
-    font-weight: vars.$font-weight-semibold;
-    padding: 2px 8px;
-    border-radius: vars.$radius-pill;
-    border: 1px solid vars.$color-border-subtle;
-  }
+.detalhe-post__total {
+  font-size: 14px;
+  font-weight: 500;
+  color: vars.$color-text-secondary;
+  margin-left: 6px;
+  background-color: vars.$color-border;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
 
-  &__carregando { display: flex; justify-content: center; padding: 64px 0; }
-  &__carregando-coment { display: flex; justify-content: center; padding: 24px 0; }
-  &__sem-coment { text-align: center; padding: 24px; font-size: 14px; color: vars.$color-tertiary-text; }
+.detalhe-post__carregando-coment {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.detalhe-post__sem-coment {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 15px;
+  color: vars.$color-text-secondary;
+}
+
+.detalhe-post__carregando {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
 }

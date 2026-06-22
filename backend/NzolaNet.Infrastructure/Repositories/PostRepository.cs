@@ -23,6 +23,7 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Comments)
+            .Include(p => p.Likes)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
@@ -31,6 +32,7 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Comments)
+            .Include(p => p.Likes)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
     }
@@ -40,6 +42,7 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Comments)
+            .Include(p => p.Likes)
             .Where(p => followedUserIds.Contains(p.UserId))
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();

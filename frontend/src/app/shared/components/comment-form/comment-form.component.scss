@@ -2,61 +2,75 @@
 
 .comentario-form {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 0;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid vars.$color-border;
+  background-color: vars.$color-background;
+  align-items: center;
+}
 
-  &__campo {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    background: vars.$color-canvas-background;
-    border: 1px solid vars.$color-border-strong;
-    border-radius: vars.$radius-sm;
-    padding: 8px 12px;
-    transition: border-color vars.$transition-base, box-shadow vars.$transition-base;
+.comentario-form__campo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f0f3f4;
+  border-radius: 9999px;
+  padding: 4px 16px;
+  transition: background-color 0.2s, box-shadow 0.2s;
 
-    &:focus-within {
-      border-color: vars.$color-accent;
-      box-shadow: 0 0 0 3px vars.$color-glow-aurora;
-    }
+  &:focus-within {
+    background-color: vars.$color-background;
+    box-shadow: 0 0 0 1px vars.$color-primary;
+    border: 1px solid transparent; // prevent size change
+  }
+}
+
+.comentario-form__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  resize: none;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 6px 0;
+  color: vars.$color-text;
+  font-family: inherit;
+  height: 20px;
+  max-height: 150px;
+
+  &::placeholder {
+    color: vars.$color-text-secondary;
+  }
+}
+
+.comentario-form__enviar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: vars.$color-primary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-hover;
   }
 
-  &__input {
-    flex: 1;
-    background: none;
-    border: none;
-    outline: none;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    color: vars.$color-primary-text;
-    resize: none;
-    line-height: 20px;
-    max-height: 120px;
-    overflow-y: auto;
-    &::placeholder { color: vars.$color-tertiary-text; }
+  &:disabled {
+    color: vars.$color-text-secondary;
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
-  &__enviar {
-    width: 28px;
-    height: 28px;
-    border-radius: vars.$radius-sm;
-    border: none;
-    background: vars.$color-accent;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background vars.$transition-base;
-
-    &:hover:not(:disabled) { background: vars.$color-accent-hover; }
-    &:disabled {
-      background: vars.$color-disabled-text;
-      color: rgba(255, 255, 255, 0.3);
-      cursor: not-allowed;
-    }
+  svg {
+    fill: currentColor;
+    stroke: none;
   }
 }

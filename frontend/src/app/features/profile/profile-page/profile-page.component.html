@@ -16,11 +16,11 @@
         </ng-container>
         <ng-template #acoesTerceiro>
           <button class="perfil__btn"
-            [class.perfil__btn--seguindo]="utilizador.estaASeguir"
-            [class.perfil__btn--primario]="!utilizador.estaASeguir"
-            (click)="alternarSeguir()" [disabled]="aAlterarSeguir">
-            {{ utilizador.estaASeguir ? 'A seguir' : 'Seguir' }}
-          </button>
+          [class.perfil__btn--seguindo]="utilizador.estaASeguir"
+          [class.perfil__btn--primario]="!utilizador.estaASeguir && !utilizador.estaPendente"
+          (click)="alternarSeguir()" [disabled]="aAlterarSeguir">
+          {{ utilizador.estaASeguir ? 'A seguir' : (utilizador.estaPendente ? 'Pendente' : 'Seguir') }}
+        </button>
         </ng-template>
       </div>
 

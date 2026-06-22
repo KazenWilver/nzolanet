@@ -1,65 +1,66 @@
 @use '../../../styles/variables' as vars;
 
 .feed-pagina {
-  display: grid;
-  gap: vars.$spacing-lg;
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
 
-  &__carregando {
-    display: flex;
-    justify-content: center;
-    padding: vars.$spacing-3xl 0;
+.feed-pagina__carregando {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.feed-pagina__vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: vars.$color-text-secondary;
+  gap: 16px;
+
+  svg {
+    color: vars.$color-primary;
   }
 
-  &__vazio {
-    text-align: center;
-    padding: vars.$spacing-2xl vars.$spacing-xl;
-    border-radius: vars.$radius-lg;
-    border: 1px solid vars.$color-border-subtle;
-    background: #FFFFFF;
-    color: vars.$color-secondary-text;
-    box-shadow: var(--shadow-card);
+  p {
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0;
+  }
+}
 
-    svg {
-      margin: 0 auto vars.$spacing-lg;
-      display: block;
-      color: vars.$color-tertiary-text;
-    }
+.feed-pagina__mais {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  border-top: 1px solid vars.$color-border;
+}
 
-    p {
-      font-size: vars.$font-size-body;
-      line-height: 1.6;
-      margin: 0;
-    }
+.feed-pagina__btn-mais {
+  background-color: vars.$color-primary;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 9999px;
+  padding: 8px 24px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-primary-hover;
   }
 
-  &__mais {
-    display: flex;
-    justify-content: center;
-    padding: vars.$spacing-lg 0 vars.$spacing-2xl;
-  }
-
-  &__btn-mais {
-    height: 40px;
-    padding: 0 vars.$spacing-2xl;
-    background: vars.$color-surface-card;
-    border: 1px solid vars.$color-border-strong;
-    border-radius: vars.$radius-md;
-    font-size: vars.$font-size-button;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: vars.$spacing-base;
-
-    &:hover:not(:disabled) {
-      border-color: vars.$color-accent;
-      color: vars.$color-accent;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

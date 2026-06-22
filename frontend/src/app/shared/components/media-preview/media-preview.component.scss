@@ -1,25 +1,34 @@
 @use '../../../styles/variables' as vars;
 
 .media-preview {
+  margin-top: 10px;
+  border: 1px solid vars.$color-border;
+  border-radius: 16px;
   overflow: hidden;
-  background: vars.$color-canvas-background;
-  border-radius: vars.$radius-lg;
-  border: 1px solid vars.$color-border-subtle;
+  position: relative;
+  background-color: #000;
+  max-height: 380px;
+  display: block;
+}
 
-  &__imagem {
-    width: 100%;
-    max-height: 400px;
-    object-fit: cover;
-    display: block;
-    cursor: pointer;
-    transition: opacity vars.$transition-base;
-    &:hover { opacity: 0.92; }
-  }
+.media-preview__imagem {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: cover;
+  cursor: pointer;
+  display: block;
+  transition: filter 0.2s;
 
-  &__video {
-    width: 100%;
-    max-height: 400px;
-    display: block;
-    background: #000;
+  &:hover {
+    filter: brightness(0.95);
   }
+}
+
+.media-preview__video {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  display: block;
+  outline: none;
 }

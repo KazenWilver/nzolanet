@@ -2,121 +2,167 @@
 
 .comentario-item {
   display: flex;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid vars.$color-border;
+  background-color: vars.$color-background;
+  transition: background-color 0.2s;
 
-  &__conteudo { flex: 1; min-width: 0; }
-
-  &__balao {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid vars.$color-border-subtle;
-    border-radius: 0 vars.$radius-md vars.$radius-md vars.$radius-md;
-    padding: 8px 12px;
-    display: inline-block;
-    max-width: 100%;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.01);
   }
+}
 
-  &__autor {
-    display: block;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-caption;
-    font-weight: vars.$font-weight-semibold;
-    color: vars.$color-primary-text;
-    text-decoration: none;
-    margin-bottom: 2px;
-    &:hover { color: vars.$color-accent; }
+.comentario-item__conteudo {
+  flex: 1;
+  min-width: 0;
+}
+
+.comentario-item__balao {
+  display: block;
+}
+
+.comentario-item__autor {
+  font-weight: 700;
+  color: vars.$color-text;
+  font-size: 15px;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
+}
 
-  &__editado {
-    display: inline-block;
-    margin-bottom: 4px;
-    font-size: 11px;
-    color: vars.$color-accent;
-    font-weight: vars.$font-weight-semibold;
+.comentario-item__editado {
+  font-size: 11px;
+  color: vars.$color-text-secondary;
+  background-color: #f0f3f4;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.comentario-item__texto {
+  font-size: 15px;
+  line-height: 1.4;
+  color: vars.$color-text;
+  margin: 4px 0 8px 0;
+  word-break: break-word;
+  white-space: pre-line;
+}
+
+.comentario-item__edicao {
+  margin: 8px 0;
+}
+
+.comentario-item__textarea {
+  width: 100%;
+  border: 1px solid vars.$color-border;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 15px;
+  outline: none;
+  resize: vertical;
+  background-color: vars.$color-background;
+  font-family: inherit;
+  color: vars.$color-text;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: vars.$color-primary;
   }
+}
 
-  &__texto {
-    font-size: vars.$font-size-body;
-    line-height: 20px;
-    color: vars.$color-secondary-text;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
+.comentario-item__edicao-acoes {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
 
-  &__edicao { display: flex; flex-direction: column; gap: 6px; }
+.comentario-item__btn {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
 
-  &__textarea {
-    width: 100%;
-    background: vars.$color-canvas-background;
-    border: 1px solid vars.$color-accent;
-    border-radius: vars.$radius-sm;
-    padding: 6px 8px;
-    font-family: vars.$font-family-primary;
-    font-size: vars.$font-size-body;
-    color: vars.$color-primary-text;
-    outline: none;
-    resize: vertical;
-  }
+  &--guardar {
+    background-color: vars.$color-primary;
+    color: #ffffff;
 
-  &__edicao-acoes { display: flex; gap: 6px; }
-
-  &__rodape {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 4px;
-    padding-left: 4px;
-  }
-
-  &__tempo { font-size: 12px; color: vars.$color-tertiary-text; font-weight: vars.$font-weight-medium; }
-
-  &__acoes { display: flex; gap: 8px; align-items: center; }
-
-  &__label {
-    font-size: 12px;
-    color: vars.$color-engagement-pink;
-    font-weight: 700;
-  }
-
-  &__btn {
-    padding: 4px 10px;
-    border-radius: vars.$radius-sm;
-    border: none;
-    font-family: vars.$font-family-primary;
-    font-size: 12px;
-    font-weight: vars.$font-weight-medium;
-    cursor: pointer;
-    transition: background 150ms ease;
-
-    &--guardar { background: vars.$color-accent; color: #FFFFFF; &:hover { background: vars.$color-accent-hover; } }
-    &--cancelar {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: vars.$color-primary-text;
-      &:hover { background: rgba(255, 255, 255, 0.08); }
+    &:hover {
+      background-color: vars.$color-primary-hover;
     }
   }
 
-  &__btn-link {
-    background: none;
-    border: none;
-    font-family: vars.$font-family-primary;
-    font-size: 12px;
-    font-weight: vars.$font-weight-medium;
-    color: vars.$color-tertiary-text;
-    cursor: pointer;
-    padding: 0;
-    transition: color 150ms ease;
-    &:hover { color: vars.$color-primary-text; }
-    &--perigo:hover { color: vars.$color-error; }
-    &--warning { color: vars.$color-engagement-pink; }
-    &--warning:hover { color: #d13d61; }
+  &--cancelar {
+    background-color: transparent;
+    border: 1px solid vars.$color-border;
+    color: vars.$color-text;
+
+    &:hover {
+      background-color: vars.$color-gray-hover;
+    }
+  }
+}
+
+.comentario-item__rodape {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: vars.$color-text-secondary;
+  margin-top: 4px;
+}
+
+.comentario-item__tempo {
+  font-size: 13px;
+}
+
+.comentario-item__acoes {
+  display: flex;
+  gap: 12px;
+}
+
+.comentario-item__btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: vars.$color-primary;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    text-decoration: underline;
   }
 
-  &__denuncias {
-    margin-top: 6px;
-    color: vars.$color-warning;
-    font-size: 12px;
-    font-weight: 600;
+  &--warning {
+    color: #f59e0b;
   }
+
+  &--perigo {
+    color: vars.$color-like;
+  }
+}
+
+.comentario-item__label {
+  font-size: 13px;
+  font-weight: 600;
+
+  &--denunciado {
+    color: #f59e0b;
+  }
+}
+
+.comentario-item__denuncias {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f59e0b;
 }
