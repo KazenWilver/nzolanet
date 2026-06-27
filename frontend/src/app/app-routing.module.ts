@@ -30,6 +30,7 @@ export const routes: Routes = [
       { path: 'perfil/me',   loadComponent: () => import('./features/profile/profile-me-redirect.component').then(m => m.ProfileMeRedirectComponent) },
       { path: 'perfil',      loadChildren: () => import('./features/profile/profile.module').then(m => m.profileRoutes) },
       { path: 'publicacoes', loadChildren: () => import('./features/posts/posts.module').then(m => m.postsRoutes) },
+      { path: 'total-comentarios', loadComponent: () => import('./features/comments/total-comentarios/total-comentarios.component').then(m => m.TotalComentariosComponent) },
       { path: '', redirectTo: 'feed', pathMatch: 'full' }
     ]
   },

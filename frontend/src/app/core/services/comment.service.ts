@@ -95,4 +95,16 @@ export class CommentService {
   eliminar(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  obterTotalComentarios(): Observable<number> {
+    return this.http.get<{ total: number }>(`${this.baseUrl}/count`).pipe(
+      map(res => res.total)
+    );
+  }
+
+  obterTodos(): Observable<Comentario[]> {
+    return this.http.get<any[]>(this.baseUrl).pipe(
+      map(comments => comments.map(c => this.mapComment(c)))
+    );
+  }
 }

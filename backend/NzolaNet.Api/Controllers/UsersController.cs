@@ -65,7 +65,7 @@ public class UsersController : ControllerBase
     // POST /api/users/photo – Upload de foto de perfil (requer autenticação)
     [Authorize]
     [HttpPost("photo")]
-    public async Task<IActionResult> UploadPhoto([FromForm] IFormFile photoFile)
+    public async Task<IActionResult> UploadPhoto(IFormFile photoFile)
     {
         if (photoFile == null || photoFile.Length == 0)
         {

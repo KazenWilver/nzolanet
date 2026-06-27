@@ -35,6 +35,22 @@ public class CommentsController : ControllerBase
         return Ok(comments);
     }
 
+    // GET /api/comments – obter todos os comentários do sistema (para demonstração)
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var comments = await _commentService.GetAllAsync();
+        return Ok(comments);
+    }
+
+    // GET /api/comments/count – obter o total de comentários no sistema
+    [HttpGet("count")]
+    public async Task<IActionResult> GetCount()
+    {
+        var count = await _commentService.GetTotalCountAsync();
+        return Ok(new { total = count });
+    }
+
     // POST /api/comments – adicionar comentário (requer autenticação)
     [Authorize]
     [HttpPost]

@@ -34,6 +34,19 @@ public class CommentRepository : ICommentRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Comment>> GetAllAsync()
+    {
+        return await _context.Comments
+            .Include(c => c.User)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetTotalCountAsync()
+    {
+        return await _context.Comments.CountAsync();
+    }
+
     public async Task<bool> CreateAsync(Comment comment)
     {
         _context.Comments.Add(comment);

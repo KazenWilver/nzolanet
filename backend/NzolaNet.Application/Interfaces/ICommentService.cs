@@ -11,4 +11,6 @@ public interface ICommentService
     Task<CommentDto> UpdateAsync(Guid userId, Guid commentId, UpdateCommentDto updateDto);
     Task<bool> DeleteAsync(Guid userId, Guid commentId);
     Task<IEnumerable<CommentDto>> GetByPostAsync(Guid postId, Guid? currentUserId = null);
+    Task<IEnumerable<CommentDto>> GetAllAsync();
+    Task<int> GetTotalCountAsync();
 }

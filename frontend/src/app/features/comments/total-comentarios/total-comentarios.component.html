@@ -1,0 +1,76 @@
+<div class="comentarios-stats-container">
+  <div class="header-section">
+    <h1 class="page-title">Painel de Estatísticas</h1>
+    <p class="page-subtitle">Demonstração de integração Angular com APIs backend em tempo real.</p>
+  </div>
+
+  <div *ngIf="aCarregar" class="loader-container">
+    <app-loading-spinner tamanho="lg" />
+  </div>
+
+  <div *ngIf="!aCarregar" class="dashboard-grid">
+    <!-- Card Principal: Total de Comentários -->
+    <div class="stats-card glass-effect">
+      <div class="stats-card__icon-container">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stats-icon">
+          <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+        </svg>
+      </div>
+      <div class="stats-card__info">
+        <span class="stats-card__label">Total de Comentários</span>
+        <h2 class="stats-card__value">{{ totalComentarios }}</h2>
+        <p class="stats-card__change">Comentários agregados de toda a plataforma</p>
+      </div>
+    </div>
+
+    <!-- Card Secundário: Informação de Ajuda -->
+    <div class="help-card glass-effect">
+      <h3>Como funciona?</h3>
+      <p>Este ecrã exemplifica a ligação entre o Angular e o backend da seguinte forma:</p>
+      <ul>
+        <li><strong>Backend:</strong> Endpoint <code>GET /api/comments/count</code> que executa <code>CountAsync()</code> no EF Core.</li>
+        <li><strong>Serviço:</strong> <code>CommentService.obterTotalComentarios()</code> mapeia a resposta da API HTTP.</li>
+        <li><strong>Componente:</strong> Subscreve o Observable no <code>ngOnInit</code> e atualiza a propriedade do template.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Listagem dos Comentários Recentes -->
+  <div *ngIf="!aCarregar" class="recent-comments-section glass-effect">
+    <div class="section-header">
+      <h2>Comentários Recentes no Sistema</h2>
+      <button class="btn-refresh" (click)="carregarDados()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        Atualizar
+      </button>
+    </div>
+
+    <div class="comments-list" *ngIf="comentariosRecentes.length > 0; else semComentarios">
+      <div class="comment-row" *ngFor="let c of comentariosRecentes">
+        <div class="comment-author-avatar">
+          <img *ngIf="c.autorFoto; else defaultAvatar" [src]="c.autorFoto" [alt]="c.autorNome" />
+          <ng-template #defaultAvatar>
+            <div class="avatar-placeholder">{{ c.autorNome.charAt(0).toUpperCase() }}</div>
+          </ng-template>
+        </div>
+        <div class="comment-row-content">
+          <div class="comment-row-meta">
+            <span class="author-name">{{ c.autorNome }}</span>
+            <span class="author-handle">&#64;{{ c.autorNomeUtilizador }}</span>
+            <span class="comment-date">{{ c.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <p class="comment-text">"{{ c.texto }}"</p>
+          <a class="view-post-link" [routerLink]="['/publicacoes', c.postId]">Ver publicação original</a>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #semComentarios>
+      <div class="no-comments-state">
+        <p>Ainda não há comentários registados na base de dados.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

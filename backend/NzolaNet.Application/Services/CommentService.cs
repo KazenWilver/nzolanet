@@ -144,6 +144,17 @@ public class CommentService : ICommentService
         return comments.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<CommentDto>> GetAllAsync()
+    {
+        var comments = await _commentRepository.GetAllAsync();
+        return comments.Select(MapToDto);
+    }
+
+    public async Task<int> GetTotalCountAsync()
+    {
+        return await _commentRepository.GetTotalCountAsync();
+    }
+
     private CommentDto MapToDto(Comment comment)
     {
         return new CommentDto

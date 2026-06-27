@@ -27,6 +27,7 @@ export class SidebarNavComponent implements OnInit {
   menuItems: MenuItem[] = [
     { icon: 'home', label: 'Feed', route: '/feed', exact: true },
     { icon: 'hash', label: 'Pesquisar', route: '/pesquisar', exact: false },
+    { icon: 'chart', label: 'Estatísticas', route: '/total-comentarios', exact: false },
     { icon: 'user', label: 'Perfil', route: '/perfil/me', exact: false },
     { icon: 'settings', label: 'Definições', route: '/perfil/me', exact: false },
   ];
@@ -46,6 +47,7 @@ export class SidebarNavComponent implements OnInit {
     const icons: { [key: string]: string } = {
       home: '<path d="m3 10.8 9-7.2 9 7.2"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path>',
       hash: '<path d="M4 9h16"></path><path d="M4 15h16"></path><path d="M10 3 8 21"></path><path d="m16 3-2 18"></path>',
+      chart: '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>',
       bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>',
       mail: '<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="m22 6-10 7L2 6"></path>',
       bookmark: '<path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>',
