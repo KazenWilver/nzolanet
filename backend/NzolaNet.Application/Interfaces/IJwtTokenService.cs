@@ -4,5 +4,8 @@ namespace NzolaNet.Application.Interfaces;
 
 public interface IJwtTokenService
 {
-    string GenerateToken(User user);
+    /// <summary>
+    /// Generates a JWT for the given user including role claims.
+    /// </summary>
+    Task<string> GenerateTokenAsync(User user);
 }

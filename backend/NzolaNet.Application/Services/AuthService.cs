@@ -49,7 +49,9 @@ public class AuthService : IAuthService
             throw new ArgumentException("Erro ao criar o utilizador. Verifica se a password cumpre os requisitos.");
         }
 
-        return _tokenService.GenerateToken(user);
+        await _userRepository.AddToRoleAsync(user, "User");
+
+        return await _tokenService.GenerateTokenAsync(user);
     }
 
     public async Task<string> LoginAsync(LoginDto loginDto)
@@ -76,6 +78,6 @@ public class AuthService : IAuthService
             throw new ArgumentException("Credenciais inválidas.");
         }
 
-        return _tokenService.GenerateToken(user);
+        return await _tokenService.GenerateTokenAsync(user);
     }
 }

@@ -6,6 +6,7 @@ namespace NzolaNet.Domain.Entities;
 
 public class User : IdentityUser<Guid>
 {
+    public string? DisplayName { get; set; }
     public string? ProfilePhoto { get; set; }
     public bool IsPrivate { get; set; } = false;
     public string? Bio { get; set; }

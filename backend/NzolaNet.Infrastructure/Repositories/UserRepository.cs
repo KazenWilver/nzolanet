@@ -71,6 +71,11 @@ public class UserRepository : IUserRepository
         return affectedRows > 0;
     }
 
+    public async Task AddToRoleAsync(User user, string role)
+    {
+        await _userManager.AddToRoleAsync(user, role);
+    }
+
     public async Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query)
     {
         if (string.IsNullOrWhiteSpace(query))
