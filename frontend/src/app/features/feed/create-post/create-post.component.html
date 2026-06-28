@@ -1,4 +1,4 @@
-<div class="create-publication">
+<div class="create-publication" [class.create-publication--modal]="modoModal">
   @if (!formOpen && !modoModal) {
     <div class="create-publication__trigger-row">
       <app-avatar
@@ -85,11 +85,9 @@
         </div>
 
         <div class="create-publication__actions">
-          @if (!modoModal) {
-            <button type="button" class="create-publication__btn-cancel" (click)="cancel()">
-              Cancelar
-            </button>
-          }
+          <button type="button" class="create-publication__btn-cancel" (click)="cancel()">
+            Cancelar
+          </button>
           <button type="submit" class="create-publication__btn-publish" [disabled]="!canPublish">
             @if (publishing) {
               <app-loading-spinner tamanho="sm" />

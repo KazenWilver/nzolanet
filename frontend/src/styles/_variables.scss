@@ -48,26 +48,26 @@
   --theme-light-sidebar-background: 247 249 249;
 
   // ---------------------------------------------------------------------------
-  // Cores semânticas — tema escuro (default, igual à referência)
+  // Cores semânticas — tema claro (default)
   // ---------------------------------------------------------------------------
-  --color-bg-primary: rgb(var(--theme-dark-background));
-  --color-bg-secondary: rgb(var(--theme-dark-sidebar-background));
-  --color-bg-search: rgb(var(--theme-dark-search-background));
-  --color-bg-hover: rgba(231, 233, 234, 0.1);
-  --color-bg-card-hover: rgba(255, 255, 255, 0.03);
-  --color-bg-input: rgb(var(--theme-dark-search-background));
-  --color-bg-input-focus: rgb(var(--theme-dark-sidebar-background));
-  --color-bg-modal: rgb(var(--theme-dark-background));
-  --color-bg-widget: rgb(var(--theme-dark-search-background));
-  --color-bg-widget-hover: rgb(44 47 51);
-  --color-bg-navbar: rgba(22, 24, 28, 0.85);
-  --color-bg-cover: rgb(47 51 54);
-  --color-image-preview-hover: #272c30;
+  --color-bg-primary: rgb(var(--theme-light-background));
+  --color-bg-secondary: rgb(var(--theme-light-sidebar-background));
+  --color-bg-search: rgb(var(--theme-light-search-background));
+  --color-bg-hover: rgba(15, 20, 25, 0.1);
+  --color-bg-card-hover: rgba(0, 0, 0, 0.03);
+  --color-bg-input: rgb(var(--theme-light-search-background));
+  --color-bg-input-focus: rgb(var(--theme-light-background));
+  --color-bg-modal: rgb(var(--theme-light-background));
+  --color-bg-widget: rgb(var(--theme-light-sidebar-background));
+  --color-bg-widget-hover: #eff1f1;
+  --color-bg-navbar: rgba(255, 255, 255, 0.85);
+  --color-bg-cover: rgb(207 217 222);
+  --color-image-preview-hover: #f7f9f9;
 
-  --color-text-primary: #e7e9ea;
-  --color-text-secondary: #71767b;
-  --color-text-muted: #71767b;
-  --color-text-inverse: #0f1419;
+  --color-text-primary: #0f1419;
+  --color-text-secondary: #536471;
+  --color-text-muted: #536471;
+  --color-text-inverse: #ffffff;
   --color-text-link: rgb(var(--accent-blue));
 
   --color-accent: rgb(var(--accent-blue));
@@ -80,19 +80,19 @@
   --color-accent-green: rgb(var(--accent-green));
   --color-accent-red: #f4212e;
   --color-like: rgb(var(--accent-pink));
-  --color-brand-icon: #d6d9db;
+  --color-brand-icon: rgb(var(--accent-blue));
 
-  --color-border: #2f3336;
-  --color-border-light: #333639;
-  --color-line-reply: #333639;
-  --color-shadow: rgba(255, 255, 255, 0.08);
-  --color-shadow-menu: #ffffff33 0px 0px 15px, #ffffff26 0px 0px 3px 1px;
+  --color-border: #eff3f4;
+  --color-border-light: #cfd9de;
+  --color-line-reply: #cfd9de;
+  --color-shadow: rgba(101, 119, 134, 0.2);
+  --color-shadow-menu: #65778633 0px 0px 15px, #65778626 0px 0px 3px 1px;
 
   --color-danger: #f4212e;
   --color-success: rgb(var(--accent-green));
 
-  --color-btn-follow-bg: #eff3f4;
-  --color-btn-follow-text: #0f1419;
+  --color-btn-follow-bg: #0f1419;
+  --color-btn-follow-text: #ffffff;
 
   // Accent palette (RGB triplets)
   --accent-yellow: 255 213 0;
@@ -105,8 +105,8 @@
   // ---------------------------------------------------------------------------
   // Tipografia
   // ---------------------------------------------------------------------------
-  --font-family-primary: 'TwitterChirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-family-extended: 'TwitterChirpExtendedHeavy', 'TwitterChirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-extended: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   --font-size-xs: 0.6875rem;   // 11px
   --font-size-sm: 0.8125rem;   // 13px
@@ -177,6 +177,54 @@
   // ---------------------------------------------------------------------------
   // Compatibilidade com variáveis legadas (--nz-*)
   // ---------------------------------------------------------------------------
+  --nz-color-bg-canvas: #f5f8fa;
+  --nz-color-background: #ffffff;
+  --nz-color-text: #14171a;
+  --nz-color-text-secondary: #657786;
+  --nz-color-border: #e6ecf0;
+  --nz-color-hover: rgba(29, 161, 242, 0.1);
+  --nz-color-gray-hover: rgba(0, 0, 0, 0.05);
+  --nz-color-input-bg: #eff3f4;
+  --nz-color-input-focus-bg: #ffffff;
+  --nz-color-btn-follow-bg: #0f1419;
+  --nz-color-btn-follow-text: #ffffff;
+  --nz-color-widget-bg: #f7f9f9;
+  --nz-color-widget-hover-bg: #eff1f1;
+  --nz-color-shadow: rgba(101, 119, 134, 0.2);
+  --nz-color-navbar-bg: rgba(255, 255, 255, 0.85);
+}
+
+// Tema escuro (activado com body.dark-theme)
+body.dark-theme {
+  --color-bg-primary: rgb(var(--theme-dark-background));
+  --color-bg-secondary: rgb(var(--theme-dark-sidebar-background));
+  --color-bg-search: rgb(var(--theme-dark-search-background));
+  --color-bg-hover: rgba(231, 233, 234, 0.1);
+  --color-bg-card-hover: rgba(255, 255, 255, 0.03);
+  --color-bg-input: rgb(var(--theme-dark-search-background));
+  --color-bg-input-focus: rgb(var(--theme-dark-sidebar-background));
+  --color-bg-modal: rgb(var(--theme-dark-background));
+  --color-bg-widget: rgb(var(--theme-dark-search-background));
+  --color-bg-widget-hover: rgb(44 47 51);
+  --color-bg-navbar: rgba(22, 24, 28, 0.85);
+  --color-bg-cover: rgb(47 51 54);
+  --color-image-preview-hover: #272c30;
+
+  --color-text-primary: #e7e9ea;
+  --color-text-secondary: #71767b;
+  --color-text-muted: #71767b;
+  --color-text-inverse: #0f1419;
+  --color-brand-icon: #d6d9db;
+
+  --color-border: #2f3336;
+  --color-border-light: #333639;
+  --color-line-reply: #333639;
+  --color-shadow: rgba(255, 255, 255, 0.08);
+  --color-shadow-menu: #ffffff33 0px 0px 15px, #ffffff26 0px 0px 3px 1px;
+
+  --color-btn-follow-bg: #eff3f4;
+  --color-btn-follow-text: #0f1419;
+
   --nz-color-bg-canvas: var(--color-bg-primary);
   --nz-color-background: var(--color-bg-secondary);
   --nz-color-text: var(--color-text-primary);
@@ -194,52 +242,9 @@
   --nz-color-navbar-bg: var(--color-bg-navbar);
 }
 
-// Tema claro (referência: light-* tokens + tailwind light-* colors)
+// Alias legado — light-theme mantém compatibilidade
 body.light-theme {
-  --color-bg-primary: rgb(var(--theme-light-background));
-  --color-bg-secondary: rgb(var(--theme-light-sidebar-background));
-  --color-bg-search: rgb(var(--theme-light-search-background));
-  --color-bg-hover: rgba(15, 20, 25, 0.1);
-  --color-bg-card-hover: rgba(0, 0, 0, 0.03);
-  --color-bg-input: rgb(var(--theme-light-search-background));
-  --color-bg-input-focus: rgb(var(--theme-light-background));
-  --color-bg-modal: rgb(var(--theme-light-background));
-  --color-bg-widget: rgb(var(--theme-light-sidebar-background));
-  --color-bg-widget-hover: #eff1f1;
-  --color-bg-navbar: rgba(255, 255, 255, 0.85);
-  --color-bg-cover: rgb(207 217 222);
-  --color-image-preview-hover: #f7f9f9;
-
-  --color-text-primary: #0f1419;
-  --color-text-secondary: #536471;
-  --color-text-muted: #536471;
-  --color-text-inverse: #ffffff;
-  --color-brand-icon: rgb(var(--accent-blue));
-
-  --color-border: #eff3f4;
-  --color-border-light: #cfd9de;
-  --color-line-reply: #cfd9de;
-  --color-shadow: rgba(101, 119, 134, 0.2);
-  --color-shadow-menu: #65778633 0px 0px 15px, #65778626 0px 0px 3px 1px;
-
-  --color-btn-follow-bg: #0f1419;
-  --color-btn-follow-text: #ffffff;
-
-  --nz-color-bg-canvas: #f5f8fa;
-  --nz-color-background: #ffffff;
-  --nz-color-text: #14171a;
-  --nz-color-text-secondary: #657786;
-  --nz-color-border: #e6ecf0;
-  --nz-color-hover: rgba(29, 161, 242, 0.1);
-  --nz-color-gray-hover: rgba(0, 0, 0, 0.05);
-  --nz-color-input-bg: #eff3f4;
-  --nz-color-input-focus-bg: #ffffff;
-  --nz-color-btn-follow-bg: #0f1419;
-  --nz-color-btn-follow-text: #ffffff;
-  --nz-color-widget-bg: #f7f9f9;
-  --nz-color-widget-hover-bg: #eff1f1;
-  --nz-color-shadow: rgba(101, 119, 134, 0.2);
-  --nz-color-navbar-bg: rgba(255, 255, 255, 0.85);
+  color-scheme: light;
 }
 
 // -----------------------------------------------------------------------------

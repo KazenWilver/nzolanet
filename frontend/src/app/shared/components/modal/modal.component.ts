@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
         <div
           class="modal__dialog"
           role="dialog"
+          aria-modal="true"
           [attr.aria-label]="title"
           (click)="$event.stopPropagation()"
         >
@@ -36,17 +37,21 @@ import { CommonModule } from '@angular/common';
     .modal {
       position: fixed;
       inset: 0;
-      z-index: 1000;
+      z-index: 1200;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
-      padding: var(--spacing-3xl) var(--spacing-lg);
-      background-color: rgba(91, 112, 131, 0.4);
+      padding: var(--spacing-lg);
+      background-color: rgba(91, 112, 131, 0.45);
+      overscroll-behavior: contain;
     }
 
     .modal__dialog {
       width: 100%;
       max-width: var(--width-modal);
+      max-height: min(90vh, 720px);
+      display: flex;
+      flex-direction: column;
       border-radius: var(--border-radius-lg);
       background-color: var(--color-bg-modal);
       box-shadow: var(--color-shadow-menu);
@@ -57,6 +62,7 @@ import { CommonModule } from '@angular/common';
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
       padding: var(--spacing-md) var(--spacing-lg);
       border-bottom: var(--border-width) solid var(--color-border);
     }
@@ -86,13 +92,46 @@ import { CommonModule } from '@angular/common';
 
     .modal__body {
       padding: var(--spacing-lg);
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 500px) {
+      .modal {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      .modal__dialog {
+        max-height: 92vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .modal__body {
+        padding: var(--spacing-md);
+      }
     }
   `
 })
-export class ModalComponent {
+export class ModalComponent implements OnChanges {
   @Input() open = false;
   @Input() title = '';
   @Output() closed = new EventEmitter<void>();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if ('open' in changes) {
+      this.updateBodyScrollLock(this.open);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscape(): void {
+    if (this.open) {
+      this.handleClose();
+    }
+  }
 
   handleClose(): void {
     this.closed.emit();
@@ -100,5 +139,10 @@ export class ModalComponent {
 
   handleBackdropClick(): void {
     this.handleClose();
+  }
+
+  private updateBodyScrollLock(locked: boolean): void {
+    document.body.style.overflow = locked ? 'hidden' : '';
+    document.body.style.touchAction = locked ? 'none' : '';
   }
 }

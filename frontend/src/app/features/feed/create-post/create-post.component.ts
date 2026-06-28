@@ -72,10 +72,13 @@ export class CreatePostComponent implements OnInit {
   }
 
   private resetForm(): void {
-    this.formOpen = false;
+    if (!this.modoModal) {
+      this.formOpen = false;
+    }
     this.text = '';
     this.removeMedia();
     this.error = '';
+    this.publishing = false;
   }
 
   selectFile(event: Event, type: 'image' | 'video'): void {

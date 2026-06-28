@@ -36,6 +36,16 @@
           <span class="sidebar__label">{{ item.label }}</span>
         </a>
       }
+
+      <button
+        type="button"
+        class="sidebar__link sidebar__link--theme"
+        (click)="handleToggleTheme()"
+        [attr.aria-label]="themeService.isDarkMode() ? 'Activar modo claro' : 'Activar modo escuro'"
+      >
+        <span class="sidebar__icon" [attr.data-icon]="themeService.isDarkMode() ? 'sun' : 'moon'" aria-hidden="true"></span>
+        <span class="sidebar__label">{{ themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro' }}</span>
+      </button>
     </nav>
 
     <button type="button" class="sidebar__publish" (click)="handleOpenPublishModal()">
@@ -86,9 +96,11 @@
   title="Criar publicação"
   (closed)="handleClosePublishModal()"
 >
-  <app-create-post
-    [modoModal]="true"
-    (postCriado)="handlePostCreated()"
-    (cancelado)="handleClosePublishModal()"
-  />
+  @if (publishModalOpen) {
+    <app-create-post
+      [modoModal]="true"
+      (postCriado)="handlePostCreated()"
+      (cancelado)="handleClosePublishModal()"
+    />
+  }
 </app-modal>

@@ -14,6 +14,25 @@
     border-bottom: var(--border-width) solid var(--color-border);
     background-color: var(--color-bg-navbar);
     backdrop-filter: blur(12px);
+    min-height: 52px;
+  }
+
+  .topbar__theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--border-radius-full);
+    background: transparent;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var(--color-bg-hover);
+    }
   }
 
   .topbar__brand {
@@ -40,5 +59,6 @@
   .topbar__profile {
     margin-left: auto;
     text-decoration: none;
+    flex-shrink: 0;
   }
 }
