@@ -27,9 +27,8 @@ export class SidebarNavComponent implements OnInit {
   menuItems: MenuItem[] = [
     { icon: 'home', label: 'Feed', route: '/feed', exact: true },
     { icon: 'hash', label: 'Pesquisar', route: '/pesquisar', exact: false },
-    { icon: 'chart', label: 'Estatísticas', route: '/total-comentarios', exact: false },
     { icon: 'user', label: 'Perfil', route: '/perfil/me', exact: false },
-    { icon: 'settings', label: 'Definições', route: '/perfil/me', exact: false },
+    { icon: 'settings', label: 'Definições', route: '/settings', exact: false },
   ];
 
   constructor(

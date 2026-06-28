@@ -74,13 +74,6 @@ export const routes: Routes = [
       {
         path: 'publicacoes',
         loadChildren: () => import('./features/posts/posts.module').then(m => m.postsRoutes)
-      },
-      {
-        path: 'total-comentarios',
-        loadComponent: () =>
-          import('./features/comments/total-comentarios/total-comentarios.component').then(
-            m => m.TotalComentariosComponent
-          )
       }
     ]
   },

@@ -96,12 +96,6 @@ export class CommentService {
     });
   }
 
-  obterTotalComentarios(): Observable<number> {
-    return this.http
-      .get<{ total: number }>(`${this.baseUrl}/count`)
-      .pipe(map(response => response.total));
-  }
-
   obterTodos(): Observable<Comentario[]> {
     return this.http.get<BackendCommentDto[]>(this.baseUrl).pipe(
       map(comments => comments.map(comment => this.toLegacyComment(this.mapComment(comment))))

@@ -1,0 +1,253 @@
+@use '../../styles/variables' as vars;
+
+.settings {
+  background-color: vars.$color-background;
+  min-height: 100vh;
+}
+
+.settings__header {
+  padding: 16px;
+  border-bottom: 1px solid vars.$color-border;
+}
+
+.settings__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: vars.$color-text;
+}
+
+.settings__nav {
+  display: none;
+  gap: 0;
+  border-bottom: 1px solid vars.$color-border;
+  overflow-x: auto;
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+}
+
+.settings__nav-item {
+  flex: 1;
+  min-width: max-content;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 700;
+  color: vars.$color-text-secondary;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &--active {
+    color: vars.$color-text;
+    box-shadow: inset 0 -3px 0 vars.$color-primary;
+  }
+}
+
+.settings__layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings__sidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid vars.$color-border;
+  padding: 8px 0;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.settings__sidebar-item {
+  text-align: left;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: vars.$color-text-secondary;
+  cursor: pointer;
+
+  &:hover {
+    background-color: vars.$color-gray-hover;
+  }
+
+  &--active {
+    color: vars.$color-text;
+    background-color: vars.$color-hover;
+    font-weight: 700;
+  }
+}
+
+.settings__content {
+  padding: 24px 20px;
+}
+
+.settings__panel-title {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 800;
+  color: vars.$color-text;
+}
+
+.settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  input,
+  textarea {
+    font-family: inherit;
+    font-size: 15px;
+    border: 1px solid vars.$color-border;
+    border-radius: 8px;
+    padding: 12px;
+    color: vars.$color-text;
+    background: transparent;
+
+    &:focus {
+      outline: 2px solid vars.$color-primary;
+      outline-offset: 0;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 88px;
+  }
+
+  &--readonly input {
+    background-color: var(--nz-color-input-bg);
+    color: vars.$color-text-secondary;
+    cursor: not-allowed;
+  }
+}
+
+.settings__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: vars.$color-text;
+}
+
+.settings__hint {
+  font-size: 13px;
+  color: vars.$color-text-secondary;
+}
+
+.settings__counter {
+  align-self: flex-end;
+  font-size: 13px;
+  color: vars.$color-text-secondary;
+
+  &--warn {
+    color: vars.$color-like;
+    font-weight: 700;
+  }
+}
+
+.settings__message {
+  margin: 0 0 16px;
+  font-size: 14px;
+
+  &--error {
+    color: vars.$color-like;
+  }
+
+  &--success {
+    color: #00ba7c;
+  }
+}
+
+.settings__btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: vars.$color-primary;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.settings__toggle-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid vars.$color-border;
+  border-radius: 16px;
+}
+
+.settings__toggle-copy {
+  flex: 1;
+}
+
+.settings__toggle-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: vars.$color-text;
+}
+
+.settings__toggle-description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: vars.$color-text-secondary;
+}
+
+.settings-toggle {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  border: none;
+  border-radius: 9999px;
+  background-color: #cfd9de;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 200ms ease;
+  padding: 0;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--on {
+    background-color: vars.$color-primary;
+  }
+}
+
+.settings-toggle__thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 200ms ease;
+}
+
+.settings-toggle--on .settings-toggle__thumb {
+  transform: translateX(20px);
+}
