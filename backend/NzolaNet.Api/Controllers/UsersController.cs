@@ -1,8 +1,5 @@
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NzolaNet.Application.DTOs.Users;
 using NzolaNet.Application.Interfaces;
@@ -20,146 +17,117 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    // GET /api/users/{id} – Obter perfil público/privado do utilizador
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProfile(Guid id)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
-        var profile = await _userService.GetProfileAsync(id, currentUserId);
+        var profile = await _userService.GetUserResponseAsync(id);
         return Ok(profile);
     }
 
-    // GET /api/users/search – Pesquisar utilizadores
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string q)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
+        Guid? currentUserId = GetOptionalCurrentUserId();
         var users = await _userService.SearchUsersAsync(q ?? string.Empty, currentUserId);
         return Ok(users);
     }
 
-    // PUT /api/users/profile – Editar perfil do utilizador autenticado
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileDto updateDto)
+    {
+        if (!IsCurrentUser(id))
+        {
+            return Forbid();
+        }
+
+        var updatedProfile = await _userService.UpdateProfileAsync(id, updateDto);
+        return Ok(updatedProfile);
+    }
+
+    [Authorize]
+    [HttpPut("{id}/photo")]
+    public async Task<IActionResult> UploadPhoto(Guid id, IFormFile photo)
+    {
+        if (!IsCurrentUser(id))
+        {
+            return Forbid();
+        }
+
+        if (photo == null || photo.Length == 0)
+        {
+            return BadRequest(new { message = "Por favor, envie um ficheiro de imagem válido." });
+        }
+
+        var user = await _userService.UploadPhotoAsync(id, photo);
+        return Ok(user);
+    }
+
     [Authorize]
     [HttpPut("profile")]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto updateDto)
+    public async Task<IActionResult> UpdateProfileLegacy([FromBody] UpdateProfileDto updateDto)
     {
         var currentUserId = GetCurrentUserId();
         var updatedProfile = await _userService.UpdateProfileAsync(currentUserId, updateDto);
         return Ok(updatedProfile);
     }
 
-    // POST /api/users/photo – Upload de foto de perfil (requer autenticação)
     [Authorize]
     [HttpPost("photo")]
-    public async Task<IActionResult> UploadPhoto(IFormFile photoFile)
+    public async Task<IActionResult> UploadPhotoLegacy(IFormFile photoFile)
     {
         if (photoFile == null || photoFile.Length == 0)
         {
-            return BadRequest(new { Message = "Por favor, envie um ficheiro de imagem válido." });
+            return BadRequest(new { message = "Por favor, envie um ficheiro de imagem válido." });
         }
 
         var currentUserId = GetCurrentUserId();
-        var photoPath = await _userService.UploadPhotoAsync(currentUserId, photoFile);
-        return Ok(new { PhotoPath = photoPath, Message = "Foto de perfil atualizada com sucesso!" });
+        var user = await _userService.UploadPhotoAsync(currentUserId, photoFile);
+        return Ok(user);
     }
 
-    // POST /api/users/{id}/follow – Seguir um utilizador (requer autenticação)
     [Authorize]
     [HttpPost("{id}/follow")]
     public async Task<IActionResult> FollowUser(Guid id)
     {
         var currentUserId = GetCurrentUserId();
-        var result = await _userService.FollowUserAsync(currentUserId, id);
-        if (result.Success)
-        {
-            return Ok(result);
-        }
-        return BadRequest(new { Message = result.Message });
+        await _userService.FollowUserAsync(currentUserId, id);
+        return Ok(new { message = "Utilizador seguido com sucesso." });
     }
 
-    // DELETE /api/users/{id}/follow – Deixar de seguir um utilizador (requer autenticação)
     [Authorize]
     [HttpDelete("{id}/follow")]
     public async Task<IActionResult> UnfollowUser(Guid id)
     {
         var currentUserId = GetCurrentUserId();
-        var success = await _userService.UnfollowUserAsync(currentUserId, id);
-        if (success)
-        {
-            return Ok(new { Message = "Deixou de seguir o utilizador com sucesso." });
-        }
-        return BadRequest(new { Message = "Não foi possível deixar de seguir o utilizador." });
+        await _userService.UnfollowUserAsync(currentUserId, id);
+        return Ok(new { message = "Deixou de seguir o utilizador com sucesso." });
     }
 
-    // GET /api/users/{id}/seguidores – Listar seguidores de um utilizador específico (suporta privado)
-    [HttpGet("{id}/seguidores")]
+    [HttpGet("{id}/followers")]
     public async Task<IActionResult> GetFollowers(Guid id)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
-        try
-        {
-            var followers = await _userService.GetFollowersAsync(id, currentUserId);
-            return Ok(followers);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Forbid();
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { Message = ex.Message });
-        }
+        return await GetFollowersInternal(id);
     }
 
-    // GET /api/users/{id}/seguindo – Listar utilizadores seguidos por um utilizador específico (suporta privado)
-    [HttpGet("{id}/seguindo")]
+    [HttpGet("{id}/seguidores")]
+    public async Task<IActionResult> GetFollowersLegacy(Guid id)
+    {
+        return await GetFollowersInternal(id);
+    }
+
+    [HttpGet("{id}/following")]
     public async Task<IActionResult> GetFollowing(Guid id)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
-        try
-        {
-            var following = await _userService.GetFollowingAsync(id, currentUserId);
-            return Ok(following);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Forbid();
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { Message = ex.Message });
-        }
+        return await GetFollowingInternal(id);
     }
 
-    // GET /api/users/follow-requests – Listar pedidos de seguimento pendentes (requer autenticação)
+    [HttpGet("{id}/seguindo")]
+    public async Task<IActionResult> GetFollowingLegacy(Guid id)
+    {
+        return await GetFollowingInternal(id);
+    }
+
     [Authorize]
     [HttpGet("follow-requests")]
     public async Task<IActionResult> GetPendingRequests()
@@ -169,7 +137,6 @@ public class UsersController : ControllerBase
         return Ok(requests);
     }
 
-    // POST /api/users/follow-requests/{followerId}/approve – Aprovar pedido (requer autenticação)
     [Authorize]
     [HttpPost("follow-requests/{followerId}/approve")]
     public async Task<IActionResult> ApproveFollowRequest(Guid followerId)
@@ -178,12 +145,12 @@ public class UsersController : ControllerBase
         var success = await _userService.ApproveFollowRequestAsync(currentUserId, followerId);
         if (success)
         {
-            return Ok(new { Message = "Pedido de seguimento aprovado com sucesso." });
+            return Ok(new { message = "Pedido de seguimento aprovado com sucesso." });
         }
-        return BadRequest(new { Message = "Não foi possível aprovar o pedido de seguimento." });
+
+        return BadRequest(new { message = "Não foi possível aprovar o pedido de seguimento." });
     }
 
-    // POST /api/users/follow-requests/{followerId}/reject – Rejeitar pedido (requer autenticação)
     [Authorize]
     [HttpPost("follow-requests/{followerId}/reject")]
     public async Task<IActionResult> RejectFollowRequest(Guid followerId)
@@ -192,21 +159,73 @@ public class UsersController : ControllerBase
         var success = await _userService.RejectFollowRequestAsync(currentUserId, followerId);
         if (success)
         {
-            return Ok(new { Message = "Pedido de seguimento rejeitado com sucesso." });
+            return Ok(new { message = "Pedido de seguimento rejeitado com sucesso." });
         }
-        return BadRequest(new { Message = "Não foi possível rejeitar o pedido de seguimento." });
+
+        return BadRequest(new { message = "Não foi possível rejeitar o pedido de seguimento." });
+    }
+
+    private async Task<IActionResult> GetFollowersInternal(Guid id)
+    {
+        var currentUserId = GetOptionalCurrentUserId();
+
+        try
+        {
+            var followers = await _userService.GetFollowersAsync(id, currentUserId);
+            return Ok(followers);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
+
+    private async Task<IActionResult> GetFollowingInternal(Guid id)
+    {
+        var currentUserId = GetOptionalCurrentUserId();
+
+        try
+        {
+            var following = await _userService.GetFollowingAsync(id, currentUserId);
+            return Ok(following);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
+
+    private Guid? GetOptionalCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("sub")?.Value;
+
+        if (Guid.TryParse(userIdClaim, out var parsedId))
+        {
+            return parsedId;
+        }
+
+        return null;
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                        ?? User.FindFirst("sub")?.Value;
 
-        if (string.IsNullOrEmpty(userIdClaim))
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
             throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
         }
 
-        return Guid.Parse(userIdClaim);
+        return userId;
+    }
+
+    private bool IsCurrentUser(Guid id)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("sub")?.Value;
+
+        return Guid.TryParse(userIdClaim, out var currentUserId) && currentUserId == id;
     }
 }

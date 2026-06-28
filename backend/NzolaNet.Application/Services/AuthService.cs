@@ -1,7 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using NzolaNet.Application.DTOs.Auth;
+using NzolaNet.Application.DTOs.Users;
+using NzolaNet.Application.Exceptions;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -12,34 +12,38 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenService _tokenService;
+    private readonly IUserService _userService;
     private readonly SignInManager<User> _signInManager;
 
     public AuthService(
-        IUserRepository userRepository, 
-        IJwtTokenService tokenService, 
+        IUserRepository userRepository,
+        IJwtTokenService tokenService,
+        IUserService userService,
         SignInManager<User> signInManager)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
+        _userService = userService;
         _signInManager = signInManager;
     }
 
-    public async Task<string> RegisterAsync(RegisterDto registerDto)
+    public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
     {
         if (await _userRepository.ExistsByEmailAsync(registerDto.Email))
         {
-            throw new ArgumentException("O email já se encontra registado.");
+            throw new ConflictException("O email já se encontra registado.");
         }
 
         if (await _userRepository.ExistsByUsernameAsync(registerDto.Username))
         {
-            throw new ArgumentException("O nome de utilizador já está a ser utilizado.");
+            throw new ConflictException("O nome de utilizador já está a ser utilizado.");
         }
 
         var user = new User
         {
             UserName = registerDto.Username,
             Email = registerDto.Email,
+            DisplayName = registerDto.DisplayName,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -51,33 +55,44 @@ public class AuthService : IAuthService
 
         await _userRepository.AddToRoleAsync(user, "User");
 
-        return await _tokenService.GenerateTokenAsync(user);
+        var token = await _tokenService.GenerateTokenAsync(user);
+        var userResponse = await _userService.GetUserResponseAsync(user.Id);
+
+        return new AuthResponseDto
+        {
+            Token = token,
+            User = userResponse
+        };
     }
 
-    public async Task<string> LoginAsync(LoginDto loginDto)
+    public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
     {
-        User? user = null;
-
-        if (loginDto.UsernameOrEmail.Contains("@"))
-        {
-            user = await _userRepository.GetByEmailAsync(loginDto.UsernameOrEmail);
-        }
-        else
-        {
-            user = await _userRepository.GetByUsernameAsync(loginDto.UsernameOrEmail);
-        }
-
+        var user = await _userRepository.GetByEmailAsync(loginDto.Email);
         if (user == null)
         {
-            throw new ArgumentException("Credenciais inválidas.");
+            throw new InvalidCredentialsException();
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
         if (!result.Succeeded)
         {
-            throw new ArgumentException("Credenciais inválidas.");
+            throw new InvalidCredentialsException();
         }
 
-        return await _tokenService.GenerateTokenAsync(user);
+        var token = await _tokenService.GenerateTokenAsync(user);
+        var userResponse = await _userService.GetUserResponseAsync(user.Id);
+
+        return new AuthResponseDto
+        {
+            Token = token,
+            User = userResponse
+        };
+    }
+
+    public Task<string> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+    {
+        // TODO: integrar serviço de email
+        _ = forgotPasswordDto;
+        return Task.FromResult("Se o email existir, receberás instruções.");
     }
 }

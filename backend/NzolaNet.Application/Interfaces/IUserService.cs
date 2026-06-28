@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Users;
@@ -7,15 +6,16 @@ namespace NzolaNet.Application.Interfaces;
 
 public interface IUserService
 {
+    Task<UserResponseDto> GetUserResponseAsync(Guid userId);
     Task<UserProfileDto> GetProfileAsync(Guid userId, Guid? currentUserId = null);
-    Task<UserProfileDto> UpdateProfileAsync(Guid userId, UpdateProfileDto updateDto);
-    Task<string> UploadPhotoAsync(Guid userId, IFormFile photoFile);
-    Task<FollowResultDto> FollowUserAsync(Guid followerId, Guid followedId);
-    Task<bool> UnfollowUserAsync(Guid followerId, Guid followedId);
+    Task<UserResponseDto> UpdateProfileAsync(Guid userId, UpdateProfileDto updateDto);
+    Task<UserResponseDto> UploadPhotoAsync(Guid userId, IFormFile photoFile);
+    Task FollowUserAsync(Guid followerId, Guid followedId);
+    Task UnfollowUserAsync(Guid followerId, Guid followedId);
     Task<IEnumerable<FollowRequestDto>> GetPendingRequestsAsync(Guid userId);
     Task<bool> ApproveFollowRequestAsync(Guid followedId, Guid followerId);
     Task<bool> RejectFollowRequestAsync(Guid followedId, Guid followerId);
-    Task<System.Collections.Generic.IEnumerable<UserProfileDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null);
-    Task<System.Collections.Generic.IEnumerable<UserProfileDto>> GetFollowingAsync(Guid userId, Guid? currentUserId = null);
-    Task<System.Collections.Generic.IEnumerable<UserProfileDto>> SearchUsersAsync(string query, Guid? currentUserId = null);
+    Task<IEnumerable<UserResponseDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null);
+    Task<IEnumerable<UserResponseDto>> GetFollowingAsync(Guid userId, Guid? currentUserId = null);
+    Task<IEnumerable<UserProfileDto>> SearchUsersAsync(string query, Guid? currentUserId = null);
 }

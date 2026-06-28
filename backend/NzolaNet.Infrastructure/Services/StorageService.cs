@@ -18,26 +18,31 @@ public class StorageService : IStorageService
 
     public async Task<string> SaveFileAsync(IFormFile file, string folderName)
     {
+        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        return await SaveFileAsync(file, folderName, uniqueFileName);
+    }
+
+    public async Task<string> SaveFileAsync(IFormFile file, string folderName, string fileName)
+    {
         if (file == null || file.Length == 0)
             throw new ArgumentException("O ficheiro está vazio.");
 
         var rootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
         var uploadsFolder = Path.Combine(rootPath, folderName);
-        
+
         if (!Directory.Exists(uploadsFolder))
         {
             Directory.CreateDirectory(uploadsFolder);
         }
 
-        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        var filePath = Path.Combine(uploadsFolder, fileName);
 
         using (var fileStream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
 
-        return Path.Combine("/", folderName, uniqueFileName).Replace("\\", "/");
+        return Path.Combine("/", folderName, fileName).Replace("\\", "/");
     }
 
     public void DeleteFile(string filePath)

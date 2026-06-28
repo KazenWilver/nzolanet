@@ -15,4 +15,7 @@ public class RegisterDto
     [Required(ErrorMessage = "A palavra-passe é obrigatória.")]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "A palavra-passe deve ter pelo menos 6 caracteres.")]
     public string Password { get; set; } = string.Empty;
+
+    [StringLength(100, ErrorMessage = "O nome de exibição não pode exceder 100 caracteres.")]
+    public string? DisplayName { get; set; }
 }

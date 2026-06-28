@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Users;
+using NzolaNet.Application.Exceptions;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -24,6 +25,31 @@ public class UserService : IUserService
         _userRepository = userRepository;
         _storageService = storageService;
         _followRepository = followRepository;
+    }
+
+    public async Task<UserResponseDto> GetUserResponseAsync(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        var followersCount = await _followRepository.GetFollowersCountAsync(userId);
+        var followingCount = await _followRepository.GetFollowingCountAsync(userId);
+
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            Username = user.UserName ?? string.Empty,
+            DisplayName = user.DisplayName,
+            Bio = user.Bio,
+            ProfilePhotoUrl = user.ProfilePhoto,
+            IsPrivate = user.IsPrivate,
+            FollowersCount = followersCount,
+            FollowingCount = followingCount,
+            CreatedAt = user.CreatedAt
+        };
     }
 
     public async Task<UserProfileDto> GetProfileAsync(Guid userId, Guid? currentUserId = null)
@@ -66,7 +92,7 @@ public class UserService : IUserService
         return profileDto;
     }
 
-    public async Task<UserProfileDto> UpdateProfileAsync(Guid userId, UpdateProfileDto updateDto)
+    public async Task<UserResponseDto> UpdateProfileAsync(Guid userId, UpdateProfileDto updateDto)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -74,6 +100,7 @@ public class UserService : IUserService
             throw new ArgumentException("Utilizador não encontrado.");
         }
 
+        if (updateDto.DisplayName != null) user.DisplayName = updateDto.DisplayName;
         if (updateDto.Bio != null) user.Bio = updateDto.Bio;
         if (updateDto.IsPrivate.HasValue) user.IsPrivate = updateDto.IsPrivate.Value;
         user.UpdatedAt = DateTime.UtcNow;
@@ -84,10 +111,10 @@ public class UserService : IUserService
             throw new ArgumentException("Não foi possível atualizar o perfil.");
         }
 
-        return await GetProfileAsync(userId, userId);
+        return await GetUserResponseAsync(userId);
     }
 
-    public async Task<string> UploadPhotoAsync(Guid userId, IFormFile photoFile)
+    public async Task<UserResponseDto> UploadPhotoAsync(Guid userId, IFormFile photoFile)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -100,17 +127,19 @@ public class UserService : IUserService
             _storageService.DeleteFile(user.ProfilePhoto);
         }
 
-        var photoPath = await _storageService.SaveFileAsync(photoFile, "uploads/profiles");
-        
+        var extension = Path.GetExtension(photoFile.FileName);
+        var fileName = $"{userId}_{DateTime.UtcNow:yyyyMMddHHmmss}{extension}";
+        var photoPath = await _storageService.SaveFileAsync(photoFile, "uploads/profiles", fileName);
+
         user.ProfilePhoto = photoPath;
         user.UpdatedAt = DateTime.UtcNow;
-        
+
         await _userRepository.UpdateAsync(user);
 
-        return photoPath;
+        return await GetUserResponseAsync(userId);
     }
 
-    public async Task<FollowResultDto> FollowUserAsync(Guid followerId, Guid followedId)
+    public async Task FollowUserAsync(Guid followerId, Guid followedId)
     {
         if (followerId == followedId)
         {
@@ -128,23 +157,13 @@ public class UserService : IUserService
         var alreadyFollowing = await _followRepository.IsFollowingAsync(followerId, followedId);
         if (alreadyFollowing)
         {
-            return new FollowResultDto
-            {
-                Success = true,
-                IsPending = false,
-                Message = "Já segues este utilizador."
-            };
+            throw new ConflictException("Já segues este utilizador.");
         }
 
         var alreadyPending = await _followRepository.IsFollowPendingAsync(followerId, followedId);
         if (alreadyPending)
         {
-            return new FollowResultDto
-            {
-                Success = true,
-                IsPending = true,
-                Message = "Pedido de seguimento já se encontra pendente."
-            };
+            throw new ConflictException("Pedido de seguimento já se encontra pendente.");
         }
 
         var follow = new Follow
@@ -158,20 +177,11 @@ public class UserService : IUserService
         var success = await _followRepository.AddFollowAsync(follow);
         if (!success)
         {
-            return new FollowResultDto { Success = false, Message = "Não foi possível seguir o utilizador." };
+            throw new ArgumentException("Não foi possível seguir o utilizador.");
         }
-
-        return new FollowResultDto
-        {
-            Success = true,
-            IsPending = followed.IsPrivate,
-            Message = followed.IsPrivate 
-                ? "Pedido de seguimento enviado com sucesso." 
-                : "Começou a seguir o utilizador com sucesso."
-        };
     }
 
-    public async Task<bool> UnfollowUserAsync(Guid followerId, Guid followedId)
+    public async Task UnfollowUserAsync(Guid followerId, Guid followedId)
     {
         var follower = await _userRepository.GetByIdAsync(followerId);
         var followed = await _userRepository.GetByIdAsync(followedId);
@@ -181,7 +191,18 @@ public class UserService : IUserService
             throw new ArgumentException("Utilizador não encontrado.");
         }
 
-        return await _followRepository.RemoveFollowAsync(followerId, followedId);
+        var isFollowing = await _followRepository.IsFollowingAsync(followerId, followedId);
+        var isPending = await _followRepository.IsFollowPendingAsync(followerId, followedId);
+        if (!isFollowing && !isPending)
+        {
+            throw new ArgumentException("Não segues este utilizador.");
+        }
+
+        var removed = await _followRepository.RemoveFollowAsync(followerId, followedId);
+        if (!removed)
+        {
+            throw new ArgumentException("Não foi possível deixar de seguir o utilizador.");
+        }
     }
 
     public async Task<IEnumerable<FollowRequestDto>> GetPendingRequestsAsync(Guid userId)
@@ -213,7 +234,7 @@ public class UserService : IUserService
         return await _followRepository.RemoveFollowAsync(followerId, followedId);
     }
 
-    public async Task<IEnumerable<UserProfileDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null)
+    public async Task<IEnumerable<UserResponseDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -236,15 +257,15 @@ public class UserService : IUserService
         }
 
         var followers = user.Followers.Where(f => f.IsApproved).Select(f => f.Follower);
-        var dtos = new List<UserProfileDto>();
+        var dtos = new List<UserResponseDto>();
         foreach (var f in followers)
         {
-            dtos.Add(await GetProfileAsync(f.Id, currentUserId));
+            dtos.Add(await GetUserResponseAsync(f.Id));
         }
         return dtos;
     }
 
-    public async Task<IEnumerable<UserProfileDto>> GetFollowingAsync(Guid userId, Guid? currentUserId = null)
+    public async Task<IEnumerable<UserResponseDto>> GetFollowingAsync(Guid userId, Guid? currentUserId = null)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -267,10 +288,10 @@ public class UserService : IUserService
         }
 
         var following = user.Following.Where(f => f.IsApproved).Select(f => f.Followed);
-        var dtos = new List<UserProfileDto>();
+        var dtos = new List<UserResponseDto>();
         foreach (var f in following)
         {
-            dtos.Add(await GetProfileAsync(f.Id, currentUserId));
+            dtos.Add(await GetUserResponseAsync(f.Id));
         }
         return dtos;
     }

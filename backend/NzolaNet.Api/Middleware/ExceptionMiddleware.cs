@@ -1,10 +1,6 @@
-using System;
 using System.Net;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using NzolaNet.Application.Exceptions;
 
 namespace NzolaNet.Api.Middleware;
 
@@ -43,12 +39,20 @@ public class ExceptionMiddleware
 
         switch (exception)
         {
-            case UnauthorizedAccessException:
+            case ConflictException conflictEx:
+                statusCode = HttpStatusCode.Conflict;
+                message = conflictEx.Message;
+                break;
+            case InvalidCredentialsException invalidCredentialsEx:
+                statusCode = HttpStatusCode.Unauthorized;
+                message = invalidCredentialsEx.Message;
+                break;
+            case UnauthorizedAccessException unauthorizedEx:
                 statusCode = HttpStatusCode.Forbidden;
-                message = exception.Message;
+                message = unauthorizedEx.Message;
                 break;
             case ArgumentException argEx:
-                if (argEx.Message.Contains("não encontrado", StringComparison.OrdinalIgnoreCase) || 
+                if (argEx.Message.Contains("não encontrado", StringComparison.OrdinalIgnoreCase) ||
                     argEx.Message.Contains("não encontrada", StringComparison.OrdinalIgnoreCase))
                 {
                     statusCode = HttpStatusCode.NotFound;
@@ -57,6 +61,7 @@ public class ExceptionMiddleware
                 {
                     statusCode = HttpStatusCode.BadRequest;
                 }
+
                 message = exception.Message;
                 break;
             default:
@@ -64,6 +69,7 @@ public class ExceptionMiddleware
                 {
                     message = exception.Message;
                 }
+
                 break;
         }
 
