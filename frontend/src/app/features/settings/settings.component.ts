@@ -119,4 +119,8 @@ export class SettingsComponent implements OnInit {
       }
     });
   }
+
+  handleLogout(): void {
+    this.authService.logout();
+  }
 }

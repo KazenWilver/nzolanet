@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -19,12 +19,16 @@ export class TopbarComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   currentUser: User | null = null;
+  accountMenuOpen = false;
 
   constructor() {
     this.authService.currentUser$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(user => {
         this.currentUser = user;
+        if (!user) {
+          this.accountMenuOpen = false;
+        }
       });
   }
 
@@ -34,5 +38,26 @@ export class TopbarComponent {
 
   handleToggleTheme(): void {
     this.themeService.toggleTheme();
+  }
+
+  handleToggleAccountMenu(): void {
+    this.accountMenuOpen = !this.accountMenuOpen;
+  }
+
+  handleCloseAccountMenu(): void {
+    this.accountMenuOpen = false;
+  }
+
+  handleLogout(): void {
+    this.accountMenuOpen = false;
+    this.authService.logout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.topbar__account')) {
+      this.accountMenuOpen = false;
+    }
   }
 }

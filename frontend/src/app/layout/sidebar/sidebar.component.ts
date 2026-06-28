@@ -90,6 +90,10 @@ export class SidebarComponent {
     this.themeService.toggleTheme();
   }
 
+  handleLogout(): void {
+    this.authService.logout();
+  }
+
   isActive(route: string, exact = false): boolean {
     if (exact) {
       return this.router.url === route || this.router.url.startsWith(`${route}?`);

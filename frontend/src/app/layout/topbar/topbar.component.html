@@ -24,12 +24,35 @@
   </a>
 
   @if (currentUser) {
-    <a class="topbar__profile" [routerLink]="profileRoute" [attr.aria-label]="'Perfil de ' + currentUser.username">
-      <app-avatar
-        [src]="currentUser.profilePhotoUrl"
-        [username]="currentUser.username"
-        size="sm"
-      />
-    </a>
+    <div class="topbar__account">
+      <button
+        type="button"
+        class="topbar__account-trigger"
+        (click)="handleToggleAccountMenu()"
+        [attr.aria-expanded]="accountMenuOpen"
+        aria-haspopup="menu"
+        [attr.aria-label]="'Menu de ' + currentUser.username"
+      >
+        <app-avatar
+          [src]="currentUser.profilePhotoUrl"
+          [username]="currentUser.username"
+          size="sm"
+        />
+      </button>
+
+      @if (accountMenuOpen) {
+        <div class="topbar__account-menu" role="menu">
+          <a class="topbar__account-item" routerLink="/settings" role="menuitem" (click)="handleCloseAccountMenu()">
+            Definições
+          </a>
+          <a class="topbar__account-item" [routerLink]="profileRoute" role="menuitem" (click)="handleCloseAccountMenu()">
+            Perfil
+          </a>
+          <button type="button" class="topbar__account-item topbar__account-item--danger" role="menuitem" (click)="handleLogout()">
+            Terminar sessão
+          </button>
+        </div>
+      }
+    </div>
   }
 </header>

@@ -119,6 +119,14 @@
           <app-placeholder-feature featureName="Alterar palavra-passe" />
         </section>
       }
+
+      <section class="settings__panel settings__panel--danger" aria-labelledby="settings-session-title">
+        <h2 id="settings-session-title" class="settings__panel-title">Sessão</h2>
+        <p class="settings__session-text">Termina a sessão neste dispositivo. Terás de voltar a iniciar sessão para aceder à conta.</p>
+        <button type="button" class="settings__logout-btn" (click)="handleLogout()">
+          Terminar sessão
+        </button>
+      </section>
     </div>
   </div>
 </section>

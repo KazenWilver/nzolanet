@@ -280,3 +280,36 @@
 .settings-toggle--on .settings-toggle__thumb {
   transform: translateX(20px);
 }
+
+.settings__panel--danger {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid vars.$color-border;
+}
+
+.settings__session-text {
+  margin: 0 0 var(--spacing-md);
+  font-size: 14px;
+  line-height: 1.5;
+  color: vars.$color-text-secondary;
+}
+
+.settings__logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: 1px solid vars.$color-like;
+  border-radius: 9999px;
+  background: transparent;
+  color: vars.$color-like;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background-color: vars.$color-like;
+    color: #fff;
+  }
+}

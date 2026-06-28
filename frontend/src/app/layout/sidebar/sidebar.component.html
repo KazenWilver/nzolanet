@@ -65,6 +65,10 @@
           <small>@{{ currentUser.username }}</small>
         </span>
       </a>
+      <button type="button" class="sidebar__logout" (click)="handleLogout()">
+        <span class="sidebar__icon" data-icon="logout" aria-hidden="true"></span>
+        <span class="sidebar__label">Terminar sessão</span>
+      </button>
     }
   </div>
 
@@ -78,8 +82,9 @@
     <button type="button" class="sidebar__mobile-publish" (click)="handleOpenPublishModal()" aria-label="Publicar">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
     </button>
-    <a class="sidebar__mobile-link" routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')">
-      <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>
+    <a class="sidebar__mobile-link" routerLink="/settings" [class.sidebar__mobile-link--active]="isActive('/settings')">
+      <span class="sidebar__icon" data-icon="settings" aria-hidden="true"></span>
+      <span class="sr-only">Definições</span>
     </a>
     <a class="sidebar__mobile-link" [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)">
       @if (currentUser) {
