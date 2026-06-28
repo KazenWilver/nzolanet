@@ -1,9 +1,8 @@
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NzolaNet.Application.DTOs.Posts;
+using NzolaNet.Application.DTOs.Publications;
 using NzolaNet.Application.Interfaces;
 
 namespace NzolaNet.Api.Controllers;
@@ -19,63 +18,43 @@ public class PostsController : ControllerBase
         _postService = postService;
     }
 
-    // GET /api/posts – Listar TODAS as publicações em ordem cronológica (público)
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
-        var posts = await _postService.GetAllAsync(currentUserId);
-        return Ok(posts);
+        var posts = await _postService.GetAllAsync(GetOptionalCurrentUserId());
+        return Ok(posts.Select(ToLegacyPostDto));
     }
 
-    // GET /api/posts/{id} – Obter uma publicação específica por ID
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
+        try
         {
-            currentUserId = parsedId;
-        }
+            var post = await _postService.GetByIdAsync(id, GetOptionalCurrentUserId());
+            if (post == null)
+            {
+                return NotFound(new { Message = "Publicação não encontrada." });
+            }
 
-        var post = await _postService.GetByIdAsync(id, currentUserId);
-        if (post == null)
+            return Ok(ToLegacyPostDto(post));
+        }
+        catch (UnauthorizedAccessException)
         {
-            return NotFound(new { Message = "Publicação não encontrada." });
+            return Forbid();
         }
-
-        return Ok(post);
     }
 
-    // GET /api/posts/utilizador/{utilizadorId} – Listar publicações de um utilizador específico (suporta privado)
     [HttpGet("utilizador/{utilizadorId}")]
     public async Task<IActionResult> GetByUserId(Guid utilizadorId)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
         try
         {
-            var posts = await _postService.GetByUserIdAsync(utilizadorId, currentUserId);
-            return Ok(posts);
+            var posts = await _postService.GetByUserIdAsync(utilizadorId, GetOptionalCurrentUserId());
+            return Ok(posts.Select(ToLegacyPostDto));
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
-            return Forbid(); // Ou StatusCode(403, new { Message = ex.Message })
+            return Forbid();
         }
         catch (ArgumentException ex)
         {
@@ -83,48 +62,72 @@ public class PostsController : ControllerBase
         }
     }
 
-    // GET /api/posts/feed – Listar publicações de utilizadores seguidos em ordem cronológica (requer autenticação)
     [Authorize]
     [HttpGet("feed")]
     public async Task<IActionResult> GetFeed()
     {
         var userId = GetCurrentUserId();
         var feed = await _postService.GetFeedAsync(userId);
-        return Ok(feed);
+        return Ok(feed.Select(ToLegacyPostDto));
     }
 
-    // POST /api/posts – Criar uma nova publicação com upload de imagem/vídeo (requer autenticação)
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreatePostDto createDto)
     {
         var userId = GetCurrentUserId();
-        var post = await _postService.CreateAsync(userId, createDto);
-        return CreatedAtAction(nameof(GetAll), new { id = post.Id }, post);
+        var publicationDto = new CreatePublicationDto
+        {
+            Text = createDto.Text,
+            Image = createDto.Image,
+            Video = createDto.Video
+        };
+        var post = await _postService.CreateAsync(userId, publicationDto);
+        return CreatedAtAction(nameof(GetAll), new { id = post.Id }, ToLegacyPostDto(post));
     }
 
-    // PUT /api/posts/{id} – Editar apenas o texto da própria publicação (requer autenticação)
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePostDto updateDto)
     {
         var userId = GetCurrentUserId();
-        var post = await _postService.UpdateAsync(userId, id, updateDto);
-        return Ok(post);
+        var post = await _postService.UpdateAsync(userId, id, new UpdatePublicationDto { Text = updateDto.Text });
+        return Ok(ToLegacyPostDto(post));
     }
 
-    // DELETE /api/posts/{id} – Eliminar apenas a própria publicação (requer autenticação)
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = GetCurrentUserId();
-        var deleted = await _postService.DeleteAsync(userId, id);
-        if (deleted)
+        await _postService.DeleteAsync(userId, id);
+        return Ok(new { Message = "Publicação eliminada com sucesso." });
+    }
+
+    private static PostDto ToLegacyPostDto(PublicationResponseDto publication)
+    {
+        return new PostDto
         {
-            return Ok(new { Message = "Publicação eliminada com sucesso." });
-        }
-        return BadRequest(new { Message = "Não foi possível eliminar a publicação." });
+            Id = publication.Id,
+            UserId = publication.AuthorId,
+            UserName = publication.AuthorUsername,
+            UserPhoto = publication.AuthorPhotoUrl,
+            Text = publication.Text ?? string.Empty,
+            ImageUrl = publication.ImageUrl,
+            VideoUrl = publication.VideoUrl,
+            CreatedAt = publication.CreatedAt,
+            CommentsCount = publication.CommentsCount,
+            BazesCount = publication.LikesCount,
+            UserHasBaze = publication.HasLiked ?? false
+        };
+    }
+
+    private Guid? GetOptionalCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("sub")?.Value;
+
+        return Guid.TryParse(userIdClaim, out var parsedId) ? parsedId : null;
     }
 
     private Guid GetCurrentUserId()

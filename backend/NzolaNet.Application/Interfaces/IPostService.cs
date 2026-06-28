@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using NzolaNet.Application.DTOs.Posts;
+using NzolaNet.Application.DTOs.Publications;
 
 namespace NzolaNet.Application.Interfaces;
 
 public interface IPostService
 {
-    Task<PostDto> CreateAsync(Guid userId, CreatePostDto createDto);
-    Task<PostDto> UpdateAsync(Guid userId, Guid postId, UpdatePostDto updateDto);
-    Task<bool> DeleteAsync(Guid userId, Guid postId);
-    Task<IEnumerable<PostDto>> GetAllAsync(Guid? currentUserId = null);
-    Task<IEnumerable<PostDto>> GetFeedAsync(Guid userId);
-    Task<IEnumerable<PostDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
-    Task<PostDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
+    Task<PublicationResponseDto> CreateAsync(Guid userId, CreatePublicationDto createDto);
+    Task<PublicationResponseDto> UpdateAsync(Guid userId, Guid postId, UpdatePublicationDto updateDto);
+    Task DeleteAsync(Guid userId, Guid postId);
+    Task<IEnumerable<PublicationResponseDto>> GetAllAsync(Guid? currentUserId = null);
+    Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId);
+    Task<IEnumerable<PublicationResponseDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
+    Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
 }

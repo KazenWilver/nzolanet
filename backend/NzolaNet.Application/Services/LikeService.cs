@@ -1,5 +1,4 @@
-using System;
-using System.Threading.Tasks;
+using NzolaNet.Application.Exceptions;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -17,7 +16,34 @@ public class LikeService : ILikeService
         _postRepository = postRepository;
     }
 
-    public async Task<bool> ToggleLikeAsync(Guid userId, Guid postId)
+    public async Task LikeAsync(Guid userId, Guid postId)
+    {
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            throw new ArgumentException("Publicação não encontrada.");
+        }
+
+        if (await _likeRepository.HasUserLikedAsync(userId, postId))
+        {
+            throw new ConflictException("Já deste baze nesta publicação.");
+        }
+
+        var like = new Like
+        {
+            UserId = userId,
+            PostId = postId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var created = await _likeRepository.CreateAsync(like);
+        if (!created)
+        {
+            throw new ArgumentException("Não foi possível dar baze na publicação.");
+        }
+    }
+
+    public async Task UnlikeAsync(Guid userId, Guid postId)
     {
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
@@ -26,21 +52,28 @@ public class LikeService : ILikeService
         }
 
         var existingLike = await _likeRepository.GetByUserAndPostAsync(userId, postId);
+        if (existingLike == null)
+        {
+            throw new ArgumentException("Ainda não deste baze nesta publicação.");
+        }
 
-        if (existingLike != null)
+        var deleted = await _likeRepository.DeleteAsync(existingLike);
+        if (!deleted)
         {
-            return await _likeRepository.DeleteAsync(existingLike);
+            throw new ArgumentException("Não foi possível remover o baze.");
         }
-        else
+    }
+
+    public async Task<bool> ToggleLikeAsync(Guid userId, Guid postId)
+    {
+        if (await _likeRepository.HasUserLikedAsync(userId, postId))
         {
-            var like = new Like
-            {
-                UserId = userId,
-                PostId = postId,
-                CreatedAt = DateTime.UtcNow
-            };
-            return await _likeRepository.CreateAsync(like);
+            await UnlikeAsync(userId, postId);
+            return true;
         }
+
+        await LikeAsync(userId, postId);
+        return true;
     }
 
     public async Task<int> GetLikeCountAsync(Guid postId)

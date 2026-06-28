@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +15,18 @@ using NzolaNet.Infrastructure.Services;
 using NzolaNet.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+const long maxUploadBytes = 52_428_800; // 50 MB
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = maxUploadBytes;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = maxUploadBytes;
+});
 
 // 1. Configura a ligação à Base de Dados com EF Core e SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 

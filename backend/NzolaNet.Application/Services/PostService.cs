@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NzolaNet.Application.DTOs.Posts;
+using NzolaNet.Application.DTOs.Publications;
+using NzolaNet.Application.Helpers;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -17,7 +14,7 @@ public class PostService : IPostService
     private readonly IStorageService _storageService;
 
     public PostService(
-        IPostRepository postRepository, 
+        IPostRepository postRepository,
         IUserRepository userRepository,
         IFollowRepository followRepository,
         IStorageService storageService)
@@ -28,7 +25,7 @@ public class PostService : IPostService
         _storageService = storageService;
     }
 
-    public async Task<PostDto> CreateAsync(Guid userId, CreatePostDto createDto)
+    public async Task<PublicationResponseDto> CreateAsync(Guid userId, CreatePublicationDto createDto)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -36,25 +33,29 @@ public class PostService : IPostService
             throw new ArgumentException("Utilizador não encontrado.");
         }
 
-        string? imagePath = null;
-        string? videoPath = null;
+        var hasText = !string.IsNullOrWhiteSpace(createDto.Text);
+        var hasImage = createDto.Image is { Length: > 0 };
+        var hasVideo = createDto.Video is { Length: > 0 };
 
-        if (createDto.Image != null && createDto.Image.Length > 0)
+        if (!hasText && !hasImage && !hasVideo)
         {
-            imagePath = await _storageService.SaveFileAsync(createDto.Image, "uploads/posts/images");
+            throw new ArgumentException("A publicação deve conter texto, imagem ou vídeo.");
         }
 
-        if (createDto.Video != null && createDto.Video.Length > 0)
+        if (hasImage)
         {
-            videoPath = await _storageService.SaveFileAsync(createDto.Video, "uploads/posts/videos");
+            FileHelper.ValidateImageExtension(createDto.Image!.FileName);
+        }
+
+        if (hasVideo)
+        {
+            FileHelper.ValidateVideoExtension(createDto.Video!.FileName);
         }
 
         var post = new Post
         {
             UserId = userId,
-            Text = createDto.Text,
-            ImagePath = imagePath,
-            VideoPath = videoPath,
+            Text = createDto.Text ?? string.Empty,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -64,12 +65,28 @@ public class PostService : IPostService
             throw new ArgumentException("Não foi possível publicar.");
         }
 
-        post.User = user;
+        if (hasImage)
+        {
+            var imageFileName = FileHelper.BuildPublicationFileName(post.Id, createDto.Image!.FileName);
+            post.ImagePath = await _storageService.SaveFileAsync(createDto.Image, "uploads/publications", imageFileName);
+        }
 
+        if (hasVideo)
+        {
+            var videoFileName = FileHelper.BuildPublicationFileName(post.Id, createDto.Video!.FileName);
+            post.VideoPath = await _storageService.SaveFileAsync(createDto.Video, "uploads/publications", videoFileName);
+        }
+
+        if (hasImage || hasVideo)
+        {
+            await _postRepository.UpdateAsync(post);
+        }
+
+        post.User = user;
         return MapToDto(post, userId);
     }
 
-    public async Task<PostDto> UpdateAsync(Guid userId, Guid postId, UpdatePostDto updateDto)
+    public async Task<PublicationResponseDto> UpdateAsync(Guid userId, Guid postId, UpdatePublicationDto updateDto)
     {
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
@@ -82,7 +99,11 @@ public class PostService : IPostService
             throw new UnauthorizedAccessException("Não tens permissão para editar esta publicação.");
         }
 
-        post.Text = updateDto.Text;
+        if (updateDto.Text != null)
+        {
+            post.Text = updateDto.Text;
+        }
+
         post.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _postRepository.UpdateAsync(post);
@@ -94,7 +115,7 @@ public class PostService : IPostService
         return MapToDto(post, userId);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid postId)
+    public async Task DeleteAsync(Guid userId, Guid postId)
     {
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
@@ -117,21 +138,24 @@ public class PostService : IPostService
             _storageService.DeleteFile(post.VideoPath);
         }
 
-        return await _postRepository.DeleteAsync(post);
+        var deleted = await _postRepository.DeleteAsync(post);
+        if (!deleted)
+        {
+            throw new ArgumentException("Não foi possível eliminar a publicação.");
+        }
     }
 
-    public async Task<IEnumerable<PostDto>> GetAllAsync(Guid? currentUserId = null)
+    public async Task<IEnumerable<PublicationResponseDto>> GetAllAsync(Guid? currentUserId = null)
     {
         var posts = await _postRepository.GetAllAsync();
 
         if (currentUserId.HasValue)
         {
             var followedIds = (await _followRepository.GetFollowedUserIdsAsync(currentUserId.Value)).ToHashSet();
-            posts = posts.Where(p => 
-                p.UserId == currentUserId.Value || 
-                !p.User.IsPrivate || 
-                followedIds.Contains(p.UserId)
-            );
+            posts = posts.Where(p =>
+                p.UserId == currentUserId.Value ||
+                !p.User.IsPrivate ||
+                followedIds.Contains(p.UserId));
         }
         else
         {
@@ -141,15 +165,18 @@ public class PostService : IPostService
         return posts.Select(p => MapToDto(p, currentUserId));
     }
 
-    public async Task<IEnumerable<PostDto>> GetFeedAsync(Guid userId)
+    public async Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId)
     {
         return await GetAllAsync(userId);
     }
 
-    public async Task<PostDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
+    public async Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
     {
         var post = await _postRepository.GetByIdAsync(id);
-        if (post == null) return null;
+        if (post == null)
+        {
+            return null;
+        }
 
         var author = post.User;
         if (author != null && author.IsPrivate && author.Id != currentUserId)
@@ -169,7 +196,7 @@ public class PostService : IPostService
         return MapToDto(post, currentUserId);
     }
 
-    public async Task<IEnumerable<PostDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
+    public async Task<IEnumerable<PublicationResponseDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
     {
         var targetUser = await _userRepository.GetByIdAsync(targetUserId);
         if (targetUser == null)
@@ -196,21 +223,29 @@ public class PostService : IPostService
         return userPosts.Select(p => MapToDto(p, currentUserId));
     }
 
-    private PostDto MapToDto(Post post, Guid? currentUserId = null)
+    private static PublicationResponseDto MapToDto(Post post, Guid? currentUserId = null)
     {
-        return new PostDto
+        bool? hasLiked = null;
+        if (currentUserId.HasValue)
+        {
+            hasLiked = post.Likes?.Any(l => l.UserId == currentUserId.Value) == true;
+        }
+
+        return new PublicationResponseDto
         {
             Id = post.Id,
-            UserId = post.UserId,
-            UserName = post.User?.UserName ?? string.Empty,
-            UserPhoto = post.User?.ProfilePhoto,
             Text = post.Text,
             ImageUrl = post.ImagePath,
             VideoUrl = post.VideoPath,
             CreatedAt = post.CreatedAt,
+            UpdatedAt = post.UpdatedAt,
+            AuthorId = post.UserId,
+            AuthorUsername = post.User?.UserName ?? string.Empty,
+            AuthorDisplayName = post.User?.DisplayName,
+            AuthorPhotoUrl = post.User?.ProfilePhoto,
+            LikesCount = post.Likes?.Count ?? 0,
             CommentsCount = post.Comments?.Count ?? 0,
-            BazesCount = post.Likes?.Count ?? 0,
-            UserHasBaze = currentUserId.HasValue && post.Likes?.Any(l => l.UserId == currentUserId.Value) == true
+            HasLiked = hasLiked
         };
     }
 }
