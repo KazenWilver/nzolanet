@@ -82,6 +82,12 @@ export class RegisterComponent {
         next: () => void this.router.navigate(['/feed']),
         error: (error: HttpErrorResponse) => {
           this.isLoading = false;
+
+          if (error.status === 0) {
+            this.errorMessage = 'Sem ligação ao servidor. Verifica a internet e tenta novamente.';
+            return;
+          }
+
           const message = this.extractErrorMessage(error);
 
           if (error.status === 409 || this.isDuplicateEmailMessage(message)) {

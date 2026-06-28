@@ -10,5 +10,10 @@ export const resolveMediaUrl = (url: string | undefined | null): string | undefi
   }
 
   const path = url.startsWith('/') ? url : `/${url}`;
+
+  if (!environment.uploadsUrl) {
+    return path;
+  }
+
   return `${environment.uploadsUrl}${path}`;
 };
