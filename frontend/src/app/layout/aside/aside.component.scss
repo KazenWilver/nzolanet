@@ -1,0 +1,45 @@
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.aside__search {
+  position: relative;
+}
+
+.aside__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-text-secondary);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  mask-size: contain;
+  -webkit-mask-size: contain;
+}
+
+.aside__search-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: none;
+  border-radius: var(--border-radius-full);
+  background-color: var(--color-bg-search);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+
+  &:focus {
+    outline: 2px solid var(--color-accent);
+    background-color: var(--color-bg-primary);
+  }
+}
+
+.aside__section {
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-bg-widget);
+  overflow: hidden;
+}

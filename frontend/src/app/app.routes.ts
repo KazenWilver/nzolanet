@@ -59,10 +59,18 @@ export const routes: Routes = [
       { path: 'pesquisar', redirectTo: 'search', pathMatch: 'full' },
       { path: 'perfil/me', redirectTo: 'profile/me', pathMatch: 'full' },
       {
-        path: 'notificacoes',
+        path: 'notifications',
         loadComponent: () =>
-          import('./features/notifications/notifications-page.component').then(m => m.NotificationsPageComponent)
+          import('./features/placeholder/placeholder-page.component').then(m => m.PlaceholderPageComponent),
+        data: { featureName: 'Notificações' }
       },
+      {
+        path: 'messages',
+        loadComponent: () =>
+          import('./features/placeholder/placeholder-page.component').then(m => m.PlaceholderPageComponent),
+        data: { featureName: 'Mensagens' }
+      },
+      { path: 'notificacoes', redirectTo: 'notifications', pathMatch: 'full' },
       {
         path: 'publicacoes',
         loadChildren: () => import('./features/posts/posts.module').then(m => m.postsRoutes)

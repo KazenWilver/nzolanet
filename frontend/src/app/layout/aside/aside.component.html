@@ -1,0 +1,17 @@
+<aside class="aside" aria-label="Explorar">
+  <form class="aside__search" (ngSubmit)="handleSearchSubmit()">
+    <span class="aside__search-icon" aria-hidden="true"></span>
+    <input
+      class="aside__search-input"
+      type="search"
+      name="asideSearch"
+      [(ngModel)]="searchQuery"
+      placeholder="Pesquisar utilizadores..."
+      aria-label="Pesquisa rápida de utilizadores"
+    />
+  </form>
+
+  <section class="aside__section">
+    <app-placeholder-feature featureName="Quem seguir" />
+  </section>
+</aside>

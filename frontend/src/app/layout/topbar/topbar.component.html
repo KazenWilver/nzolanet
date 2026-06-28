@@ -1,0 +1,16 @@
+<header class="topbar">
+  <a class="topbar__brand" routerLink="/feed" aria-label="NzolaNet">
+    <img src="/nzolanet-logo.png" alt="" class="topbar__brand-icon" />
+    <span class="topbar__brand-name">NzolaNet</span>
+  </a>
+
+  @if (currentUser) {
+    <a class="topbar__profile" [routerLink]="profileRoute" [attr.aria-label]="'Perfil de ' + currentUser.username">
+      <app-avatar
+        [src]="currentUser.profilePhotoUrl"
+        [username]="currentUser.username"
+        size="sm"
+      />
+    </a>
+  }
+</header>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PostService } from '../../../core/services/post.service';
@@ -16,7 +16,9 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   styleUrl: './create-post.component.scss'
 })
 export class CreatePostComponent implements OnInit {
+  @Input() modoModal = false;
   @Output() postCriado = new EventEmitter<Post>();
+  @Output() cancelado = new EventEmitter<void>();
 
   utilizadorAtual: LegacyUser | null = null;
   formularioAberto = false;
@@ -31,15 +33,25 @@ export class CreatePostComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.utilizador$.subscribe((u: LegacyUser | null) => this.utilizadorAtual = u);
+    if (this.modoModal) {
+      this.formularioAberto = true;
+    }
   }
 
   abrirFormulario(): void { this.formularioAberto = true; }
 
   cancelar(): void {
+    this.resetFormulario();
+    if (this.modoModal) {
+      this.cancelado.emit();
+    }
+  }
+
+  private resetFormulario(): void {
     this.formularioAberto = false;
     this.texto = '';
-    this.erro = '';
     this.removerMedia();
+    this.erro = '';
   }
 
   selecionarFicheiro(evento: Event, tipo: 'imagem' | 'video'): void {
@@ -85,7 +97,11 @@ export class CreatePostComponent implements OnInit {
       video:  this.tipoMedia === 'video'  ? this.ficheiroSelecionado ?? undefined : undefined
     };
     this.postService.criar(dados).subscribe({
-      next: (novoPost: Post) => { this.postCriado.emit(novoPost); this.cancelar(); this.aPublicar = false; },
+      next: (novoPost: Post) => {
+        this.postCriado.emit(novoPost);
+        this.aPublicar = false;
+        this.resetFormulario();
+      },
       error: (err: any) => {
         this.aPublicar = false;
         this.erro = 'Erro ao publicar. Verifica se o ficheiro é válido e tenta novamente (máx. 30MB para vídeos).';

@@ -1,5 +1,5 @@
 <div class="criar-post">
-  <div class="criar-post__cabecalho" *ngIf="!formularioAberto">
+  <div class="criar-post__cabecalho" *ngIf="!formularioAberto && !modoModal">
     <app-user-avatar [foto]="utilizadorAtual?.fotoPerfil" [nome]="utilizadorAtual?.nome" tamanho="md" />
     <button class="criar-post__gatilho" (click)="abrirFormulario()">
       O que estás a pensar, {{ (utilizadorAtual?.nome || '').split(' ')[0] }}?
