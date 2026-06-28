@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Comments;
 using NzolaNet.Application.Interfaces;
 
@@ -46,7 +46,7 @@ public class CommentsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var comment = await _commentService.CreateAsync(
             userId,
             createDto.PostId,
@@ -64,7 +64,7 @@ public class CommentsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var comment = await _commentService.UpdateAsync(userId, id, updateDto);
         return Ok(comment);
     }
@@ -73,25 +73,19 @@ public class CommentsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var userId = GetCurrentUserId();
-        var isAdmin = IsCurrentUserAdmin();
+        var userId = AuthClaimsHelper.GetUserId(User);
+        var isAdmin = AuthClaimsHelper.IsAdmin(User);
         await _commentService.DeleteAsync(userId, id, isAdmin);
         return NoContent();
     }
 
     private async Task<IActionResult> GetCommentsInternal(Guid publicationId)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
         try
         {
-            var comments = await _commentService.GetByPublicationAsync(publicationId, currentUserId);
+            var comments = await _commentService.GetByPublicationAsync(
+                publicationId,
+                AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(comments);
         }
         catch (UnauthorizedAccessException)
@@ -112,24 +106,5 @@ public class CommentsController : ControllerBase
             Text = comment.Text,
             CreatedAt = comment.CreatedAt
         };
-    }
-
-    private bool IsCurrentUserAdmin()
-    {
-        return User.Claims.Any(c =>
-            (c.Type == "role" || c.Type == ClaimTypes.Role) && c.Value == "Admin");
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-        {
-            throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
-        }
-
-        return userId;
     }
 }

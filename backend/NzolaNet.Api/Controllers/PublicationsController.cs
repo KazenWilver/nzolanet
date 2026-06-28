@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Comments;
 using NzolaNet.Application.DTOs.Publications;
 using NzolaNet.Application.Interfaces;
@@ -28,7 +28,7 @@ public class PublicationsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var publications = await _postService.GetAllAsync(GetOptionalCurrentUserId());
+        var publications = await _postService.GetAllAsync(AuthClaimsHelper.GetOptionalUserId(User));
         return Ok(publications);
     }
 
@@ -37,7 +37,7 @@ public class PublicationsController : ControllerBase
     {
         try
         {
-            var publication = await _postService.GetByIdAsync(id, GetOptionalCurrentUserId());
+            var publication = await _postService.GetByIdAsync(id, AuthClaimsHelper.GetOptionalUserId(User));
             if (publication == null)
             {
                 return NotFound(new { message = "Publicação não encontrada." });
@@ -56,7 +56,7 @@ public class PublicationsController : ControllerBase
     {
         try
         {
-            var publications = await _postService.GetByUserIdAsync(userId, GetOptionalCurrentUserId());
+            var publications = await _postService.GetByUserIdAsync(userId, AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(publications);
         }
         catch (UnauthorizedAccessException)
@@ -69,7 +69,7 @@ public class PublicationsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreatePublicationDto createDto)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var publication = await _postService.CreateAsync(userId, createDto);
         return CreatedAtAction(nameof(GetById), new { id = publication.Id }, publication);
     }
@@ -78,7 +78,7 @@ public class PublicationsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePublicationDto updateDto)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var publication = await _postService.UpdateAsync(userId, id, updateDto);
         return Ok(publication);
     }
@@ -87,7 +87,7 @@ public class PublicationsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         await _postService.DeleteAsync(userId, id);
         return NoContent();
     }
@@ -97,7 +97,7 @@ public class PublicationsController : ControllerBase
     {
         try
         {
-            var comments = await _commentService.GetByPublicationAsync(publicationId, GetOptionalCurrentUserId());
+            var comments = await _commentService.GetByPublicationAsync(publicationId, AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(comments);
         }
         catch (UnauthorizedAccessException)
@@ -115,7 +115,7 @@ public class PublicationsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var comment = await _commentService.CreateAsync(userId, publicationId, createDto);
         return CreatedAtAction(nameof(GetComments), new { publicationId }, comment);
     }
@@ -124,7 +124,7 @@ public class PublicationsController : ControllerBase
     [HttpPost("{id}/like")]
     public async Task<IActionResult> Like(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         await _likeService.LikeAsync(userId, id);
         return Ok(new { message = "Baze registado com sucesso." });
     }
@@ -133,29 +133,8 @@ public class PublicationsController : ControllerBase
     [HttpDelete("{id}/like")]
     public async Task<IActionResult> Unlike(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         await _likeService.UnlikeAsync(userId, id);
         return NoContent();
-    }
-
-    private Guid? GetOptionalCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        return Guid.TryParse(userIdClaim, out var parsedId) ? parsedId : null;
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-        {
-            throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
-        }
-
-        return userId;
     }
 }

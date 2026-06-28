@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Users;
 using NzolaNet.Application.Interfaces;
 
@@ -27,8 +27,9 @@ public class UsersController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string q)
     {
-        Guid? currentUserId = GetOptionalCurrentUserId();
-        var users = await _userService.SearchUsersAsync(q ?? string.Empty, currentUserId);
+        var users = await _userService.SearchUsersAsync(
+            q ?? string.Empty,
+            AuthClaimsHelper.GetOptionalUserId(User));
         return Ok(users);
     }
 
@@ -67,7 +68,7 @@ public class UsersController : ControllerBase
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfileLegacy([FromBody] UpdateProfileDto updateDto)
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         var updatedProfile = await _userService.UpdateProfileAsync(currentUserId, updateDto);
         return Ok(updatedProfile);
     }
@@ -81,7 +82,7 @@ public class UsersController : ControllerBase
             return BadRequest(new { message = "Por favor, envie um ficheiro de imagem válido." });
         }
 
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         var user = await _userService.UploadPhotoAsync(currentUserId, photoFile);
         return Ok(user);
     }
@@ -90,7 +91,7 @@ public class UsersController : ControllerBase
     [HttpPost("{id}/follow")]
     public async Task<IActionResult> FollowUser(Guid id)
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         await _userService.FollowUserAsync(currentUserId, id);
         return Ok(new { message = "Utilizador seguido com sucesso." });
     }
@@ -99,7 +100,7 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}/follow")]
     public async Task<IActionResult> UnfollowUser(Guid id)
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         await _userService.UnfollowUserAsync(currentUserId, id);
         return Ok(new { message = "Deixou de seguir o utilizador com sucesso." });
     }
@@ -132,7 +133,7 @@ public class UsersController : ControllerBase
     [HttpGet("follow-requests")]
     public async Task<IActionResult> GetPendingRequests()
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         var requests = await _userService.GetPendingRequestsAsync(currentUserId);
         return Ok(requests);
     }
@@ -141,7 +142,7 @@ public class UsersController : ControllerBase
     [HttpPost("follow-requests/{followerId}/approve")]
     public async Task<IActionResult> ApproveFollowRequest(Guid followerId)
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         var success = await _userService.ApproveFollowRequestAsync(currentUserId, followerId);
         if (success)
         {
@@ -155,7 +156,7 @@ public class UsersController : ControllerBase
     [HttpPost("follow-requests/{followerId}/reject")]
     public async Task<IActionResult> RejectFollowRequest(Guid followerId)
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
         var success = await _userService.RejectFollowRequestAsync(currentUserId, followerId);
         if (success)
         {
@@ -167,11 +168,11 @@ public class UsersController : ControllerBase
 
     private async Task<IActionResult> GetFollowersInternal(Guid id)
     {
-        var currentUserId = GetOptionalCurrentUserId();
-
         try
         {
-            var followers = await _userService.GetFollowersAsync(id, currentUserId);
+            var followers = await _userService.GetFollowersAsync(
+                id,
+                AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(followers);
         }
         catch (UnauthorizedAccessException)
@@ -182,11 +183,11 @@ public class UsersController : ControllerBase
 
     private async Task<IActionResult> GetFollowingInternal(Guid id)
     {
-        var currentUserId = GetOptionalCurrentUserId();
-
         try
         {
-            var following = await _userService.GetFollowingAsync(id, currentUserId);
+            var following = await _userService.GetFollowingAsync(
+                id,
+                AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(following);
         }
         catch (UnauthorizedAccessException)
@@ -195,37 +196,8 @@ public class UsersController : ControllerBase
         }
     }
 
-    private Guid? GetOptionalCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            return parsedId;
-        }
-
-        return null;
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-        {
-            throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
-        }
-
-        return userId;
-    }
-
     private bool IsCurrentUser(Guid id)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        return Guid.TryParse(userIdClaim, out var currentUserId) && currentUserId == id;
+        return AuthClaimsHelper.GetOptionalUserId(User) == id;
     }
 }

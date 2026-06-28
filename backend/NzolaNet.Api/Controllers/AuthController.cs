@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Auth;
 using NzolaNet.Application.Interfaces;
 
@@ -57,21 +57,8 @@ public class AuthController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser([FromServices] IUserService userService)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var user = await userService.GetUserResponseAsync(userId);
         return Ok(user);
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-        {
-            throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
-        }
-
-        return userId;
     }
 }

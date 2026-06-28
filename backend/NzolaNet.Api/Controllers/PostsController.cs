@@ -1,6 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Posts;
 using NzolaNet.Application.DTOs.Publications;
 using NzolaNet.Application.Interfaces;
@@ -21,7 +21,7 @@ public class PostsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var posts = await _postService.GetAllAsync(GetOptionalCurrentUserId());
+        var posts = await _postService.GetAllAsync(AuthClaimsHelper.GetOptionalUserId(User));
         return Ok(posts.Select(ToLegacyPostDto));
     }
 
@@ -30,7 +30,7 @@ public class PostsController : ControllerBase
     {
         try
         {
-            var post = await _postService.GetByIdAsync(id, GetOptionalCurrentUserId());
+            var post = await _postService.GetByIdAsync(id, AuthClaimsHelper.GetOptionalUserId(User));
             if (post == null)
             {
                 return NotFound(new { Message = "Publicação não encontrada." });
@@ -49,7 +49,7 @@ public class PostsController : ControllerBase
     {
         try
         {
-            var posts = await _postService.GetByUserIdAsync(utilizadorId, GetOptionalCurrentUserId());
+            var posts = await _postService.GetByUserIdAsync(utilizadorId, AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(posts.Select(ToLegacyPostDto));
         }
         catch (UnauthorizedAccessException)
@@ -66,7 +66,7 @@ public class PostsController : ControllerBase
     [HttpGet("feed")]
     public async Task<IActionResult> GetFeed()
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var feed = await _postService.GetFeedAsync(userId);
         return Ok(feed.Select(ToLegacyPostDto));
     }
@@ -75,7 +75,7 @@ public class PostsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] CreatePostDto createDto)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var publicationDto = new CreatePublicationDto
         {
             Text = createDto.Text,
@@ -90,7 +90,7 @@ public class PostsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePostDto updateDto)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         var post = await _postService.UpdateAsync(userId, id, new UpdatePublicationDto { Text = updateDto.Text });
         return Ok(ToLegacyPostDto(post));
     }
@@ -99,7 +99,7 @@ public class PostsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = AuthClaimsHelper.GetUserId(User);
         await _postService.DeleteAsync(userId, id);
         return Ok(new { Message = "Publicação eliminada com sucesso." });
     }
@@ -120,26 +120,5 @@ public class PostsController : ControllerBase
             BazesCount = publication.LikesCount,
             UserHasBaze = publication.HasLiked ?? false
         };
-    }
-
-    private Guid? GetOptionalCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        return Guid.TryParse(userIdClaim, out var parsedId) ? parsedId : null;
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value;
-
-        if (string.IsNullOrEmpty(userIdClaim))
-        {
-            throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
-        }
-
-        return Guid.Parse(userIdClaim);
     }
 }
