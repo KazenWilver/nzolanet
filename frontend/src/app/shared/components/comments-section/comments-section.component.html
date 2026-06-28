@@ -8,6 +8,7 @@
       />
       <div class="comments-section__composer-field">
         <textarea
+          id="comment-new-text"
           class="comments-section__textarea"
           [(ngModel)]="newCommentText"
           name="newComment"
@@ -64,8 +65,10 @@
           @if (editingCommentId === comment.id) {
             <div class="comments-section__edit">
               <textarea
+                id="comment-edit-text"
                 class="comments-section__edit-textarea"
                 [(ngModel)]="editText"
+                name="editComment"
                 rows="2"
                 aria-label="Editar comentário"
               ></textarea>

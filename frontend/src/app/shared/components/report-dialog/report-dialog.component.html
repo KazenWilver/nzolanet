@@ -11,14 +11,16 @@
       </label>
     </div>
 
-    <textarea 
-      *ngIf="motivoSelecionado === 'Outro'" 
-      class="report-dialog__textarea" 
-      placeholder="Descreva o motivo da denúncia..." 
+    <textarea
+      *ngIf="motivoSelecionado === 'Outro'"
+      id="report-motivo-outro"
+      name="motivoOutro"
+      class="report-dialog__textarea"
+      placeholder="Descreva o motivo da denúncia..."
       [(ngModel)]="motivoOutro"
       [disabled]="disabled || submitting"
-      rows="3">
-    </textarea>
+      rows="3"
+    ></textarea>
 
     <div class="report-dialog__acoes">
       <button class="report-dialog__btn report-dialog__btn--cancelar" (click)="!submitting && !disabled ? cancelar() : null" [disabled]="submitting || disabled">Cancelar</button>

@@ -7,7 +7,15 @@
       <circle cx="11" cy="11" r="8"></circle>
       <path d="m21 21-4.35-4.35"></path>
     </svg>
-    <input type="text" placeholder="Pesquisar" [(ngModel)]="termoPesquisa" (keyup.enter)="pesquisar()" />
+    <input
+      id="navbar-search"
+      name="search"
+      type="search"
+      placeholder="Pesquisar"
+      [(ngModel)]="termoPesquisa"
+      (keyup.enter)="pesquisar()"
+      aria-label="Pesquisar"
+    />
     <kbd>⌘ K</kbd>
   </div>
 

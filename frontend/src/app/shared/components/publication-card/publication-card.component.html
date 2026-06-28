@@ -64,8 +64,10 @@
     @if (editing) {
       <div class="publication-card__edit">
         <textarea
+          id="publication-edit-text"
           class="publication-card__edit-textarea"
           [(ngModel)]="editText"
+          name="editPublication"
           rows="3"
           maxlength="280"
           aria-label="Editar publicação"

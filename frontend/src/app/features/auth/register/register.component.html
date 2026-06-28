@@ -15,6 +15,7 @@
         <span class="auth-form__prefix" aria-hidden="true">@</span>
         <input
           id="register-username"
+          name="username"
           class="auth-form__input"
           [class.auth-form__input--invalid]="isInvalid('username')"
           type="text"
@@ -32,6 +33,7 @@
       <label class="auth-form__label" for="register-email">Email</label>
       <input
         id="register-email"
+        name="email"
         class="auth-form__input"
         [class.auth-form__input--invalid]="isInvalid('email') || !!emailApiError"
         type="email"
@@ -48,6 +50,7 @@
       <label class="auth-form__label" for="register-display-name">Nome de exibição (opcional)</label>
       <input
         id="register-display-name"
+        name="displayName"
         class="auth-form__input"
         type="text"
         formControlName="displayName"
@@ -61,6 +64,7 @@
       <div class="auth-form__input-wrap">
         <input
           id="register-password"
+          name="password"
           class="auth-form__input"
           [class.auth-form__input--invalid]="isInvalid('password')"
           [type]="showPassword ? 'text' : 'password'"
@@ -86,6 +90,7 @@
       <label class="auth-form__label" for="register-confirm-password">Confirmar palavra-passe</label>
       <input
         id="register-confirm-password"
+        name="confirmPassword"
         class="auth-form__input"
         [class.auth-form__input--invalid]="isInvalid('confirmPassword')"
         type="password"

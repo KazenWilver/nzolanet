@@ -8,8 +8,9 @@
 
       <form class="admin-login__form" (ngSubmit)="entrar()">
         <div class="admin-login__grupo">
-          <label class="admin-login__label">Email de Administrador</label>
+          <label class="admin-login__label" for="admin-login-email">Email de Administrador</label>
           <input
+            id="admin-login-email"
             type="email"
             class="admin-login__input"
             [(ngModel)]="email"
@@ -20,9 +21,10 @@
         </div>
 
         <div class="admin-login__grupo">
-          <label class="admin-login__label">Senha</label>
+          <label class="admin-login__label" for="admin-login-password">Senha</label>
           <div class="admin-login__senha-grupo">
             <input
+              id="admin-login-password"
               [type]="mostrarSenha ? 'text' : 'password'"
               class="admin-login__input"
               [(ngModel)]="senha"

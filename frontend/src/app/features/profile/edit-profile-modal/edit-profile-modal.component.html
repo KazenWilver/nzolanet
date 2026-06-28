@@ -6,20 +6,34 @@
         [username]="user.username"
         size="lg"
       />
-      <label class="edit-profile__photo-btn">
-        <input type="file" accept="image/*" (change)="handlePhotoSelect($event)" hidden />
+      <label class="edit-profile__photo-btn" for="edit-profile-photo">
+        <input
+          id="edit-profile-photo"
+          name="profilePhoto"
+          type="file"
+          accept="image/*"
+          (change)="handlePhotoSelect($event)"
+          hidden
+        />
         Alterar foto
       </label>
     </div>
 
-    <label class="edit-profile__field">
+    <label class="edit-profile__field" for="edit-profile-display-name">
       <span>Nome de exibição</span>
-      <input type="text" [(ngModel)]="displayName" name="displayName" maxlength="50" />
+      <input
+        id="edit-profile-display-name"
+        type="text"
+        [(ngModel)]="displayName"
+        name="displayName"
+        maxlength="50"
+      />
     </label>
 
-    <label class="edit-profile__field">
+    <label class="edit-profile__field" for="edit-profile-bio">
       <span>Bio</span>
       <textarea
+        id="edit-profile-bio"
         [(ngModel)]="bio"
         name="bio"
         rows="3"

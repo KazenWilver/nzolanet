@@ -35,28 +35,40 @@
         <section class="settings__panel" aria-labelledby="settings-account-title">
           <h2 id="settings-account-title" class="settings__panel-title">Conta</h2>
 
-          <label class="settings__field">
+          <label class="settings__field" for="settings-display-name">
             <span class="settings__label">Nome de exibição</span>
-            <input type="text" [(ngModel)]="displayName" maxlength="50" />
+            <input
+              id="settings-display-name"
+              name="displayName"
+              type="text"
+              [(ngModel)]="displayName"
+              maxlength="50"
+            />
           </label>
 
-          <label class="settings__field">
+          <label class="settings__field" for="settings-bio">
             <span class="settings__label">Bio</span>
-            <textarea [(ngModel)]="bio" rows="3" [maxlength]="maxBioLength"></textarea>
+            <textarea
+              id="settings-bio"
+              name="bio"
+              [(ngModel)]="bio"
+              rows="3"
+              [maxlength]="maxBioLength"
+            ></textarea>
             <span class="settings__counter" [class.settings__counter--warn]="remainingBioChars <= 20">
               {{ remainingBioChars }}
             </span>
           </label>
 
           <div class="settings__field settings__field--readonly">
-            <span class="settings__label">Email</span>
-            <input type="email" [value]="user.email ?? ''" readonly />
+            <label class="settings__label" for="settings-email">Email</label>
+            <input id="settings-email" name="email" type="email" [value]="user.email ?? ''" readonly />
             <span class="settings__hint">Para alterar o email, contacta o suporte.</span>
           </div>
 
           <div class="settings__field settings__field--readonly">
-            <span class="settings__label">Username</span>
-            <input type="text" [value]="'@' + user.username" readonly />
+            <label class="settings__label" for="settings-username">Username</label>
+            <input id="settings-username" name="username" type="text" [value]="'@' + user.username" readonly />
             <span class="settings__hint">O username não pode ser alterado.</span>
           </div>
 
