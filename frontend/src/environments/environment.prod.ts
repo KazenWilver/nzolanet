@@ -1,4 +1,5 @@
 export const environment = {
-  producao: true,
-  apiUrl: 'https://api.nzolanet.ao/api'
+  production: true,
+  apiUrl: 'https://api.nzolanet.ao/api',
+  uploadsUrl: 'https://api.nzolanet.ao'
 };

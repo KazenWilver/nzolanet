@@ -3,22 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { resolveMediaUrl } from '../helpers/media-url.helper';
 import { Post, CriarPostDto, EditarPostDto } from '../models/post.model';
 
 @Injectable({ providedIn: 'root' })
 export class PostService {
   private readonly baseUrl = `${environment.apiUrl}/posts`;
-  private readonly mediaBaseUrl = environment.apiUrl.replace('/api', '');
+  private readonly mediaBaseUrl = environment.uploadsUrl;
 
   constructor(private http: HttpClient) {}
 
   private formatarUrlMedia(url: string | undefined): string | undefined {
-    if (!url) return undefined;
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-      return url;
-    }
-    const path = url.startsWith('/') ? url : `/${url}`;
-    return `${this.mediaBaseUrl}${path}`;
+    return resolveMediaUrl(url);
   }
 
   private mapPost(p: any): Post {

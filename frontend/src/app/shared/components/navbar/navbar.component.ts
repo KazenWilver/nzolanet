@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Notificacao } from '../../../core/services/notification.service';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -18,7 +18,7 @@ import { takeUntil } from 'rxjs/operators';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  utilizadorAtual: User | null = null;
+  utilizadorAtual: LegacyUser | null = null;
   termoPesquisa = '';
   menuAberto = false;
   totalNotificacoes = 0;
@@ -38,7 +38,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.modoEscuro = savedTheme === 'dark';
     document.body.classList.toggle('light-theme', !this.modoEscuro);
 
-    this.authService.utilizador$.pipe(takeUntil(this.destroy$)).subscribe((u: User | null) => {
+    this.authService.utilizador$.pipe(takeUntil(this.destroy$)).subscribe((u: LegacyUser | null) => {
       this.utilizadorAtual = u;
       if (u) this.carregarNotificacoes();
     });

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
@@ -24,7 +24,7 @@ interface FormPerfil {
   styleUrl: './edit-profile.component.scss'
 })
 export class EditProfileComponent implements OnInit {
-  utilizador: User | null = null;
+  utilizador: LegacyUser | null = null;
   formDados: FormPerfil = { nome: '', nomeUtilizador: '', bio: '', localizacao: '', privado: false };
   fotoSelecionada: File | null = null;
   previsaoFoto: string | null = null;
@@ -37,7 +37,7 @@ export class EditProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.utilizador$.subscribe((u: User | null) => {
+    this.authService.utilizador$.subscribe((u: LegacyUser | null) => {
       if (!u) return;
       this.utilizador = u;
       this.formDados = {
@@ -70,7 +70,7 @@ export class EditProfileComponent implements OnInit {
     if (this.fotoSelecionada) formulario.append('foto', this.fotoSelecionada);
 
     this.userService.editarPerfil(this.utilizador.id, formulario).subscribe({
-      next: (usuarioAtualizado: User) => {
+      next: (usuarioAtualizado: LegacyUser) => {
         // Atualiza a sessão local com os novos dados
         this.authService.atualizarUtilizadorAtual(usuarioAtualizado);
         this.voltar();

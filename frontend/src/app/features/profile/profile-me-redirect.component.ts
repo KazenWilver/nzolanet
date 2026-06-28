@@ -13,9 +13,9 @@ export class ProfileMeRedirectComponent implements OnInit {
   ngOnInit(): void {
     const utilizador = this.authService.obterUtilizadorAtual();
     if (utilizador?.id) {
-      this.router.navigate(['/perfil', utilizador.id]);
+      this.router.navigate(['/profile', utilizador.id]);
     } else {
-      this.router.navigate(['/auth/login']);
+      this.router.navigate(['/login']);
     }
   }
 }

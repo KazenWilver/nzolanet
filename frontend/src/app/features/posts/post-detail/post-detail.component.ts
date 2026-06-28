@@ -6,7 +6,7 @@ import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Post } from '../../../core/models/post.model';
 import { Comentario } from '../../../core/models/comment.model';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 // Importação via barrel do módulo de comentários — evita acoplamento directo a shared/components
@@ -22,7 +22,7 @@ import { CommentFormComponent, CommentItemComponent } from '../../comments/comme
 export class PostDetailComponent implements OnInit {
   post: Post | null = null;
   comentarios: Comentario[] = [];
-  utilizadorAtual: User | null = null;
+  utilizadorAtual: LegacyUser | null = null;
   aCarregarComentarios = true;
 
   constructor(
@@ -34,7 +34,7 @@ export class PostDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.utilizador$.subscribe((u: User | null) => this.utilizadorAtual = u);
+    this.authService.utilizador$.subscribe((u: LegacyUser | null) => this.utilizadorAtual = u);
     const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.postService.obterPorId(id).subscribe((p: Post) => {
       this.post = p;

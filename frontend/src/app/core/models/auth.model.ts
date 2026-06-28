@@ -1,9 +1,42 @@
-export interface TokenAutenticacao {
+import type { User } from './user.model';
+
+export interface AuthResponse {
   token: string;
-  expiracao: string;
+  user: User;
 }
 
-export interface EstadoAutenticacao {
-  autenticado: boolean;
-  utilizadorId?: number;
+export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+export interface RegisterDto {
+  username: string;
+  email: string;
+  password: string;
+  displayName?: string;
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface BackendAuthResponseDto {
+  token: string;
+  user: BackendUserDto;
+}
+
+export interface BackendUserDto {
+  id: string;
+  username: string;
+  displayName?: string;
+  bio?: string;
+  profilePhotoUrl?: string;
+  email?: string;
+  isPrivate: boolean;
+  followersCount: number;
+  followingCount: number;
+  createdAt: string;
+  role?: string;
+  isFollowing?: boolean;
 }

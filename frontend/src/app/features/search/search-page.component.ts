@@ -6,7 +6,7 @@ import { forkJoin } from 'rxjs';
 import { PostService } from '../../core/services/post.service';
 import { UserService } from '../../core/services/user.service';
 import { Post } from '../../core/models/post.model';
-import { User } from '../../core/models/user.model';
+import { LegacyUser } from '../../core/models/user.model';
 import { PostCardComponent } from '../../shared/components/post-card/post-card.component';
 import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
@@ -21,7 +21,7 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 export class SearchPageComponent implements OnInit {
   termo = '';
   posts: Post[] = [];
-  utilizadores: User[] = [];
+  utilizadores: LegacyUser[] = [];
   aCarregar = false;
 
   constructor(

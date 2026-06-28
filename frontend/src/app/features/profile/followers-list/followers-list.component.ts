@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
@@ -14,7 +14,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   styleUrl: './followers-list.component.scss'
 })
 export class FollowersListComponent implements OnInit {
-  utilizadores: User[] = [];
+  utilizadores: LegacyUser[] = [];
   modo: 'seguidores' | 'seguindo' = 'seguidores';
   aCarregar = true;
   private utilizadorId!: string;
@@ -45,7 +45,7 @@ export class FollowersListComponent implements OnInit {
       : this.userService.obterSeguindo(this.utilizadorId);
 
     pedido.subscribe({
-      next: (lista: User[]) => { this.utilizadores = lista; this.aCarregar = false; },
+      next: (lista: LegacyUser[]) => { this.utilizadores = lista; this.aCarregar = false; },
       error: () => { this.aCarregar = false; }
     });
   }

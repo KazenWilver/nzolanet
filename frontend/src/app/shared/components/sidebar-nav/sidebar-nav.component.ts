@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../../core/services/auth.service';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 interface MenuItem {
@@ -22,7 +22,7 @@ interface MenuItem {
   styleUrl: './sidebar-nav.component.scss'
 })
 export class SidebarNavComponent implements OnInit {
-  utilizadorAtual: User | null = null;
+  utilizadorAtual: LegacyUser | null = null;
 
   menuItems: MenuItem[] = [
     { icon: 'home', label: 'Feed', route: '/feed', exact: true },

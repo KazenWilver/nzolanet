@@ -3,117 +3,134 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { User } from '../models/user.model';
+import { resolveMediaUrl } from '../helpers/media-url.helper';
+import type { BackendUserDto } from '../models/auth.model';
+import { mapBackendUser, toLegacyUser, type LegacyUser, type UpdateProfileDto, type User } from '../models/user.model';
 
-// Serviço que gere os dados de perfil e o sistema de seguimento entre utilizadores
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly baseUrl = `${environment.apiUrl}/users`;
-  private readonly mediaBaseUrl = environment.apiUrl.replace('/api', '');
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
-  private formatarUrlMedia(url: string | undefined): string | undefined {
-    if (!url) return undefined;
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-      return url;
-    }
-    const path = url.startsWith('/') ? url : `/${url}`;
-    return `${this.mediaBaseUrl}${path}`;
+  getProfile(userId: string): Observable<User> {
+    return this.http
+      .get<BackendUserDto>(`${this.baseUrl}/${userId}`)
+      .pipe(map(user => this.mapUser(user)));
   }
 
-  private mapUser(u: any): User {
-    return {
-      id: u.id,
-      nome: u.username || 'Utilizador',
-      nomeUtilizador: u.username || 'utilizador',
-      email: u.email || '',
-      fotoPerfil: this.formatarUrlMedia(u.profilePhoto),
-      bio: u.bio,
-      totalSeguidores: u.followersCount || 0,
-      totalSeguindo: u.followingCount || 0,
-      totalPublicacoes: 0,
-      privado: u.isPrivate || false,
-      eAdmin: false,
-      estaASeguir: u.isFollowing || false,
-      estaPendente: u.isPending || false,
-      criadoEm: new Date().toISOString()
-    };
+  updateProfile(userId: string, dto: UpdateProfileDto): Observable<User> {
+    return this.http
+      .put<BackendUserDto>(`${this.baseUrl}/${userId}`, {
+        displayName: dto.displayName,
+        bio: dto.bio,
+        isPrivate: dto.isPrivate
+      })
+      .pipe(map(user => this.mapUser(user)));
   }
 
-  obterPorId(id: string): Observable<User> {
-    return this.http.get<any>(`${this.baseUrl}/${id}`).pipe(
-      map(u => this.mapUser(u))
-    );
+  uploadPhoto(userId: string, file: File): Observable<User> {
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    return this.http
+      .put<BackendUserDto>(`${this.baseUrl}/${userId}/photo`, formData)
+      .pipe(map(user => this.mapUser(user)));
   }
 
-  obterSeguidores(id: string): Observable<User[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/${id}/seguidores`).pipe(
-      map(users => users.map(u => this.mapUser(u)))
-    );
+  follow(userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${userId}/follow`, {});
   }
 
-  obterSeguindo(id: string): Observable<User[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/${id}/seguindo`).pipe(
-      map(users => users.map(u => this.mapUser(u)))
-    );
+  unfollow(userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${userId}/follow`);
   }
 
-  // Cria a relação de seguimento — o backend impede auto-seguimento
-  seguir(id: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/${id}/follow`, {});
+  getFollowers(userId: string): Observable<User[]> {
+    return this.http
+      .get<BackendUserDto[]>(`${this.baseUrl}/${userId}/followers`)
+      .pipe(map(users => users.map(user => this.mapUser(user))));
   }
 
-  deixarDeSeguir(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/${id}/follow`);
+  getFollowing(userId: string): Observable<User[]> {
+    return this.http
+      .get<BackendUserDto[]>(`${this.baseUrl}/${userId}/following`)
+      .pipe(map(users => users.map(user => this.mapUser(user))));
   }
 
-  // Envia FormData para suportar actualização de foto de perfil junto com os restantes dados
-  editarPerfil(id: string, dados: FormData): Observable<User> {
-    const bio = dados.get('bio') as string;
+  /** @deprecated Usar getProfile */
+  obterPorId(id: string): Observable<LegacyUser> {
+    return this.getProfile(id).pipe(map(user => toLegacyUser(user)));
+  }
+
+  /** @deprecated Usar getFollowers */
+  obterSeguidores(id: string): Observable<LegacyUser[]> {
+    return this.getFollowers(id).pipe(map(users => users.map(user => toLegacyUser(user))));
+  }
+
+  /** @deprecated Usar getFollowing */
+  obterSeguindo(id: string): Observable<LegacyUser[]> {
+    return this.getFollowing(id).pipe(map(users => users.map(user => toLegacyUser(user))));
+  }
+
+  /** @deprecated Usar follow */
+  seguir(id: string): Observable<void> {
+    return this.follow(id);
+  }
+
+  /** @deprecated Usar unfollow */
+  deixarDeSeguir(id: string): Observable<void> {
+    return this.unfollow(id);
+  }
+
+  /** @deprecated Usar updateProfile + uploadPhoto */
+  editarPerfil(id: string, dados: FormData): Observable<LegacyUser> {
+    const bio = dados.get('bio') as string | null;
     const privado = dados.get('privado') === 'true';
+    const foto = dados.get('foto') as File | null;
 
-    // 1. Primeiro atualiza dados de texto
-    return this.http.put<any>(`${this.baseUrl}/profile`, {
-      Bio: bio,
-      IsPrivate: privado
+    return this.updateProfile(id, {
+      bio: bio ?? undefined,
+      isPrivate: privado
     }).pipe(
-      // 2. Se tiver foto selecionada, envia a foto e atualiza o objeto final
-      switchMap(userProfileDto => {
-        const foto = dados.get('foto') as File;
+      switchMap(user => {
         if (foto) {
-          const fotoForm = new FormData();
-          fotoForm.append('photoFile', foto);
-          return this.http.post<any>(`${this.baseUrl}/photo`, fotoForm).pipe(
-            map(photoRes => {
-              userProfileDto.profilePhoto = photoRes.photoPath;
-              return this.mapUser(userProfileDto);
-            })
-          );
+          return this.uploadPhoto(id, foto).pipe(map(updated => toLegacyUser(updated)));
         }
-        return of(this.mapUser(userProfileDto));
+        return of(toLegacyUser(user));
       })
     );
   }
 
-  // Métodos adicionados para suportar pedidos de seguimento pendentes
-  obterPedidosPendentes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/follow-requests`);
+  obterPedidosPendentes(): Observable<unknown[]> {
+    return this.http.get<unknown[]>(`${this.baseUrl}/follow-requests`);
   }
 
-  aprovarPedido(followerId: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/follow-requests/${followerId}/approve`, {});
+  aprovarPedido(followerId: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/follow-requests/${followerId}/approve`, {});
   }
 
-  rejeitarPedido(followerId: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/follow-requests/${followerId}/reject`, {});
+  rejeitarPedido(followerId: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/follow-requests/${followerId}/reject`, {});
   }
 
-  pesquisar(termo: string): Observable<User[]> {
-    const query = termo.trim().toLowerCase();
-    if (!query) return of([]);
-    return this.http.get<any[]>(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`).pipe(
-      map(users => users.map(u => this.mapUser(u)))
-    );
+  /** @deprecated Usar SearchService.searchUsers */
+  pesquisar(termo: string): Observable<LegacyUser[]> {
+    const query = termo.trim();
+    if (!query) {
+      return of([]);
+    }
+
+    return this.http
+      .get<BackendUserDto[]>(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`)
+      .pipe(map(users => users.map(user => toLegacyUser(this.mapUser(user)))));
+  }
+
+  private mapUser(dto: BackendUserDto): User {
+    const user = mapBackendUser(dto);
+    return {
+      ...user,
+      profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl)
+    };
   }
 }

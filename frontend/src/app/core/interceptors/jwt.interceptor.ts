@@ -1,19 +1,22 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-// Interceptor funcional (Angular 17+): anexa automaticamente o token JWT
-// no cabeçalho Authorization de todos os pedidos HTTP ao backend
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
-  const token = auth.obterToken();
+  const token = auth.getToken();
 
-  if (token) {
-    // Clona o pedido original e adiciona o cabeçalho — os pedidos HTTP são imutáveis
-    req = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-  }
+  const authReq = token
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    : req;
 
-  return next(req);
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && !req.url.includes('/auth/login') && !req.url.includes('/auth/register')) {
+        auth.logout();
+      }
+      return throwError(() => error);
+    })
+  );
 };

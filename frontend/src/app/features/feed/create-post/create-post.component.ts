@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PostService } from '../../../core/services/post.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { Post } from '../../../core/models/post.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -18,7 +18,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 export class CreatePostComponent implements OnInit {
   @Output() postCriado = new EventEmitter<Post>();
 
-  utilizadorAtual: User | null = null;
+  utilizadorAtual: LegacyUser | null = null;
   formularioAberto = false;
   texto = '';
   ficheiroSelecionado: File | null = null;
@@ -30,7 +30,7 @@ export class CreatePostComponent implements OnInit {
   constructor(private postService: PostService, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.authService.utilizador$.subscribe((u: User | null) => this.utilizadorAtual = u);
+    this.authService.utilizador$.subscribe((u: LegacyUser | null) => this.utilizadorAtual = u);
   }
 
   abrirFormulario(): void { this.formularioAberto = true; }

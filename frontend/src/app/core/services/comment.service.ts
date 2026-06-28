@@ -3,83 +3,88 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Comentario, CriarComentarioDto, EditarComentarioDto } from '../models/comment.model';
+import { resolveMediaUrl } from '../helpers/media-url.helper';
+import type {
+  BackendCommentDto,
+  Comment,
+  Comentario,
+  CreateCommentDto,
+  CriarComentarioDto,
+  EditarComentarioDto,
+  UpdateCommentDto
+} from '../models/comment.model';
 
-// Serviço responsável pelas operações CRUD de comentários
 @Injectable({ providedIn: 'root' })
 export class CommentService {
   private readonly baseUrl = `${environment.apiUrl}/comments`;
-  private readonly mediaBaseUrl = environment.apiUrl.replace('/api', '');
+  private readonly publicationsUrl = `${environment.apiUrl}/publications`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
-  private formatarUrlMedia(url: string | undefined): string | undefined {
-    if (!url) return undefined;
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-      return url;
-    }
-    const path = url.startsWith('/') ? url : `/${url}`;
-    return `${this.mediaBaseUrl}${path}`;
+  getByPublication(publicationId: string): Observable<Comment[]> {
+    return this.http
+      .get<BackendCommentDto[]>(`${this.publicationsUrl}/${publicationId}/comments`)
+      .pipe(map(comments => comments.map(comment => this.mapComment(comment))));
   }
 
-  private mapComment(c: any): Comentario {
-    const reportKey = `report_comment_${c.id}`;
-    const reportadoPorMim = localStorage.getItem(`reported_comment_${c.id}`) === 'true';
-    const reportCount = parseInt(localStorage.getItem(reportKey) || '0', 10);
-
-    return {
-      id: c.id,
-      postId: c.postId,
-      autorId: c.userId,
-      autorNome: c.userName || 'Utilizador',
-      autorFoto: this.formatarUrlMedia(c.userPhoto),
-      autorNomeUtilizador: c.userName ? c.userName.toLowerCase().replace(/\s+/g, '') : 'utilizador',
-      texto: c.text,
-      criadoEm: c.createdAt,
-      reportsCount: reportCount,
-      reportadoPorMim: reportadoPorMim
-    };
+  create(publicationId: string, dto: CreateCommentDto): Observable<Comment> {
+    return this.http
+      .post<BackendCommentDto>(`${this.publicationsUrl}/${publicationId}/comments`, {
+        text: dto.text
+      })
+      .pipe(map(comment => this.mapComment(comment)));
   }
 
+  update(id: string, dto: UpdateCommentDto): Observable<Comment> {
+    return this.http
+      .put<BackendCommentDto>(`${this.baseUrl}/${id}`, { text: dto.text })
+      .pipe(map(comment => this.mapComment(comment)));
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /** @deprecated Usar getByPublication */
   obterPorPost(postId: string): Observable<Comentario[]> {
-    // Alinha a rota com a do backend: GET /api/posts/{postId}/comments
-    return this.http.get<any[]>(`${environment.apiUrl}/posts/${postId}/comments`).pipe(
-      map(comments => comments.map(c => this.mapComment(c)))
+    return this.getByPublication(postId).pipe(
+      map(comments => comments.map(comment => this.toLegacyComment(comment)))
     );
   }
 
+  /** @deprecated Usar create */
   criar(dados: CriarComentarioDto): Observable<Comentario> {
-    return this.http.post<any>(this.baseUrl, {
-      PostId: dados.postId,
-      Text: dados.texto
-    }).pipe(
-      map(c => this.mapComment(c))
+    return this.create(dados.postId, { text: dados.texto }).pipe(
+      map(comment => this.toLegacyComment(comment))
     );
   }
 
-  // Apenas o autor pode editar o seu próprio comentário — validado também no backend
+  /** @deprecated Usar update */
   editar(id: string, dados: EditarComentarioDto): Observable<Comentario> {
-    return this.http.put<any>(`${this.baseUrl}/${id}`, {
-      Text: dados.texto
-    }).pipe(
-      map(c => this.mapComment(c))
+    return this.update(id, { text: dados.texto }).pipe(
+      map(comment => this.toLegacyComment(comment))
     );
   }
 
-  // Simula a denúncia do comentário com persistência no localStorage
+  /** @deprecated */
+  eliminar(id: string): Observable<void> {
+    return this.delete(id);
+  }
+
+  /** @deprecated */
   denunciar(id: string, motivo: string): Observable<Comentario> {
     const reportKey = `report_comment_${id}`;
     const userReportKey = `reported_comment_${id}`;
     let count = parseInt(localStorage.getItem(reportKey) || '0', 10);
+
     if (localStorage.getItem(userReportKey) !== 'true') {
-      count++;
+      count += 1;
       localStorage.setItem(reportKey, count.toString());
       localStorage.setItem(userReportKey, 'true');
     }
-    
-    // Devolvemos um mock de comentário atualizado localmente
-    const mockComment: Comentario = {
-      id: id,
+
+    return of({
+      id,
       postId: '',
       autorId: '',
       autorNome: 'Sistema',
@@ -88,23 +93,46 @@ export class CommentService {
       criadoEm: new Date().toISOString(),
       reportsCount: count,
       reportadoPorMim: true
-    };
-    return of(mockComment);
-  }
-
-  eliminar(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    });
   }
 
   obterTotalComentarios(): Observable<number> {
-    return this.http.get<{ total: number }>(`${this.baseUrl}/count`).pipe(
-      map(res => res.total)
-    );
+    return this.http
+      .get<{ total: number }>(`${this.baseUrl}/count`)
+      .pipe(map(response => response.total));
   }
 
   obterTodos(): Observable<Comentario[]> {
-    return this.http.get<any[]>(this.baseUrl).pipe(
-      map(comments => comments.map(c => this.mapComment(c)))
+    return this.http.get<BackendCommentDto[]>(this.baseUrl).pipe(
+      map(comments => comments.map(comment => this.toLegacyComment(this.mapComment(comment))))
     );
+  }
+
+  private mapComment(dto: BackendCommentDto): Comment {
+    return {
+      id: dto.id,
+      text: dto.text,
+      createdAt: dto.createdAt,
+      updatedAt: dto.updatedAt,
+      publicationId: dto.publicationId,
+      authorId: dto.authorId,
+      authorUsername: dto.authorUsername,
+      authorDisplayName: dto.authorDisplayName,
+      authorPhotoUrl: resolveMediaUrl(dto.authorPhotoUrl)
+    };
+  }
+
+  private toLegacyComment(comment: Comment): Comentario {
+    return {
+      id: comment.id,
+      postId: comment.publicationId,
+      autorId: comment.authorId,
+      autorNome: comment.authorDisplayName ?? comment.authorUsername,
+      autorFoto: comment.authorPhotoUrl,
+      autorNomeUtilizador: comment.authorUsername,
+      texto: comment.text,
+      criadoEm: comment.createdAt,
+      atualizadoEm: comment.updatedAt
+    };
   }
 }

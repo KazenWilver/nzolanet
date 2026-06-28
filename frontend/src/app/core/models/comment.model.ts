@@ -1,5 +1,36 @@
-// Representa um comentário associado a uma publicação
-// Nota: evitado o nome "Comment" por conflito com o tipo nativo do DOM no TypeScript
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
+  publicationId: string;
+  authorId: string;
+  authorUsername: string;
+  authorDisplayName?: string;
+  authorPhotoUrl?: string;
+}
+
+export interface CreateCommentDto {
+  text: string;
+}
+
+export interface UpdateCommentDto {
+  text: string;
+}
+
+export interface BackendCommentDto {
+  id: string;
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
+  publicationId: string;
+  authorId: string;
+  authorUsername: string;
+  authorDisplayName?: string;
+  authorPhotoUrl?: string;
+}
+
+/** @deprecated Usar Comment */
 export interface Comentario {
   id: string;
   postId: string;
@@ -15,12 +46,13 @@ export interface Comentario {
   reports?: Array<{ userId: string; motivo: string; criadoEm: string }>;
 }
 
-// DTOs que separam os dados de entrada dos dados de saída (requisito técnico do enunciado)
+/** @deprecated Usar CreateCommentDto */
 export interface CriarComentarioDto {
   postId: string;
   texto: string;
 }
 
+/** @deprecated Usar UpdateCommentDto */
 export interface EditarComentarioDto {
   texto: string;
 }

@@ -4,7 +4,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../core/services/user.service';
 import { PostService } from '../../../core/services/post.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { User } from '../../../core/models/user.model';
+import { LegacyUser } from '../../../core/models/user.model';
 import { Post } from '../../../core/models/post.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
@@ -19,7 +19,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   styleUrl: './profile-page.component.scss'
 })
 export class ProfilePageComponent implements OnInit {
-  utilizador: User | null = null;
+  utilizador: LegacyUser | null = null;
   posts: Post[] = [];
   aCarregarPosts = true;
   aAlterarSeguir = false;
@@ -33,7 +33,7 @@ export class ProfilePageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.utilizador$.subscribe((u: User | null) => this.utilizadorLogadoId = u?.id);
+    this.authService.utilizador$.subscribe((u: LegacyUser | null) => this.utilizadorLogadoId = u?.id);
     // Reage a mudanças de parâmetro na URL (ex: navegar de um perfil para outro)
     this.route.paramMap.subscribe(params => {
       const id = params.get('id') ?? '';
@@ -43,7 +43,7 @@ export class ProfilePageComponent implements OnInit {
 
   carregarPerfil(id: string): void {
     this.aCarregarPosts = true;
-    this.userService.obterPorId(id).subscribe((u: User) => {
+    this.userService.obterPorId(id).subscribe((u: LegacyUser) => {
       this.utilizador = u;
       const podeVerPosts = !u.privado || this.utilizadorLogadoId === u.id || u.estaASeguir;
       if (podeVerPosts) {

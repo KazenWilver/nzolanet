@@ -1,152 +1,235 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoginDto, RegistoDto, RecuperarSenhaDto, RespostaAutenticacao, User } from '../models/user.model';
+import type {
+  AuthResponse,
+  BackendAuthResponseDto,
+  ForgotPasswordDto,
+  LoginDto as AuthLoginDto,
+  RegisterDto
+} from '../models/auth.model';
+import {
+  mapBackendUser,
+  toLegacyUser,
+  type LegacyUser,
+  type LoginDtoLegacy,
+  type RecuperarSenhaDto,
+  type RegistoDto,
+  type RespostaAutenticacao,
+  type User
+} from '../models/user.model';
 
-// Serviço central de autenticação: gere o token JWT e o estado do utilizador autenticado
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly CHAVE_TOKEN = 'nzolanet_token';
-  private readonly CHAVE_UTILIZADOR = 'nzolanet_user';
+  private readonly tokenKey = 'nzolanet_token';
+  private readonly userKey = 'nzolanet_user';
   private readonly baseUrl = `${environment.apiUrl}/auth`;
 
-  // BehaviorSubject permite que qualquer componente reaja a mudanças do utilizador autenticado
-  private utilizadorAtual$ = new BehaviorSubject<User | null>(null);
-  utilizador$ = this.utilizadorAtual$.asObservable();
+  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
-    // Ao arrancar a app, tenta restaurar a sessão a partir do token guardado
-    this.carregarUtilizadorGuardado();
+  /** @deprecated Usar currentUser$ — emite formato legado para componentes existentes */
+  readonly utilizador$ = this.currentUser$.pipe(
+    map(user => (user ? toLegacyUser(user) : null))
+  );
+
+  constructor(
+    private readonly http: HttpClient,
+    private readonly router: Router
+  ) {
+    this.restoreSession();
   }
 
-  login(dados: LoginDto): Observable<RespostaAutenticacao> {
-    const payload = {
-      usernameOrEmail: dados.email,
-      password: dados.senha
-    };
-    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/login`, payload).pipe(
-      tap(resposta => this.guardarSessao(resposta))
+  login(dto: AuthLoginDto | LoginDtoLegacy): Observable<AuthResponse> {
+    const password = 'password' in dto ? dto.password : dto.senha;
+
+    return this.http
+      .post<BackendAuthResponseDto>(`${this.baseUrl}/login`, {
+        email: dto.email,
+        password
+      })
+      .pipe(
+        map(response => this.mapAuthResponse(response)),
+        tap(response => this.persistSession(response))
+      );
+  }
+
+  register(dto: RegisterDto): Observable<AuthResponse> {
+    return this.http
+      .post<BackendAuthResponseDto>(`${this.baseUrl}/register`, {
+        username: dto.username,
+        email: dto.email,
+        password: dto.password,
+        displayName: dto.displayName
+      })
+      .pipe(
+        map(response => this.mapAuthResponse(response)),
+        tap(response => this.persistSession(response))
+      );
+  }
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+    const dto: ForgotPasswordDto = { email };
+    return this.http.post<{ message: string }>(`${this.baseUrl}/forgot-password`, dto);
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this.currentUserSubject.next(null);
+    void this.router.navigate(['/login']);
+  }
+
+  getCurrentUser(): User | null {
+    return this.currentUserSubject.getValue();
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  updateCurrentUser(user: User): void {
+    localStorage.setItem(this.userKey, JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  /** @deprecated Usar login */
+  loginLegacy(dados: LoginDtoLegacy): Observable<RespostaAutenticacao> {
+    return this.login({ email: dados.email, password: dados.senha }).pipe(
+      map(response => ({
+        token: response.token,
+        utilizador: toLegacyUser(response.user)
+      }))
     );
   }
 
+  /** @deprecated Usar register */
   registar(dados: RegistoDto): Observable<RespostaAutenticacao> {
-    const payload = {
+    return this.register({
       username: dados.nomeUtilizador,
       email: dados.email,
-      password: dados.senha
-    };
-    return this.http.post<RespostaAutenticacao>(`${this.baseUrl}/register`, payload).pipe(
-      tap(resposta => this.guardarSessao(resposta))
+      password: dados.senha,
+      displayName: dados.nome
+    }).pipe(
+      map(response => ({
+        token: response.token,
+        utilizador: toLegacyUser(response.user)
+      }))
     );
   }
 
-  recuperarSenha(dados: RecuperarSenhaDto): Observable<void> {
-    const payload = {
-      email: dados.email
-    };
-    return this.http.post<void>(`${this.baseUrl}/recuperar-senha`, payload);
+  /** @deprecated Usar forgotPassword */
+  recuperarSenha(dados: RecuperarSenhaDto): Observable<{ message: string }> {
+    return this.forgotPassword(dados.email);
   }
 
-  // Limpa o token e redireciona para o login — usado pelo error interceptor no 401
+  /** @deprecated Usar logout */
   terminarSessao(): void {
-    localStorage.removeItem(this.CHAVE_TOKEN);
-    localStorage.removeItem(this.CHAVE_UTILIZADOR);
-    this.utilizadorAtual$.next(null);
-    this.router.navigate(['/auth/login']);
+    this.logout();
   }
 
+  /** @deprecated Usar getToken */
   obterToken(): string | null {
-    return localStorage.getItem(this.CHAVE_TOKEN);
+    return this.getToken();
   }
 
+  /** @deprecated Usar isAuthenticated */
   estaAutenticado(): boolean {
-    return !!this.obterToken();
+    return this.isAuthenticated();
   }
 
-  // Não confiar no flag `eAdmin` vindo do cliente. A verificação de admin é feita server-side.
+  /** @deprecated Usar getCurrentUser */
+  obterUtilizadorAtual(): LegacyUser | null {
+    const user = this.getCurrentUser();
+    return user ? toLegacyUser(user) : null;
+  }
+
+  /** @deprecated Usar updateCurrentUser */
+  atualizarUtilizadorAtual(utilizador: LegacyUser): void {
+    this.updateCurrentUser({
+      id: utilizador.id,
+      username: utilizador.nomeUtilizador,
+      displayName: utilizador.nome,
+      email: utilizador.email,
+      bio: utilizador.bio,
+      profilePhotoUrl: utilizador.fotoPerfil,
+      isPrivate: utilizador.privado,
+      followersCount: utilizador.totalSeguidores,
+      followingCount: utilizador.totalSeguindo,
+      createdAt: utilizador.criadoEm,
+      role: utilizador.eAdmin ? 'Admin' : 'User'
+    });
+  }
+
   estaAdmin(): boolean {
-    return false;
+    return this.getCurrentUser()?.role === 'Admin';
   }
 
-  obterUtilizadorAtual(): User | null {
-    return this.utilizadorAtual$.getValue();
-  }
-
-  atualizarUtilizadorAtual(utilizador: User): void {
-    localStorage.setItem(this.CHAVE_UTILIZADOR, JSON.stringify(utilizador));
-    this.utilizadorAtual$.next(utilizador);
-  }
-
-  private guardarSessao(resposta: any): void {
-    const token = resposta.token;
-    const backendUser = resposta.utilizador;
-    const utilizador: User = {
-      id: backendUser.id,
-      nome: backendUser.username,
-      nomeUtilizador: backendUser.username,
-      email: backendUser.email,
-      fotoPerfil: backendUser.profilePhoto || undefined,
-      privado: backendUser.isPrivate || false,
-      bio: backendUser.bio || undefined,
-      totalSeguidores: backendUser.followersCount || 0,
-      totalSeguindo: backendUser.followingCount || 0,
-      totalPublicacoes: 0,
-      eAdmin: false,
-      criadoEm: backendUser.createdAt
+  private mapAuthResponse(response: BackendAuthResponseDto): AuthResponse {
+    return {
+      token: response.token,
+      user: mapBackendUser(response.user)
     };
-
-    localStorage.setItem(this.CHAVE_TOKEN, token);
-    localStorage.setItem(this.CHAVE_UTILIZADOR, JSON.stringify(utilizador));
-    this.utilizadorAtual$.next(utilizador);
-    this.guardarContaSalva(utilizador);
   }
 
-  private guardarContaSalva(utilizador: User): void {
-    const contas: Array<{ email: string; nome: string; fotoPerfil?: string }> = JSON.parse(
+  private persistSession(response: AuthResponse): void {
+    localStorage.setItem(this.tokenKey, response.token);
+    localStorage.setItem(this.userKey, JSON.stringify(response.user));
+    this.currentUserSubject.next(response.user);
+    this.saveAccountShortcut(response.user);
+  }
+
+  private saveAccountShortcut(user: User): void {
+    if (!user.email) {
+      return;
+    }
+
+    const savedAccounts: Array<{ email: string; nome: string; fotoPerfil?: string }> = JSON.parse(
       localStorage.getItem('nzolanet_contas_salvas') || '[]'
     );
-    const jaExiste = contas.findIndex(c => c.email === utilizador.email) !== -1;
-    if (!jaExiste) {
-      contas.unshift({ email: utilizador.email, nome: utilizador.nome, fotoPerfil: utilizador.fotoPerfil });
-      if (contas.length > 5) contas.pop();
-      localStorage.setItem('nzolanet_contas_salvas', JSON.stringify(contas));
+
+    const exists = savedAccounts.some(account => account.email === user.email);
+    if (exists) {
+      return;
     }
+
+    savedAccounts.unshift({
+      email: user.email,
+      nome: user.displayName ?? user.username,
+      fotoPerfil: user.profilePhotoUrl
+    });
+
+    if (savedAccounts.length > 5) {
+      savedAccounts.pop();
+    }
+
+    localStorage.setItem('nzolanet_contas_salvas', JSON.stringify(savedAccounts));
   }
 
-  private carregarUtilizadorGuardado(): void {
-    const token = this.obterToken();
-    if (!token) return;
+  private restoreSession(): void {
+    const token = this.getToken();
+    if (!token) {
+      return;
+    }
 
-    fetch(`${this.baseUrl}/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const cachedUser = localStorage.getItem(this.userKey);
+    if (cachedUser) {
+      try {
+        this.currentUserSubject.next(JSON.parse(cachedUser) as User);
+      } catch {
+        localStorage.removeItem(this.userKey);
       }
-    })
-      .then(async res => {
-        if (!res.ok) {
-          throw res;
-        }
-        const backendUser = await res.json();
-        const utilizador: User = {
-          id: backendUser.id,
-          nome: backendUser.username,
-          nomeUtilizador: backendUser.username,
-          email: backendUser.email,
-          fotoPerfil: backendUser.profilePhoto || undefined,
-          privado: backendUser.isPrivate || false,
-          bio: backendUser.bio || undefined,
-          totalSeguidores: backendUser.followersCount || 0,
-          totalSeguindo: backendUser.followingCount || 0,
-          totalPublicacoes: 0,
-          eAdmin: false,
-          criadoEm: backendUser.createdAt
-        };
-        this.utilizadorAtual$.next(utilizador);
-      })
-      .catch(() => {
-        this.terminarSessao();
-      });
+    }
+
+    this.http.get<BackendAuthResponseDto['user']>(`${this.baseUrl}/me`).subscribe({
+      next: user => this.currentUserSubject.next(mapBackendUser(user)),
+      error: () => this.logout()
+    });
   }
 }
