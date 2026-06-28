@@ -56,7 +56,7 @@ public class AuthService : IAuthService
         await _userRepository.AddToRoleAsync(user, "User");
 
         var token = await _tokenService.GenerateTokenAsync(user);
-        var userResponse = await _userService.GetUserResponseAsync(user.Id);
+        var userResponse = await _userService.GetUserResponseAsync(user.Id, user.Id);
 
         return new AuthResponseDto
         {
@@ -80,7 +80,7 @@ public class AuthService : IAuthService
         }
 
         var token = await _tokenService.GenerateTokenAsync(user);
-        var userResponse = await _userService.GetUserResponseAsync(user.Id);
+        var userResponse = await _userService.GetUserResponseAsync(user.Id, user.Id);
 
         return new AuthResponseDto
         {

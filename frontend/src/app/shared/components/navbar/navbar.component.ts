@@ -100,10 +100,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   get tituloPagina(): string {
     const url = this.router.url;
-    if (url.startsWith('/pesquisar')) return 'Explore';
-    if (url.startsWith('/notificacoes')) return 'Notificações';
-    if (url.startsWith('/perfil')) return 'Perfil';
-    if (url.startsWith('/publicacoes')) return 'Publicação';
+    if (url.startsWith('/pesquisar') || url.startsWith('/search')) return 'Explore';
+    if (url.startsWith('/notificacoes') || url.startsWith('/notifications')) return 'Notificações';
+    if (url.startsWith('/perfil') || url.startsWith('/profile')) return 'Perfil';
     return 'Feed';
   }
 

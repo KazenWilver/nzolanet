@@ -17,5 +17,5 @@ public interface IUserService
     Task<bool> RejectFollowRequestAsync(Guid followedId, Guid followerId);
     Task<IEnumerable<UserResponseDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null);
     Task<IEnumerable<UserResponseDto>> GetFollowingAsync(Guid userId, Guid? currentUserId = null);
-    Task<IEnumerable<UserProfileDto>> SearchUsersAsync(string query, Guid? currentUserId = null);
+    Task<IEnumerable<UserResponseDto>> SearchUsersAsync(string query, Guid? currentUserId = null);
 }

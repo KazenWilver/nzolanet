@@ -76,6 +76,18 @@ public class UserRepository : IUserRepository
         await _userManager.AddToRoleAsync(user, role);
     }
 
+    public async Task<IReadOnlyList<string>> GetRolesAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return Array.Empty<string>();
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return roles.ToList();
+    }
+
     public async Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query)
     {
         if (string.IsNullOrWhiteSpace(query))

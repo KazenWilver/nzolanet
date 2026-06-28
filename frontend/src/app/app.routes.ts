@@ -71,10 +71,9 @@ export const routes: Routes = [
         data: { featureName: 'Mensagens' }
       },
       { path: 'notificacoes', redirectTo: 'notifications', pathMatch: 'full' },
-      {
-        path: 'publicacoes',
-        loadChildren: () => import('./features/posts/posts.module').then(m => m.postsRoutes)
-      }
+      { path: 'publicacoes/:id/editar', redirectTo: 'feed', pathMatch: 'full' },
+      { path: 'publicacoes/:id', redirectTo: 'feed', pathMatch: 'full' },
+      { path: 'publicacoes', redirectTo: 'feed', pathMatch: 'full' }
     ]
   },
   {

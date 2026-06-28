@@ -14,5 +14,6 @@ public interface IUserRepository
     Task<bool> CreateAsync(User user, string password);
     Task<bool> UpdateAsync(User user);
     Task AddToRoleAsync(User user, string role);
+    Task<IReadOnlyList<string>> GetRolesAsync(Guid userId);
     Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query);
 }

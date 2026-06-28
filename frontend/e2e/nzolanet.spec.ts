@@ -44,12 +44,12 @@ test.describe('NzolaNet — Testes E2E Completos', () => {
   test('3. Feed carrega publicações do mock backend', async ({ page }) => {
     await fazerLogin(page);
 
-    // Aguardar pelo menos um post-card visível
-    const postCard = page.locator('.post-card').first();
-    await expect(postCard).toBeVisible({ timeout: 10000 });
+    // Aguardar pelo menos um publication-card visível
+    const publicationCard = page.locator('app-publication-card').first();
+    await expect(publicationCard).toBeVisible({ timeout: 10000 });
 
     // O post deve ter texto legível (não "undefined" ou vazio)
-    const textoPost = await postCard.innerText();
+    const textoPost = await publicationCard.innerText();
     expect(textoPost.length).toBeGreaterThan(5);
     expect(textoPost).not.toContain('undefined');
     console.log('✅ Feed carregou publicações com conteúdo real');
@@ -84,7 +84,7 @@ test.describe('NzolaNet — Testes E2E Completos', () => {
     await input.fill('fotografia');
     await page.click('.search-page__button');
 
-    // Aguardar resultado (post-card ou mensagem vazia)
+    // Aguardar resultado (utilizador ou mensagem vazia)
     await page.waitForTimeout(2000);
     console.log('✅ Pesquisa executada com sucesso');
   });

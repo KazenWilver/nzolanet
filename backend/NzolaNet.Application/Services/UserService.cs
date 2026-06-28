@@ -57,6 +57,8 @@ public class UserService : IUserService
             {
                 response.IsFollowing = true;
                 response.IsPending = false;
+                var roles = await _userRepository.GetRolesAsync(userId);
+                response.Role = roles.Contains("Admin") ? "Admin" : "User";
             }
             else
             {
@@ -84,6 +86,7 @@ public class UserService : IUserService
         {
             Id = user.Id,
             Username = user.UserName ?? string.Empty,
+            DisplayName = user.DisplayName,
             Email = user.Email ?? string.Empty,
             ProfilePhoto = user.ProfilePhoto,
             IsPrivate = user.IsPrivate,
@@ -313,13 +316,13 @@ public class UserService : IUserService
         return dtos;
     }
 
-    public async Task<IEnumerable<UserProfileDto>> SearchUsersAsync(string query, Guid? currentUserId = null)
+    public async Task<IEnumerable<UserResponseDto>> SearchUsersAsync(string query, Guid? currentUserId = null)
     {
         var users = await _userRepository.SearchAsync(query);
-        var dtos = new List<UserProfileDto>();
+        var dtos = new List<UserResponseDto>();
         foreach (var user in users)
         {
-            dtos.Add(await GetProfileAsync(user.Id, currentUserId));
+            dtos.Add(await GetUserResponseAsync(user.Id, currentUserId));
         }
         return dtos;
     }

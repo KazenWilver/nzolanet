@@ -58,7 +58,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> GetCurrentUser([FromServices] IUserService userService)
     {
         var userId = AuthClaimsHelper.GetUserId(User);
-        var user = await userService.GetUserResponseAsync(userId);
+        var user = await userService.GetUserResponseAsync(userId, userId);
         return Ok(user);
     }
 }
