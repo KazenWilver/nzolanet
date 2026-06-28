@@ -1,10 +1,17 @@
 .layout-publico {
   display: flex;
   min-height: 100vh;
+  max-width: 100vw;
   background-color: var(--color-bg-primary);
 
   @media (max-width: 768px) {
     flex-direction: column;
+  }
+
+  @media (min-width: 1536px) {
+    max-width: 1600px;
+    margin-inline: auto;
+    box-shadow: 0 0 0 1px var(--color-border);
   }
 }
 
@@ -16,6 +23,10 @@
   padding: var(--spacing-3xl);
   background-color: var(--color-accent);
   color: #fff;
+
+  @media (min-width: 1280px) {
+    padding: clamp(2rem, 5vw, 4rem);
+  }
 
   @media (max-width: 768px) {
     padding: var(--spacing-2xl) var(--spacing-lg);
@@ -48,7 +59,11 @@
 }
 
 .layout-publico__descricao {
-  max-width: 28rem;
+  max-width: min(28rem, 100%);
+
+  @media (min-width: 1280px) {
+    max-width: 32rem;
+  }
 
   h2 {
     margin: 0 0 var(--spacing-lg);
@@ -75,6 +90,10 @@
   padding: var(--spacing-3xl);
   background-color: var(--color-bg-primary);
 
+  @media (min-width: 1280px) {
+    padding: clamp(2rem, 4vw, 4rem);
+  }
+
   @media (max-width: 768px) {
     padding: var(--spacing-xl) var(--spacing-lg);
   }
@@ -82,5 +101,5 @@
 
 .layout-publico__cartao {
   width: 100%;
-  max-width: 26rem;
+  max-width: var(--width-auth-card);
 }

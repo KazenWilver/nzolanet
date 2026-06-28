@@ -113,6 +113,18 @@ import { CommonModule } from '@angular/common';
         padding: var(--spacing-md);
       }
     }
+
+    @media (min-width: 768px) {
+      .modal__dialog {
+        max-width: min(var(--width-modal), calc(100vw - 2rem));
+      }
+    }
+
+    @media (min-width: 1536px) {
+      .modal {
+        padding: var(--spacing-3xl);
+      }
+    }
   `
 })
 export class ModalComponent implements OnChanges {

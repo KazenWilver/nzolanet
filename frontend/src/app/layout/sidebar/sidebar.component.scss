@@ -7,6 +7,11 @@
   flex-direction: column;
   height: 100%;
   gap: var(--spacing-sm);
+
+  @media (min-width: 1280px) {
+    gap: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+  }
 }
 
 .sidebar__brand {

@@ -15,6 +15,10 @@
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-heavy);
   color: var(--color-text-primary);
+
+  @media (min-width: 1280px) {
+    font-size: var(--font-size-3xl);
+  }
 }
 
 .auth-form__subtitle {

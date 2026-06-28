@@ -155,17 +155,22 @@
   --width-sidebar-mobile: 68px;
   --width-content: 600px;
   --width-sidebar-right: 350px;
-  --width-layout-max: 1220px;
+  --width-layout-max: 1225px;
   --width-modal: 36rem;
+  --width-auth-card: 26rem;
+  --width-settings-panel: 36rem;
+  --layout-gutter: clamp(1rem, 2vw, 2rem);
 
   // ---------------------------------------------------------------------------
-  // Breakpoints
+  // Breakpoints (mobile-first; use min-width for desktop/large)
   // ---------------------------------------------------------------------------
   --breakpoint-xs: 500px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 1920px;
 
   // ---------------------------------------------------------------------------
   // Transições e animações
@@ -245,6 +250,24 @@ body.dark-theme {
 // Alias legado — light-theme mantém compatibilidade
 body.light-theme {
   color-scheme: light;
+}
+
+// Ecrãs grandes — mais espaço lateral e coluna direita ligeiramente mais larga
+@media (min-width: 1536px) {
+  :root {
+    --width-sidebar-right: 380px;
+    --width-layout-max: 1280px;
+    --width-modal: 40rem;
+    --font-size-3xl: 2rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --width-layout-max: 1320px;
+    --width-sidebar-right: 400px;
+    --layout-gutter: clamp(1.5rem, 3vw, 3rem);
+  }
 }
 
 // -----------------------------------------------------------------------------

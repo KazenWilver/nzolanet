@@ -13,6 +13,10 @@
   height: 200px;
   background-color: #cfd9de;
 
+  @media (min-width: 1280px) {
+    height: 220px;
+  }
+
   @media (max-width: 500px) {
     height: 150px;
   }
