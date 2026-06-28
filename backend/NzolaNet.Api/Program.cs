@@ -91,17 +91,55 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
 
-// 4.5. Configura a política de CORS para o frontend Angular (http://localhost:4200)
+// 4.5. Configura a política de CORS para o frontend Angular
+var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:4200" };
+
+var extraCorsOrigins = builder.Configuration["CORS_EXTRA_ORIGINS"];
+if (!string.IsNullOrWhiteSpace(extraCorsOrigins))
+{
+    corsOrigins = corsOrigins
+        .Concat(extraCorsOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
+        policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
+
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.SetIsOriginAllowed(IsAllowedDevelopmentOrigin);
+        }
+        else
+        {
+            policy.WithOrigins(corsOrigins);
+        }
     });
 });
+
+static bool IsAllowedDevelopmentOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    if (uri.Host is "localhost" or "127.0.0.1")
+    {
+        return uri.Scheme is "http" or "https";
+    }
+
+    return uri.Scheme == "https"
+        && (uri.Host.EndsWith(".ngrok-free.dev", StringComparison.OrdinalIgnoreCase)
+            || uri.Host.EndsWith(".ngrok-free.app", StringComparison.OrdinalIgnoreCase)
+            || uri.Host.EndsWith(".ngrok.app", StringComparison.OrdinalIgnoreCase));
+}
 
 // 5. Adiciona os controladores da API
 builder.Services.AddControllers();

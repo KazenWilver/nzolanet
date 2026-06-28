@@ -79,6 +79,7 @@ LocalDB/
 appsettings.Development.json
 appsettings.Local.json
 appsettings.*.local.json
+frontend/src/environments/environment.ngrok.ts
 *.env
 .env
 .env.local
