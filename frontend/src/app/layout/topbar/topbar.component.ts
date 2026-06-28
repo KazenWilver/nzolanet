@@ -48,11 +48,6 @@ export class TopbarComponent {
     this.accountMenuOpen = false;
   }
 
-  handleLogout(): void {
-    this.accountMenuOpen = false;
-    this.authService.logout();
-  }
-
   @HostListener('document:click', ['$event'])
   handleDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
