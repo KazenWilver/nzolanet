@@ -1,18 +1,19 @@
 @use '../../../styles/variables' as vars;
 
-.feed-pagina {
+.feed-page {
   background-color: vars.$color-background;
   min-height: 100vh;
 }
 
-.feed-pagina__carregando {
+.feed-page__loading {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 30px;
 }
 
-.feed-pagina__vazio {
+.feed-page__empty,
+.feed-page__error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,33 +35,17 @@
   }
 }
 
-.feed-pagina__mais {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  border-top: 1px solid vars.$color-border;
-}
-
-.feed-pagina__btn-mais {
+.feed-page__retry {
   background-color: vars.$color-primary;
-  color: #ffffff;
+  color: #fff;
   font-weight: 700;
   font-size: 14px;
   border-radius: 9999px;
   padding: 8px 24px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 
-  &:hover:not(:disabled) {
+  &:hover {
     background-color: vars.$color-primary-hover;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 }

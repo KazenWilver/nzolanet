@@ -1,18 +1,18 @@
 @use '../../../styles/variables' as vars;
 
-.criar-post {
+.create-publication {
   background-color: vars.$color-background;
   border-bottom: 1px solid vars.$color-border;
   padding: 16px;
 }
 
-.criar-post__cabecalho {
+.create-publication__trigger-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.criar-post__gatilho {
+.create-publication__trigger {
   flex: 1;
   background-color: var(--nz-color-input-bg);
   border: none;
@@ -30,17 +30,17 @@
   }
 }
 
-.criar-post__formulario {
+.create-publication__form {
   display: flex;
   flex-direction: column;
 }
 
-.criar-post__composer {
+.create-publication__composer {
   display: flex;
   gap: 12px;
 }
 
-.criar-post__textarea {
+.create-publication__textarea {
   flex: 1;
   border: none;
   background: transparent;
@@ -58,14 +58,14 @@
   }
 }
 
-.criar-post__erro {
+.create-publication__error {
   color: vars.$color-like;
   font-size: 14px;
   font-weight: 500;
   margin: 8px 0 8px 60px;
 }
 
-.criar-post__previsao {
+.create-publication__preview {
   position: relative;
   margin-top: 12px;
   margin-left: 60px;
@@ -73,16 +73,14 @@
   overflow: hidden;
   border: 1px solid vars.$color-border;
   max-width: 100%;
-  max-height: 380px;
-  display: inline-block;
 }
 
-.criar-post__remover {
+.create-publication__remove-media {
   position: absolute;
   top: 8px;
   right: 8px;
   background-color: rgba(15, 20, 25, 0.75);
-  color: #ffffff;
+  color: #fff;
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -91,32 +89,22 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: background-color 0.2s;
   z-index: 2;
-
-  &:hover {
-    background-color: rgba(15, 20, 25, 0.9);
-  }
 }
 
-.criar-post__img-previsao {
+.create-publication__preview-image,
+.create-publication__preview-video {
   width: 100%;
-  height: auto;
   max-height: 380px;
   object-fit: cover;
   display: block;
 }
 
-.criar-post__video-previsao {
-  width: 100%;
-  height: auto;
-  max-height: 380px;
-  display: block;
+.create-publication__preview-video {
   background-color: #000;
 }
 
-.criar-post__rodape {
+.create-publication__footer {
   margin-left: 60px;
   margin-top: 12px;
   padding-top: 12px;
@@ -128,67 +116,47 @@
   gap: 12px;
 }
 
-.criar-post__acoes-media {
+.create-publication__toolbar {
   display: flex;
+  align-items: center;
   gap: 4px;
 }
 
-.criar-post__btn-media {
+.create-publication__media-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: vars.$color-primary;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 8px 12px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border-radius: 9999px;
-  background: none;
-  border: none;
+  color: vars.$color-primary;
+  cursor: pointer;
   transition: background-color 0.2s;
 
   &:hover {
     background-color: vars.$color-hover;
   }
+}
 
-  svg {
-    stroke: currentColor;
-    fill: none;
+.create-publication__counter {
+  margin-left: 8px;
+  font-size: 13px;
+  color: vars.$color-text-secondary;
+
+  &--warn {
+    color: vars.$color-like;
+    font-weight: 700;
   }
 }
 
-.criar-post__acoes-principais {
+.create-publication__actions {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-left: auto;
 }
 
-.criar-post__audiencia {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid vars.$color-border;
-  background: transparent;
-  color: vars.$color-primary;
-  font-weight: 700;
-  font-size: 14px;
-  border-radius: 9999px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: vars.$color-hover;
-  }
-
-  svg {
-    stroke: currentColor;
-    fill: none;
-  }
-}
-
-.criar-post__btn-cancelar {
+.create-publication__btn-cancel {
   background-color: transparent;
   border: 1px solid vars.$color-border;
   color: vars.$color-text;
@@ -197,30 +165,20 @@
   border-radius: 9999px;
   padding: 8px 18px;
   cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: vars.$color-gray-hover;
-  }
 }
 
-.criar-post__btn-publicar {
+.create-publication__btn-publish {
   background-color: vars.$color-primary;
-  color: #ffffff;
+  color: #fff;
   font-weight: 700;
   font-size: 15px;
   border-radius: 9999px;
   padding: 8px 20px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-
-  &:hover:not(:disabled) {
-    background-color: vars.$color-primary-hover;
-  }
 
   &:disabled {
     opacity: 0.5;

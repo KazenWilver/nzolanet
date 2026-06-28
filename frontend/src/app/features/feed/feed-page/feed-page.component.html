@@ -1,29 +1,42 @@
-<div class="feed-pagina">
-  <app-create-post (postCriado)="adicionarPost($event)" />
+<div class="feed-page">
+  <app-create-post (postCriado)="handleCreated($event)" />
 
-  <div class="feed-pagina__carregando" *ngIf="aCarregar">
-    <app-loading-spinner tamanho="md" />
-  </div>
+  @if (loading) {
+    <div class="feed-page__loading">
+      <app-loading-spinner tamanho="md" />
+    </div>
+  }
 
-  <div class="feed-pagina__vazio" *ngIf="!aCarregar && posts.length === 0">
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-      <circle cx="9" cy="7" r="4"></circle>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-    </svg>
-    <p>O teu feed está vazio. Segue utilizadores para ver as suas publicações.</p>
-  </div>
+  @if (error) {
+    <div class="feed-page__error">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>Não foi possível carregar o feed. Tenta novamente.</p>
+      <button type="button" class="feed-page__retry" (click)="loadFeed()">Tentar novamente</button>
+    </div>
+  }
 
-  <app-post-card
-    *ngFor="let post of posts; trackBy: trackPorId"
-    [post]="post"
-    (eliminado)="removerPost($event)" />
+  @if (!loading && !error && publications.length === 0) {
+    <div class="feed-page__empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <p>Ainda não há publicações. Sê o primeiro a publicar!</p>
+    </div>
+  }
 
-  <div class="feed-pagina__mais" *ngIf="!aCarregar && temMais">
-    <button class="feed-pagina__btn-mais" (click)="carregarMais()" [disabled]="aCarregarMais">
-      <app-loading-spinner *ngIf="aCarregarMais" tamanho="sm" />
-      <span *ngIf="!aCarregarMais">Carregar mais</span>
-    </button>
-  </div>
+  @for (publication of publications; track trackById($index, publication)) {
+    <app-publication-card
+      [publication]="publication"
+      [currentUserId]="currentUserId"
+      (deleted)="handleDeleted($event)"
+      (updated)="handleUpdated($event)"
+    />
+  }
 </div>

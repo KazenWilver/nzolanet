@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { resolveMediaUrl } from '../helpers/media-url.helper';
 import type {
@@ -13,6 +13,8 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class PublicationService {
   private readonly baseUrl = `${environment.apiUrl}/publications`;
+  private readonly createdSubject = new Subject<Publication>();
+  readonly created$ = this.createdSubject.asObservable();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -37,7 +39,10 @@ export class PublicationService {
   create(formData: FormData): Observable<Publication> {
     return this.http
       .post<BackendPublicationDto>(this.baseUrl, formData)
-      .pipe(map(publication => this.mapPublication(publication)));
+      .pipe(
+        map(publication => this.mapPublication(publication)),
+        tap(publication => this.createdSubject.next(publication))
+      );
   }
 
   update(id: string, dto: UpdatePublicationDto): Observable<Publication> {

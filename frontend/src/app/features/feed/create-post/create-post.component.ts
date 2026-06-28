@@ -1,122 +1,141 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PostService } from '../../../core/services/post.service';
+import { PublicationService } from '../../../core/services/publication.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { LegacyUser } from '../../../core/models/user.model';
-import { Post } from '../../../core/models/post.model';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+import type { User } from '../../../core/models/user.model';
+import type { Publication } from '../../../core/models/publication.model';
+import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-create-post',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserAvatarComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, AvatarComponent, LoadingSpinnerComponent],
   templateUrl: './create-post.component.html',
   styleUrl: './create-post.component.scss'
 })
 export class CreatePostComponent implements OnInit {
+  private readonly publicationService = inject(PublicationService);
+  private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
+
   @Input() modoModal = false;
-  @Output() postCriado = new EventEmitter<Post>();
+  @Output() postCriado = new EventEmitter<Publication>();
   @Output() cancelado = new EventEmitter<void>();
 
-  utilizadorAtual: LegacyUser | null = null;
-  formularioAberto = false;
-  texto = '';
-  ficheiroSelecionado: File | null = null;
-  tipoMedia: 'imagem' | 'video' | null = null;
-  previsaoUrl: string | null = null;
-  aPublicar = false;
-  erro = '';
+  readonly maxChars = 280;
 
-  constructor(private postService: PostService, private authService: AuthService) {}
+  currentUser: User | null = null;
+  formOpen = false;
+  text = '';
+  selectedFile: File | null = null;
+  mediaType: 'image' | 'video' | null = null;
+  previewUrl: string | null = null;
+  publishing = false;
+  error = '';
 
   ngOnInit(): void {
-    this.authService.utilizador$.subscribe((u: LegacyUser | null) => this.utilizadorAtual = u);
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
+
     if (this.modoModal) {
-      this.formularioAberto = true;
+      this.formOpen = true;
     }
   }
 
-  abrirFormulario(): void { this.formularioAberto = true; }
+  get remainingChars(): number {
+    return this.maxChars - this.text.length;
+  }
 
-  cancelar(): void {
-    this.resetFormulario();
+  get canPublish(): boolean {
+    return (this.text.trim().length > 0 || !!this.selectedFile) && !this.publishing;
+  }
+
+  get displayName(): string {
+    return this.currentUser?.displayName ?? this.currentUser?.username ?? 'Utilizador';
+  }
+
+  openForm(): void {
+    this.formOpen = true;
+  }
+
+  cancel(): void {
+    this.resetForm();
     if (this.modoModal) {
       this.cancelado.emit();
     }
   }
 
-  private resetFormulario(): void {
-    this.formularioAberto = false;
-    this.texto = '';
-    this.removerMedia();
-    this.erro = '';
+  private resetForm(): void {
+    this.formOpen = false;
+    this.text = '';
+    this.removeMedia();
+    this.error = '';
   }
 
-  selecionarFicheiro(evento: Event, tipo: 'imagem' | 'video'): void {
-    const input = evento.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const ficheiro = input.files[0];
-    this.ficheiroSelecionado = ficheiro;
-    this.tipoMedia = tipo;
-    this.previsaoUrl = URL.createObjectURL(ficheiro);
-    this.erro = '';
-  }
+  selectFile(event: Event, type: 'image' | 'video'): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
 
-  selecionarAnexo(evento: Event): void {
-    const input = evento.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const ficheiro = input.files[0];
-    if (ficheiro.type.startsWith('image/')) {
-      this.selecionarFicheiro(evento, 'imagem');
-      return;
-    }
-    if (ficheiro.type.startsWith('video/')) {
-      this.selecionarFicheiro(evento, 'video');
-      return;
-    }
-    this.erro = 'Seleciona uma imagem ou um vídeo válido.';
+    const file = input.files[0];
+    this.selectedFile = file;
+    this.mediaType = type;
+    this.previewUrl = URL.createObjectURL(file);
+    this.error = '';
     input.value = '';
   }
 
-  removerMedia(): void {
-    if (this.previsaoUrl) URL.revokeObjectURL(this.previsaoUrl);
-    this.ficheiroSelecionado = null;
-    this.tipoMedia = null;
-    this.previsaoUrl = null;
+  removeMedia(): void {
+    if (this.previewUrl) {
+      URL.revokeObjectURL(this.previewUrl);
+    }
+    this.selectedFile = null;
+    this.mediaType = null;
+    this.previewUrl = null;
   }
 
-  publicar(): void {
-    if (!this.texto.trim() || this.aPublicar) return;
-    this.aPublicar = true;
-    this.erro = '';
-    const dados = {
-      texto: this.texto.trim(),
-      imagem: this.tipoMedia === 'imagem' ? this.ficheiroSelecionado ?? undefined : undefined,
-      video:  this.tipoMedia === 'video'  ? this.ficheiroSelecionado ?? undefined : undefined
-    };
-    this.postService.criar(dados).subscribe({
-      next: (novoPost: Post) => {
-        this.postCriado.emit(novoPost);
-        this.aPublicar = false;
-        this.resetFormulario();
+  publish(): void {
+    if (!this.canPublish) {
+      return;
+    }
+
+    this.publishing = true;
+    this.error = '';
+
+    const formData = new FormData();
+    if (this.text.trim()) {
+      formData.append('Text', this.text.trim());
+    }
+    if (this.mediaType === 'image' && this.selectedFile) {
+      formData.append('Image', this.selectedFile);
+    }
+    if (this.mediaType === 'video' && this.selectedFile) {
+      formData.append('Video', this.selectedFile);
+    }
+
+    this.publicationService.create(formData).subscribe({
+      next: publication => {
+        this.postCriado.emit(publication);
+        this.publishing = false;
+        this.resetForm();
       },
-      error: (err: any) => {
-        this.aPublicar = false;
-        this.erro = 'Erro ao publicar. Verifica se o ficheiro é válido e tenta novamente (máx. 30MB para vídeos).';
-        setTimeout(() => {
-          if (this.erro === 'Erro ao publicar. Verifica se o ficheiro é válido e tenta novamente (máx. 30MB para vídeos).') {
-            this.erro = '';
-          }
-        }, 6000);
+      error: () => {
+        this.publishing = false;
+        this.error = 'Erro ao publicar. Verifica o ficheiro e tenta novamente (máx. 30MB para vídeos).';
       }
     });
   }
 
-  ajustarAltura(evento: Event): void {
-    const el = evento.target as HTMLTextAreaElement;
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+  adjustHeight(event: Event): void {
+    const element = event.target as HTMLTextAreaElement;
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
   }
 }

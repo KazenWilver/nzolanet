@@ -1,0 +1,155 @@
+<article class="publication-card">
+  <header class="publication-card__header">
+    <button
+      type="button"
+      class="publication-card__avatar-btn"
+      (click)="handleAvatarClick()"
+      (keydown)="handleAvatarKeydown($event)"
+      [attr.aria-label]="'Ver perfil de ' + authorName"
+    >
+      <app-avatar
+        [src]="publication.authorPhotoUrl"
+        [username]="publication.authorUsername"
+        size="md"
+      />
+    </button>
+
+    <div class="publication-card__meta">
+      <div class="publication-card__author-line">
+        <a class="publication-card__name" [routerLink]="['/profile', publication.authorId]">
+          {{ authorName }}
+        </a>
+        <span class="publication-card__handle">@{{ publication.authorUsername }}</span>
+        <span class="publication-card__time">· {{ publication.createdAt | tempoAtras }}</span>
+        @if (publication.updatedAt && publication.updatedAt !== publication.createdAt) {
+          <span class="publication-card__edited">Editado</span>
+        }
+      </div>
+    </div>
+
+    @if (isAuthor) {
+      <div class="publication-card__menu-wrap">
+        <button
+          type="button"
+          class="publication-card__menu-btn"
+          (click)="toggleMenu()"
+          aria-label="Opções da publicação"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="12" cy="5" r="1.5"></circle>
+            <circle cx="12" cy="12" r="1.5"></circle>
+            <circle cx="12" cy="19" r="1.5"></circle>
+          </svg>
+        </button>
+
+        @if (menuOpen) {
+          <div class="publication-card__menu" role="menu">
+            <button type="button" class="publication-card__menu-item" (click)="startEdit()">
+              Editar
+            </button>
+            <button
+              type="button"
+              class="publication-card__menu-item publication-card__menu-item--danger"
+              (click)="confirmDelete()"
+            >
+              Apagar
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </header>
+
+  <div class="publication-card__body">
+    @if (editing) {
+      <div class="publication-card__edit">
+        <textarea
+          class="publication-card__edit-textarea"
+          [(ngModel)]="editText"
+          rows="3"
+          maxlength="280"
+          aria-label="Editar publicação"
+        ></textarea>
+        @if (editError) {
+          <p class="publication-card__error">{{ editError }}</p>
+        }
+        <div class="publication-card__edit-actions">
+          <button type="button" class="publication-card__btn-secondary" (click)="cancelEdit()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="publication-card__btn-primary"
+            [disabled]="!editText.trim() || savingEdit"
+            (click)="saveEdit()"
+          >
+            @if (savingEdit) {
+              <app-loading-spinner tamanho="sm" />
+            } @else {
+              Guardar
+            }
+          </button>
+        </div>
+      </div>
+    } @else {
+      @if (publication.text) {
+        <p class="publication-card__text">{{ publication.text }}</p>
+      }
+
+      @if (publication.imageUrl) {
+        <div class="publication-card__media">
+          <img [src]="publication.imageUrl" alt="Imagem da publicação" loading="lazy" />
+        </div>
+      }
+
+      @if (publication.videoUrl) {
+        <div class="publication-card__media">
+          <video [src]="publication.videoUrl" controls preload="metadata"></video>
+        </div>
+      }
+    }
+  </div>
+
+  <footer class="publication-card__footer">
+    <button type="button" class="publication-card__action publication-card__action--comment" aria-label="Comentários">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+      </svg>
+      <span>{{ publication.commentsCount }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="publication-card__action publication-card__action--like"
+      [class.publication-card__action--liked]="publication.hasLiked"
+      (click)="toggleLike()"
+      [attr.aria-pressed]="publication.hasLiked"
+      aria-label="Baze"
+    >
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        [attr.fill]="publication.hasLiked ? 'currentColor' : 'none'"
+        stroke="currentColor"
+        stroke-width="1.8"
+        aria-hidden="true"
+      >
+        <path d="M19.5 12.6 12 20l-7.5-7.4A5 5 0 0 1 12 6a5 5 0 0 1 7.5 6.6Z"></path>
+      </svg>
+      <span>{{ publication.likesCount }}</span>
+    </button>
+
+    @if (likeError) {
+      <span class="publication-card__like-error">{{ likeError }}</span>
+    }
+  </footer>
+</article>
+
+@if (deleteDialogOpen) {
+  <app-confirm-dialog
+    mensagem="Tens a certeza que queres apagar esta publicação?"
+    (confirmado)="deletePublication()"
+    (cancelado)="deleteDialogOpen = false"
+  />
+}
