@@ -1,10 +1,9 @@
 /**
- * Copia este ficheiro para `environment.ngrok.ts` e preenche os URLs dos túneis ngrok.
+ * Opcional — só necessário se expuseres também a API via ngrok (ex.: teste no telemóvel).
  *
- * 1. ngrok http 4200   → URL do frontend (browser)
- * 2. ngrok http 5000   → URL da API (apiUrl / uploadsUrl)
- * 3. npm run start:ngrok
- * 4. Na API, define CORS_EXTRA_ORIGINS com o URL do frontend ngrok (ver appsettings.json).
+ * Fluxo simples (backend local, frontend via ngrok no mesmo PC):
+ *   npm start  →  ngrok http 4200  →  dotnet run
+ * Usa environment.ts (localhost:5000) — não precisas deste ficheiro.
  */
 export const environment = {
   production: false,

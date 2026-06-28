@@ -108,12 +108,38 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins(corsOrigins)
-              .AllowAnyHeader()
+        policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
+
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.SetIsOriginAllowed(IsAllowedDevelopmentOrigin);
+        }
+        else
+        {
+            policy.WithOrigins(corsOrigins);
+        }
     });
 });
+
+static bool IsAllowedDevelopmentOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    if (uri.Host is "localhost" or "127.0.0.1")
+    {
+        return uri.Scheme is "http" or "https";
+    }
+
+    return uri.Scheme == "https"
+        && (uri.Host.EndsWith(".ngrok-free.dev", StringComparison.OrdinalIgnoreCase)
+            || uri.Host.EndsWith(".ngrok-free.app", StringComparison.OrdinalIgnoreCase)
+            || uri.Host.EndsWith(".ngrok.app", StringComparison.OrdinalIgnoreCase));
+}
 
 // 5. Adiciona os controladores da API
 builder.Services.AddControllers();
