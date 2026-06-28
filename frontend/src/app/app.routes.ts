@@ -3,18 +3,29 @@ import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/feed', pathMatch: 'full' },
   {
-    path: 'login',
-    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
-    canActivate: [guestGuard]
-  },
-  {
-    path: 'register',
-    loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent),
-    canActivate: [guestGuard]
+    path: '',
+    component: PublicLayoutComponent,
+    canActivate: [guestGuard],
+    children: [
+      { path: '', redirectTo: 'login', pathMatch: 'full' },
+      {
+        path: 'login',
+        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
+      },
+      {
+        path: 'register',
+        loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+      }
+    ]
   },
   {
     path: '',
@@ -82,9 +93,8 @@ export const routes: Routes = [
   },
   {
     path: 'auth/recuperar-senha',
-    loadComponent: () =>
-      import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
-    canActivate: [guestGuard]
+    redirectTo: 'forgot-password',
+    pathMatch: 'full'
   },
   {
     path: 'admin-login',

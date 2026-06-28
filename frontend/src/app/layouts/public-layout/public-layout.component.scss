@@ -1,9 +1,7 @@
-@use '../../styles/variables' as vars;
-
 .layout-publico {
   display: flex;
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: var(--color-bg-primary);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -12,55 +10,60 @@
 
 .layout-publico__hero {
   flex: 1;
-  background-color: vars.$color-primary;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 40px;
-  color: #ffffff;
+  padding: var(--spacing-3xl);
+  background-color: var(--color-accent);
+  color: #fff;
 
   @media (max-width: 768px) {
-    padding: 30px 20px;
+    padding: var(--spacing-2xl) var(--spacing-lg);
     align-items: center;
     text-align: center;
   }
 }
 
 .layout-publico__marca {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 800;
-  margin-bottom: 40px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-3xl);
+  color: #fff;
+  font-family: var(--font-family-extended);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-heavy);
+  text-decoration: none;
 
   img {
     height: 48px;
     width: auto;
-    filter: brightness(0) invert(1); // Force logo to be white on blue bg
+    filter: brightness(0) invert(1);
   }
 
   &:hover {
     text-decoration: none;
+    opacity: 0.92;
   }
 }
 
 .layout-publico__descricao {
-  max-width: 450px;
+  max-width: 28rem;
 
   h2 {
-    font-size: 32px;
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 16px;
-    color: #ffffff;
+    margin: 0 0 var(--spacing-lg);
+    font-family: var(--font-family-extended);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-heavy);
+    line-height: var(--line-height-tight);
+    color: #fff;
   }
 
   p {
-    font-size: 16px;
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+    color: rgba(255, 255, 255, 0.88);
   }
 }
 
@@ -69,14 +72,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: var(--spacing-3xl);
+  background-color: var(--color-bg-primary);
 
   @media (max-width: 768px) {
-    padding: 20px;
+    padding: var(--spacing-xl) var(--spacing-lg);
   }
 }
 
 .layout-publico__cartao {
   width: 100%;
-  max-width: 400px;
+  max-width: 26rem;
 }

@@ -1,70 +1,114 @@
-<div class="registo">
-  <h1 class="registo__titulo">Criar conta</h1>
-  <p class="registo__subtitulo">Junta-te ao NzolaNet hoje.</p>
+<div class="auth-form">
+  <header class="auth-form__header">
+    <h1 class="auth-form__title">Criar conta</h1>
+    <p class="auth-form__subtitle">Junta-te ao NzolaNet hoje.</p>
+  </header>
 
-  <div class="registo__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
+  @if (errorMessage) {
+    <p class="auth-form__error" role="alert">{{ errorMessage }}</p>
+  }
 
-  <form class="registo__formulario" (ngSubmit)="registar()" #formulario="ngForm" novalidate>
-    <div class="campo">
-      <label class="campo__label" for="nome">Nome completo</label>
-      <input id="nome" class="campo__input" type="text" placeholder="O teu nome"
-        [(ngModel)]="dados.nome" name="nome" required minlength="2"
-        [class.campo__input--erro]="campoNome.invalid && campoNome.touched" #campoNome="ngModel" />
-      <span class="campo__erro" *ngIf="campoNome.invalid && campoNome.touched">Mínimo 2 caracteres</span>
-    </div>
-
-    <div class="campo">
-      <label class="campo__label" for="nomeUtil">Nome de utilizador</label>
-      <div class="campo__prefixo-wrap">
-        <span class="campo__prefixo">@</span>
-        <input id="nomeUtil" class="campo__input campo__input--com-prefixo" type="text"
-          placeholder="nome.utilizador" [(ngModel)]="dados.nomeUtilizador" name="nomeUtilizador"
-          required minlength="3" pattern="^[a-zA-Z0-9._]+$"
-          [class.campo__input--erro]="campoUtil.invalid && campoUtil.touched" #campoUtil="ngModel" />
+  <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="handleSubmit()" novalidate>
+    <div class="auth-form__field">
+      <label class="auth-form__label" for="register-username">Username</label>
+      <div class="auth-form__prefix-wrap">
+        <span class="auth-form__prefix" aria-hidden="true">@</span>
+        <input
+          id="register-username"
+          class="auth-form__input"
+          [class.auth-form__input--invalid]="isInvalid('username')"
+          type="text"
+          formControlName="username"
+          autocomplete="username"
+          placeholder="nome.utilizador"
+        />
       </div>
-      <span class="campo__erro" *ngIf="campoUtil.invalid && campoUtil.touched">Usa pelo menos 3 caracteres: letras, números, pontos ou underscores.</span>
+      @if (getUsernameError()) {
+        <span class="auth-form__field-error" role="alert">{{ getUsernameError() }}</span>
+      }
     </div>
 
-    <div class="campo">
-      <label class="campo__label" for="emailReg">Email</label>
-      <input id="emailReg" class="campo__input" type="email" placeholder="o.teu@email.com"
-        [(ngModel)]="dados.email" name="email" required email
-        [class.campo__input--erro]="campoEmail.invalid && campoEmail.touched" #campoEmail="ngModel" />
-      <span class="campo__erro" *ngIf="campoEmail.invalid && campoEmail.touched">Email inválido</span>
+    <div class="auth-form__field">
+      <label class="auth-form__label" for="register-email">Email</label>
+      <input
+        id="register-email"
+        class="auth-form__input"
+        [class.auth-form__input--invalid]="isInvalid('email') || !!emailApiError"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="o.teu@email.com"
+      />
+      @if (getEmailError()) {
+        <span class="auth-form__field-error" role="alert">{{ getEmailError() }}</span>
+      }
     </div>
 
-    <div class="campo">
-      <label class="campo__label" for="senhaReg">Senha</label>
-      <div class="campo__senha-wrap">
-        <input id="senhaReg" class="campo__input" [type]="senhaVisivel ? 'text' : 'password'"
-          placeholder="Mínimo 6 caracteres" [(ngModel)]="dados.senha" name="senha" required minlength="6"
-          [class.campo__input--erro]="campoSenha.invalid && campoSenha.touched" #campoSenha="ngModel" />
-        <button type="button" class="campo__toggle-senha" (click)="senhaVisivel = !senhaVisivel">
-          {{ senhaVisivel ? 'Ocultar' : 'Ver' }}
+    <div class="auth-form__field">
+      <label class="auth-form__label" for="register-display-name">Nome de exibição (opcional)</label>
+      <input
+        id="register-display-name"
+        class="auth-form__input"
+        type="text"
+        formControlName="displayName"
+        autocomplete="name"
+        placeholder="Como queres aparecer"
+      />
+    </div>
+
+    <div class="auth-form__field">
+      <label class="auth-form__label" for="register-password">Palavra-passe</label>
+      <div class="auth-form__input-wrap">
+        <input
+          id="register-password"
+          class="auth-form__input"
+          [class.auth-form__input--invalid]="isInvalid('password')"
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="new-password"
+          placeholder="Mínimo 6 caracteres"
+        />
+        <button
+          type="button"
+          class="auth-form__toggle"
+          (click)="showPassword = !showPassword"
+          [attr.aria-label]="showPassword ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'"
+        >
+          {{ showPassword ? 'Ocultar' : 'Ver' }}
         </button>
       </div>
-
-      <div class="campo__requisitos" *ngIf="dados.senha.length > 0">
-        <p class="campo__requisito" [class.campo__requisito--ok]="temTamanhoMinimo()">Mínimo de 6 caracteres</p>
-        <p class="campo__requisito" [class.campo__requisito--ok]="temMaiuscula()">Uma letra maiúscula</p>
-        <p class="campo__requisito" [class.campo__requisito--ok]="temMinuscula()">Uma letra minúscula</p>
-        <p class="campo__requisito" [class.campo__requisito--ok]="temNumero()">Um número</p>
-      </div>
+      @if (getPasswordError()) {
+        <span class="auth-form__field-error" role="alert">{{ getPasswordError() }}</span>
+      }
     </div>
 
-    <div class="campo">
-      <label class="campo__label" for="confirmar">Confirmar senha</label>
-      <input id="confirmar" class="campo__input" type="password" placeholder="Repete a senha"
-        [(ngModel)]="dados.confirmarSenha" name="confirmarSenha" required
-        [class.campo__input--erro]="senhasNaoCoincidem()" />
-      <span class="campo__erro" *ngIf="senhasNaoCoincidem()">As senhas não coincidem</span>
+    <div class="auth-form__field">
+      <label class="auth-form__label" for="register-confirm-password">Confirmar palavra-passe</label>
+      <input
+        id="register-confirm-password"
+        class="auth-form__input"
+        [class.auth-form__input--invalid]="isInvalid('confirmPassword')"
+        type="password"
+        formControlName="confirmPassword"
+        autocomplete="new-password"
+        placeholder="Repete a palavra-passe"
+      />
+      @if (getConfirmPasswordError()) {
+        <span class="auth-form__field-error" role="alert">{{ getConfirmPasswordError() }}</span>
+      }
     </div>
 
-    <button type="submit" class="registo__btn" [disabled]="formulario.invalid || senhasNaoCoincidem() || !senhaValida() || aRegistar">
-      <app-loading-spinner *ngIf="aRegistar" tamanho="sm" />
-      <span *ngIf="!aRegistar">Criar conta</span>
+    <button type="submit" class="auth-form__submit" [disabled]="registerForm.invalid || isLoading">
+      @if (isLoading) {
+        <app-loading-spinner tamanho="sm" />
+      } @else {
+        <span>Criar conta</span>
+      }
     </button>
   </form>
 
-  <p class="registo__login">Já tens conta? <a routerLink="/auth/login">Entra aqui</a></p>
+  <p class="auth-form__footer">
+    Já tens conta?
+    <a routerLink="/login">Entrar</a>
+  </p>
 </div>

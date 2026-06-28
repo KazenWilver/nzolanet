@@ -1,101 +1,110 @@
-<div class="login__content">
-  <div class="login__header">
-    <h1 class="login__titulo">
-      {{ contasSalvas.length > 0 && !modoOutraConta ? 'Bem-vindo de volta' : 'Entra na tua conta' }}
-    </h1>
-    <p class="login__subtitulo">
-      {{ contasSalvas.length > 0 && !modoOutraConta ? 'Escolhe uma conta guardada ou usa outra conta.' : 'Usa o teu email e senha para continuar no NzolaNet.' }}
-    </p>
-  </div>
+<div class="auth-form">
+  @if (!showForgotPassword) {
+    <header class="auth-form__header">
+      <h1 class="auth-form__title">Entrar no NzolaNet</h1>
+      <p class="auth-form__subtitle">Usa o teu email e palavra-passe para continuar.</p>
+    </header>
 
-  <ng-container *ngIf="contasSalvas.length > 0 && !modoOutraConta">
-    <div class="login__contas-salvas">
-      <p class="login__label-contas">Contas guardadas</p>
-      <div class="login__grid-contas">
-        <button type="button" class="login__cartao-conta" *ngFor="let conta of contasSalvas" (click)="selecionarConta(conta)">
-          <div class="login__avatar-grande" [style.background-image]="conta.fotoPerfil ? 'url(' + conta.fotoPerfil + ')' : ''">
-            <span *ngIf="!conta.fotoPerfil" class="login__iniciais">
-              {{ (conta.nome.split(' ')[0][0] + conta.nome.split(' ')[conta.nome.split(' ').length - 1][0]).toUpperCase() }}
-            </span>
-          </div>
-          <span class="login__detalhe-conta">
-            <strong class="login__nome-conta">{{ conta.nome }}</strong>
-            <small class="login__email-conta">{{ conta.email }}</small>
-          </span>
-        </button>
-      </div>
-    </div>
+    @if (errorMessage) {
+      <p class="auth-form__error" role="alert">{{ errorMessage }}</p>
+    }
 
-    <div class="login__opcoes">
-      <button type="button" class="login__btn login__btn--ghost" (click)="usarOutraConta()">Usar outra conta</button>
-      <a routerLink="/auth/registar" class="login__btn login__btn--secondary">Criar nova conta</a>
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="modoOutraConta || contasSalvas.length === 0">
-    <button type="button" class="login__voltar" *ngIf="contasSalvas.length > 0" (click)="voltarContas()">Voltar</button>
-
-    <form class="login__formulario" (ngSubmit)="entrar()" #formulario="ngForm" novalidate>
-      <div class="login__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
-
-      <div class="campo">
-        <label class="campo__label" for="email">Email</label>
-        <input id="email" class="campo__input" type="email" placeholder="o.teu@email.com"
-          [(ngModel)]="credenciais.email" name="email" required email
-          [class.campo__input--erro]="campoEmail.invalid && campoEmail.touched" #campoEmail="ngModel" />
-        <span class="campo__erro" *ngIf="campoEmail.invalid && campoEmail.touched">Email inválido</span>
+    <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="handleSubmit()" novalidate>
+      <div class="auth-form__field">
+        <label class="auth-form__label" for="login-email">Email</label>
+        <input
+          id="login-email"
+          class="auth-form__input"
+          [class.auth-form__input--invalid]="isInvalid('email')"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="o.teu@email.com"
+        />
+        @if (getEmailError()) {
+          <span class="auth-form__field-error" role="alert">{{ getEmailError() }}</span>
+        }
       </div>
 
-      <div class="campo">
-        <label class="campo__label" for="senha">Senha</label>
-        <div class="campo__senha-wrap">
-          <input id="senha" class="campo__input" [type]="senhaVisivel ? 'text' : 'password'" placeholder="A tua senha"
-            [(ngModel)]="credenciais.senha" name="senha" required minlength="6"
-            [class.campo__input--erro]="campoSenha.invalid && campoSenha.touched" #campoSenha="ngModel" />
-          <button type="button" class="campo__toggle-senha" (click)="senhaVisivel = !senhaVisivel">
-            {{ senhaVisivel ? 'Ocultar' : 'Ver' }}
+      <div class="auth-form__field">
+        <label class="auth-form__label" for="login-password">Palavra-passe</label>
+        <div class="auth-form__input-wrap">
+          <input
+            id="login-password"
+            class="auth-form__input"
+            [class.auth-form__input--invalid]="isInvalid('password')"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="A tua palavra-passe"
+          />
+          <button
+            type="button"
+            class="auth-form__toggle"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'"
+          >
+            {{ showPassword ? 'Ocultar' : 'Ver' }}
           </button>
         </div>
-        <span class="campo__erro" *ngIf="campoSenha.invalid && campoSenha.touched">Mínimo 6 caracteres</span>
+        @if (getPasswordError()) {
+          <span class="auth-form__field-error" role="alert">{{ getPasswordError() }}</span>
+        }
       </div>
 
-      <a class="login__recuperar" routerLink="/auth/recuperar-senha">Esqueceste a senha?</a>
+      <button type="button" class="auth-form__link" (click)="handleShowForgotPassword()">
+        Esqueci a minha senha
+      </button>
 
-      <button type="submit" class="login__btn" [disabled]="formulario.invalid || aEntrar">
-        <app-loading-spinner *ngIf="aEntrar" tamanho="sm" />
-        <span *ngIf="!aEntrar">Entrar</span>
+      <button type="submit" class="auth-form__submit" [disabled]="loginForm.invalid || isLoading">
+        @if (isLoading) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          <span>Entrar</span>
+        }
       </button>
     </form>
 
-    <p class="login__registo">Ainda não tens conta? <a routerLink="/auth/registar">Regista-te</a></p>
-  </ng-container>
-</div>
+    <p class="auth-form__footer">
+      Ainda não tens conta?
+      <a routerLink="/register">Regista-te</a>
+    </p>
+  } @else {
+    <header class="auth-form__header">
+      <h1 class="auth-form__title">Recuperar palavra-passe</h1>
+      <p class="auth-form__subtitle">Introduz o teu email para receberes instruções.</p>
+    </header>
 
-<div *ngIf="contaSelecionada" class="login__popup-overlay">
-  <div class="login__popup-card">
-    <button type="button" class="login__popup-close" (click)="cancelarConta()">×</button>
-    <div class="login__avatar-grande" [style.background-image]="contaSelecionada.fotoPerfil ? 'url(' + contaSelecionada.fotoPerfil + ')' : ''">
-      <span *ngIf="!contaSelecionada.fotoPerfil" class="login__iniciais">
-        {{ (contaSelecionada.nome.split(' ')[0][0] + contaSelecionada.nome.split(' ')[contaSelecionada.nome.split(' ').length - 1][0]).toUpperCase() }}
-      </span>
-    </div>
-    <p class="login__popup-nome">{{ contaSelecionada.nome }}</p>
-    <p class="login__popup-subtitulo">Insere a senha para continuar</p>
+    @if (forgotSuccessMessage) {
+      <p class="auth-form__success" role="status">{{ forgotSuccessMessage }}</p>
+    }
 
-    <form class="login__formulario login__formulario--popup" (ngSubmit)="entrar()" #modalFormulario="ngForm" novalidate>
-      <div class="login__erro" *ngIf="erroGeral">{{ erroGeral }}</div>
-      <div class="campo">
-        <label class="campo__label" for="senha-modal">Senha</label>
-        <input id="senha-modal" class="campo__input" [type]="senhaVisivel ? 'text' : 'password'"
-          placeholder="A tua senha" [(ngModel)]="credenciais.senha" name="senha" required minlength="6"
-          #campoSenhaModal="ngModel" />
-        <span class="campo__erro" *ngIf="campoSenhaModal.invalid && campoSenhaModal.touched">Mínimo 6 caracteres</span>
+    <form class="auth-form" [formGroup]="forgotForm" (ngSubmit)="handleForgotPassword()" novalidate>
+      <div class="auth-form__field">
+        <label class="auth-form__label" for="forgot-email">Email</label>
+        <input
+          id="forgot-email"
+          class="auth-form__input"
+          [class.auth-form__input--invalid]="isForgotInvalid()"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="o.teu@email.com"
+        />
+        @if (isForgotInvalid()) {
+          <span class="auth-form__field-error" role="alert">Introduz um email válido.</span>
+        }
       </div>
 
-      <button type="submit" class="login__btn" [disabled]="modalFormulario.invalid || aEntrar">
-        <app-loading-spinner *ngIf="aEntrar" tamanho="sm" />
-        <span *ngIf="!aEntrar">Entrar</span>
+      <button type="submit" class="auth-form__submit" [disabled]="forgotForm.invalid || isForgotLoading">
+        @if (isForgotLoading) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          <span>Enviar instruções</span>
+        }
       </button>
     </form>
-  </div>
+
+    <button type="button" class="auth-form__link" (click)="handleBackToLogin()">Voltar ao login</button>
+  }
 </div>
