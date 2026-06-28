@@ -56,7 +56,7 @@ export class LoginComponent {
           this.isLoading = false;
           this.errorMessage =
             error.status === 401
-              ? 'Credenciais inválidas.'
+              ? 'Credenciais inválidas. Verifica o email e a palavra-passe.'
               : 'Não foi possível entrar. Tenta novamente.';
         }
       });

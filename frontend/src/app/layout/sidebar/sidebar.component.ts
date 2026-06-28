@@ -7,6 +7,7 @@ import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { CreatePostComponent } from '../../features/feed/create-post/create-post.component';
+import { ThemeService } from '../../core/services/theme.service';
 
 interface SidebarLinkItem {
   type: 'link';
@@ -36,6 +37,7 @@ type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem;
 })
 export class SidebarComponent {
   private readonly authService = inject(AuthService);
+  readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -82,6 +84,10 @@ export class SidebarComponent {
     if (!this.router.url.startsWith('/feed')) {
       void this.router.navigate(['/feed']);
     }
+  }
+
+  handleToggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 
   isActive(route: string, exact = false): boolean {
