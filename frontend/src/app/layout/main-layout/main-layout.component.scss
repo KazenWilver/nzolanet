@@ -68,7 +68,9 @@
     max-width: none;
     flex: 1 1 auto;
     border-right: none;
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(
+      var(--height-mobile-nav) + var(--spacing-lg) + env(safe-area-inset-bottom, 0px)
+    );
   }
 }
 
