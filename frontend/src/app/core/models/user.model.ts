@@ -13,6 +13,7 @@ export interface User {
   createdAt: string;
   role?: string;
   isFollowing?: boolean;
+  isPending?: boolean;
 }
 
 export interface UpdateProfileDto {
@@ -85,7 +86,8 @@ export const mapBackendUser = (dto: BackendUserDto): User => ({
   followingCount: dto.followingCount ?? 0,
   createdAt: dto.createdAt,
   role: dto.role,
-  isFollowing: dto.isFollowing
+  isFollowing: dto.isFollowing,
+  isPending: dto.isPending
 });
 
 export const toLegacyUser = (user: User): LegacyUser => ({

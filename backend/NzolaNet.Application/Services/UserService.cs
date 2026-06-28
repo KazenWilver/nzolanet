@@ -27,7 +27,7 @@ public class UserService : IUserService
         _followRepository = followRepository;
     }
 
-    public async Task<UserResponseDto> GetUserResponseAsync(Guid userId)
+    public async Task<UserResponseDto> GetUserResponseAsync(Guid userId, Guid? currentUserId = null)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -38,7 +38,7 @@ public class UserService : IUserService
         var followersCount = await _followRepository.GetFollowersCountAsync(userId);
         var followingCount = await _followRepository.GetFollowingCountAsync(userId);
 
-        return new UserResponseDto
+        var response = new UserResponseDto
         {
             Id = user.Id,
             Username = user.UserName ?? string.Empty,
@@ -50,6 +50,23 @@ public class UserService : IUserService
             FollowingCount = followingCount,
             CreatedAt = user.CreatedAt
         };
+
+        if (currentUserId.HasValue)
+        {
+            if (currentUserId.Value == userId)
+            {
+                response.IsFollowing = true;
+                response.IsPending = false;
+            }
+            else
+            {
+                response.IsFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, userId);
+                response.IsPending = !response.IsFollowing &&
+                    await _followRepository.IsFollowPendingAsync(currentUserId.Value, userId);
+            }
+        }
+
+        return response;
     }
 
     public async Task<UserProfileDto> GetProfileAsync(Guid userId, Guid? currentUserId = null)

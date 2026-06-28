@@ -1,0 +1,41 @@
+<app-modal [open]="open" [title]="title" (closed)="handleClose()">
+  @if (loading) {
+    <div class="followers-modal__loading">
+      <app-loading-spinner tamanho="md" />
+    </div>
+  }
+
+  @if (error) {
+    <p class="followers-modal__error">Não foi possível carregar a lista.</p>
+  }
+
+  @if (!loading && !error && users.length === 0) {
+    <p class="followers-modal__empty">Nenhum utilizador encontrado.</p>
+  }
+
+  <ul class="followers-modal__list">
+    @for (user of users; track user.id) {
+      <li class="followers-modal__item">
+        <button type="button" class="followers-modal__profile" (click)="navigateToProfile(user.id)">
+          <app-avatar [src]="user.profilePhotoUrl" [username]="user.username" size="md" />
+          <span class="followers-modal__info">
+            <strong>{{ getDisplayName(user) }}</strong>
+            <span>@{{ user.username }}</span>
+          </span>
+        </button>
+
+        @if (currentUserId && user.id !== currentUserId) {
+          <button
+            type="button"
+            class="followers-modal__follow-btn"
+            [class.followers-modal__follow-btn--following]="isFollowingUser(user)"
+            [disabled]="togglingUserId === user.id"
+            (click)="toggleFollow(user, $event)"
+          >
+            {{ isFollowingUser(user) ? 'A seguir' : 'Seguir' }}
+          </button>
+        }
+      </li>
+    }
+  </ul>
+</app-modal>

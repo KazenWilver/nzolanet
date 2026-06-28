@@ -39,4 +39,5 @@ export interface BackendUserDto {
   createdAt: string;
   role?: string;
   isFollowing?: boolean;
+  isPending?: boolean;
 }

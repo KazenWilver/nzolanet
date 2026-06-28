@@ -1,71 +1,124 @@
-<div class="perfil" *ngIf="utilizador; else aCarregar">
-  <section class="perfil__card">
-    <div class="perfil__capa">
-      <img *ngIf="utilizador.fotoCapa" [src]="utilizador.fotoCapa" alt="Foto de capa" class="perfil__img-capa" />
-      <div *ngIf="!utilizador.fotoCapa" class="perfil__capa-placeholder"></div>
-    </div>
+@if (loadingProfile) {
+  <div class="profile-page__loading">
+    <app-loading-spinner tamanho="lg" />
+  </div>
+} @else if (profileError) {
+  <div class="profile-page__error">
+    <p>Não foi possível carregar o perfil.</p>
+  </div>
+} @else if (profile) {
+  <div class="profile-page">
+    <section class="profile-page__header">
+      <div class="profile-page__cover" aria-hidden="true"></div>
 
-    <div class="perfil__info">
-      <div class="perfil__avatar-wrap">
-        <app-user-avatar [foto]="utilizador.fotoPerfil" [nome]="utilizador.nome" tamanho="xl" />
-      </div>
-
-      <div class="perfil__acoes">
-        <ng-container *ngIf="eMeuPerfil(); else acoesTerceiro">
-          <a class="perfil__btn perfil__btn--secundario" [routerLink]="['/perfil', utilizador.id, 'editar']">Editar perfil</a>
-        </ng-container>
-        <ng-template #acoesTerceiro>
-          <button class="perfil__btn"
-          [class.perfil__btn--seguindo]="utilizador.estaASeguir"
-          [class.perfil__btn--primario]="!utilizador.estaASeguir && !utilizador.estaPendente"
-          (click)="alternarSeguir()" [disabled]="aAlterarSeguir">
-          {{ utilizador.estaASeguir ? 'A seguir' : (utilizador.estaPendente ? 'Pendente' : 'Seguir') }}
-        </button>
-        </ng-template>
-      </div>
-
-      <div class="perfil__dados">
-        <h1 class="perfil__nome">{{ utilizador.nome }}</h1>
-        <span class="perfil__nomeutil">@{{ utilizador.nomeUtilizador }}</span>
-        <p *ngIf="utilizador.bio" class="perfil__bio">{{ utilizador.bio }}</p>
-        <p *ngIf="utilizador.localizacao" class="perfil__localizacao">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          {{ utilizador.localizacao }}
-        </p>
-      </div>
-
-      <div class="perfil__estatisticas">
-        <div class="perfil__stat">
-          <strong>{{ utilizador.totalPublicacoes }}</strong>
-          <span>Publicações</span>
+      <div class="profile-page__info">
+        <div class="profile-page__avatar">
+          <app-avatar
+            [src]="profile.profilePhotoUrl"
+            [username]="profile.username"
+            size="lg"
+          />
         </div>
-        <a class="perfil__stat" [routerLink]="['/perfil', utilizador.id, 'seguidores']">
-          <strong>{{ utilizador.totalSeguidores }}</strong>
-          <span>Seguidores</span>
-        </a>
-        <a class="perfil__stat" [routerLink]="['/perfil', utilizador.id, 'seguindo']">
-          <strong>{{ utilizador.totalSeguindo }}</strong>
-          <span>A seguir</span>
-        </a>
+
+        <div class="profile-page__actions">
+          @if (isOwnProfile) {
+            <button type="button" class="profile-page__btn profile-page__btn--secondary" (click)="openEditModal()">
+              Editar perfil
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="profile-page__btn"
+              [class.profile-page__btn--primary]="!profile.isFollowing && !profile.isPending"
+              [class.profile-page__btn--following]="profile.isFollowing || profile.isPending"
+              [disabled]="togglingFollow"
+              (click)="toggleFollow()"
+            >
+              {{ followLabel }}
+            </button>
+          }
+        </div>
+
+        <div class="profile-page__details">
+          <h1 class="profile-page__name">{{ displayName }}</h1>
+          <span class="profile-page__username">@{{ profile.username }}</span>
+          @if (profile.bio) {
+            <p class="profile-page__bio">{{ profile.bio }}</p>
+          }
+          <p class="profile-page__member-since">
+            Membro desde {{ profile.createdAt | date:'longDate' }}
+          </p>
+        </div>
+
+        <div class="profile-page__stats">
+          <button type="button" class="profile-page__stat" (click)="openFollowersModal('following')">
+            <strong>{{ profile.followingCount }}</strong>
+            <span>A seguir</span>
+          </button>
+          <button type="button" class="profile-page__stat" (click)="openFollowersModal('followers')">
+            <strong>{{ profile.followersCount }}</strong>
+            <span>Seguidores</span>
+          </button>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="perfil__publicacoes">
-    <h2>Publicações</h2>
-    <div class="perfil__carregando" *ngIf="aCarregarPosts">
-      <app-loading-spinner tamanho="md" />
-    </div>
-    <div class="perfil__sem-pub" *ngIf="!aCarregarPosts && posts.length === 0">
-      <p>Ainda sem publicações.</p>
-    </div>
-    <app-post-card *ngFor="let post of posts; trackBy: trackPorId" [post]="post" (eliminado)="removerPost($event)" />
-  </section>
-</div>
+    <nav class="profile-page__tabs" aria-label="Secções do perfil">
+      <button
+        type="button"
+        class="profile-page__tab"
+        [class.profile-page__tab--active]="activeTab === 'publications'"
+        (click)="setActiveTab('publications')"
+      >
+        Publicações
+      </button>
+      <button
+        type="button"
+        class="profile-page__tab"
+        [class.profile-page__tab--active]="activeTab === 'likes'"
+        (click)="setActiveTab('likes')"
+      >
+        Gostos
+      </button>
+    </nav>
 
-<ng-template #aCarregar>
-  <div class="perfil__carregando-pagina"><app-loading-spinner tamanho="lg" /></div>
-</ng-template>
+    @if (activeTab === 'likes') {
+      <app-placeholder-feature featureName="Gostos" />
+    } @else if (privateAccount) {
+      <div class="profile-page__private">
+        <p>Esta conta é privada. Segue para ver as publicações.</p>
+      </div>
+    } @else if (loadingPublications) {
+      <div class="profile-page__loading">
+        <app-loading-spinner tamanho="md" />
+      </div>
+    } @else if (publications.length === 0) {
+      <div class="profile-page__empty">
+        <p>Ainda sem publicações.</p>
+      </div>
+    } @else {
+      @for (publication of publications; track trackById($index, publication)) {
+        <app-publication-card
+          [publication]="publication"
+          [currentUserId]="currentUserId"
+          (deleted)="handlePublicationDeleted($event)"
+          (updated)="handlePublicationUpdated($event)"
+        />
+      }
+    }
+  </div>
+
+  <app-edit-profile-modal
+    [open]="editModalOpen"
+    [user]="profile"
+    (closed)="editModalOpen = false"
+    (saved)="handleProfileSaved($event)"
+  />
+
+  <app-followers-modal
+    [open]="followersModalOpen"
+    [profileUserId]="profile.id"
+    [mode]="followersModalMode"
+    (closed)="followersModalOpen = false"
+  />
+}

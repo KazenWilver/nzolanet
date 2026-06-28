@@ -11,4 +11,6 @@ public class UserResponseDto
     public int FollowersCount { get; set; }
     public int FollowingCount { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsFollowing { get; set; }
+    public bool IsPending { get; set; }
 }

@@ -20,7 +20,7 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProfile(Guid id)
     {
-        var profile = await _userService.GetUserResponseAsync(id);
+        var profile = await _userService.GetUserResponseAsync(id, AuthClaimsHelper.GetOptionalUserId(User));
         return Ok(profile);
     }
 

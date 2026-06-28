@@ -1,0 +1,51 @@
+<app-modal [open]="open" title="Editar perfil" (closed)="handleClose()">
+  <form class="edit-profile" (ngSubmit)="save()">
+    <div class="edit-profile__photo">
+      <app-avatar
+        [src]="photoPreview"
+        [username]="user.username"
+        size="lg"
+      />
+      <label class="edit-profile__photo-btn">
+        <input type="file" accept="image/*" (change)="handlePhotoSelect($event)" hidden />
+        Alterar foto
+      </label>
+    </div>
+
+    <label class="edit-profile__field">
+      <span>Nome de exibição</span>
+      <input type="text" [(ngModel)]="displayName" name="displayName" maxlength="50" />
+    </label>
+
+    <label class="edit-profile__field">
+      <span>Bio</span>
+      <textarea
+        [(ngModel)]="bio"
+        name="bio"
+        rows="3"
+        [maxlength]="maxBioLength"
+        placeholder="Conta um pouco sobre ti"
+      ></textarea>
+      <span class="edit-profile__counter" [class.edit-profile__counter--warn]="remainingBioChars <= 20">
+        {{ remainingBioChars }}
+      </span>
+    </label>
+
+    @if (error) {
+      <p class="edit-profile__error" role="alert">{{ error }}</p>
+    }
+
+    <div class="edit-profile__actions">
+      <button type="button" class="edit-profile__btn-secondary" (click)="handleClose()">
+        Cancelar
+      </button>
+      <button type="submit" class="edit-profile__btn-primary" [disabled]="saving">
+        @if (saving) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          Guardar
+        }
+      </button>
+    </div>
+  </form>
+</app-modal>

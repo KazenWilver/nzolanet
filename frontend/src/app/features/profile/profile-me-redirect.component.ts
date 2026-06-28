@@ -11,11 +11,11 @@ export class ProfileMeRedirectComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    const utilizador = this.authService.obterUtilizadorAtual();
-    if (utilizador?.id) {
-      this.router.navigate(['/profile', utilizador.id]);
+    const user = this.authService.getCurrentUser();
+    if (user?.id) {
+      void this.router.navigate(['/profile', user.id]);
     } else {
-      this.router.navigate(['/login']);
+      void this.router.navigate(['/login']);
     }
   }
 }

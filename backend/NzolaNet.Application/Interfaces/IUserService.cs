@@ -6,7 +6,7 @@ namespace NzolaNet.Application.Interfaces;
 
 public interface IUserService
 {
-    Task<UserResponseDto> GetUserResponseAsync(Guid userId);
+    Task<UserResponseDto> GetUserResponseAsync(Guid userId, Guid? currentUserId = null);
     Task<UserProfileDto> GetProfileAsync(Guid userId, Guid? currentUserId = null);
     Task<UserResponseDto> UpdateProfileAsync(Guid userId, UpdateProfileDto updateDto);
     Task<UserResponseDto> UploadPhotoAsync(Guid userId, IFormFile photoFile);

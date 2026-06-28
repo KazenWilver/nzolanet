@@ -1,212 +1,188 @@
 @use '../../../styles/variables' as vars;
 
-.perfil {
+.profile-page {
   background-color: vars.$color-background;
   min-height: 100vh;
 }
 
-.perfil__card {
-  background-color: vars.$color-background;
+.profile-page__header {
   border-bottom: 1px solid vars.$color-border;
 }
 
-.perfil__capa {
-  position: relative;
+.profile-page__cover {
   height: 200px;
   background-color: #cfd9de;
-  overflow: hidden;
 
   @media (max-width: 500px) {
     height: 150px;
   }
 }
 
-.perfil__img-capa {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.perfil__capa-placeholder {
-  width: 100%;
-  height: 100%;
-  background-color: #cfd9de;
-}
-
-.perfil__info {
-  padding: 12px 16px 0 16px;
+.profile-page__info {
+  padding: 12px 16px 0;
   position: relative;
 }
 
-.perfil__avatar-wrap {
+.profile-page__avatar {
   position: absolute;
-  top: -75px;
+  top: -32px;
   left: 16px;
-  z-index: 2;
-
-  @media (max-width: 500px) {
-    top: -55px;
-  }
 }
 
-.perfil__acoes {
+.profile-page__actions {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
-  height: 48px;
+  min-height: 48px;
   margin-bottom: 12px;
 }
 
-.perfil__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.profile-page__btn {
   font-size: 15px;
   font-weight: 700;
   border-radius: 9999px;
   padding: 8px 16px;
   min-height: 36px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   border: 1px solid vars.$color-border;
   color: vars.$color-text;
   background-color: vars.$color-background;
-  text-decoration: none;
 
-  &:hover {
-    background-color: vars.$color-gray-hover;
-    text-decoration: none;
-  }
-
-  &--primario {
+  &--primary {
     background-color: vars.$color-text;
     color: vars.$color-background;
     border-color: vars.$color-text;
-
-    &:hover {
-      background-color: rgba(15, 20, 25, 0.9);
-    }
   }
 
-  &--secundario {
-    border: 1px solid vars.$color-border;
-    color: vars.$color-text;
-    background-color: vars.$color-background;
-
+  &--secondary {
     &:hover {
       background-color: vars.$color-gray-hover;
     }
   }
 
-  &--seguindo {
-    background-color: vars.$color-background;
-    border-color: vars.$color-border;
-    color: vars.$color-text;
+  &--following:hover {
+    background-color: rgba(244, 33, 46, 0.1);
+    border-color: #f4212e;
+    color: #f4212e;
+  }
 
-    &:hover {
-      background-color: rgba(244, 33, 46, 0.1);
-      border-color: #f4212e;
-      color: #f4212e;
-    }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 
-.perfil__dados {
-  margin-top: 8px;
+.profile-page__details {
+  margin-top: 48px;
 }
 
-.perfil__nome {
+.profile-page__name {
+  margin: 0;
   font-size: 20px;
   font-weight: 800;
   color: vars.$color-text;
-  margin: 0;
 }
 
-.perfil__nomeutil {
+.profile-page__username {
+  display: block;
+  margin-top: 2px;
   font-size: 15px;
   color: vars.$color-text-secondary;
-  margin-top: 2px;
-  display: block;
 }
 
-.perfil__bio {
+.profile-page__bio {
+  margin: 12px 0 0;
   font-size: 15px;
   line-height: 1.4;
   color: vars.$color-text;
-  margin: 12px 0 0 0;
   white-space: pre-line;
-  word-break: break-word;
 }
 
-.perfil__localizacao {
-  font-size: 15px;
+.profile-page__member-since {
+  margin: 12px 0 0;
+  font-size: 14px;
   color: vars.$color-text-secondary;
-  margin: 12px 0 0 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
-  svg {
-    stroke: currentColor;
-    fill: none;
-    flex-shrink: 0;
-  }
 }
 
-.perfil__estatisticas {
+.profile-page__stats {
   display: flex;
   gap: 20px;
   margin: 16px 0;
-  font-size: 14px;
 }
 
-.perfil__stat {
-  color: vars.$color-text-secondary;
-  text-decoration: none;
+.profile-page__stat {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: vars.$color-text-secondary;
 
   strong {
     color: vars.$color-text;
     font-weight: 700;
   }
 
-  &:hover {
+  &:hover span {
     text-decoration: underline;
   }
 }
 
-.perfil__publicacoes {
-  background-color: vars.$color-background;
+.profile-page__tabs {
+  display: flex;
+  border-bottom: 1px solid vars.$color-border;
+}
 
-  h2 {
-    font-size: 15px;
-    font-weight: 800;
+.profile-page__tab {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 700;
+  color: vars.$color-text-secondary;
+  cursor: pointer;
+  position: relative;
+
+  &--active {
     color: vars.$color-text;
-    padding: 16px;
-    margin: 0;
-    border-bottom: 1px solid vars.$color-border;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 4px;
+      border-radius: 9999px;
+      background-color: vars.$color-primary;
+    }
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.03);
   }
 }
 
-.perfil__carregando {
-  display: flex;
-  justify-content: center;
-  padding: 24px;
-}
-
-.perfil__sem-pub {
-  padding: 40px 16px;
-  text-align: center;
-  font-size: 15px;
-  color: vars.$color-text-secondary;
-}
-
-.perfil__carregando-pagina {
+.profile-page__loading,
+.profile-page__error,
+.profile-page__empty,
+.profile-page__private {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  padding: 48px 16px;
+  text-align: center;
+  color: vars.$color-text-secondary;
+}
+
+.profile-page__private p,
+.profile-page__empty p,
+.profile-page__error p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
 }
