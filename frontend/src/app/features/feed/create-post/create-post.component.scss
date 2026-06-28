@@ -43,11 +43,18 @@
 
 .create-publication__composer {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
+}
+
+.create-publication__composer app-avatar {
+  flex-shrink: 0;
 }
 
 .create-publication__textarea {
   flex: 1;
+  min-width: 0;
+  width: 100%;
   border: none;
   background: transparent;
   resize: none;
