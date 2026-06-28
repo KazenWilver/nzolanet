@@ -1,4 +1,4 @@
-<header class="topbar">
+<header class="topbar" [class.topbar--menu-open]="accountMenuOpen">
   <button
     type="button"
     class="topbar__theme-btn"
@@ -39,17 +39,6 @@
           size="sm"
         />
       </button>
-
-      @if (accountMenuOpen) {
-        <div class="topbar__account-menu" role="menu">
-          <a class="topbar__account-item" routerLink="/settings" role="menuitem" (click)="handleCloseAccountMenu()">
-            Definições
-          </a>
-          <a class="topbar__account-item" [routerLink]="profileRoute" role="menuitem" (click)="handleCloseAccountMenu()">
-            Perfil
-          </a>
-        </div>
-      }
     </div>
   }
 </header>

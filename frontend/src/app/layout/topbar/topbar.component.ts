@@ -2,6 +2,7 @@ import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { AccountMenuService } from '../../core/services/account-menu.service';
 import { ThemeService } from '../../core/services/theme.service';
 import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -16,10 +17,10 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 export class TopbarComponent {
   readonly themeService = inject(ThemeService);
   private readonly authService = inject(AuthService);
+  private readonly accountMenu = inject(AccountMenuService);
   private readonly destroyRef = inject(DestroyRef);
 
   currentUser: User | null = null;
-  accountMenuOpen = false;
 
   constructor() {
     this.authService.currentUser$
@@ -27,13 +28,13 @@ export class TopbarComponent {
       .subscribe(user => {
         this.currentUser = user;
         if (!user) {
-          this.accountMenuOpen = false;
+          this.accountMenu.close();
         }
       });
   }
 
-  get profileRoute(): string {
-    return this.currentUser ? `/profile/${this.currentUser.id}` : '/profile/me';
+  get accountMenuOpen(): boolean {
+    return this.accountMenu.isOpen();
   }
 
   handleToggleTheme(): void {
@@ -41,18 +42,6 @@ export class TopbarComponent {
   }
 
   handleToggleAccountMenu(): void {
-    this.accountMenuOpen = !this.accountMenuOpen;
-  }
-
-  handleCloseAccountMenu(): void {
-    this.accountMenuOpen = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  handleDocumentClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (!target?.closest('.topbar__account')) {
-      this.accountMenuOpen = false;
-    }
+    this.accountMenu.toggle();
   }
 }

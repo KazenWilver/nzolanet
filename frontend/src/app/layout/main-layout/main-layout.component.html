@@ -28,3 +28,31 @@
     />
   }
 </app-modal>
+
+@if (accountMenu.isOpen() && currentUser) {
+  <div class="account-menu-layer" role="presentation" (click)="handleCloseAccountMenu()">
+    <nav
+      class="account-menu"
+      role="menu"
+      aria-label="Menu da conta"
+      (click)="$event.stopPropagation()"
+    >
+      <a
+        class="account-menu__item"
+        routerLink="/settings"
+        role="menuitem"
+        (click)="handleAccountMenuNavigate()"
+      >
+        Definições
+      </a>
+      <a
+        class="account-menu__item"
+        [routerLink]="profileRoute"
+        role="menuitem"
+        (click)="handleAccountMenuNavigate()"
+      >
+        Perfil
+      </a>
+    </nav>
+  </div>
+}

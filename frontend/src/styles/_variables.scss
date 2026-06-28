@@ -157,7 +157,11 @@
   --width-sidebar-right: 350px;
   --width-layout-max: 1225px;
   --width-modal: 36rem;
-  --height-mobile-nav: 64px;
+  --height-mobile-nav: 72px;
+  --z-topbar: 100;
+  --z-mobile-nav: 100;
+  --z-topbar-menu: 1100;
+  --z-modal: 1200;
   --width-auth-card: 26rem;
   --width-settings-panel: 36rem;
   --layout-gutter: clamp(1rem, 2vw, 2rem);
