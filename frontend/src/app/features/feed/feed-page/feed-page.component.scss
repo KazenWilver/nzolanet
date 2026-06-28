@@ -5,7 +5,9 @@
   min-height: 100vh;
 
   @media (max-width: 500px) {
-    padding-bottom: var(--spacing-2xl);
+    padding-bottom: calc(
+      var(--height-mobile-nav) + var(--spacing-2xl) + env(safe-area-inset-bottom, 0px)
+    );
   }
 }
 

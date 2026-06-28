@@ -251,7 +251,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 90;
+    z-index: var(--z-mobile-nav, 100);
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -260,6 +260,7 @@
     padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 0px));
     border-top: var(--border-width) solid var(--color-border);
     background-color: var(--color-bg-secondary);
+    box-shadow: 0 -4px 16px rgba(15, 20, 25, 0.08);
   }
 
   .sidebar__mobile-link,
