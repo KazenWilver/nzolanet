@@ -68,13 +68,17 @@
     max-width: none;
     flex: 1 1 auto;
     border-right: none;
-    padding-bottom: 64px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 .main-layout__content {
   flex: 1;
   min-width: 0;
+
+  @media (max-width: 500px) {
+    padding-bottom: var(--spacing-md);
+  }
 }
 
 .main-layout__aside {

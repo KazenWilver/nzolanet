@@ -3,6 +3,10 @@
 .feed-page {
   background-color: vars.$color-background;
   min-height: 100vh;
+
+  @media (max-width: 500px) {
+    padding-bottom: var(--spacing-lg);
+  }
 }
 
 .feed-page__loading {
