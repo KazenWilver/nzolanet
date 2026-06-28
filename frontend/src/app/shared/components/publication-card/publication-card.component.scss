@@ -262,6 +262,16 @@
     }
   }
 
+  &--comment:hover,
+  &--comment.publication-card__action--active {
+    color: vars.$color-primary;
+
+    svg {
+      background-color: vars.$color-hover;
+      border-radius: 50%;
+    }
+  }
+
   &--like:hover,
   &--liked {
     color: vars.$color-like;

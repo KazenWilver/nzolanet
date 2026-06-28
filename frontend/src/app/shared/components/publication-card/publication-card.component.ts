@@ -8,6 +8,7 @@ import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { CommentsSectionComponent } from '../comments-section/comments-section.component';
 
 @Component({
   selector: 'app-publication-card',
@@ -19,7 +20,8 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
     TimeAgoPipe,
     AvatarComponent,
     ConfirmDialogComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    CommentsSectionComponent
   ],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'
@@ -41,6 +43,7 @@ export class PublicationCardComponent {
   editError = '';
   likeError = '';
   deleting = false;
+  commentsOpen = false;
 
   get isAuthor(): boolean {
     return !!this.currentUserId && this.currentUserId === this.publication.authorId;
@@ -153,6 +156,17 @@ export class PublicationCardComponent {
         }, 4000);
       }
     });
+  }
+
+  toggleComments(): void {
+    this.commentsOpen = !this.commentsOpen;
+  }
+
+  handleCommentsCountChange(count: number): void {
+    this.publication = {
+      ...this.publication,
+      commentsCount: count
+    };
   }
 
   @HostListener('document:click', ['$event'])

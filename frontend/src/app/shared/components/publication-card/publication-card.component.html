@@ -111,7 +111,14 @@
   </div>
 
   <footer class="publication-card__footer">
-    <button type="button" class="publication-card__action publication-card__action--comment" aria-label="Comentários">
+    <button
+      type="button"
+      class="publication-card__action publication-card__action--comment"
+      [class.publication-card__action--active]="commentsOpen"
+      [attr.aria-expanded]="commentsOpen"
+      aria-label="Comentários"
+      (click)="toggleComments()"
+    >
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
       </svg>
@@ -144,6 +151,13 @@
       <span class="publication-card__like-error">{{ likeError }}</span>
     }
   </footer>
+
+  @if (commentsOpen) {
+    <app-comments-section
+      [publicationId]="publication.id"
+      (countChange)="handleCommentsCountChange($event)"
+    />
+  }
 </article>
 
 @if (deleteDialogOpen) {

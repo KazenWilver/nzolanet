@@ -1,0 +1,113 @@
+<section class="comments-section" aria-label="Comentários">
+  @if (currentUser) {
+    <form class="comments-section__composer" (ngSubmit)="submitComment()">
+      <app-avatar
+        [src]="currentUser.profilePhotoUrl"
+        [username]="currentUser.username"
+        size="sm"
+      />
+      <div class="comments-section__composer-field">
+        <textarea
+          class="comments-section__textarea"
+          [(ngModel)]="newCommentText"
+          name="newComment"
+          rows="1"
+          placeholder="Adiciona um comentário"
+          aria-label="Adiciona um comentário"
+        ></textarea>
+        <button type="submit" class="comments-section__submit" [disabled]="!canSubmit">
+          @if (submitting) {
+            <app-loading-spinner tamanho="sm" />
+          } @else {
+            Publicar
+          }
+        </button>
+      </div>
+    </form>
+
+    @if (submitError) {
+      <p class="comments-section__error" role="alert">{{ submitError }}</p>
+    }
+  }
+
+  @if (loading) {
+    <div class="comments-section__loading">
+      <app-loading-spinner tamanho="sm" />
+    </div>
+  }
+
+  @if (error) {
+    <p class="comments-section__error">Não foi possível carregar os comentários.</p>
+  }
+
+  @if (!loading && !error && comments.length === 0) {
+    <p class="comments-section__empty">Sê o primeiro a comentar.</p>
+  }
+
+  <ul class="comments-section__list">
+    @for (comment of comments; track trackById($index, comment)) {
+      <li class="comments-section__item">
+        <app-avatar
+          [src]="comment.authorPhotoUrl"
+          [username]="comment.authorUsername"
+          size="sm"
+        />
+
+        <div class="comments-section__content">
+          <div class="comments-section__meta">
+            <a class="comments-section__author" [routerLink]="['/profile', comment.authorId]">
+              @{{ comment.authorUsername }}
+            </a>
+            <span class="comments-section__time">· {{ comment.createdAt | tempoAtras }}</span>
+          </div>
+
+          @if (editingCommentId === comment.id) {
+            <div class="comments-section__edit">
+              <textarea
+                class="comments-section__edit-textarea"
+                [(ngModel)]="editText"
+                rows="2"
+                aria-label="Editar comentário"
+              ></textarea>
+              <div class="comments-section__edit-actions">
+                <button type="button" class="comments-section__btn-secondary" (click)="cancelEdit()">
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="comments-section__btn-primary"
+                  [disabled]="!editText.trim() || savingEditId === comment.id"
+                  (click)="saveEdit(comment)"
+                >
+                  Guardar
+                </button>
+              </div>
+            </div>
+          } @else {
+            <p class="comments-section__text">{{ comment.text }}</p>
+
+            @if (canEdit(comment) || canDelete(comment)) {
+              <div class="comments-section__actions">
+                @if (canEdit(comment)) {
+                  <button type="button" class="comments-section__action" (click)="startEdit(comment)">
+                    Editar
+                  </button>
+                }
+                @if (canDelete(comment)) {
+                  <button
+                    type="button"
+                    class="comments-section__action comments-section__action--danger"
+                    [disabled]="deletingId === comment.id"
+                    (click)="deleteComment(comment)"
+                  >
+                    Apagar
+                  </button>
+                }
+              </div>
+            }
+          }
+        </div>
+      </li>
+    }
+  </ul>
+</section>
