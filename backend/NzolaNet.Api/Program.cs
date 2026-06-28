@@ -91,12 +91,24 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
 
-// 4.5. Configura a política de CORS para o frontend Angular (http://localhost:4200)
+// 4.5. Configura a política de CORS para o frontend Angular
+var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:4200" };
+
+var extraCorsOrigins = builder.Configuration["CORS_EXTRA_ORIGINS"];
+if (!string.IsNullOrWhiteSpace(extraCorsOrigins))
+{
+    corsOrigins = corsOrigins
+        .Concat(extraCorsOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
