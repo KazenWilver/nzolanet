@@ -44,6 +44,7 @@
     padding: 0;
     border: none;
     overflow: visible;
+    z-index: var(--z-mobile-nav, 1000);
   }
 }
 
@@ -80,8 +81,6 @@
 .main-layout__content {
   flex: 1;
   min-width: 0;
-  position: relative;
-  z-index: 1;
 
   @media (max-width: 500px) {
     padding-bottom: var(--spacing-lg);
@@ -110,7 +109,17 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-topbar-menu, 1100);
-  background-color: rgba(15, 20, 25, 0.25);
+  pointer-events: none;
+}
+
+.account-menu-layer__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background-color: rgba(15, 20, 25, 0.4);
+  cursor: default;
+  pointer-events: auto;
 }
 
 .account-menu {
@@ -122,8 +131,10 @@
   padding: var(--spacing-xs);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--border-radius-lg);
-  background-color: var(--color-bg-card);
-  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+  background-color: var(--color-bg-modal);
+  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
+  isolation: isolate;
+  pointer-events: auto;
 }
 
 .account-menu__item {

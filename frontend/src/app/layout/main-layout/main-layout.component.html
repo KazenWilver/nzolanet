@@ -30,12 +30,17 @@
 </app-modal>
 
 @if (accountMenu.isOpen() && currentUser) {
-  <div class="account-menu-layer" role="presentation" (click)="handleCloseAccountMenu()">
+  <div class="account-menu-layer" role="presentation">
+    <button
+      type="button"
+      class="account-menu-layer__backdrop"
+      aria-label="Fechar menu"
+      (click)="handleCloseAccountMenu()"
+    ></button>
     <nav
       class="account-menu"
       role="menu"
       aria-label="Menu da conta"
-      (click)="$event.stopPropagation()"
     >
       <a
         class="account-menu__item"

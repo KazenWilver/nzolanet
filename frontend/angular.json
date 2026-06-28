@@ -59,39 +59,18 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
-            },
-            "ngrok": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.ngrok.ts"
-                }
-              ]
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "allowedHosts": [
-              ".ngrok-free.dev",
-              ".ngrok-free.app",
-              ".ngrok.app"
-            ]
-          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
             },
             "development": {
               "buildTarget": "frontend:build:development"
-            },
-            "ngrok": {
-              "buildTarget": "frontend:build:ngrok"
             }
           },
           "defaultConfiguration": "development"
