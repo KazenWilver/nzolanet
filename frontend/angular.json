@@ -77,18 +77,15 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": [
-              ".ngrok-free.dev",
-              ".ngrok-free.app",
-              ".ngrok.app"
-            ]
+            "allowedHosts": true
           },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
             },
             "development": {
-              "buildTarget": "frontend:build:development"
+              "buildTarget": "frontend:build:development",
+              "allowedHosts": true
             },
             "lan": {
               "buildTarget": "frontend:build:development",
@@ -98,11 +95,7 @@
             "ngrok": {
               "buildTarget": "frontend:build:ngrok",
               "host": "0.0.0.0",
-              "allowedHosts": [
-                ".ngrok-free.dev",
-                ".ngrok-free.app",
-                ".ngrok.app"
-              ]
+              "allowedHosts": true
             }
           },
           "defaultConfiguration": "development"
