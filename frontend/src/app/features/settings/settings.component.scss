@@ -287,6 +287,19 @@
   border-top: 1px solid vars.$color-border;
 }
 
+.settings__session {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid vars.$color-border;
+}
+
+.settings__session-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  color: vars.$color-text;
+}
+
 .settings__session-text {
   margin: 0 0 var(--spacing-md);
   font-size: 14px;

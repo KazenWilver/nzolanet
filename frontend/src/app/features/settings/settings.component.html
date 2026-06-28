@@ -41,6 +41,7 @@
               id="settings-display-name"
               name="displayName"
               type="text"
+              autocomplete="name"
               [(ngModel)]="displayName"
               maxlength="50"
             />
@@ -51,6 +52,7 @@
             <textarea
               id="settings-bio"
               name="bio"
+              autocomplete="off"
               [(ngModel)]="bio"
               rows="3"
               [maxlength]="maxBioLength"
@@ -62,13 +64,13 @@
 
           <div class="settings__field settings__field--readonly">
             <label class="settings__label" for="settings-email">Email</label>
-            <input id="settings-email" name="email" type="email" [value]="user.email ?? ''" readonly />
+            <input id="settings-email" name="email" type="email" autocomplete="email" [value]="user.email ?? ''" readonly />
             <span class="settings__hint">Para alterar o email, contacta o suporte.</span>
           </div>
 
           <div class="settings__field settings__field--readonly">
             <label class="settings__label" for="settings-username">Username</label>
-            <input id="settings-username" name="username" type="text" [value]="'@' + user.username" readonly />
+            <input id="settings-username" name="username" type="text" autocomplete="username" [value]="'@' + user.username" readonly />
             <span class="settings__hint">O username não pode ser alterado.</span>
           </div>
 
@@ -91,6 +93,14 @@
               Guardar alterações
             }
           </button>
+
+          <div class="settings__session" aria-labelledby="settings-session-title">
+            <h3 id="settings-session-title" class="settings__session-title">Sessão</h3>
+            <p class="settings__session-text">Termina a sessão neste dispositivo. Terás de voltar a iniciar sessão para aceder à conta.</p>
+            <button type="button" class="settings__logout-btn" (click)="handleLogout()">
+              Terminar sessão
+            </button>
+          </div>
         </section>
       }
 
@@ -131,14 +141,6 @@
           <app-placeholder-feature featureName="Alterar palavra-passe" />
         </section>
       }
-
-      <section class="settings__panel settings__panel--danger" aria-labelledby="settings-session-title">
-        <h2 id="settings-session-title" class="settings__panel-title">Sessão</h2>
-        <p class="settings__session-text">Termina a sessão neste dispositivo. Terás de voltar a iniciar sessão para aceder à conta.</p>
-        <button type="button" class="settings__logout-btn" (click)="handleLogout()">
-          Terminar sessão
-        </button>
-      </section>
     </div>
   </div>
 </section>
