@@ -1,0 +1,97 @@
+// Mixins extraídos de globals.scss (twitter-clone-main)
+
+@mixin hover-animation {
+  transition: color var(--transition-base), background-color var(--transition-base),
+    border-color var(--transition-base), opacity var(--transition-base),
+    box-shadow var(--transition-base), filter var(--transition-base);
+}
+
+@mixin custom-button {
+  @include hover-animation;
+  border-radius: var(--border-radius-full);
+  padding: var(--spacing-md);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+@mixin custom-underline {
+  @include hover-animation;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: inherit;
+  }
+}
+
+@mixin focus-ring($color: #878a8c) {
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px #{$color};
+    transition: box-shadow var(--transition-base);
+  }
+}
+
+@mixin accent-tab {
+  @include focus-ring(rgba(29, 155, 240, 0.8));
+}
+
+@mixin hover-card {
+  @include hover-animation;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-bg-card-hover);
+  }
+}
+
+@mixin menu-container {
+  z-index: 10;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-bg-modal);
+  outline: none;
+  box-shadow: var(--color-shadow-menu);
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin line-clamp($lines: 1) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin avatar-size($size) {
+  width: $size;
+  height: $size;
+  min-width: $size;
+  min-height: $size;
+  border-radius: var(--border-radius-full);
+}
+
+@mixin respond-below($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin respond-above($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}

@@ -1,0 +1,263 @@
+// =============================================================================
+// NzolaNet Design System — extraído de extras/design/twitter-clone-main
+// =============================================================================
+//
+// MAPEAMENTO DE COMPONENTES (referência → Angular):
+// Tweet                    → PublicationCardComponent
+// Sidebar / SidebarLink    → SidebarComponent + SidebarNavItemComponent
+// SidebarProfile           → secção de conta na SidebarComponent
+// UserAvatar               → AvatarComponent
+// Input (compose tweet)    → CreatePublicationComponent
+// TweetStats / TweetOption → acções like/comentário no PublicationCardComponent
+// TweetActions (⋮)         → dropdown editar/apagar no PublicationCardComponent
+// Modal                    → ModalComponent
+// Button / Loading         → ButtonComponent / SpinnerComponent
+// LoginMain                → LoginComponent / RegisterComponent (layout auth)
+// UserHeader / UserHomeCover → ProfileComponent
+// UserEditProfile          → EditProfileModal
+// UserFollowStats          → modal seguidores/seguindo
+// Comments (inline)        → CommentsSectionComponent
+// HeroIcon (@heroicons/react v2) → SVG inline nos componentes Angular
+// CustomIcon (brand SVGs)  → logo NzolaNet, Feather, Spinner
+//
+// ÍCONES HEROICONS IDENTIFICADOS:
+// HomeIcon, HashtagIcon, BellIcon, EnvelopeIcon, BookmarkIcon, UserIcon,
+// ChatBubbleOvalLeftIcon, HeartIcon, EllipsisHorizontalIcon, MagnifyingGlassIcon,
+// TrashIcon, PencilSquareIcon, XMarkIcon, CameraIcon, ArrowPathIcon,
+// CheckIcon, ArrowRightOnRectangleIcon, Cog8ToothIcon, PhotoIcon, FilmIcon
+//
+// BREAKPOINTS (tailwind.config.js):
+// xs: 500px | sm: 640px | md: 768px | lg: 1024px | xl: 1280px
+// isMobile: < 500px
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // Temas base (RGB triplets — referência globals.scss)
+  // ---------------------------------------------------------------------------
+  --theme-dark-background: 0 0 0;
+  --theme-dim-background: 22 33 44;
+  --theme-light-background: 255 255 255;
+
+  --theme-dark-search-background: 32 35 39;
+  --theme-dim-search-background: 39 51 64;
+  --theme-light-search-background: 239 243 244;
+
+  --theme-dark-sidebar-background: 22 24 28;
+  --theme-dim-sidebar-background: 30 39 50;
+  --theme-light-sidebar-background: 247 249 249;
+
+  // ---------------------------------------------------------------------------
+  // Cores semânticas — tema escuro (default, igual à referência)
+  // ---------------------------------------------------------------------------
+  --color-bg-primary: rgb(var(--theme-dark-background));
+  --color-bg-secondary: rgb(var(--theme-dark-sidebar-background));
+  --color-bg-search: rgb(var(--theme-dark-search-background));
+  --color-bg-hover: rgba(231, 233, 234, 0.1);
+  --color-bg-card-hover: rgba(255, 255, 255, 0.03);
+  --color-bg-input: rgb(var(--theme-dark-search-background));
+  --color-bg-input-focus: rgb(var(--theme-dark-sidebar-background));
+  --color-bg-modal: rgb(var(--theme-dark-background));
+  --color-bg-widget: rgb(var(--theme-dark-search-background));
+  --color-bg-widget-hover: rgb(44 47 51);
+  --color-bg-navbar: rgba(22, 24, 28, 0.85);
+  --color-bg-cover: rgb(47 51 54);
+  --color-image-preview-hover: #272c30;
+
+  --color-text-primary: #e7e9ea;
+  --color-text-secondary: #71767b;
+  --color-text-muted: #71767b;
+  --color-text-inverse: #0f1419;
+  --color-text-link: rgb(var(--accent-blue));
+
+  --color-accent: rgb(var(--accent-blue));
+  --color-accent-hover: #1a8cd8;
+  --color-accent-blue: rgb(var(--accent-blue));
+  --color-accent-yellow: rgb(var(--accent-yellow));
+  --color-accent-pink: rgb(var(--accent-pink));
+  --color-accent-purple: rgb(var(--accent-purple));
+  --color-accent-orange: rgb(var(--accent-orange));
+  --color-accent-green: rgb(var(--accent-green));
+  --color-accent-red: #f4212e;
+  --color-like: rgb(var(--accent-pink));
+  --color-brand-icon: #d6d9db;
+
+  --color-border: #2f3336;
+  --color-border-light: #333639;
+  --color-line-reply: #333639;
+  --color-shadow: rgba(255, 255, 255, 0.08);
+  --color-shadow-menu: #ffffff33 0px 0px 15px, #ffffff26 0px 0px 3px 1px;
+
+  --color-danger: #f4212e;
+  --color-success: rgb(var(--accent-green));
+
+  --color-btn-follow-bg: #eff3f4;
+  --color-btn-follow-text: #0f1419;
+
+  // Accent palette (RGB triplets)
+  --accent-yellow: 255 213 0;
+  --accent-blue: 29 155 240;
+  --accent-pink: 249 26 130;
+  --accent-purple: 120 87 255;
+  --accent-orange: 255 122 0;
+  --accent-green: 0 184 122;
+
+  // ---------------------------------------------------------------------------
+  // Tipografia
+  // ---------------------------------------------------------------------------
+  --font-family-primary: 'TwitterChirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-extended: 'TwitterChirpExtendedHeavy', 'TwitterChirp', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --font-size-xs: 0.6875rem;   // 11px
+  --font-size-sm: 0.8125rem;   // 13px
+  --font-size-base: 0.9375rem; // 15px
+  --font-size-md: 1.0625rem;   // 17px
+  --font-size-lg: 1.1875rem;   // 19px
+  --font-size-xl: 1.375rem;    // 22px
+  --font-size-2xl: 1.5rem;     // 24px
+  --font-size-3xl: 1.875rem;   // 30px
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-heavy: 800;
+
+  --line-height-tight: 1.2;
+  --line-height-base: 1.3125;
+  --line-height-relaxed: 1.5;
+
+  // ---------------------------------------------------------------------------
+  // Espaçamentos
+  // ---------------------------------------------------------------------------
+  --spacing-xs: 0.25rem;  // 4px
+  --spacing-sm: 0.5rem;   // 8px
+  --spacing-md: 0.75rem;  // 12px
+  --spacing-lg: 1rem;     // 16px
+  --spacing-xl: 1.25rem;  // 20px
+  --spacing-2xl: 1.5rem;  // 24px
+  --spacing-3xl: 2rem;    // 32px
+
+  // ---------------------------------------------------------------------------
+  // Bordas
+  // ---------------------------------------------------------------------------
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 24px;
+  --border-radius-full: 9999px;
+  --border-width: 1px;
+
+  // ---------------------------------------------------------------------------
+  // Layout (3 colunas — referência + layout existente)
+  // ---------------------------------------------------------------------------
+  --width-sidebar-left: 275px;
+  --width-sidebar-collapsed: 88px;
+  --width-sidebar-mobile: 68px;
+  --width-content: 600px;
+  --width-sidebar-right: 350px;
+  --width-layout-max: 1220px;
+  --width-modal: 36rem;
+
+  // ---------------------------------------------------------------------------
+  // Breakpoints
+  // ---------------------------------------------------------------------------
+  --breakpoint-xs: 500px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  // ---------------------------------------------------------------------------
+  // Transições e animações
+  // ---------------------------------------------------------------------------
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  // ---------------------------------------------------------------------------
+  // Compatibilidade com variáveis legadas (--nz-*)
+  // ---------------------------------------------------------------------------
+  --nz-color-bg-canvas: var(--color-bg-primary);
+  --nz-color-background: var(--color-bg-secondary);
+  --nz-color-text: var(--color-text-primary);
+  --nz-color-text-secondary: var(--color-text-secondary);
+  --nz-color-border: var(--color-border);
+  --nz-color-hover: rgba(29, 155, 240, 0.1);
+  --nz-color-gray-hover: var(--color-bg-hover);
+  --nz-color-input-bg: var(--color-bg-input);
+  --nz-color-input-focus-bg: var(--color-bg-input-focus);
+  --nz-color-btn-follow-bg: var(--color-btn-follow-bg);
+  --nz-color-btn-follow-text: var(--color-btn-follow-text);
+  --nz-color-widget-bg: var(--color-bg-widget);
+  --nz-color-widget-hover-bg: var(--color-bg-widget-hover);
+  --nz-color-shadow: var(--color-shadow);
+  --nz-color-navbar-bg: var(--color-bg-navbar);
+}
+
+// Tema claro (referência: light-* tokens + tailwind light-* colors)
+body.light-theme {
+  --color-bg-primary: rgb(var(--theme-light-background));
+  --color-bg-secondary: rgb(var(--theme-light-sidebar-background));
+  --color-bg-search: rgb(var(--theme-light-search-background));
+  --color-bg-hover: rgba(15, 20, 25, 0.1);
+  --color-bg-card-hover: rgba(0, 0, 0, 0.03);
+  --color-bg-input: rgb(var(--theme-light-search-background));
+  --color-bg-input-focus: rgb(var(--theme-light-background));
+  --color-bg-modal: rgb(var(--theme-light-background));
+  --color-bg-widget: rgb(var(--theme-light-sidebar-background));
+  --color-bg-widget-hover: #eff1f1;
+  --color-bg-navbar: rgba(255, 255, 255, 0.85);
+  --color-bg-cover: rgb(207 217 222);
+  --color-image-preview-hover: #f7f9f9;
+
+  --color-text-primary: #0f1419;
+  --color-text-secondary: #536471;
+  --color-text-muted: #536471;
+  --color-text-inverse: #ffffff;
+  --color-brand-icon: rgb(var(--accent-blue));
+
+  --color-border: #eff3f4;
+  --color-border-light: #cfd9de;
+  --color-line-reply: #cfd9de;
+  --color-shadow: rgba(101, 119, 134, 0.2);
+  --color-shadow-menu: #65778633 0px 0px 15px, #65778626 0px 0px 3px 1px;
+
+  --color-btn-follow-bg: #0f1419;
+  --color-btn-follow-text: #ffffff;
+
+  --nz-color-bg-canvas: #f5f8fa;
+  --nz-color-background: #ffffff;
+  --nz-color-text: #14171a;
+  --nz-color-text-secondary: #657786;
+  --nz-color-border: #e6ecf0;
+  --nz-color-hover: rgba(29, 161, 242, 0.1);
+  --nz-color-gray-hover: rgba(0, 0, 0, 0.05);
+  --nz-color-input-bg: #eff3f4;
+  --nz-color-input-focus-bg: #ffffff;
+  --nz-color-btn-follow-bg: #0f1419;
+  --nz-color-btn-follow-text: #ffffff;
+  --nz-color-widget-bg: #f7f9f9;
+  --nz-color-widget-hover-bg: #eff1f1;
+  --nz-color-shadow: rgba(101, 119, 134, 0.2);
+  --nz-color-navbar-bg: rgba(255, 255, 255, 0.85);
+}
+
+// -----------------------------------------------------------------------------
+// Variáveis SCSS (compatibilidade com componentes existentes)
+// -----------------------------------------------------------------------------
+$color-primary: var(--color-accent);
+$color-primary-hover: var(--color-accent-hover);
+$color-background: var(--nz-color-background);
+$color-bg-canvas: var(--nz-color-bg-canvas);
+$color-text: var(--nz-color-text);
+$color-text-secondary: var(--nz-color-text-secondary);
+$color-border: var(--nz-color-border);
+$color-like: var(--color-like);
+$color-hover: var(--nz-color-hover);
+$color-gray-hover: var(--nz-color-gray-hover);
+
+$font-family: var(--font-family-primary);
+
+$width-sidebar-left: var(--width-sidebar-left);
+$width-content: var(--width-content);
+$width-sidebar-right: var(--width-sidebar-right);

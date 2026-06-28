@@ -1,7 +1,8 @@
 @use './variables' as vars;
+@use '../../styles/mixins' as mixins;
 
 body {
-  font-family: 'Inter', vars.$font-family;
+  font-family: vars.$font-family;
   background-color: vars.$color-bg-canvas;
   color: vars.$color-text;
   margin: 0;
@@ -12,6 +13,7 @@ body {
 a {
   color: vars.$color-primary;
   text-decoration: none;
+
   &:hover {
     text-decoration: underline;
   }
@@ -25,25 +27,27 @@ button {
   cursor: pointer;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-// Input styles to look like Twitter's
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-  border: 1px solid vars.$color-border;
-  border-radius: 4px;
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+textarea {
+  border: var(--border-width) solid vars.$color-border;
+  border-radius: var(--border-radius-sm);
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   font-family: inherit;
   outline: none;
   background-color: var(--nz-color-input-bg);
   color: vars.$color-text;
-  transition: border-color 0.2s, background-color 0.2s;
+  @include mixins.hover-animation;
 
   &:focus {
     border-color: vars.$color-primary;
@@ -51,11 +55,10 @@ input[type="password"] {
   }
 }
 
-// Layout helper
 .layout-privado {
   display: flex;
   justify-content: center;
-  max-width: 1220px;
+  max-width: var(--width-layout-max);
   margin: 0 auto;
   min-height: 100vh;
 }

@@ -1,18 +1,3 @@
-// Twitter Clone Theme Variables
-
-$color-primary: #1DA1F2;
-$color-primary-hover: #1a91da;
-$color-background: var(--nz-color-background, #ffffff);
-$color-bg-canvas: var(--nz-color-bg-canvas, #f5f8fa);
-$color-text: var(--nz-color-text, #14171a);
-$color-text-secondary: var(--nz-color-text-secondary, #657786);
-$color-border: var(--nz-color-border, #e6ecf0);
-$color-like: #e0245e;
-$color-hover: var(--nz-color-hover, rgba(29, 161, 242, 0.1));
-$color-gray-hover: var(--nz-color-gray-hover, rgba(0, 0, 0, 0.05));
-
-$font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-$width-sidebar-left: 275px;
-$width-content: 600px;
-$width-sidebar-right: 350px;
+// Re-exporta o design system para componentes que importam de app/styles/
+@forward '../../styles/variables';
+@use '../../styles/variables' as *;

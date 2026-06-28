@@ -1,50 +1,63 @@
-@use 'app/styles/variables' as vars;
+@use 'styles/variables';
+@use 'styles/typography';
+@use 'styles/mixins' as mixins;
 @use 'app/styles/global';
 
-:root {
-  // Dark Theme (Default) - Canvas: rgb(7, 8, 10), Surface: #15181c
-  --nz-color-bg-canvas: rgb(7, 8, 10);
-  --nz-color-background: #15181c;
-  --nz-color-text: #ffffff;
-  --nz-color-text-secondary: #8899a6;
-  --nz-color-border: #2f3336;
-  --nz-color-hover: rgba(29, 161, 242, 0.1);
-  --nz-color-gray-hover: rgba(255, 255, 255, 0.08);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-  --nz-color-input-bg: #202327;
-  --nz-color-input-focus-bg: #15181c;
-  --nz-color-btn-follow-bg: #ffffff;
-  --nz-color-btn-follow-text: #0f1419;
-  --nz-color-widget-bg: #202327;
-  --nz-color-widget-hover-bg: #2c2f33;
-  --nz-color-shadow: rgba(255, 255, 255, 0.08);
-  --nz-color-navbar-bg: rgba(21, 24, 28, 0.85);
+html {
+  color-scheme: dark;
 }
 
 body.light-theme {
-  // Light Theme - Canvas: #f5f8fa, Surface: #ffffff
-  --nz-color-bg-canvas: #f5f8fa;
-  --nz-color-background: #ffffff;
-  --nz-color-text: #14171a;
-  --nz-color-text-secondary: #657786;
-  --nz-color-border: #e6ecf0;
-  --nz-color-hover: rgba(29, 161, 242, 0.1);
-  --nz-color-gray-hover: rgba(0, 0, 0, 0.05);
-
-  --nz-color-input-bg: #eff3f4;
-  --nz-color-input-focus-bg: #ffffff;
-  --nz-color-btn-follow-bg: #0f1419;
-  --nz-color-btn-follow-text: #ffffff;
-  --nz-color-widget-bg: #f7f9f9;
-  --nz-color-widget-hover-bg: #eff1f1;
-  --nz-color-shadow: rgba(101, 119, 134, 0.2);
-  --nz-color-navbar-bg: rgba(255, 255, 255, 0.85);
+  color-scheme: light;
 }
 
 body {
-  background-color: var(--nz-color-bg-canvas);
-  font-family: 'Inter', vars.$font-family;
-  color: var(--nz-color-text);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   margin: 0;
   padding: 0;
+}
+
+a,
+input,
+button,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+button {
+  font-family: inherit;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

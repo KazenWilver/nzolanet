@@ -1,0 +1,103 @@
+// Tipografia — Twitter Chirp (referência: src/styles/fonts.scss)
+// Colocar ficheiros .woff2 em public/fonts/ para activar a fonte personalizada.
+// Fallback: system stack idêntico ao usado quando Chirp não está disponível.
+
+@font-face {
+  font-family: TwitterChirpExtendedHeavy;
+  src: url('/fonts/chirp-extended-heavy-web.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: TwitterChirp;
+  src: url('/fonts/chirp-regular-web.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: TwitterChirp;
+  src: url('/fonts/chirp-medium-web.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: TwitterChirp;
+  src: url('/fonts/chirp-bold-web.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: TwitterChirp;
+  src: url('/fonts/chirp-heavy-web.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+.h1 {
+  font-family: var(--font-family-extended);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-heavy);
+  line-height: var(--line-height-tight);
+}
+
+h2,
+.h2 {
+  font-family: var(--font-family-extended);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+h3,
+.h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+
+.text-lg {
+  font-size: var(--font-size-lg);
+}
+
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
