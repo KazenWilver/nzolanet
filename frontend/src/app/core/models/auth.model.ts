@@ -32,6 +32,7 @@ export interface BackendUserDto {
   displayName?: string;
   bio?: string;
   profilePhotoUrl?: string;
+  profilePhoto?: string;
   email?: string;
   isPrivate: boolean;
   followersCount: number;

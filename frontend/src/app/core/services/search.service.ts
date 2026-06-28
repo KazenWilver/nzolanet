@@ -34,7 +34,15 @@ export class SearchService {
   }
 
   private mapUser(dto: BackendUserDto): User {
-    const user = mapBackendUser(dto);
+    const user = mapBackendUser({
+      ...dto,
+      profilePhotoUrl: dto.profilePhotoUrl ?? dto.profilePhoto,
+      isPrivate: dto.isPrivate ?? false,
+      followersCount: dto.followersCount ?? 0,
+      followingCount: dto.followingCount ?? 0,
+      createdAt: dto.createdAt ?? new Date(0).toISOString()
+    });
+
     return {
       ...user,
       profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl)
