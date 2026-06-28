@@ -95,8 +95,23 @@ export class AuthService {
   }
 
   updateCurrentUser(user: User): void {
-    localStorage.setItem(this.userKey, JSON.stringify(user));
-    this.currentUserSubject.next(user);
+    const normalized = mapBackendUser({
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      email: user.email,
+      bio: user.bio,
+      profilePhotoUrl: user.profilePhotoUrl,
+      isPrivate: user.isPrivate,
+      followersCount: user.followersCount,
+      followingCount: user.followingCount,
+      createdAt: user.createdAt,
+      role: user.role,
+      isFollowing: user.isFollowing,
+      isPending: user.isPending
+    });
+    localStorage.setItem(this.userKey, JSON.stringify(normalized));
+    this.currentUserSubject.next(normalized);
   }
 
   /** @deprecated Usar login */
@@ -221,7 +236,22 @@ export class AuthService {
     const cachedUser = localStorage.getItem(this.userKey);
     if (cachedUser) {
       try {
-        this.currentUserSubject.next(JSON.parse(cachedUser) as User);
+        const parsed = JSON.parse(cachedUser) as User;
+        this.currentUserSubject.next(mapBackendUser({
+          id: parsed.id,
+          username: parsed.username,
+          displayName: parsed.displayName,
+          email: parsed.email,
+          bio: parsed.bio,
+          profilePhotoUrl: parsed.profilePhotoUrl,
+          isPrivate: parsed.isPrivate,
+          followersCount: parsed.followersCount,
+          followingCount: parsed.followingCount,
+          createdAt: parsed.createdAt,
+          role: parsed.role,
+          isFollowing: parsed.isFollowing,
+          isPending: parsed.isPending
+        }));
       } catch {
         localStorage.removeItem(this.userKey);
       }

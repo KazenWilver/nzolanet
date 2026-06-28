@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { resolveMediaUrl } from '../../../core/helpers/media-url.helper';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
@@ -11,14 +12,14 @@ type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
     <div
       class="avatar"
       [class]="'avatar--' + size"
-      [style.background-color]="!src || imageError ? avatarColor : null"
+      [style.background-color]="!resolvedSrc || imageError ? avatarColor : null"
       role="img"
       [attr.aria-label]="username"
     >
-      @if (src && !imageError) {
+      @if (resolvedSrc && !imageError) {
         <img
           class="avatar__image"
-          [src]="src"
+          [src]="resolvedSrc"
           [alt]="username"
           loading="lazy"
           (error)="handleImageError()"
@@ -82,6 +83,7 @@ export class AvatarComponent implements OnChanges {
   @Input() username = '';
   @Input() size: AvatarSize = 'md';
 
+  resolvedSrc?: string;
   imageError = false;
   initial = '?';
   avatarColor = '#1d9bf0';
@@ -89,6 +91,7 @@ export class AvatarComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['src']) {
       this.imageError = false;
+      this.resolvedSrc = resolveMediaUrl(this.src);
     }
 
     if (changes['username'] || changes['src']) {

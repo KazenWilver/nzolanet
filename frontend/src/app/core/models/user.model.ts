@@ -1,4 +1,5 @@
 import type { BackendUserDto } from './auth.model';
+import { resolveMediaUrl } from '../helpers/media-url.helper';
 
 export interface User {
   id: string;
@@ -80,7 +81,7 @@ export const mapBackendUser = (dto: BackendUserDto): User => ({
   displayName: dto.displayName,
   email: dto.email,
   bio: dto.bio,
-  profilePhotoUrl: dto.profilePhotoUrl,
+  profilePhotoUrl: resolveMediaUrl(dto.profilePhotoUrl ?? dto.profilePhoto),
   isPrivate: dto.isPrivate ?? false,
   followersCount: dto.followersCount ?? 0,
   followingCount: dto.followingCount ?? 0,
