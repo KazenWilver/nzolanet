@@ -96,7 +96,9 @@ public class UserRepository : IUserRepository
         }
         var upperQuery = query.ToUpper();
         return await _context.Users
-            .Where(u => u.NormalizedUserName.Contains(upperQuery) || (u.Bio != null && u.Bio.ToUpper().Contains(upperQuery)))
+            .Where(u =>
+                (u.NormalizedUserName != null && u.NormalizedUserName.Contains(upperQuery)) ||
+                (u.Bio != null && u.Bio.ToUpper().Contains(upperQuery)))
             .Take(30)
             .ToListAsync();
     }
