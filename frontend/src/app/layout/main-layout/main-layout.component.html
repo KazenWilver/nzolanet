@@ -14,3 +14,17 @@
     <app-aside />
   </aside>
 </div>
+
+<app-modal
+  [open]="publishModal.isOpen()"
+  title="Criar publicação"
+  (closed)="handleClosePublishModal()"
+>
+  @if (publishModal.isOpen()) {
+    <app-create-post
+      [modoModal]="true"
+      (postCriado)="handlePostCreated()"
+      (cancelado)="handleClosePublishModal()"
+    />
+  }
+</app-modal>

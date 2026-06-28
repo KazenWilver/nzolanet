@@ -5,9 +5,8 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { CreatePostComponent } from '../../features/feed/create-post/create-post.component';
 import { ThemeService } from '../../core/services/theme.service';
+import { PublishModalService } from '../../core/services/publish-modal.service';
 
 interface SidebarLinkItem {
   type: 'link';
@@ -31,18 +30,18 @@ type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem;
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, AvatarComponent, ModalComponent, CreatePostComponent],
+  imports: [CommonModule, RouterModule, AvatarComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
   private readonly authService = inject(AuthService);
   readonly themeService = inject(ThemeService);
+  private readonly publishModal = inject(PublishModalService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   currentUser: User | null = null;
-  publishModalOpen = false;
 
   readonly primaryNavItems: SidebarItem[] = [
     { type: 'link', id: 'feed', label: 'Feed', route: '/feed', exact: true, icon: 'home' },
@@ -72,26 +71,11 @@ export class SidebarComponent {
   }
 
   handleOpenPublishModal(): void {
-    this.publishModalOpen = true;
-  }
-
-  handleClosePublishModal(): void {
-    this.publishModalOpen = false;
-  }
-
-  handlePostCreated(): void {
-    this.publishModalOpen = false;
-    if (!this.router.url.startsWith('/feed')) {
-      void this.router.navigate(['/feed']);
-    }
+    this.publishModal.open();
   }
 
   handleToggleTheme(): void {
     this.themeService.toggleTheme();
-  }
-
-  handleLogout(): void {
-    this.authService.logout();
   }
 
   isActive(route: string, exact = false): boolean {

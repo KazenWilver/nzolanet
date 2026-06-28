@@ -42,11 +42,16 @@ import { CommonModule } from '@angular/common';
       align-items: center;
       justify-content: center;
       padding: var(--spacing-lg);
-      background-color: rgba(91, 112, 131, 0.45);
+      background-color: rgba(15, 20, 25, 0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       overscroll-behavior: contain;
+      isolation: isolate;
     }
 
     .modal__dialog {
+      position: relative;
+      z-index: 1;
       width: 100%;
       max-width: var(--width-modal);
       max-height: min(90vh, 720px);
@@ -56,6 +61,7 @@ import { CommonModule } from '@angular/common';
       background-color: var(--color-bg-modal);
       box-shadow: var(--color-shadow-menu);
       overflow: hidden;
+      isolation: isolate;
     }
 
     .modal__header {
@@ -95,6 +101,7 @@ import { CommonModule } from '@angular/common';
       overflow-y: auto;
       flex: 1;
       min-height: 0;
+      background-color: var(--color-bg-modal);
     }
 
     @media (max-width: 500px) {

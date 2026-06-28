@@ -95,17 +95,3 @@
     </a>
   </nav>
 </aside>
-
-<app-modal
-  [open]="publishModalOpen"
-  title="Criar publicação"
-  (closed)="handleClosePublishModal()"
->
-  @if (publishModalOpen) {
-    <app-create-post
-      [modoModal]="true"
-      (postCriado)="handlePostCreated()"
-      (cancelado)="handleClosePublishModal()"
-    />
-  }
-</app-modal>
