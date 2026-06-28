@@ -1,6 +1,4 @@
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NzolaNet.Application.DTOs.Comments;
@@ -19,23 +17,12 @@ public class CommentsController : ControllerBase
         _commentService = commentService;
     }
 
-    // GET /api/posts/{postId}/comments – listar comentários de uma publicação
     [HttpGet("/api/posts/{postId}/comments")]
-    public async Task<IActionResult> GetByPost(Guid postId)
+    public async Task<IActionResult> GetByPostLegacy(Guid postId)
     {
-        Guid? currentUserId = null;
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                       ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out var parsedId))
-        {
-            currentUserId = parsedId;
-        }
-
-        var comments = await _commentService.GetByPostAsync(postId, currentUserId);
-        return Ok(comments);
+        return await GetCommentsInternal(postId);
     }
 
-    // GET /api/comments – obter todos os comentários do sistema (para demonstração)
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -43,7 +30,6 @@ public class CommentsController : ControllerBase
         return Ok(comments);
     }
 
-    // GET /api/comments/count – obter o total de comentários no sistema
     [HttpGet("count")]
     public async Task<IActionResult> GetCount()
     {
@@ -51,38 +37,87 @@ public class CommentsController : ControllerBase
         return Ok(new { total = count });
     }
 
-    // POST /api/comments – adicionar comentário (requer autenticação)
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCommentDto createDto)
+    public async Task<IActionResult> CreateLegacy([FromBody] CreateCommentLegacyDto createDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var userId = GetCurrentUserId();
-        var comment = await _commentService.CreateAsync(userId, createDto);
-        return CreatedAtAction(nameof(GetByPost), new { postId = comment.PostId }, comment);
+        var comment = await _commentService.CreateAsync(
+            userId,
+            createDto.PostId,
+            new CreateCommentDto { Text = createDto.Text });
+
+        return CreatedAtAction(nameof(GetByPostLegacy), new { postId = comment.PublicationId }, ToLegacyDto(comment));
     }
 
-    // PUT /api/comments/{id} – editar apenas o próprio comentário (requer autenticação)
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCommentDto updateDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var userId = GetCurrentUserId();
         var comment = await _commentService.UpdateAsync(userId, id, updateDto);
         return Ok(comment);
     }
 
-    // DELETE /api/comments/{id} – excluir apenas o próprio comentário (requer autenticação)
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = GetCurrentUserId();
-        var deleted = await _commentService.DeleteAsync(userId, id);
-        if (deleted)
+        var isAdmin = IsCurrentUserAdmin();
+        await _commentService.DeleteAsync(userId, id, isAdmin);
+        return NoContent();
+    }
+
+    private async Task<IActionResult> GetCommentsInternal(Guid publicationId)
+    {
+        Guid? currentUserId = null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                       ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out var parsedId))
         {
-            return Ok(new { Message = "Comentário eliminado com sucesso." });
+            currentUserId = parsedId;
         }
-        return BadRequest(new { Message = "Não foi possível eliminar o comentário." });
+
+        try
+        {
+            var comments = await _commentService.GetByPublicationAsync(publicationId, currentUserId);
+            return Ok(comments);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
+
+    private static CommentDto ToLegacyDto(CommentResponseDto comment)
+    {
+        return new CommentDto
+        {
+            Id = comment.Id,
+            UserId = comment.AuthorId,
+            UserName = comment.AuthorUsername,
+            UserPhoto = comment.AuthorPhotoUrl,
+            PostId = comment.PublicationId,
+            Text = comment.Text,
+            CreatedAt = comment.CreatedAt
+        };
+    }
+
+    private bool IsCurrentUserAdmin()
+    {
+        return User.Claims.Any(c =>
+            (c.Type == "role" || c.Type == ClaimTypes.Role) && c.Value == "Admin");
     }
 
     private Guid GetCurrentUserId()
@@ -90,11 +125,11 @@ public class CommentsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                        ?? User.FindFirst("sub")?.Value;
 
-        if (string.IsNullOrEmpty(userIdClaim))
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
             throw new UnauthorizedAccessException("Utilizador não autenticado no sistema.");
         }
 
-        return Guid.Parse(userIdClaim);
+        return userId;
     }
 }

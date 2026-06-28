@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Application.DTOs.Comments;
 using NzolaNet.Application.DTOs.Publications;
 using NzolaNet.Application.Interfaces;
 
@@ -12,11 +13,16 @@ public class PublicationsController : ControllerBase
 {
     private readonly IPostService _postService;
     private readonly ILikeService _likeService;
+    private readonly ICommentService _commentService;
 
-    public PublicationsController(IPostService postService, ILikeService likeService)
+    public PublicationsController(
+        IPostService postService,
+        ILikeService likeService,
+        ICommentService commentService)
     {
         _postService = postService;
         _likeService = likeService;
+        _commentService = commentService;
     }
 
     [HttpGet]
@@ -84,6 +90,34 @@ public class PublicationsController : ControllerBase
         var userId = GetCurrentUserId();
         await _postService.DeleteAsync(userId, id);
         return NoContent();
+    }
+
+    [HttpGet("{publicationId}/comments")]
+    public async Task<IActionResult> GetComments(Guid publicationId)
+    {
+        try
+        {
+            var comments = await _commentService.GetByPublicationAsync(publicationId, GetOptionalCurrentUserId());
+            return Ok(comments);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
+
+    [Authorize]
+    [HttpPost("{publicationId}/comments")]
+    public async Task<IActionResult> CreateComment(Guid publicationId, [FromBody] CreateCommentDto createDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = GetCurrentUserId();
+        var comment = await _commentService.CreateAsync(userId, publicationId, createDto);
+        return CreatedAtAction(nameof(GetComments), new { publicationId }, comment);
     }
 
     [Authorize]

@@ -35,7 +35,8 @@ public class JwtTokenService : IJwtTokenService
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim("role", role)
+            new Claim("role", role),
+            new Claim(ClaimTypes.Role, role)
         };
 
         var durationInDays = jwtSettings.GetValue("DurationInDays", 7);

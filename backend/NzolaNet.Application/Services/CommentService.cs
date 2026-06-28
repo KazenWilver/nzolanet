@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using NzolaNet.Application.DTOs.Comments;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
@@ -28,7 +24,7 @@ public class CommentService : ICommentService
         _followRepository = followRepository;
     }
 
-    public async Task<CommentDto> CreateAsync(Guid userId, CreateCommentDto createDto)
+    public async Task<CommentResponseDto> CreateAsync(Guid userId, Guid publicationId, CreateCommentDto createDto)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -36,13 +32,12 @@ public class CommentService : ICommentService
             throw new ArgumentException("Utilizador não encontrado.");
         }
 
-        var post = await _postRepository.GetByIdAsync(createDto.PostId);
+        var post = await _postRepository.GetByIdAsync(publicationId);
         if (post == null)
         {
             throw new ArgumentException("Publicação não encontrada.");
         }
 
-        // Regra de privacidade: Não pode comentar se o autor do post for privado e o utilizador não o seguir (e não for ele próprio)
         if (post.User.IsPrivate && post.UserId != userId)
         {
             var isFollowing = await _followRepository.IsFollowingAsync(userId, post.UserId);
@@ -55,7 +50,7 @@ public class CommentService : ICommentService
         var comment = new Comment
         {
             UserId = userId,
-            PostId = createDto.PostId,
+            PostId = publicationId,
             Text = createDto.Text,
             CreatedAt = DateTime.UtcNow
         };
@@ -67,11 +62,10 @@ public class CommentService : ICommentService
         }
 
         comment.User = user;
-
-        return MapToDto(comment);
+        return MapToResponseDto(comment);
     }
 
-    public async Task<CommentDto> UpdateAsync(Guid userId, Guid commentId, UpdateCommentDto updateDto)
+    public async Task<CommentResponseDto> UpdateAsync(Guid userId, Guid commentId, UpdateCommentDto updateDto)
     {
         var comment = await _commentRepository.GetByIdAsync(commentId);
         if (comment == null)
@@ -79,7 +73,6 @@ public class CommentService : ICommentService
             throw new ArgumentException("Comentário não encontrado.");
         }
 
-        // Regra de Negócio: Apenas o autor do comentário pode editá-lo
         if (comment.UserId != userId)
         {
             throw new UnauthorizedAccessException("Não tens permissão para editar este comentário.");
@@ -94,10 +87,10 @@ public class CommentService : ICommentService
             throw new ArgumentException("Não foi possível atualizar o comentário.");
         }
 
-        return MapToDto(comment);
+        return MapToResponseDto(comment);
     }
 
-    public async Task<bool> DeleteAsync(Guid userId, Guid commentId)
+    public async Task DeleteAsync(Guid userId, Guid commentId, bool isAdmin)
     {
         var comment = await _commentRepository.GetByIdAsync(commentId);
         if (comment == null)
@@ -105,24 +98,26 @@ public class CommentService : ICommentService
             throw new ArgumentException("Comentário não encontrado.");
         }
 
-        // Regra de Negócio: Apenas o autor do comentário pode eliminá-lo
-        if (comment.UserId != userId)
+        if (comment.UserId != userId && !isAdmin)
         {
             throw new UnauthorizedAccessException("Não tens permissão para eliminar este comentário.");
         }
 
-        return await _commentRepository.DeleteAsync(comment);
+        var deleted = await _commentRepository.DeleteAsync(comment);
+        if (!deleted)
+        {
+            throw new ArgumentException("Não foi possível eliminar o comentário.");
+        }
     }
 
-    public async Task<IEnumerable<CommentDto>> GetByPostAsync(Guid postId, Guid? currentUserId = null)
+    public async Task<IEnumerable<CommentResponseDto>> GetByPublicationAsync(Guid publicationId, Guid? currentUserId = null)
     {
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetByIdAsync(publicationId);
         if (post == null)
         {
             throw new ArgumentException("Publicação não encontrada.");
         }
 
-        // Regra de privacidade: Não pode ver os comentários se o autor do post for privado e o utilizador atual não o seguir
         if (post.User.IsPrivate)
         {
             if (!currentUserId.HasValue)
@@ -140,14 +135,14 @@ public class CommentService : ICommentService
             }
         }
 
-        var comments = await _commentRepository.GetByPostIdAsync(postId);
-        return comments.Select(MapToDto);
+        var comments = await _commentRepository.GetByPostIdAsync(publicationId);
+        return comments.Select(MapToResponseDto);
     }
 
     public async Task<IEnumerable<CommentDto>> GetAllAsync()
     {
         var comments = await _commentRepository.GetAllAsync();
-        return comments.Select(MapToDto);
+        return comments.Select(MapToLegacyDto);
     }
 
     public async Task<int> GetTotalCountAsync()
@@ -155,7 +150,23 @@ public class CommentService : ICommentService
         return await _commentRepository.GetTotalCountAsync();
     }
 
-    private CommentDto MapToDto(Comment comment)
+    private static CommentResponseDto MapToResponseDto(Comment comment)
+    {
+        return new CommentResponseDto
+        {
+            Id = comment.Id,
+            Text = comment.Text,
+            CreatedAt = comment.CreatedAt,
+            UpdatedAt = comment.UpdatedAt,
+            PublicationId = comment.PostId,
+            AuthorId = comment.UserId,
+            AuthorUsername = comment.User?.UserName ?? string.Empty,
+            AuthorDisplayName = comment.User?.DisplayName,
+            AuthorPhotoUrl = comment.User?.ProfilePhoto
+        };
+    }
+
+    private static CommentDto MapToLegacyDto(Comment comment)
     {
         return new CommentDto
         {

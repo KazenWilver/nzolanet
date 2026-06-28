@@ -30,7 +30,7 @@ public class CommentRepository : ICommentRepository
         return await _context.Comments
             .Include(c => c.User)
             .Where(c => c.PostId == postId)
-            .OrderByDescending(c => c.CreatedAt)
+            .OrderBy(c => c.CreatedAt)
             .ToListAsync();
     }
 
