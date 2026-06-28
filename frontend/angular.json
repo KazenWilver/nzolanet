@@ -71,6 +71,11 @@
             },
             "development": {
               "buildTarget": "frontend:build:development"
+            },
+            "lan": {
+              "buildTarget": "frontend:build:development",
+              "host": "0.0.0.0",
+              "allowedHosts": true
             }
           },
           "defaultConfiguration": "development"
