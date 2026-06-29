@@ -47,6 +47,7 @@ export class FeedPageComponent implements OnInit {
   loading = true;
   loadingMore = false;
   error = false;
+  loadMoreError = false;
   hasMore = false;
   currentUserId?: string;
   activeTab: FeedTab = 'para-ti';
@@ -134,6 +135,9 @@ export class FeedPageComponent implements OnInit {
 
     const requestId = ++this.feedRequestId;
     this.error = false;
+    if (reset) {
+      this.loadMoreError = false;
+    }
 
     const request$ = this.isFollowingTab
       ? this.publicationService.getFollowingFeed(this.page)
@@ -171,7 +175,13 @@ export class FeedPageComponent implements OnInit {
             return;
           }
 
-          this.error = true;
+          if (reset) {
+            this.error = true;
+            return;
+          }
+
+          this.page = Math.max(1, this.page - 1);
+          this.loadMoreError = true;
         }
       });
   }

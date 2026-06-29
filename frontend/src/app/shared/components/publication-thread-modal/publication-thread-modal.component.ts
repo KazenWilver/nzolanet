@@ -1,4 +1,5 @@
 import {
+  AfterViewChecked,
   Component,
   DestroyRef,
   ElementRef,
@@ -22,6 +23,7 @@ import { AnimationService } from '../../../core/services/animation.service';
 import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicationService } from '../../../core/services/publication.service';
+import { ScrollLockService } from '../../../core/services/scroll-lock.service';
 import type { Comment } from '../../../core/models/comment.model';
 import type { Publication } from '../../../core/models/publication.model';
 import type { User } from '../../../core/models/user.model';
@@ -45,11 +47,12 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
   templateUrl: './publication-thread-modal.component.html',
   styleUrl: './publication-thread-modal.component.scss'
 })
-export class PublicationThreadModalComponent implements OnChanges, OnDestroy, OnInit {
+export class PublicationThreadModalComponent implements OnChanges, OnDestroy, OnInit, AfterViewChecked {
   private readonly commentService = inject(CommentService);
   private readonly authService = inject(AuthService);
   private readonly publicationService = inject(PublicationService);
   private readonly animationService = inject(AnimationService);
+  private readonly scrollLock = inject(ScrollLockService);
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) publication!: Publication;
@@ -81,27 +84,44 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   likeError = '';
 
   private commentsLoadedForId?: string;
+  private pendingModalAnimation = false;
 
   readonly maxImageBytes = 10 * 1024 * 1024;
   readonly maxVideoBytes = 50 * 1024 * 1024;
 
   ngOnInit(): void {
-    if (this.embedded || this.open) {
-      this.loadComments();
-      if (this.useMediaLayout && this.publication?.videoUrl) {
-        setTimeout(() => this.syncModalVideo(), 0);
-      }
-    }
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const isOpen = this.embedded || changes['open']?.currentValue === true;
+    const publicationChanged =
+      !!changes['publication'] &&
+      changes['publication'].currentValue?.id !== changes['publication'].previousValue?.id;
 
-    if (isOpen && (changes['open']?.currentValue === true || changes['embedded']?.currentValue === true)) {
+    if (publicationChanged && !changes['publication'].firstChange) {
+      this.comments = [];
+      this.commentsLoadedForId = undefined;
+    }
+
+    const isOpen = this.embedded || this.open || changes['open']?.currentValue === true;
+
+    if (
+      isOpen &&
+      (
+        publicationChanged ||
+        (changes['publication']?.firstChange && !!changes['publication'].currentValue) ||
+        changes['open']?.currentValue === true ||
+        changes['embedded']?.currentValue === true
+      )
+    ) {
       this.loadComments();
       if (!this.embedded) {
-        document.body.style.overflow = 'hidden';
-        requestAnimationFrame(() => this.animateModalOpen());
+        this.scrollLock.lock();
+        this.pendingModalAnimation = true;
       }
       if (this.useMediaLayout && this.publication?.videoUrl) {
         setTimeout(() => this.syncModalVideo(), 0);
@@ -110,8 +130,15 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
 
     if (!this.embedded && changes['open']?.currentValue === false) {
       this.pauseModalVideo();
-      document.body.style.overflow = '';
+      this.scrollLock.unlock();
       this.resetComposer();
+    }
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.pendingModalAnimation && this.threadOverlayRef && this.threadShellRef) {
+      this.pendingModalAnimation = false;
+      this.animateModalOpen();
     }
   }
 
@@ -125,7 +152,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   ngOnDestroy(): void {
     if (!this.embedded) {
       this.pauseModalVideo();
-      document.body.style.overflow = '';
+      this.scrollLock.unlock();
     }
     this.clearMediaPreview();
   }
@@ -283,7 +310,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
       .subscribe({
       next: comment => {
         this.comments = this.sortByCreatedAtDesc([comment, ...this.comments]);
-        this.countChange.emit(this.comments.length);
+        this.syncCommentsCount();
         this.resetComposer();
         this.submitting = false;
       },
@@ -311,12 +338,6 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     this.loading = true;
     this.loadError = false;
 
-    this.authService.currentUser$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(user => {
-        this.currentUser = user;
-      });
-
     this.commentService
       .getByPublication(this.publication.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -324,7 +345,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
       next: comments => {
         this.comments = this.sortByCreatedAtDesc(comments);
         this.loading = false;
-        this.countChange.emit(this.comments.length);
+        this.syncCommentsCount();
       },
       error: () => {
         this.loading = false;
@@ -385,5 +406,20 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     if (overlay && shell) {
       this.animationService.modalEnter(overlay, shell);
     }
+  }
+
+  private syncCommentsCount(): void {
+    const nextCount = this.comments.length;
+    if (this.publication.commentsCount === nextCount) {
+      this.countChange.emit(nextCount);
+      return;
+    }
+
+    this.publication = {
+      ...this.publication,
+      commentsCount: nextCount
+    };
+    this.publicationChange.emit(this.publication);
+    this.countChange.emit(nextCount);
   }
 }

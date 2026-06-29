@@ -77,7 +77,16 @@
     <app-publication-card-skeleton />
   }
 
-  @if (!loading && hasMore) {
+  @if (loadMoreError) {
+    <div class="feed-page__load-more-error">
+      <p>Não foi possível carregar mais publicações.</p>
+      <button type="button" class="feed-page__retry" appPressScale (click)="loadMoreError = false; loadMore()">
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @if (!loading && hasMore && !loadMoreError) {
     <div
       appInfiniteScroll
       [infiniteScrollDisabled]="loadingMore"

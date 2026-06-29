@@ -119,6 +119,7 @@ export class AnimationService {
       return;
     }
 
+    gsap.killTweensOf([overlay, dialog]);
     const mobile = this.isMobile;
 
     gsap.set(overlay, { opacity: 0 });

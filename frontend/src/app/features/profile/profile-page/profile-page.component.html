@@ -211,7 +211,16 @@
           <app-publication-card-skeleton />
         }
 
-        @if (mediaHasMore) {
+        @if (mediaLoadMoreError) {
+          <div class="profile-page__load-more-error">
+            <p>Não foi possível carregar mais media.</p>
+            <button type="button" class="profile-page__retry" (click)="mediaLoadMoreError = false; loadMoreMedia()">
+              Tentar novamente
+            </button>
+          </div>
+        }
+
+        @if (mediaHasMore && !mediaLoadMoreError) {
           <div
             appInfiniteScroll
             [infiniteScrollDisabled]="loadingMoreMedia"
@@ -257,7 +266,16 @@
           <app-publication-card-skeleton />
         }
 
-        @if (publicationsHasMore) {
+        @if (publicationsLoadMoreError) {
+          <div class="profile-page__load-more-error">
+            <p>Não foi possível carregar mais publicações.</p>
+            <button type="button" class="profile-page__retry" (click)="publicationsLoadMoreError = false; loadMorePublications()">
+              Tentar novamente
+            </button>
+          </div>
+        }
+
+        @if (publicationsHasMore && !publicationsLoadMoreError) {
           <div
             appInfiniteScroll
             [infiniteScrollDisabled]="loadingMorePublications"

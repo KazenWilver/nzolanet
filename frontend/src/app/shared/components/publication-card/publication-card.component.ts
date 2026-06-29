@@ -39,7 +39,6 @@ export class PublicationCardComponent implements OnChanges {
 
   @Input({ required: true }) publication!: Publication;
   @Input() currentUserId?: string;
-  @Input() expandComments = false;
   @Input() highlighted = false;
   @Output() deleted = new EventEmitter<string>();
   @Output() updated = new EventEmitter<Publication>();
@@ -63,10 +62,6 @@ export class PublicationCardComponent implements OnChanges {
   @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['expandComments']?.currentValue === true) {
-      this.navigateToPublication(false);
-    }
-
     if (changes['publication']) {
       this.imageLoadFailed = false;
       this.videoLoadFailed = false;

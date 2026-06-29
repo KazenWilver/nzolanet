@@ -1,4 +1,15 @@
-import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  inject
+} from '@angular/core';
 
 /**
  * Emite quando o elemento entra na área visível do contentor com scroll.
@@ -7,23 +18,47 @@ import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, 
   selector: '[appInfiniteScroll]',
   standalone: true
 })
-export class InfiniteScrollDirective implements OnInit, OnDestroy {
+export class InfiniteScrollDirective implements OnInit, OnChanges, OnDestroy {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private observer?: IntersectionObserver;
+  private lastEmitAt = 0;
 
   @Input() infiniteScrollDisabled = false;
   @Input() infiniteScrollRoot: HTMLElement | null = null;
   @Output() readonly appInfiniteScroll = new EventEmitter<void>();
 
   ngOnInit(): void {
+    this.createObserver();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if ('infiniteScrollDisabled' in changes || 'infiniteScrollRoot' in changes) {
+      this.observer?.disconnect();
+      this.createObserver();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
+
+  private createObserver(): void {
     const root = this.infiniteScrollRoot ?? this.findScrollRoot();
 
     this.observer = new IntersectionObserver(
       entries => {
         const entry = entries[0];
-        if (entry?.isIntersecting && !this.infiniteScrollDisabled) {
-          this.appInfiniteScroll.emit();
+        if (!entry?.isIntersecting || this.infiniteScrollDisabled) {
+          return;
         }
+
+        const now = Date.now();
+        if (now - this.lastEmitAt < 400) {
+          return;
+        }
+
+        this.lastEmitAt = now;
+        this.appInfiniteScroll.emit();
       },
       {
         root,
@@ -33,10 +68,6 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
     );
 
     this.observer.observe(this.elementRef.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.observer?.disconnect();
   }
 
   private findScrollRoot(): HTMLElement | null {

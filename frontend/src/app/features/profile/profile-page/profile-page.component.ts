@@ -72,6 +72,8 @@ export class ProfilePageComponent implements OnInit {
   profileError = false;
   profileNotFound = false;
   contentLoadError = false;
+  publicationsLoadMoreError = false;
+  mediaLoadMoreError = false;
   privateAccount = false;
   togglingFollow = false;
   processingFollowRequest = false;
@@ -141,6 +143,8 @@ export class ProfilePageComponent implements OnInit {
     this.profileError = false;
     this.profileNotFound = false;
     this.contentLoadError = false;
+    this.publicationsLoadMoreError = false;
+    this.mediaLoadMoreError = false;
     this.privateAccount = false;
     this.publications = [];
     this.mediaPublications = [];
@@ -203,6 +207,8 @@ export class ProfilePageComponent implements OnInit {
     }
 
     this.contentLoadError = false;
+    this.publicationsLoadMoreError = false;
+    this.mediaLoadMoreError = false;
     if (this.activeTab === 'likes') {
       this.loadLikedPublications(this.profile.id);
     } else if (this.activeTab === 'media') {
@@ -224,6 +230,9 @@ export class ProfilePageComponent implements OnInit {
     this.loadingMorePublications = !reset;
     this.privateAccount = false;
     this.contentLoadError = false;
+    if (reset) {
+      this.publicationsLoadMoreError = false;
+    }
 
     this.publicationService
       .getByUser(userId, this.publicationsPage)
@@ -258,13 +267,16 @@ export class ProfilePageComponent implements OnInit {
 
           if (reset) {
             this.publications = [];
+            if (error.status === 403) {
+              this.privateAccount = true;
+            } else {
+              this.contentLoadError = true;
+            }
+            return;
           }
 
-          if (error.status === 403) {
-            this.privateAccount = true;
-          } else {
-            this.contentLoadError = true;
-          }
+          this.publicationsPage = Math.max(1, this.publicationsPage - 1);
+          this.publicationsLoadMoreError = true;
         }
       });
   }
@@ -281,6 +293,9 @@ export class ProfilePageComponent implements OnInit {
     this.loadingMoreMedia = !reset;
     this.privateAccount = false;
     this.contentLoadError = false;
+    if (reset) {
+      this.mediaLoadMoreError = false;
+    }
 
     this.publicationService
       .getByUser(userId, this.mediaPage, undefined, true)
@@ -315,13 +330,16 @@ export class ProfilePageComponent implements OnInit {
 
           if (reset) {
             this.mediaPublications = [];
+            if (error.status === 403) {
+              this.privateAccount = true;
+            } else {
+              this.contentLoadError = true;
+            }
+            return;
           }
 
-          if (error.status === 403) {
-            this.privateAccount = true;
-          } else {
-            this.contentLoadError = true;
-          }
+          this.mediaPage = Math.max(1, this.mediaPage - 1);
+          this.mediaLoadMoreError = true;
         }
       });
   }
@@ -349,6 +367,8 @@ export class ProfilePageComponent implements OnInit {
     this.loadingLikes = true;
     this.privateAccount = false;
     this.contentLoadError = false;
+    this.publicationsLoadMoreError = false;
+    this.mediaLoadMoreError = false;
 
     this.publicationService
       .getLikedByUser(userId)

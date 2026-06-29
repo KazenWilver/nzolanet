@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnimationService } from '../../../core/services/animation.service';
+import { ScrollLockService } from '../../../core/services/scroll-lock.service';
 
 @Component({
   selector: 'app-modal',
@@ -156,6 +157,7 @@ import { AnimationService } from '../../../core/services/animation.service';
 })
 export class ModalComponent implements OnChanges, AfterViewChecked {
   private readonly animationService = inject(AnimationService);
+  private readonly scrollLock = inject(ScrollLockService);
 
   @Input() open = false;
   @Input() title = '';
@@ -206,7 +208,11 @@ export class ModalComponent implements OnChanges, AfterViewChecked {
   }
 
   private updateBodyScrollLock(locked: boolean): void {
-    document.body.style.overflow = locked ? 'hidden' : '';
-    document.body.style.touchAction = locked ? 'none' : '';
+    if (locked) {
+      this.scrollLock.lock();
+      return;
+    }
+
+    this.scrollLock.unlock();
   }
 }
