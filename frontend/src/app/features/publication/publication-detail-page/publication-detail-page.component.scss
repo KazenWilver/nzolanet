@@ -1,0 +1,25 @@
+.publication-detail-page {
+  min-height: 100%;
+  background-color: var(--color-bg-primary);
+}
+
+.publication-detail-page__message {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.publication-detail-page__link {
+  display: inline-block;
+  margin-top: 12px;
+  border: none;
+  background: none;
+  color: var(--color-accent-blue);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

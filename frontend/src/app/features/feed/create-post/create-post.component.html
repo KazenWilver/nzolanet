@@ -29,6 +29,7 @@
           rows="2"
           [maxlength]="maxChars"
           (input)="adjustHeight($event)"
+          (keydown)="handleTextareaKeydown($event)"
         ></textarea>
       </div>
 
@@ -113,5 +114,13 @@
         </div>
       </div>
     </form>
+  }
+
+  @if (discardDialogOpen) {
+    <app-confirm-dialog
+      mensagem="Descartar esta publicação?"
+      (confirmado)="confirmDiscard()"
+      (cancelado)="discardDialogOpen = false"
+    />
   }
 </div>

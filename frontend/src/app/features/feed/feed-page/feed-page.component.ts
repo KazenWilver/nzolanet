@@ -11,12 +11,21 @@ import type { Publication } from '../../../core/models/publication.model';
 import type { User } from '../../../core/models/user.model';
 import { PublicationCardComponent } from '../../../shared/components/publication-card/publication-card.component';
 import { CreatePostComponent } from '../create-post/create-post.component';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { PublicationCardSkeletonComponent } from '../../../shared/components/publication-card-skeleton/publication-card-skeleton.component';
+import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
 
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, PublicationCardComponent, CreatePostComponent, LoadingSpinnerComponent],
+  imports: [
+    CommonModule,
+    PublicationCardComponent,
+    CreatePostComponent,
+    PageHeaderComponent,
+    PublicationCardSkeletonComponent,
+    InfiniteScrollDirective
+  ],
   templateUrl: './feed-page.component.html',
   styleUrl: './feed-page.component.scss'
 })
@@ -30,11 +39,12 @@ export class FeedPageComponent implements OnInit {
 
   publications: Publication[] = [];
   loading = true;
+  loadingMore = false;
   error = false;
+  hasMore = false;
   currentUserId?: string;
   activeTab: FeedTab = 'para-ti';
-  focusPublicationId?: string;
-  expandCommentsForPublicationId?: string;
+  private page = 1;
   private feedRequestId = 0;
 
   ngOnInit(): void {
@@ -50,13 +60,15 @@ export class FeedPageComponent implements OnInit {
       });
 
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const publicacao = params.get('publicacao');
+      if (publicacao) {
+        void this.router.navigate(['/publicacoes', publicacao], { replaceUrl: true });
+        return;
+      }
+
       const tab = params.get('tab');
       this.activeTab = tab === 'a-seguir' ? 'a-seguir' : 'para-ti';
-      this.focusPublicationId = params.get('publicacao') ?? undefined;
-      const expandComments = params.get('comentarios') === '1';
-      this.expandCommentsForPublicationId =
-        expandComments && this.focusPublicationId ? this.focusPublicationId : undefined;
-      this.loadFeed();
+      this.loadFeed(true);
     });
 
     this.router.events
@@ -67,7 +79,7 @@ export class FeedPageComponent implements OnInit {
       )
       .subscribe(() => {
         if (this.isFollowingTab && this.feedTabService.isFollowingStale()) {
-          this.loadFeed();
+          this.loadFeed(true);
         }
       });
 
@@ -106,46 +118,66 @@ export class FeedPageComponent implements OnInit {
     });
   }
 
-  loadFeed(): void {
+  loadFeed(reset = false): void {
+    if (reset) {
+      this.page = 1;
+      this.publications = [];
+      this.hasMore = false;
+      this.loading = true;
+    }
+
     const requestId = ++this.feedRequestId;
-    this.loading = true;
     this.error = false;
 
     const request$ = this.isFollowingTab
-      ? this.publicationService.getFollowingFeed()
-      : this.publicationService.getAll();
+      ? this.publicationService.getFollowingFeed(this.page)
+      : this.publicationService.getAll(this.page);
 
     request$
       .pipe(
         finalize(() => {
           if (requestId === this.feedRequestId) {
             this.loading = false;
+            this.loadingMore = false;
           }
         }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-      next: publications => {
-        if (requestId !== this.feedRequestId) {
-          return;
+        next: response => {
+          if (requestId !== this.feedRequestId) {
+            return;
+          }
+
+          const merged = reset
+            ? response.items
+            : this.mergePublications(this.publications, response.items);
+
+          this.publications = this.sortByDate(merged);
+          this.hasMore = response.hasMore;
+
+          if (this.isFollowingTab) {
+            this.feedTabService.clearFollowingStale();
+          }
+        },
+        error: () => {
+          if (requestId !== this.feedRequestId) {
+            return;
+          }
+
+          this.error = true;
         }
+      });
+  }
 
-        this.publications = this.sortByDate(publications);
+  loadMore(): void {
+    if (this.loading || this.loadingMore || !this.hasMore) {
+      return;
+    }
 
-        if (this.isFollowingTab) {
-          this.feedTabService.clearFollowingStale();
-        }
-
-        this.scrollToFocusedPublication();
-      },
-      error: () => {
-        if (requestId !== this.feedRequestId) {
-          return;
-        }
-
-        this.error = true;
-      }
-    });
+    this.loadingMore = true;
+    this.page += 1;
+    this.loadFeed(false);
   }
 
   handleCreated(publication: Publication): void {
@@ -182,21 +214,16 @@ export class FeedPageComponent implements OnInit {
     this.publications = [publication, ...this.publications];
   }
 
+  private mergePublications(existing: Publication[], incoming: Publication[]): Publication[] {
+    const seen = new Set(existing.map(item => item.id));
+    const appended = incoming.filter(item => !seen.has(item.id));
+    return [...existing, ...appended];
+  }
+
   private sortByDate(publications: Publication[]): Publication[] {
     return [...publications].sort(
       (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
     );
-  }
-
-  private scrollToFocusedPublication(): void {
-    if (!this.focusPublicationId) {
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      const element = document.getElementById(`publication-${this.focusPublicationId}`);
-      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
   }
 
   private syncAuthorProfileOnPublications(user: User): void {

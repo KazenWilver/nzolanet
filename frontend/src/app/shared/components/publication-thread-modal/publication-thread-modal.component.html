@@ -1,65 +1,83 @@
-@if (open) {
-  <div
-    class="thread-modal"
-    [class.thread-modal--media]="useMediaLayout"
-    role="presentation"
-    (click)="handleBackdropClick()"
-  >
-    <div class="thread-modal__shell" role="dialog" aria-modal="true" aria-label="Publicação e respostas" (click)="$event.stopPropagation()">
-      <header class="thread-modal__header">
-        <button type="button" class="thread-modal__close" aria-label="Fechar" (click)="handleClose()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M18 6 6 18M6 6l12 12"></path>
-          </svg>
-        </button>
-      </header>
-
-      @if (useMediaLayout) {
-        <div class="thread-modal__split">
-          <div class="thread-modal__media-pane">
-            <div class="thread-modal__media-stage">
-              @if (publication.imageUrl) {
-                <div
-                  class="thread-modal__media-bg thread-modal__media-bg--image"
-                  [style.background-image]="'url(' + publication.imageUrl + ')'"
-                  aria-hidden="true"
-                ></div>
-                <img [src]="publication.imageUrl" alt="Imagem da publicação" class="thread-modal__media" />
-              } @else if (publication.videoUrl) {
-                <video
-                  class="thread-modal__media-bg"
-                  [src]="publication.videoUrl"
-                  muted
-                  loop
-                  playsinline
-                  autoplay
-                  tabindex="-1"
-                  aria-hidden="true"
-                ></video>
-                <video
-                  #modalVideo
-                  [src]="publication.videoUrl"
-                  controls
-                  playsinline
-                  class="thread-modal__media thread-modal__media--video"
-                ></video>
-              }
-            </div>
-          </div>
-
-          <div class="thread-modal__side-pane">
-            <ng-container *ngTemplateOutlet="sideContent" />
-          </div>
-        </div>
-      } @else {
-        <div class="thread-modal__stack">
-          <ng-container *ngTemplateOutlet="sideContent" />
-        </div>
-      }
+@if (embedded || open) {
+  @if (!embedded) {
+    <div
+      class="thread-modal"
+      [class.thread-modal--media]="useMediaLayout"
+      role="presentation"
+      (click)="handleBackdropClick()"
+    >
+      <div
+        class="thread-modal__shell"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Publicação e respostas"
+        (click)="$event.stopPropagation()"
+      >
+        <ng-container *ngTemplateOutlet="modalChrome" />
+      </div>
     </div>
-  </div>
+  } @else {
+    <div class="thread-modal__shell thread-modal__shell--embedded" aria-label="Publicação e respostas">
+      <ng-container *ngTemplateOutlet="modalContent" />
+    </div>
+  }
 }
 
+<ng-template #modalChrome>
+  <header class="thread-modal__header">
+    <button type="button" class="thread-modal__close" aria-label="Fechar" (click)="handleClose()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M18 6 6 18M6 6l12 12"></path>
+      </svg>
+    </button>
+  </header>
+  <ng-container *ngTemplateOutlet="modalContent" />
+</ng-template>
+
+<ng-template #modalContent>
+  @if (useMediaLayout) {
+    <div class="thread-modal__split">
+      <div class="thread-modal__media-pane">
+        <div class="thread-modal__media-stage">
+          @if (publication.imageUrl) {
+            <div
+              class="thread-modal__media-bg thread-modal__media-bg--image"
+              [style.background-image]="'url(' + publication.imageUrl + ')'"
+              aria-hidden="true"
+            ></div>
+            <img [src]="publication.imageUrl" alt="Imagem da publicação" class="thread-modal__media" />
+          } @else if (publication.videoUrl) {
+            <video
+              class="thread-modal__media-bg"
+              [src]="publication.videoUrl"
+              muted
+              loop
+              playsinline
+              autoplay
+              tabindex="-1"
+              aria-hidden="true"
+            ></video>
+            <video
+              #modalVideo
+              [src]="publication.videoUrl"
+              controls
+              playsinline
+              class="thread-modal__media thread-modal__media--video"
+            ></video>
+          }
+        </div>
+      </div>
+
+      <div class="thread-modal__side-pane">
+        <ng-container *ngTemplateOutlet="sideContent" />
+      </div>
+    </div>
+  } @else {
+    <div class="thread-modal__stack">
+      <ng-container *ngTemplateOutlet="sideContent" />
+    </div>
+  }
+</ng-template>
 <ng-template #sideContent>
   <article class="thread-modal__post">
     <div class="thread-modal__post-header">
@@ -131,6 +149,7 @@
           maxlength="1000"
           placeholder="Publica a tua resposta"
           aria-label="Publica a tua resposta"
+          (keydown)="handleReplyKeydown($event)"
         ></textarea>
 
         @if (previewUrl) {

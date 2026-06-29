@@ -11,7 +11,6 @@ import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { PublicationThreadModalComponent } from '../publication-thread-modal/publication-thread-modal.component';
 
 @Component({
   selector: 'app-publication-card',
@@ -24,8 +23,7 @@ import { PublicationThreadModalComponent } from '../publication-thread-modal/pub
     LinkifyTextPipe,
     AvatarComponent,
     ConfirmDialogComponent,
-    LoadingSpinnerComponent,
-    PublicationThreadModalComponent
+    LoadingSpinnerComponent
   ],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'
@@ -51,10 +49,6 @@ export class PublicationCardComponent implements OnChanges {
   likeError = '';
   deleteError = '';
   deleting = false;
-  commentsOpen = false;
-  threadModalOpen = false;
-  threadMediaFocus = false;
-  videoStartTime = 0;
   likePulsing = false;
   likingInProgress = false;
   imageLoadFailed = false;
@@ -65,7 +59,7 @@ export class PublicationCardComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
-      this.openThread(false);
+      this.navigateToPublication(false);
     }
 
     if (changes['publication']) {
@@ -136,17 +130,17 @@ export class PublicationCardComponent implements OnChanges {
       .update(this.publication.id, { text })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: updated => {
-        this.publication = updated;
-        this.editing = false;
-        this.savingEdit = false;
-        this.updated.emit(updated);
-      },
-      error: () => {
-        this.savingEdit = false;
-        this.editError = 'Não foi possível guardar as alterações.';
-      }
-    });
+        next: updated => {
+          this.publication = updated;
+          this.editing = false;
+          this.savingEdit = false;
+          this.updated.emit(updated);
+        },
+        error: () => {
+          this.savingEdit = false;
+          this.editError = 'Não foi possível guardar as alterações.';
+        }
+      });
   }
 
   confirmDelete(): void {
@@ -165,16 +159,16 @@ export class PublicationCardComponent implements OnChanges {
       .delete(this.publication.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: () => {
-        this.deleteDialogOpen = false;
-        this.deleting = false;
-        this.deleted.emit(this.publication.id);
-      },
-      error: () => {
-        this.deleting = false;
-        this.deleteError = 'Não foi possível apagar a publicação.';
-      }
-    });
+        next: () => {
+          this.deleteDialogOpen = false;
+          this.deleting = false;
+          this.deleted.emit(this.publication.id);
+        },
+        error: () => {
+          this.deleting = false;
+          this.deleteError = 'Não foi possível apagar a publicação.';
+        }
+      });
   }
 
   toggleLike(event: MouseEvent): void {
@@ -209,57 +203,67 @@ export class PublicationCardComponent implements OnChanges {
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: () => {
-        this.likingInProgress = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        if (error.status === 409) {
+        next: () => {
+          this.likingInProgress = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 409) {
+            this.publication = {
+              ...this.publication,
+              hasLiked: true,
+              likesCount: Math.max(this.publication.likesCount, previousCount)
+            };
+            this.likingInProgress = false;
+            return;
+          }
+
           this.publication = {
             ...this.publication,
-            hasLiked: true,
-            likesCount: Math.max(this.publication.likesCount, previousCount)
+            hasLiked: previousLiked,
+            likesCount: previousCount
           };
+          this.likeError = 'Não foi possível actualizar o baze.';
           this.likingInProgress = false;
-          return;
+          setTimeout(() => {
+            this.likeError = '';
+          }, 4000);
         }
-
-        this.publication = {
-          ...this.publication,
-          hasLiked: previousLiked,
-          likesCount: previousCount
-        };
-        this.likeError = 'Não foi possível actualizar o baze.';
-        this.likingInProgress = false;
-        setTimeout(() => {
-          this.likeError = '';
-        }, 4000);
-      }
-    });
+      });
   }
 
   toggleComments(event: MouseEvent): void {
     event.stopPropagation();
-    this.openThread(false);
+    this.navigateToPublication(false);
   }
 
-  openThread(mediaFocus: boolean): void {
-    this.pauseCardVideo();
-    this.threadMediaFocus = mediaFocus;
-    this.threadModalOpen = true;
-    this.commentsOpen = true;
+  handleBodyClick(event: MouseEvent): void {
+    if (this.editing) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    if (target.closest('a, button, video, .publication-card__media')) {
+      return;
+    }
+
+    this.navigateToPublication(false);
   }
 
-  handleThreadClosed(): void {
-    this.threadModalOpen = false;
-    this.threadMediaFocus = false;
-    this.commentsOpen = false;
-    this.videoStartTime = 0;
+  handleBodyKeydown(event: KeyboardEvent): void {
+    if (this.editing) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.navigateToPublication(false);
+    }
   }
 
   handleMediaClick(event: MouseEvent): void {
     event.stopPropagation();
     this.captureVideoTime();
-    this.openThread(true);
+    this.navigateToPublication(true);
   }
 
   handleVideoClick(event: MouseEvent): void {
@@ -280,48 +284,12 @@ export class PublicationCardComponent implements OnChanges {
     event.preventDefault();
     event.stopPropagation();
     this.captureVideoTime();
-    this.openThread(true);
-  }
-
-  handleCommentsCountChange(count: number): void {
-    this.publication = {
-      ...this.publication,
-      commentsCount: count
-    };
-  }
-
-  handlePublicationChange(updated: Publication): void {
-    this.publication = updated;
-    this.updated.emit(updated);
-  }
-
-  handleBodyClick(event: MouseEvent): void {
-    if (this.editing) {
-      return;
-    }
-
-    const target = event.target as HTMLElement;
-    if (target.closest('a, button, video, .publication-card__media')) {
-      return;
-    }
-
-    this.openThread(false);
-  }
-
-  handleBodyKeydown(event: KeyboardEvent): void {
-    if (this.editing) {
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      this.openThread(false);
-    }
+    this.navigateToPublication(true);
   }
 
   handleShare(event: MouseEvent): void {
     event.stopPropagation();
-    const url = `${window.location.origin}/feed?publicacao=${this.publication.id}`;
+    const url = `${window.location.origin}/publicacoes/${this.publication.id}`;
 
     void navigator.clipboard.writeText(url).then(() => {
       this.shareFeedback = 'Ligação copiada';
@@ -339,18 +307,13 @@ export class PublicationCardComponent implements OnChanges {
     }
   }
 
-  private captureVideoTime(): void {
-    const video = this.cardVideoRef?.nativeElement;
-    if (!video) {
-      this.videoStartTime = 0;
-      return;
-    }
-
-    this.videoStartTime = video.currentTime;
-    video.pause();
+  private navigateToPublication(mediaFocus: boolean): void {
+    void this.router.navigate(['/publicacoes', this.publication.id], {
+      queryParams: mediaFocus ? { media: '1' } : undefined
+    });
   }
 
-  private pauseCardVideo(): void {
+  private captureVideoTime(): void {
     this.cardVideoRef?.nativeElement?.pause();
   }
 }

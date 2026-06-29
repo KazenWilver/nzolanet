@@ -1,0 +1,24 @@
+<header class="page-header">
+  @if (showBack) {
+    @if (backLink) {
+      <a class="page-header__back" [routerLink]="backLink" aria-label="Voltar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+      </a>
+    } @else {
+      <button type="button" class="page-header__back" aria-label="Voltar" (click)="handleBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+    }
+  }
+
+  <div class="page-header__titles">
+    <h1 class="page-header__title">{{ title }}</h1>
+    @if (subtitle) {
+      <p class="page-header__subtitle">{{ subtitle }}</p>
+    }
+  </div>
+</header>

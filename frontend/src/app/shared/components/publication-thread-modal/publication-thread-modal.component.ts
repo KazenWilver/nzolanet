@@ -7,6 +7,7 @@ import {
   Input,
   OnChanges,
   OnDestroy,
+  OnInit,
   Output,
   SimpleChanges,
   ViewChild,
@@ -43,7 +44,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
   templateUrl: './publication-thread-modal.component.html',
   styleUrl: './publication-thread-modal.component.scss'
 })
-export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
+export class PublicationThreadModalComponent implements OnChanges, OnDestroy, OnInit {
   private readonly commentService = inject(CommentService);
   private readonly authService = inject(AuthService);
   private readonly publicationService = inject(PublicationService);
@@ -51,6 +52,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
 
   @Input({ required: true }) publication!: Publication;
   @Input() open = false;
+  @Input() embedded = false;
   @Input() mediaFocus = false;
   @Input() videoStartTime = 0;
   @Output() closed = new EventEmitter<void>();
@@ -74,19 +76,34 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   likePulsing = false;
   likeError = '';
 
+  private commentsLoadedForId?: string;
+
   readonly maxImageBytes = 10 * 1024 * 1024;
   readonly maxVideoBytes = 50 * 1024 * 1024;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['open']?.currentValue === true) {
+  ngOnInit(): void {
+    if (this.embedded || this.open) {
       this.loadComments();
-      document.body.style.overflow = 'hidden';
+      if (this.useMediaLayout && this.publication?.videoUrl) {
+        setTimeout(() => this.syncModalVideo(), 0);
+      }
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const isOpen = this.embedded || changes['open']?.currentValue === true;
+
+    if (isOpen && (changes['open']?.currentValue === true || changes['embedded']?.currentValue === true)) {
+      this.loadComments();
+      if (!this.embedded) {
+        document.body.style.overflow = 'hidden';
+      }
       if (this.useMediaLayout && this.publication?.videoUrl) {
         setTimeout(() => this.syncModalVideo(), 0);
       }
     }
 
-    if (changes['open']?.currentValue === false) {
+    if (!this.embedded && changes['open']?.currentValue === false) {
       this.pauseModalVideo();
       document.body.style.overflow = '';
       this.resetComposer();
@@ -95,14 +112,16 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
 
   @HostListener('document:keydown.escape')
   handleEscape(): void {
-    if (this.open) {
+    if (this.open && !this.embedded) {
       this.handleClose();
     }
   }
 
   ngOnDestroy(): void {
-    this.pauseModalVideo();
-    document.body.style.overflow = '';
+    if (!this.embedded) {
+      this.pauseModalVideo();
+      document.body.style.overflow = '';
+    }
     this.clearMediaPreview();
   }
 
@@ -226,6 +245,13 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
     this.mediaType = null;
   }
 
+  handleReplyKeydown(event: KeyboardEvent): void {
+    if (event.ctrlKey && event.key === 'Enter' && this.canSubmit) {
+      event.preventDefault();
+      this.submitComment();
+    }
+  }
+
   submitComment(): void {
     const text = this.newCommentText.trim();
     if ((!text && !this.selectedFile) || this.submitting || !this.currentUser) {
@@ -272,6 +298,11 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   }
 
   private loadComments(): void {
+    if (this.commentsLoadedForId === this.publication.id && !this.loadError) {
+      return;
+    }
+
+    this.commentsLoadedForId = this.publication.id;
     this.loading = true;
     this.loadError = false;
 

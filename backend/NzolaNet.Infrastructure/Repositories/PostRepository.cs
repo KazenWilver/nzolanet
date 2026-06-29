@@ -35,6 +35,22 @@ public class PostRepository : IPostRepository
             .ToListAsync();
     }
 
+    public async Task<(IEnumerable<Post> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
+    {
+        var query = _context.Posts
+            .Include(p => p.User)
+            .OrderByDescending(p => p.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<IEnumerable<Post>> GetFeedByFollowedUsersAsync(IEnumerable<Guid> followedUserIds)
     {
         return await _context.Posts
@@ -45,6 +61,26 @@ public class PostRepository : IPostRepository
             .ToListAsync();
     }
 
+    public async Task<(IEnumerable<Post> Items, int TotalCount)> GetFeedByFollowedUsersPagedAsync(
+        IEnumerable<Guid> followedUserIds,
+        int page,
+        int pageSize)
+    {
+        var query = _context.Posts
+            .Include(p => p.User)
+            .Where(p => followedUserIds.Contains(p.UserId))
+            .OrderByDescending(p => p.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<IEnumerable<Post>> GetByUserIdAsync(Guid userId)
     {
         return await _context.Posts
@@ -53,6 +89,33 @@ public class PostRepository : IPostRepository
             .OrderByDescending(p => p.CreatedAt)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<(IEnumerable<Post> Items, int TotalCount)> GetByUserIdPagedAsync(
+        Guid userId,
+        int page,
+        int pageSize,
+        bool mediaOnly = false)
+    {
+        IQueryable<Post> query = _context.Posts
+            .Include(p => p.User)
+            .Where(p => p.UserId == userId);
+
+        if (mediaOnly)
+        {
+            query = query.Where(p => p.ImagePath != null || p.VideoPath != null);
+        }
+
+        query = query.OrderByDescending(p => p.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 
     public async Task<bool> CreateAsync(Post post)

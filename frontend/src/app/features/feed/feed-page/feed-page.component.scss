@@ -5,13 +5,30 @@
   min-height: 100vh;
 }
 
+.feed-page__sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: color-mix(in srgb, var(--color-bg-primary) 85%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.feed-page__sticky-top app-page-header {
+  display: block;
+}
+
+.feed-page__sticky-top .page-header {
+  position: static;
+  border-bottom: none;
+  background: transparent;
+  backdrop-filter: none;
+}
+
 .feed-page__tabs {
   display: flex;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-primary);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  background-color: transparent;
 }
 
 .feed-page__tab {
@@ -106,4 +123,9 @@
   &:active {
     transform: scale(0.98);
   }
+}
+
+.feed-page__scroll-sentinel {
+  height: 1px;
+  width: 100%;
 }

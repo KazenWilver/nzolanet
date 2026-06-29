@@ -10,11 +10,12 @@ import type { User } from '../../../core/models/user.model';
 import type { Publication } from '../../../core/models/publication.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-create-post',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, AvatarComponent, LoadingSpinnerComponent, ConfirmDialogComponent],
   templateUrl: './create-post.component.html',
   styleUrl: './create-post.component.scss'
 })
@@ -40,6 +41,7 @@ export class CreatePostComponent implements OnInit {
   previewUrl: string | null = null;
   publishing = false;
   error = '';
+  discardDialogOpen = false;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -61,6 +63,10 @@ export class CreatePostComponent implements OnInit {
     return (this.text.trim().length > 0 || !!this.selectedFile) && !this.publishing;
   }
 
+  get hasDraft(): boolean {
+    return this.text.trim().length > 0 || !!this.selectedFile;
+  }
+
   get displayName(): string {
     return this.currentUser?.displayName ?? this.currentUser?.username ?? 'Utilizador';
   }
@@ -70,9 +76,29 @@ export class CreatePostComponent implements OnInit {
   }
 
   cancel(): void {
+    if (this.hasDraft) {
+      this.discardDialogOpen = true;
+      return;
+    }
+
     this.resetForm();
     if (this.modoModal) {
       this.cancelado.emit();
+    }
+  }
+
+  confirmDiscard(): void {
+    this.discardDialogOpen = false;
+    this.resetForm();
+    if (this.modoModal) {
+      this.cancelado.emit();
+    }
+  }
+
+  handleTextareaKeydown(event: KeyboardEvent): void {
+    if (event.ctrlKey && event.key === 'Enter' && this.canPublish) {
+      event.preventDefault();
+      this.publish();
     }
   }
 

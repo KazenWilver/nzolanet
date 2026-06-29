@@ -26,19 +26,39 @@ public class PublicationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int pageSize = 20)
     {
-        var publications = await _postService.GetAllAsync(AuthClaimsHelper.GetOptionalUserId(User));
-        return Ok(publications);
+        if (page.HasValue)
+        {
+            var safePage = Math.Max(page.Value, 1);
+            var safePageSize = Math.Clamp(pageSize, 1, 50);
+            var publications = await _postService.GetAllPagedAsync(
+                AuthClaimsHelper.GetOptionalUserId(User),
+                safePage,
+                safePageSize);
+            return Ok(publications);
+        }
+
+        var allPublications = await _postService.GetAllAsync(AuthClaimsHelper.GetOptionalUserId(User));
+        return Ok(allPublications);
     }
 
     [Authorize]
     [HttpGet("feed")]
-    public async Task<IActionResult> GetFollowingFeed()
+    public async Task<IActionResult> GetFollowingFeed([FromQuery] int? page, [FromQuery] int pageSize = 20)
     {
         var userId = AuthClaimsHelper.GetUserId(User);
-        var publications = await _postService.GetFollowingFeedAsync(userId);
-        return Ok(publications);
+
+        if (page.HasValue)
+        {
+            var safePage = Math.Max(page.Value, 1);
+            var safePageSize = Math.Clamp(pageSize, 1, 50);
+            var publications = await _postService.GetFollowingFeedPagedAsync(userId, safePage, safePageSize);
+            return Ok(publications);
+        }
+
+        var feed = await _postService.GetFollowingFeedAsync(userId);
+        return Ok(feed);
     }
 
     [HttpGet("{id}")]
@@ -61,12 +81,29 @@ public class PublicationsController : ControllerBase
     }
 
     [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(Guid userId)
+    public async Task<IActionResult> GetByUserId(
+        Guid userId,
+        [FromQuery] int? page,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] bool mediaOnly = false)
     {
         try
         {
-            var publications = await _postService.GetByUserIdAsync(userId, AuthClaimsHelper.GetOptionalUserId(User));
-            return Ok(publications);
+            if (page.HasValue)
+            {
+                var safePage = Math.Max(page.Value, 1);
+                var safePageSize = Math.Clamp(pageSize, 1, 50);
+                var publications = await _postService.GetByUserIdPagedAsync(
+                    userId,
+                    AuthClaimsHelper.GetOptionalUserId(User),
+                    safePage,
+                    safePageSize,
+                    mediaOnly);
+                return Ok(publications);
+            }
+
+            var allPublications = await _postService.GetByUserIdAsync(userId, AuthClaimsHelper.GetOptionalUserId(User));
+            return Ok(allPublications);
         }
         catch (UnauthorizedAccessException ex)
         {

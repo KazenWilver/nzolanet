@@ -9,8 +9,18 @@ public interface IPostRepository
 {
     Task<Post?> GetByIdAsync(Guid id);
     Task<IEnumerable<Post>> GetAllAsync();
+    Task<(IEnumerable<Post> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
     Task<IEnumerable<Post>> GetFeedByFollowedUsersAsync(IEnumerable<Guid> followedUserIds);
+    Task<(IEnumerable<Post> Items, int TotalCount)> GetFeedByFollowedUsersPagedAsync(
+        IEnumerable<Guid> followedUserIds,
+        int page,
+        int pageSize);
     Task<IEnumerable<Post>> GetByUserIdAsync(Guid userId);
+    Task<(IEnumerable<Post> Items, int TotalCount)> GetByUserIdPagedAsync(
+        Guid userId,
+        int page,
+        int pageSize,
+        bool mediaOnly = false);
     Task<bool> CreateAsync(Post post);
     Task<bool> UpdateAsync(Post post);
     Task<bool> DeleteAsync(Post post);

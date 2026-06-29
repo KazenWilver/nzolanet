@@ -1,7 +1,8 @@
 <section class="notifications-page">
-  <header class="notifications-page__header">
-    <h1 class="notifications-page__title">Notificações</h1>
-    @if (notifications.length > 0) {
+  <app-page-header title="Notificações" [showBack]="true" />
+
+  @if (notifications.length > 0) {
+    <div class="notifications-page__toolbar">
       <button
         type="button"
         class="notifications-page__mark-all"
@@ -14,8 +15,8 @@
           Marcar todas como lidas
         }
       </button>
-    }
-  </header>
+    </div>
+  }
 
   @if (loading) {
     <div class="notifications-page__loading">

@@ -16,6 +16,12 @@
   </div>
 } @else if (profile) {
   <div class="profile-page">
+    <app-page-header
+      [title]="displayName"
+      [subtitle]="'@' + profile.username"
+      [showBack]="true"
+    />
+
     <section class="profile-page__header">
       <div class="profile-page__cover" aria-hidden="true">
         @if (profile.coverPhotoUrl) {
@@ -116,6 +122,14 @@
       <button
         type="button"
         class="profile-page__tab"
+        [class.profile-page__tab--active]="activeTab === 'media'"
+        (click)="setActiveTab('media')"
+      >
+        Media
+      </button>
+      <button
+        type="button"
+        class="profile-page__tab"
         [class.profile-page__tab--active]="activeTab === 'likes'"
         (click)="setActiveTab('likes')"
       >
@@ -136,9 +150,9 @@
           <p>Esta conta é privada. Segue para ver os gostos.</p>
         </div>
       } @else if (loadingLikes) {
-        <div class="profile-page__loading">
-          <app-loading-spinner tamanho="md" />
-        </div>
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
       } @else if (likedPublications.length === 0) {
         <div class="profile-page__empty">
           <p>Ainda sem gostos.</p>
@@ -151,6 +165,50 @@
             (deleted)="handlePublicationDeleted($event)"
             (updated)="handlePublicationUpdated($event)"
           />
+        }
+      }
+    } @else if (activeTab === 'media') {
+      @if (contentLoadError) {
+        <div class="profile-page__error">
+          <p>Não foi possível carregar o conteúdo.</p>
+          <button type="button" class="profile-page__retry" (click)="retryContentLoad()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver a media.</p>
+        </div>
+      } @else if (loadingMedia) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
+      } @else if (mediaPublications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem media.</p>
+        </div>
+      } @else {
+        @for (publication of mediaPublications; track trackById($index, publication)) {
+          <app-publication-card
+            [publication]="publication"
+            [currentUserId]="currentUserId"
+            (deleted)="handlePublicationDeleted($event)"
+            (updated)="handlePublicationUpdated($event)"
+          />
+        }
+
+        @if (loadingMoreMedia) {
+          <app-publication-card-skeleton />
+        }
+
+        @if (mediaHasMore) {
+          <div
+            appInfiniteScroll
+            [infiniteScrollDisabled]="loadingMoreMedia"
+            (appInfiniteScroll)="loadMoreMedia()"
+            class="profile-page__scroll-sentinel"
+            aria-hidden="true"
+          ></div>
         }
       }
     } @else {
@@ -166,9 +224,9 @@
           <p>Esta conta é privada. Segue para ver as publicações.</p>
         </div>
       } @else if (loadingPublications) {
-        <div class="profile-page__loading">
-          <app-loading-spinner tamanho="md" />
-        </div>
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
       } @else if (publications.length === 0) {
         <div class="profile-page__empty">
           <p>Ainda sem publicações.</p>
@@ -181,6 +239,20 @@
             (deleted)="handlePublicationDeleted($event)"
             (updated)="handlePublicationUpdated($event)"
           />
+        }
+
+        @if (loadingMorePublications) {
+          <app-publication-card-skeleton />
+        }
+
+        @if (publicationsHasMore) {
+          <div
+            appInfiniteScroll
+            [infiniteScrollDisabled]="loadingMorePublications"
+            (appInfiniteScroll)="loadMorePublications()"
+            class="profile-page__scroll-sentinel"
+            aria-hidden="true"
+          ></div>
         }
       }
     }

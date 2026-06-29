@@ -26,6 +26,25 @@
   box-shadow: var(--shadow-lg);
 }
 
+.thread-modal__shell--embedded {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  background: transparent;
+}
+
+.thread-modal__shell--embedded .thread-modal__split {
+  min-height: auto;
+}
+
+.thread-modal__shell--embedded .thread-modal__stack {
+  max-height: none;
+}
+
 .thread-modal--media .thread-modal__shell {
   max-width: min(1100px, 96vw);
   max-height: 92vh;

@@ -7,12 +7,13 @@ import { UserService } from '../../core/services/user.service';
 import type { AppNotification } from '../../core/models/notification.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
 
 @Component({
   selector: 'app-notifications-page',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, LoadingSpinnerComponent, TimeAgoPipe],
+  imports: [CommonModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, TimeAgoPipe],
   templateUrl: './notifications-page.component.html',
   styleUrl: './notifications-page.component.scss'
 })
@@ -221,12 +222,7 @@ export class NotificationsPageComponent implements OnInit {
     }
 
     if (notification.publicationId) {
-      void this.router.navigate(['/feed'], {
-        queryParams: {
-          publicacao: notification.publicationId,
-          comentarios: notification.type === 'comment' ? '1' : null
-        }
-      });
+      void this.router.navigate(['/publicacoes', notification.publicationId]);
       return;
     }
 

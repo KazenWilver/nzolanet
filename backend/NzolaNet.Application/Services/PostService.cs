@@ -188,9 +188,23 @@ public class PostService : IPostService
         return await MapPostsToDtosAsync(posts, currentUserId);
     }
 
-    public async Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId)
+    public async Task<PaginatedPublicationsResponseDto> GetAllPagedAsync(
+        Guid? currentUserId,
+        int page,
+        int pageSize)
     {
-        return await GetFollowingFeedAsync(userId);
+        var (items, totalCount) = await _postRepository.GetAllPagedAsync(page, pageSize);
+        HashSet<Guid>? followedIds = null;
+
+        if (currentUserId.HasValue)
+        {
+            followedIds = (await _followRepository.GetFollowedUserIdsAsync(currentUserId.Value)).ToHashSet();
+        }
+
+        var visiblePosts = FilterVisiblePosts(items, currentUserId, followedIds);
+        var dtos = (await MapPostsToDtosAsync(visiblePosts, currentUserId)).ToList();
+
+        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetFollowingFeedAsync(Guid userId)
@@ -201,6 +215,28 @@ public class PostService : IPostService
         var posts = await _postRepository.GetFeedByFollowedUsersAsync(followedIds);
 
         return await MapPostsToDtosAsync(posts, userId);
+    }
+
+    public async Task<PaginatedPublicationsResponseDto> GetFollowingFeedPagedAsync(
+        Guid userId,
+        int page,
+        int pageSize)
+    {
+        var followedIds = (await _followRepository.GetFollowedUserIdsAsync(userId)).ToList();
+        followedIds.Add(userId);
+
+        var (items, totalCount) = await _postRepository.GetFeedByFollowedUsersPagedAsync(
+            followedIds,
+            page,
+            pageSize);
+        var dtos = (await MapPostsToDtosAsync(items, userId)).ToList();
+
+        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
+    }
+
+    public async Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId)
+    {
+        return await GetFollowingFeedAsync(userId);
     }
 
     public async Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
@@ -231,51 +267,34 @@ public class PostService : IPostService
 
     public async Task<IEnumerable<PublicationResponseDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
     {
-        var targetUser = await _userRepository.GetByIdAsync(targetUserId);
-        if (targetUser == null)
-        {
-            throw new ArgumentException("Utilizador não encontrado.");
-        }
-
-        if (targetUser.IsPrivate && targetUserId != currentUserId)
-        {
-            if (!currentUserId.HasValue)
-            {
-                throw new UnauthorizedAccessException("Este perfil é privado.");
-            }
-
-            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, targetUserId);
-            if (!isFollowing)
-            {
-                throw new UnauthorizedAccessException("Este perfil é privado.");
-            }
-        }
+        await EnsureCanViewUserPostsAsync(targetUserId, currentUserId);
 
         var posts = await _postRepository.GetByUserIdAsync(targetUserId);
         return await MapPostsToDtosAsync(posts, currentUserId);
     }
 
+    public async Task<PaginatedPublicationsResponseDto> GetByUserIdPagedAsync(
+        Guid targetUserId,
+        Guid? currentUserId,
+        int page,
+        int pageSize,
+        bool mediaOnly = false)
+    {
+        await EnsureCanViewUserPostsAsync(targetUserId, currentUserId);
+
+        var (items, totalCount) = await _postRepository.GetByUserIdPagedAsync(
+            targetUserId,
+            page,
+            pageSize,
+            mediaOnly);
+        var dtos = (await MapPostsToDtosAsync(items, currentUserId)).ToList();
+
+        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
+    }
+
     public async Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
     {
-        var targetUser = await _userRepository.GetByIdAsync(targetUserId);
-        if (targetUser == null)
-        {
-            throw new ArgumentException("Utilizador não encontrado.");
-        }
-
-        if (targetUser.IsPrivate && targetUserId != currentUserId)
-        {
-            if (!currentUserId.HasValue)
-            {
-                throw new UnauthorizedAccessException("Este perfil é privado.");
-            }
-
-            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, targetUserId);
-            if (!isFollowing)
-            {
-                throw new UnauthorizedAccessException("Este perfil é privado.");
-            }
-        }
+        await EnsureCanViewUserPostsAsync(targetUserId, currentUserId);
 
         var likedPosts = await _likeRepository.GetLikedPostsByUserAsync(targetUserId);
         var visiblePosts = new List<Post>();
@@ -300,6 +319,66 @@ public class PostService : IPostService
         }
 
         return await MapPostsToDtosAsync(visiblePosts, currentUserId);
+    }
+
+    private async Task EnsureCanViewUserPostsAsync(Guid targetUserId, Guid? currentUserId)
+    {
+        var targetUser = await _userRepository.GetByIdAsync(targetUserId);
+        if (targetUser == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        if (targetUser.IsPrivate && targetUserId != currentUserId)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, targetUserId);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+        }
+    }
+
+    private static IEnumerable<Post> FilterVisiblePosts(
+        IEnumerable<Post> posts,
+        Guid? currentUserId,
+        HashSet<Guid>? followedIds)
+    {
+        return posts.Where(post =>
+        {
+            if (currentUserId.HasValue && post.UserId == currentUserId.Value)
+            {
+                return true;
+            }
+
+            if (post.User == null || !post.User.IsPrivate)
+            {
+                return true;
+            }
+
+            return currentUserId.HasValue && followedIds?.Contains(post.UserId) == true;
+        });
+    }
+
+    private static PaginatedPublicationsResponseDto BuildPaginatedResponse(
+        IReadOnlyList<PublicationResponseDto> items,
+        int page,
+        int pageSize,
+        int totalCount)
+    {
+        return new PaginatedPublicationsResponseDto
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            HasMore = page * pageSize < totalCount
+        };
     }
 
     private async Task<IEnumerable<PublicationResponseDto>> MapPostsToDtosAsync(

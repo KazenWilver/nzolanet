@@ -123,12 +123,11 @@
             </div>
           }
 
-          @if (publication.videoUrl) {
-            <div
-              class="publication-card__media publication-card__media--clickable publication-card__media--video"
-              [class.publication-card__media--hidden]="threadModalOpen && threadMediaFocus"
-              (click)="handleMediaClick($event)"
-            >
+      @if (publication.videoUrl) {
+        <div
+          class="publication-card__media publication-card__media--clickable publication-card__media--video"
+          (click)="handleMediaClick($event)"
+        >
               @if (videoLoadFailed) {
                 <p class="publication-card__media-fallback" role="status">Vídeo indisponível</p>
               } @else {
@@ -150,8 +149,6 @@
         <button
           type="button"
           class="publication-card__action publication-card__action--comment"
-          [class.publication-card__action--active]="threadModalOpen"
-          [attr.aria-expanded]="threadModalOpen"
           aria-label="Comentários"
           (click)="toggleComments($event)"
         >
@@ -213,18 +210,6 @@
       </footer>
     </div>
   </div>
-
-  @if (threadModalOpen) {
-    <app-publication-thread-modal
-      [publication]="publication"
-      [open]="threadModalOpen"
-      [mediaFocus]="threadMediaFocus"
-      [videoStartTime]="videoStartTime"
-      (closed)="handleThreadClosed()"
-      (countChange)="handleCommentsCountChange($event)"
-      (publicationChange)="handlePublicationChange($event)"
-    />
-  }
 </article>
 
 @if (deleteDialogOpen) {

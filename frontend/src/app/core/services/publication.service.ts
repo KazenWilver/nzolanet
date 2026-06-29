@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { resolveMediaUrl } from '../helpers/media-url.helper';
 import type {
+  BackendPaginatedPublicationsDto,
   BackendPublicationDto,
+  PaginatedPublications,
   Publication,
   UpdatePublicationDto
 } from '../models/publication.model';
@@ -15,19 +17,28 @@ export class PublicationService {
   private readonly baseUrl = `${environment.apiUrl}/publications`;
   private readonly createdSubject = new Subject<Publication>();
   readonly created$ = this.createdSubject.asObservable();
+  readonly defaultPageSize = 20;
 
   constructor(private readonly http: HttpClient) {}
 
-  getAll(): Observable<Publication[]> {
+  getAll(page = 1, pageSize = this.defaultPageSize): Observable<PaginatedPublications> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
     return this.http
-      .get<BackendPublicationDto[]>(this.baseUrl)
-      .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
+      .get<BackendPaginatedPublicationsDto>(this.baseUrl, { params })
+      .pipe(map(response => this.mapPaginated(response)));
   }
 
-  getFollowingFeed(): Observable<Publication[]> {
+  getFollowingFeed(page = 1, pageSize = this.defaultPageSize): Observable<PaginatedPublications> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
     return this.http
-      .get<BackendPublicationDto[]>(`${this.baseUrl}/feed`)
-      .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
+      .get<BackendPaginatedPublicationsDto>(`${this.baseUrl}/feed`, { params })
+      .pipe(map(response => this.mapPaginated(response)));
   }
 
   getById(id: string): Observable<Publication> {
@@ -36,10 +47,23 @@ export class PublicationService {
       .pipe(map(publication => this.mapPublication(publication)));
   }
 
-  getByUser(userId: string): Observable<Publication[]> {
+  getByUser(
+    userId: string,
+    page = 1,
+    pageSize = this.defaultPageSize,
+    mediaOnly = false
+  ): Observable<PaginatedPublications> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    if (mediaOnly) {
+      params = params.set('mediaOnly', 'true');
+    }
+
     return this.http
-      .get<BackendPublicationDto[]>(`${this.baseUrl}/user/${userId}`)
-      .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
+      .get<BackendPaginatedPublicationsDto>(`${this.baseUrl}/user/${userId}`, { params })
+      .pipe(map(response => this.mapPaginated(response)));
   }
 
   getLikedByUser(userId: string): Observable<Publication[]> {
@@ -73,6 +97,16 @@ export class PublicationService {
 
   unlike(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/like`);
+  }
+
+  private mapPaginated(dto: BackendPaginatedPublicationsDto): PaginatedPublications {
+    return {
+      items: dto.items.map(item => this.mapPublication(item)),
+      page: dto.page,
+      pageSize: dto.pageSize,
+      totalCount: dto.totalCount,
+      hasMore: dto.hasMore
+    };
   }
 
   private mapPublication(dto: BackendPublicationDto): Publication {

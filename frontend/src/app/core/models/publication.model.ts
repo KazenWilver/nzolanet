@@ -33,3 +33,19 @@ export interface BackendPublicationDto {
   commentsCount: number;
   hasLiked?: boolean;
 }
+
+export interface PaginatedPublications {
+  items: Publication[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  hasMore: boolean;
+}
+
+export interface BackendPaginatedPublicationsDto {
+  items: BackendPublicationDto[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  hasMore: boolean;
+}

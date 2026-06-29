@@ -70,9 +70,14 @@ export const routes: Routes = [
         data: { featureName: 'Mensagens' }
       },
       { path: 'notificacoes', redirectTo: 'notifications', pathMatch: 'full' },
-      { path: 'publicacoes/:id/editar', redirectTo: 'feed', pathMatch: 'full' },
-      { path: 'publicacoes/:id', redirectTo: 'feed', pathMatch: 'full' },
-      { path: 'publicacoes', redirectTo: 'feed', pathMatch: 'full' }
+      {
+        path: 'publicacoes/:id',
+        loadComponent: () =>
+          import('./features/publication/publication-detail-page/publication-detail-page.component').then(
+            m => m.PublicationDetailPageComponent
+          )
+      },
+      { path: 'publicacoes', redirectTo: 'feed', pathMatch: 'full' },
     ]
   },
   {
