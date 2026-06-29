@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -24,6 +25,8 @@ interface MenuItem {
 export class SidebarNavComponent implements OnInit {
   utilizadorAtual: LegacyUser | null = null;
 
+  private readonly destroyRef = inject(DestroyRef);
+
   menuItems: MenuItem[] = [
     { icon: 'home', label: 'Feed', route: '/feed', exact: true },
     { icon: 'hash', label: 'Pesquisar', route: '/pesquisar', exact: false },
@@ -37,9 +40,11 @@ export class SidebarNavComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.utilizador$.subscribe((utilizador) => {
-      this.utilizadorAtual = utilizador;
-    });
+    this.authService.utilizador$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(utilizador => {
+        this.utilizadorAtual = utilizador;
+      });
   }
 
   getIconSvg(iconName: string): SafeHtml {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { resolveMediaUrl } from '../helpers/media-url.helper';
@@ -71,29 +71,9 @@ export class CommentService {
     return this.delete(id);
   }
 
-  /** @deprecated */
-  denunciar(id: string, motivo: string): Observable<Comentario> {
-    const reportKey = `report_comment_${id}`;
-    const userReportKey = `reported_comment_${id}`;
-    let count = parseInt(localStorage.getItem(reportKey) || '0', 10);
-
-    if (localStorage.getItem(userReportKey) !== 'true') {
-      count += 1;
-      localStorage.setItem(reportKey, count.toString());
-      localStorage.setItem(userReportKey, 'true');
-    }
-
-    return of({
-      id,
-      postId: '',
-      autorId: '',
-      autorNome: 'Sistema',
-      autorNomeUtilizador: 'sistema',
-      texto: 'Comentário denunciado.',
-      criadoEm: new Date().toISOString(),
-      reportsCount: count,
-      reportadoPorMim: true
-    });
+  /** @deprecated Denúncias não estão implementadas no backend */
+  denunciar(_id: string, _motivo: string): Observable<Comentario> {
+    return throwError(() => new Error('A denúncia de comentários ainda não está disponível.'));
   }
 
   obterTodos(): Observable<Comentario[]> {

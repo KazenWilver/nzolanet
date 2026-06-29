@@ -29,15 +29,15 @@ public class LikesController : ControllerBase
 
             return Ok(new
             {
-                Success = true,
-                Message = result ? "Operação concluída com sucesso." : "Não foi possível processar o like.",
-                LikeCount = count,
-                IsLiked = hasLiked
+                success = true,
+                message = result ? "Operação concluída com sucesso." : "Não foi possível processar o like.",
+                likeCount = count,
+                isLiked = hasLiked
             });
         }
         catch (ArgumentException ex)
         {
-            return NotFound(new { Message = ex.Message });
+            return NotFound(new { message = ex.Message });
         }
     }
 }
