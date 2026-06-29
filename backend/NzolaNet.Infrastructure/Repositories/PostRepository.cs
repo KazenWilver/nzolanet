@@ -22,8 +22,7 @@ public class PostRepository : IPostRepository
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Comments)
-            .Include(p => p.Likes)
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 

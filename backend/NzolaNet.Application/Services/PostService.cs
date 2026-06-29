@@ -226,7 +226,7 @@ public class PostService : IPostService
             }
         }
 
-        return MapToDto(post, currentUserId);
+        return (await MapPostsToDtosAsync(new[] { post }, currentUserId)).FirstOrDefault();
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)

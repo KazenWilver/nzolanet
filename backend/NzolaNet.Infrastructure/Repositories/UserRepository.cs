@@ -23,17 +23,14 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(Guid id)
     {
         return await _context.Users
-            .Include(u => u.Posts)
-            .Include(u => u.Followers)
-            .Include(u => u.Following)
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
     public async Task<User?> GetByUsernameAsync(string username)
     {
         return await _context.Users
-            .Include(u => u.Followers)
-            .Include(u => u.Following)
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
     }
 

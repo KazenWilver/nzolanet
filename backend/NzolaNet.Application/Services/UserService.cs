@@ -297,9 +297,7 @@ public class UserService : IUserService
             }
         }
 
-        var followerIds = user.Followers
-            .Where(f => f.IsApproved)
-            .Select(f => f.FollowerId);
+        var followerIds = await _followRepository.GetFollowerIdsAsync(userId);
 
         var dtos = new List<UserResponseDto>();
         foreach (var followerId in followerIds)
@@ -332,9 +330,7 @@ public class UserService : IUserService
             }
         }
 
-        var followedIds = user.Following
-            .Where(f => f.IsApproved)
-            .Select(f => f.FollowedId);
+        var followedIds = await _followRepository.GetFollowingIdsAsync(userId);
 
         var dtos = new List<UserResponseDto>();
         foreach (var followedId in followedIds)

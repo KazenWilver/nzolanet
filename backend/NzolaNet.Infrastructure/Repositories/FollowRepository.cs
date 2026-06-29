@@ -41,6 +41,19 @@ public class FollowRepository : IFollowRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Guid>> GetFollowerIdsAsync(Guid userId)
+    {
+        return await _context.Follows
+            .Where(f => f.FollowedId == userId && f.IsApproved)
+            .Select(f => f.FollowerId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Guid>> GetFollowingIdsAsync(Guid userId)
+    {
+        return await GetFollowedUserIdsAsync(userId);
+    }
+
     public async Task<bool> AddFollowAsync(Follow follow)
     {
         _context.Follows.Add(follow);
