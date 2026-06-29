@@ -170,6 +170,16 @@ public class PostService : IPostService
         return await GetAllAsync(userId);
     }
 
+    public async Task<IEnumerable<PublicationResponseDto>> GetFollowingFeedAsync(Guid userId)
+    {
+        var followedIds = (await _followRepository.GetFollowedUserIdsAsync(userId)).ToList();
+        followedIds.Add(userId);
+
+        var posts = await _postRepository.GetFeedByFollowedUsersAsync(followedIds);
+
+        return posts.Select(p => MapToDto(p, userId));
+    }
+
     public async Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
     {
         var post = await _postRepository.GetByIdAsync(id);

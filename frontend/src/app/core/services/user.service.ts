@@ -1,15 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { resolveMediaUrl } from '../helpers/media-url.helper';
+import { FeedTabService } from './feed-tab.service';
 import type { BackendUserDto } from '../models/auth.model';
 import { mapBackendUser, toLegacyUser, type LegacyUser, type UpdateProfileDto, type User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly baseUrl = `${environment.apiUrl}/users`;
+  private readonly feedTabService = inject(FeedTabService);
 
   constructor(private readonly http: HttpClient) {}
 
@@ -39,11 +41,15 @@ export class UserService {
   }
 
   follow(userId: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${userId}/follow`, {});
+    return this.http.post<void>(`${this.baseUrl}/${userId}/follow`, {}).pipe(
+      tap(() => this.feedTabService.markFollowingStale())
+    );
   }
 
   unfollow(userId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${userId}/follow`);
+    return this.http.delete<void>(`${this.baseUrl}/${userId}/follow`).pipe(
+      tap(() => this.feedTabService.markFollowingStale())
+    );
   }
 
   getFollowers(userId: string): Observable<User[]> {

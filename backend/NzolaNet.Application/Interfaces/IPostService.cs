@@ -9,6 +9,7 @@ public interface IPostService
     Task DeleteAsync(Guid userId, Guid postId);
     Task<IEnumerable<PublicationResponseDto>> GetAllAsync(Guid? currentUserId = null);
     Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId);
+    Task<IEnumerable<PublicationResponseDto>> GetFollowingFeedAsync(Guid userId);
     Task<IEnumerable<PublicationResponseDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
     Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
 }

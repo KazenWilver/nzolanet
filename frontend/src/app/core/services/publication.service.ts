@@ -24,6 +24,12 @@ export class PublicationService {
       .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
   }
 
+  getFollowingFeed(): Observable<Publication[]> {
+    return this.http
+      .get<BackendPublicationDto[]>(`${this.baseUrl}/feed`)
+      .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
+  }
+
   getById(id: string): Observable<Publication> {
     return this.http
       .get<BackendPublicationDto>(`${this.baseUrl}/${id}`)

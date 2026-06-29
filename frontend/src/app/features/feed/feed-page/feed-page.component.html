@@ -1,4 +1,27 @@
 <div class="feed-page">
+  <nav class="feed-page__tabs" aria-label="Tipo de feed">
+    <button
+      type="button"
+      class="feed-page__tab"
+      [class.feed-page__tab--active]="activeTab === 'para-ti'"
+      [attr.aria-selected]="activeTab === 'para-ti'"
+      role="tab"
+      (click)="setTab('para-ti')"
+    >
+      Para ti
+    </button>
+    <button
+      type="button"
+      class="feed-page__tab"
+      [class.feed-page__tab--active]="activeTab === 'a-seguir'"
+      [attr.aria-selected]="activeTab === 'a-seguir'"
+      role="tab"
+      (click)="setTab('a-seguir')"
+    >
+      A seguir
+    </button>
+  </nav>
+
   <app-create-post (postCriado)="handleCreated($event)" />
 
   @if (loading) {
@@ -27,7 +50,7 @@
         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
       </svg>
-      <p>Ainda não há publicações. Sê o primeiro a publicar!</p>
+      <p>{{ emptyMessage }}</p>
     </div>
   }
 

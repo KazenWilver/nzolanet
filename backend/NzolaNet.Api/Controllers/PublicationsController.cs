@@ -32,6 +32,15 @@ public class PublicationsController : ControllerBase
         return Ok(publications);
     }
 
+    [Authorize]
+    [HttpGet("feed")]
+    public async Task<IActionResult> GetFollowingFeed()
+    {
+        var userId = AuthClaimsHelper.GetUserId(User);
+        var publications = await _postService.GetFollowingFeedAsync(userId);
+        return Ok(publications);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
