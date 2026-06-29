@@ -76,6 +76,9 @@ export class NotificationsPageComponent implements OnInit {
           this.notifications = this.notifications.map(item =>
             item.id === notification.id ? { ...item, isRead: true } : item
           );
+        },
+        error: () => {
+          // Mantém navegação mesmo se marcar como lida falhar
         }
       });
     }
@@ -92,6 +95,9 @@ export class NotificationsPageComponent implements OnInit {
       next: () => {
         this.notifications = this.notifications.filter(item => item.id !== notification.id);
         this.notificationService.notifyUnreadDecreased(wasUnread);
+      },
+      error: () => {
+        // Falha silenciosa — utilizador pode tentar novamente
       }
     });
   }

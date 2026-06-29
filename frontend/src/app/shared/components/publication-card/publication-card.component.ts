@@ -45,15 +45,31 @@ export class PublicationCardComponent implements OnChanges {
   savingEdit = false;
   editError = '';
   likeError = '';
+  deleteError = '';
   deleting = false;
   commentsOpen = false;
   likePulsing = false;
   likingInProgress = false;
+  imageLoadFailed = false;
+  videoLoadFailed = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
       this.commentsOpen = true;
     }
+
+    if (changes['publication']) {
+      this.imageLoadFailed = false;
+      this.videoLoadFailed = false;
+    }
+  }
+
+  handleImageError(): void {
+    this.imageLoadFailed = true;
+  }
+
+  handleVideoError(): void {
+    this.videoLoadFailed = true;
   }
 
   get isAuthor(): boolean {
@@ -126,6 +142,7 @@ export class PublicationCardComponent implements OnChanges {
     }
 
     this.deleting = true;
+    this.deleteError = '';
     this.publicationService.delete(this.publication.id).subscribe({
       next: () => {
         this.deleteDialogOpen = false;
@@ -134,7 +151,7 @@ export class PublicationCardComponent implements OnChanges {
       },
       error: () => {
         this.deleting = false;
-        this.deleteDialogOpen = false;
+        this.deleteError = 'Não foi possível apagar a publicação.';
       }
     });
   }

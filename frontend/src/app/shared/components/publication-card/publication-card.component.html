@@ -100,13 +100,31 @@
 
       @if (publication.imageUrl) {
         <div class="publication-card__media">
-          <img [src]="publication.imageUrl" alt="Imagem da publicação" loading="lazy" />
+          @if (imageLoadFailed) {
+            <p class="publication-card__media-fallback" role="status">Imagem indisponível</p>
+          } @else {
+            <img
+              [src]="publication.imageUrl"
+              alt="Imagem da publicação"
+              loading="lazy"
+              (error)="handleImageError()"
+            />
+          }
         </div>
       }
 
       @if (publication.videoUrl) {
         <div class="publication-card__media">
-          <video [src]="publication.videoUrl" controls preload="metadata"></video>
+          @if (videoLoadFailed) {
+            <p class="publication-card__media-fallback" role="status">Vídeo indisponível</p>
+          } @else {
+            <video
+              [src]="publication.videoUrl"
+              controls
+              preload="metadata"
+              (error)="handleVideoError()"
+            ></video>
+          }
         </div>
       }
     }
@@ -165,6 +183,9 @@
 </article>
 
 @if (deleteDialogOpen) {
+  @if (deleteError) {
+    <p class="publication-card__delete-error" role="alert">{{ deleteError }}</p>
+  }
   <app-confirm-dialog
     mensagem="Tens a certeza que queres apagar esta publicação?"
     (confirmado)="deletePublication()"

@@ -61,6 +61,7 @@ public class UsersController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileDto updateDto)
     {

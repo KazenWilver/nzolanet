@@ -7,13 +7,20 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const token = auth.getToken();
 
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  const isAdminRoute = req.url.includes('/admin');
+  const hasAuthHeader = req.headers.has('Authorization');
+
+  const authReq =
+    !isAdminRoute && !hasAuthHeader && token
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : req;
+
+  const isAuthLogin = req.url.includes('/auth/login') || req.url.includes('/auth/register');
+  const isAdminLogin = req.url.includes('/admin/login');
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/auth/login') && !req.url.includes('/auth/register')) {
+      if (error.status === 401 && !isAuthLogin && !isAdminLogin) {
         auth.logout({ sessionExpired: true });
       }
       return throwError(() => error);

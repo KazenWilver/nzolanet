@@ -175,6 +175,22 @@
   }
 }
 
+.publication-card__media-fallback {
+  margin: 0;
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-surface-secondary);
+}
+
+.publication-card__delete-error {
+  margin: var(--spacing-sm) 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .publication-card__edit-textarea {
   width: 100%;
   border: 1px solid vars.$color-border;

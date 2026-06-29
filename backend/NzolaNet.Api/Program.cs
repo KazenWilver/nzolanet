@@ -51,7 +51,16 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 
 // 3. Configura a Autenticação JWT (Token Bearer)
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+var jwtKey = Environment.GetEnvironmentVariable("NZOLANET_JWT_KEY")
+    ?? jwtSettings["Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "JWT signing key em falta. Copia appsettings.Development.example.json para appsettings.Development.json ou define NZOLANET_JWT_KEY.");
+}
+
+var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {

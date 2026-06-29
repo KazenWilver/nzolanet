@@ -33,6 +33,7 @@ export class FeedPageComponent implements OnInit {
   activeTab: FeedTab = 'para-ti';
   focusPublicationId?: string;
   expandCommentsForPublicationId?: string;
+  private feedRequestId = 0;
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id;
@@ -95,6 +96,7 @@ export class FeedPageComponent implements OnInit {
   }
 
   loadFeed(): void {
+    const requestId = ++this.feedRequestId;
     this.loading = true;
     this.error = false;
 
@@ -104,6 +106,10 @@ export class FeedPageComponent implements OnInit {
 
     request$.subscribe({
       next: publications => {
+        if (requestId !== this.feedRequestId) {
+          return;
+        }
+
         this.publications = this.sortByDate(publications);
         this.loading = false;
 
@@ -114,6 +120,10 @@ export class FeedPageComponent implements OnInit {
         this.scrollToFocusedPublication();
       },
       error: () => {
+        if (requestId !== this.feedRequestId) {
+          return;
+        }
+
         this.loading = false;
         this.error = true;
       }

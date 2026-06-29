@@ -23,6 +23,7 @@ public class CommentsController : ControllerBase
         return await GetCommentsInternal(postId);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -30,6 +31,7 @@ public class CommentsController : ControllerBase
         return Ok(comments);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("count")]
     public async Task<IActionResult> GetCount()
     {

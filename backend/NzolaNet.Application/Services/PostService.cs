@@ -178,7 +178,7 @@ public class PostService : IPostService
 
     public async Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId)
     {
-        return await GetAllAsync(userId);
+        return await GetFollowingFeedAsync(userId);
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetFollowingFeedAsync(Guid userId)
@@ -239,9 +239,8 @@ public class PostService : IPostService
             }
         }
 
-        var posts = await _postRepository.GetAllAsync();
-        var userPosts = posts.Where(p => p.UserId == targetUserId);
-        return userPosts.Select(p => MapToDto(p, currentUserId));
+        var posts = await _postRepository.GetByUserIdAsync(targetUserId);
+        return posts.Select(p => MapToDto(p, currentUserId));
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)

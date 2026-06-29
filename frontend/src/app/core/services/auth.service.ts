@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -274,7 +274,11 @@ export class AuthService {
 
     this.http.get<BackendAuthResponseDto['user']>(`${this.baseUrl}/me`).subscribe({
       next: user => this.currentUserSubject.next(mapBackendUser(user)),
-      error: () => this.logout()
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          this.logout();
+        }
+      }
     });
   }
 }

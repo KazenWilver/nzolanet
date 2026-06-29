@@ -54,6 +54,9 @@ export class ProfilePageComponent implements OnInit {
   followersModalMode: 'followers' | 'following' = 'followers';
   activeTab: ProfileTab = 'publications';
   currentUserId?: string;
+  private profileRequestId = 0;
+  private publicationsRequestId = 0;
+  private likesRequestId = 0;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -98,6 +101,7 @@ export class ProfilePageComponent implements OnInit {
   }
 
   loadProfile(userId: string): void {
+    const requestId = ++this.profileRequestId;
     this.loadingProfile = true;
     this.profileError = false;
     this.contentLoadError = false;
@@ -108,6 +112,10 @@ export class ProfilePageComponent implements OnInit {
 
     this.userService.getProfile(userId).subscribe({
       next: profile => {
+        if (requestId !== this.profileRequestId) {
+          return;
+        }
+
         this.profile = profile;
         this.loadingProfile = false;
 
@@ -118,6 +126,10 @@ export class ProfilePageComponent implements OnInit {
         }
       },
       error: () => {
+        if (requestId !== this.profileRequestId) {
+          return;
+        }
+
         this.loadingProfile = false;
         this.profileError = true;
       }
@@ -144,18 +156,27 @@ export class ProfilePageComponent implements OnInit {
   }
 
   loadPublications(userId: string): void {
+    const requestId = ++this.publicationsRequestId;
     this.loadingPublications = true;
     this.privateAccount = false;
     this.contentLoadError = false;
 
     this.publicationService.getByUser(userId).subscribe({
       next: publications => {
+        if (requestId !== this.publicationsRequestId) {
+          return;
+        }
+
         this.publications = publications.sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
         );
         this.loadingPublications = false;
       },
       error: (error: HttpErrorResponse) => {
+        if (requestId !== this.publicationsRequestId) {
+          return;
+        }
+
         this.loadingPublications = false;
         this.publications = [];
         if (error.status === 403) {
@@ -168,18 +189,27 @@ export class ProfilePageComponent implements OnInit {
   }
 
   loadLikedPublications(userId: string): void {
+    const requestId = ++this.likesRequestId;
     this.loadingLikes = true;
     this.privateAccount = false;
     this.contentLoadError = false;
 
     this.publicationService.getLikedByUser(userId).subscribe({
       next: publications => {
+        if (requestId !== this.likesRequestId) {
+          return;
+        }
+
         this.likedPublications = publications.sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
         );
         this.loadingLikes = false;
       },
       error: (error: HttpErrorResponse) => {
+        if (requestId !== this.likesRequestId) {
+          return;
+        }
+
         this.loadingLikes = false;
         this.likedPublications = [];
         if (error.status === 403) {

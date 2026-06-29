@@ -9,15 +9,18 @@ public class LikeService : ILikeService
 {
     private readonly ILikeRepository _likeRepository;
     private readonly IPostRepository _postRepository;
+    private readonly IFollowRepository _followRepository;
     private readonly INotificationService _notificationService;
 
     public LikeService(
         ILikeRepository likeRepository,
         IPostRepository postRepository,
+        IFollowRepository followRepository,
         INotificationService notificationService)
     {
         _likeRepository = likeRepository;
         _postRepository = postRepository;
+        _followRepository = followRepository;
         _notificationService = notificationService;
     }
 
@@ -28,6 +31,8 @@ public class LikeService : ILikeService
         {
             throw new ArgumentException("Publicação não encontrada.");
         }
+
+        await EnsureCanInteractWithPostAsync(userId, post);
 
         if (await _likeRepository.HasUserLikedAsync(userId, postId))
         {
@@ -57,6 +62,8 @@ public class LikeService : ILikeService
         {
             throw new ArgumentException("Publicação não encontrada.");
         }
+
+        await EnsureCanInteractWithPostAsync(userId, post);
 
         var existingLike = await _likeRepository.GetByUserAndPostAsync(userId, postId);
         if (existingLike == null)
@@ -91,5 +98,20 @@ public class LikeService : ILikeService
     public async Task<bool> HasUserLikedAsync(Guid userId, Guid postId)
     {
         return await _likeRepository.HasUserLikedAsync(userId, postId);
+    }
+
+    private async Task EnsureCanInteractWithPostAsync(Guid userId, Post post)
+    {
+        var author = post.User;
+        if (author == null || !author.IsPrivate || author.Id == userId)
+        {
+            return;
+        }
+
+        var isFollowing = await _followRepository.IsFollowingAsync(userId, author.Id);
+        if (!isFollowing)
+        {
+            throw new UnauthorizedAccessException("Este perfil é privado.");
+        }
     }
 }

@@ -5,6 +5,7 @@ SET ANSI_NULLS ON;
 -- Removes all non-admin users and content. For a full wipe including admin, use reset-database.sql instead.
 BEGIN TRANSACTION;
 
+DELETE FROM Notifications;
 DELETE FROM Likes;
 DELETE FROM Comments;
 DELETE FROM Follows;

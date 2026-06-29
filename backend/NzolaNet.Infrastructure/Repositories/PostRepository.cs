@@ -48,6 +48,17 @@ public class PostRepository : IPostRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Post>> GetByUserIdAsync(Guid userId)
+    {
+        return await _context.Posts
+            .Include(p => p.User)
+            .Include(p => p.Comments)
+            .Include(p => p.Likes)
+            .Where(p => p.UserId == userId)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<bool> CreateAsync(Post post)
     {
         _context.Posts.Add(post);
