@@ -77,7 +77,7 @@
     </div>
 
     @if (publication.text) {
-      <p class="thread-modal__post-text">{{ publication.text }}</p>
+      <p class="thread-modal__post-text" [innerHTML]="publication.text | linkifyText"></p>
     }
 
     @if (!useMediaLayout && publication.imageUrl) {
@@ -90,8 +90,22 @@
 
     <div class="thread-modal__stats">
       <span><strong>{{ publication.commentsCount }}</strong> Respostas</span>
-      <span><strong>{{ publication.likesCount }}</strong> Bazes</span>
+      <button
+        type="button"
+        class="thread-modal__like-btn"
+        [class.thread-modal__like-btn--active]="publication.hasLiked"
+        [class.thread-modal__like-btn--pulse]="likePulsing"
+        [disabled]="likingInProgress"
+        (click)="toggleLike()"
+        [attr.aria-pressed]="publication.hasLiked"
+        aria-label="Baze"
+      >
+        <strong>{{ publication.likesCount }}</strong> Bazes
+      </button>
     </div>
+    @if (likeError) {
+      <p class="thread-modal__error thread-modal__error--inline" role="alert">{{ likeError }}</p>
+    }
   </article>
 
   @if (currentUser) {
@@ -197,7 +211,7 @@
               <time class="thread-modal__time">{{ comment.createdAt | tempoAtras }}</time>
             </div>
             @if (comment.text) {
-              <p class="thread-modal__comment-text">{{ comment.text }}</p>
+              <p class="thread-modal__comment-text" [innerHTML]="comment.text | linkifyText"></p>
             }
             @if (comment.imageUrl) {
               <img [src]="comment.imageUrl" alt="Imagem no comentário" class="thread-modal__comment-media" />

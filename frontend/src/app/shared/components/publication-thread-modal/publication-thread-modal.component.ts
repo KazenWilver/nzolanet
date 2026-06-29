@@ -16,11 +16,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PublicationService } from '../../../core/services/publication.service';
 import type { Comment } from '../../../core/models/comment.model';
 import type { Publication } from '../../../core/models/publication.model';
 import type { User } from '../../../core/models/user.model';
+import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
 import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
@@ -33,6 +36,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
     FormsModule,
     RouterModule,
     TimeAgoPipe,
+    LinkifyTextPipe,
     AvatarComponent,
     LoadingSpinnerComponent
   ],
@@ -42,6 +46,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
 export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   private readonly commentService = inject(CommentService);
   private readonly authService = inject(AuthService);
+  private readonly publicationService = inject(PublicationService);
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) publication!: Publication;
@@ -50,6 +55,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   @Input() videoStartTime = 0;
   @Output() closed = new EventEmitter<void>();
   @Output() countChange = new EventEmitter<number>();
+  @Output() publicationChange = new EventEmitter<Publication>();
 
   @ViewChild('modalVideo') modalVideoRef?: ElementRef<HTMLVideoElement>;
 
@@ -64,6 +70,9 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   previewUrl: string | null = null;
   submitting = false;
   submitError = '';
+  likingInProgress = false;
+  likePulsing = false;
+  likeError = '';
 
   readonly maxImageBytes = 10 * 1024 * 1024;
   readonly maxVideoBytes = 50 * 1024 * 1024;
@@ -119,6 +128,54 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
 
   handleBackdropClick(): void {
     this.handleClose();
+  }
+
+  toggleLike(): void {
+    if (this.likingInProgress) {
+      return;
+    }
+
+    const previousLiked = this.publication.hasLiked ?? false;
+    const previousCount = this.publication.likesCount;
+
+    this.publication = {
+      ...this.publication,
+      hasLiked: !previousLiked,
+      likesCount: previousLiked ? Math.max(0, previousCount - 1) : previousCount + 1
+    };
+    this.likeError = '';
+    this.publicationChange.emit(this.publication);
+
+    if (!previousLiked) {
+      this.likePulsing = true;
+      setTimeout(() => {
+        this.likePulsing = false;
+      }, 400);
+    }
+
+    const request$ = previousLiked
+      ? this.publicationService.unlike(this.publication.id)
+      : this.publicationService.like(this.publication.id);
+
+    this.likingInProgress = true;
+
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.likingInProgress = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          this.publication = {
+            ...this.publication,
+            hasLiked: previousLiked,
+            likesCount: previousCount
+          };
+          this.publicationChange.emit(this.publication);
+          this.likeError = error.status === 409 ? '' : 'Não foi possível actualizar o baze.';
+          this.likingInProgress = false;
+        }
+      });
   }
 
   selectFile(event: Event, type: 'image' | 'video'): void {

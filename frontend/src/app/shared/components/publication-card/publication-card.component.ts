@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import type { Publication } from '../../../core/models/publication.model';
 import { PublicationService } from '../../../core/services/publication.service';
+import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
 import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
@@ -20,6 +21,7 @@ import { PublicationThreadModalComponent } from '../publication-thread-modal/pub
     FormsModule,
     RouterModule,
     TimeAgoPipe,
+    LinkifyTextPipe,
     AvatarComponent,
     ConfirmDialogComponent,
     LoadingSpinnerComponent,
@@ -57,6 +59,7 @@ export class PublicationCardComponent implements OnChanges {
   likingInProgress = false;
   imageLoadFailed = false;
   videoLoadFailed = false;
+  shareFeedback = '';
 
   @ViewChild('cardVideo') cardVideoRef?: ElementRef<HTMLVideoElement>;
 
@@ -87,18 +90,21 @@ export class PublicationCardComponent implements OnChanges {
     return this.publication.authorDisplayName ?? this.publication.authorUsername;
   }
 
-  handleAvatarClick(): void {
+  handleAvatarClick(event: MouseEvent): void {
+    event.stopPropagation();
     void this.router.navigate(['/profile', this.publication.authorId]);
   }
 
   handleAvatarKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      this.handleAvatarClick();
+      event.stopPropagation();
+      void this.router.navigate(['/profile', this.publication.authorId]);
     }
   }
 
-  toggleMenu(): void {
+  toggleMenu(event: MouseEvent): void {
+    event.stopPropagation();
     this.menuOpen = !this.menuOpen;
   }
 
@@ -171,7 +177,8 @@ export class PublicationCardComponent implements OnChanges {
     });
   }
 
-  toggleLike(): void {
+  toggleLike(event: MouseEvent): void {
+    event.stopPropagation();
     if (this.likingInProgress) {
       return;
     }
@@ -230,7 +237,8 @@ export class PublicationCardComponent implements OnChanges {
     });
   }
 
-  toggleComments(): void {
+  toggleComments(event: MouseEvent): void {
+    event.stopPropagation();
     this.openThread(false);
   }
 
@@ -280,6 +288,47 @@ export class PublicationCardComponent implements OnChanges {
       ...this.publication,
       commentsCount: count
     };
+  }
+
+  handlePublicationChange(updated: Publication): void {
+    this.publication = updated;
+    this.updated.emit(updated);
+  }
+
+  handleBodyClick(event: MouseEvent): void {
+    if (this.editing) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    if (target.closest('a, button, video, .publication-card__media')) {
+      return;
+    }
+
+    this.openThread(false);
+  }
+
+  handleBodyKeydown(event: KeyboardEvent): void {
+    if (this.editing) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.openThread(false);
+    }
+  }
+
+  handleShare(event: MouseEvent): void {
+    event.stopPropagation();
+    const url = `${window.location.origin}/feed?publicacao=${this.publication.id}`;
+
+    void navigator.clipboard.writeText(url).then(() => {
+      this.shareFeedback = 'Ligação copiada';
+      setTimeout(() => {
+        this.shareFeedback = '';
+      }, 2500);
+    });
   }
 
   @HostListener('document:click', ['$event'])

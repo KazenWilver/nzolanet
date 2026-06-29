@@ -12,6 +12,7 @@ type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
     <div
       class="avatar"
       [class]="'avatar--' + size"
+      [class.avatar--ring]="withRing"
       [style.background-color]="!resolvedSrc || imageError ? avatarColor : null"
       role="img"
       [attr.aria-label]="username"
@@ -76,6 +77,10 @@ type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
       height: 64px;
       font-size: 1.25rem;
     }
+
+    .avatar--ring {
+      box-shadow: 0 0 0 4px var(--color-bg-primary);
+    }
   `
 })
 export class AvatarComponent implements OnChanges {
@@ -83,6 +88,7 @@ export class AvatarComponent implements OnChanges {
   @Input() username = '';
   @Input() size: AvatarSize = 'md';
   @Input() avatarKey = '';
+  @Input() withRing = false;
 
   resolvedSrc?: string;
   imageError = false;

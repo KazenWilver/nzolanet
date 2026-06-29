@@ -73,8 +73,10 @@
   --color-accent: rgb(var(--accent-blue));
   --color-accent-hover: #1a8cd8;
   --color-accent-blue: rgb(var(--accent-blue));
+  --color-accent-blue-bg: rgba(var(--accent-blue) / 0.1);
   --color-accent-yellow: rgb(var(--accent-yellow));
   --color-accent-pink: rgb(var(--accent-pink));
+  --color-accent-pink-bg: rgba(var(--accent-pink) / 0.1);
   --color-accent-purple: rgb(var(--accent-purple));
   --color-accent-orange: rgb(var(--accent-orange));
   --color-accent-green: rgb(var(--accent-green));

@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as vars;
+@use '../../../../styles/mixins' as mixins;
 
 .thread-modal {
   position: fixed;
@@ -185,6 +186,19 @@
   line-height: 1.45;
   white-space: pre-line;
   word-break: break-word;
+
+  ::ng-deep {
+    .linkify__url,
+    .linkify__mention,
+    .linkify__hashtag {
+      color: var(--color-accent-blue);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
 .thread-modal__post-image,
@@ -206,6 +220,50 @@
 
   strong {
     color: var(--color-text-primary);
+  }
+}
+
+.thread-modal__like-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--border-radius-full);
+  @include mixins.hover-animation;
+
+  &:hover,
+  &--active {
+    color: var(--color-accent-pink);
+  }
+
+  &--pulse {
+    animation: thread-like-pulse 0.4s ease;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.thread-modal__error--inline {
+  padding: 0 var(--spacing-lg) var(--spacing-sm);
+  text-align: left;
+}
+
+@keyframes thread-like-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -364,6 +422,19 @@
   line-height: 1.45;
   white-space: pre-line;
   word-break: break-word;
+
+  ::ng-deep {
+    .linkify__url,
+    .linkify__mention,
+    .linkify__hashtag {
+      color: var(--color-accent-blue);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
 .thread-modal__comment-media {
