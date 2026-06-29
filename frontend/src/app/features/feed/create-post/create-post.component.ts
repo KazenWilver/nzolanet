@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PublicationService } from '../../../core/services/publication.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { translateApiMessage } from '../../../core/helpers/translate-api-message.helper';
 import type { User } from '../../../core/models/user.model';
 import type { Publication } from '../../../core/models/publication.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
@@ -29,6 +30,7 @@ export class CreatePostComponent implements OnInit {
   readonly maxChars = 280;
   readonly maxImageBytes = 10 * 1024 * 1024;
   readonly maxVideoBytes = 50 * 1024 * 1024;
+  readonly maxTextareaHeight = 200;
 
   currentUser: User | null = null;
   formOpen = false;
@@ -166,7 +168,7 @@ export class CreatePostComponent implements OnInit {
         this.publishing = false;
         const apiMessage = error.error?.message ?? error.error?.Message;
         this.error =
-          apiMessage ??
+          translateApiMessage(apiMessage) ||
           'Erro ao publicar. Verifica o ficheiro e tenta novamente (máx. 10 MB imagem, 50 MB vídeo).';
       }
     });
@@ -175,6 +177,8 @@ export class CreatePostComponent implements OnInit {
   adjustHeight(event: Event): void {
     const element = event.target as HTMLTextAreaElement;
     element.style.height = 'auto';
-    element.style.height = `${element.scrollHeight}px`;
+    const nextHeight = Math.min(element.scrollHeight, this.maxTextareaHeight);
+    element.style.height = `${nextHeight}px`;
+    element.style.overflowY = element.scrollHeight > this.maxTextareaHeight ? 'auto' : 'hidden';
   }
 }

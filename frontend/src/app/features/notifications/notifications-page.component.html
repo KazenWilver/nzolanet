@@ -69,6 +69,31 @@
             }
 
             <time class="notifications-page__time">{{ notification.createdAt | tempoAtras }}</time>
+
+            @if (isFollowRequest(notification)) {
+              <div class="notifications-page__actions">
+                <button
+                  type="button"
+                  class="notifications-page__btn notifications-page__btn--approve"
+                  [disabled]="isProcessing(notification)"
+                  (click)="handleApproveRequest(notification, $event)"
+                >
+                  @if (isProcessing(notification)) {
+                    <app-loading-spinner tamanho="sm" />
+                  } @else {
+                    Aceitar
+                  }
+                </button>
+                <button
+                  type="button"
+                  class="notifications-page__btn notifications-page__btn--reject"
+                  [disabled]="isProcessing(notification)"
+                  (click)="handleRejectRequest(notification, $event)"
+                >
+                  Recusar
+                </button>
+              </div>
+            }
           </div>
 
           <button

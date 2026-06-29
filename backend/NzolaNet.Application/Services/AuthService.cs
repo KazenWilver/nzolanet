@@ -106,7 +106,7 @@ public class AuthService : IAuthService
             throw new ArgumentException("A nova palavra-passe e a confirmação não coincidem.");
         }
 
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
             throw new ArgumentException("Utilizador não encontrado.");
@@ -115,7 +115,7 @@ public class AuthService : IAuthService
         var currentPasswordValid = await _signInManager.CheckPasswordSignInAsync(
             user,
             changePasswordDto.CurrentPassword,
-            false);
+            lockoutOnFailure: false);
 
         if (!currentPasswordValid.Succeeded)
         {
@@ -130,7 +130,9 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
         {
             var errors = string.Join(" ", result.Errors.Select(error => error.Description));
-            throw new ArgumentException(errors);
+            throw new ArgumentException(string.IsNullOrWhiteSpace(errors)
+                ? "Não foi possível alterar a palavra-passe."
+                : errors);
         }
 
         return "Palavra-passe alterada com sucesso.";

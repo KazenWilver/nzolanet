@@ -1,4 +1,10 @@
-export type NotificationType = 'baze' | 'comment' | 'follow';
+export type NotificationType =
+  | 'baze'
+  | 'comment'
+  | 'follow'
+  | 'follow_request'
+  | 'follow_accepted'
+  | 'follow_rejected';
 
 export interface BackendNotificationDto {
   id: string;

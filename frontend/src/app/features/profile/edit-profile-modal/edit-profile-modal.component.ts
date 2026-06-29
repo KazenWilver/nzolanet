@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { switchMap, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
+import { translateApiMessage } from '../../../core/helpers/translate-api-message.helper';
 import type { User } from '../../../core/models/user.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -116,9 +117,11 @@ export class EditProfileModalComponent implements OnChanges {
           this.saved.emit(updatedUser);
           this.closed.emit();
         },
-        error: () => {
+        error: (error: { error?: { message?: string; Message?: string } }) => {
           this.saving = false;
-          this.error = 'Não foi possível guardar o perfil. Tenta novamente.';
+          const apiMessage = error?.error?.message ?? error?.error?.Message;
+          this.error =
+            translateApiMessage(apiMessage) || 'Não foi possível guardar o perfil. Tenta novamente.';
         }
       });
   }

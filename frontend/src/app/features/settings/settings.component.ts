@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
+import { translateApiMessage } from '../../core/helpers/translate-api-message.helper';
 import type { User } from '../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 
@@ -175,13 +176,13 @@ export class SettingsComponent implements OnInit {
         error: error => {
           this.savingPassword = false;
           const apiError = error?.error;
-          const message =
+          const rawMessage =
             apiError?.message ??
             (Array.isArray(apiError?.errors)
               ? Object.values(apiError.errors as Record<string, string[]>).flat().join(' ')
               : null);
           this.passwordError =
-            message ?? 'Não foi possível alterar a palavra-passe.';
+            translateApiMessage(rawMessage) || 'Não foi possível alterar a palavra-passe.';
         }
       });
   }

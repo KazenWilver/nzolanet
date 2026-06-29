@@ -52,6 +52,8 @@ export class ProfilePageComponent implements OnInit {
   contentLoadError = false;
   privateAccount = false;
   togglingFollow = false;
+  processingFollowRequest = false;
+  showIncomingFollowRequest = false;
   editModalOpen = false;
   followersModalOpen = false;
   followersModalMode: 'followers' | 'following' = 'followers';
@@ -75,6 +77,10 @@ export class ProfilePageComponent implements OnInit {
       const id = params.get('id') ?? '';
       this.lastProfileUserId = id;
       this.loadProfile(id);
+    });
+
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.showIncomingFollowRequest = params.get('pedido') === '1';
     });
   }
 
@@ -134,6 +140,8 @@ export class ProfilePageComponent implements OnInit {
         }
 
         this.profile = profile;
+        this.showIncomingFollowRequest =
+          this.showIncomingFollowRequest || profile.hasIncomingFollowRequest === true;
 
         if (this.canViewPublications) {
           this.loadPublications(userId);
@@ -336,10 +344,79 @@ export class ProfilePageComponent implements OnInit {
           this.loadPublications(this.profile.id);
         }
 
+        if (this.profile.hasIncomingFollowRequest) {
+          this.profile = {
+            ...this.profile,
+            hasIncomingFollowRequest: false,
+            isFollowing: true,
+            isPending: false
+          };
+          this.showIncomingFollowRequest = false;
+          this.loadPublications(this.profile.id);
+        }
+
         this.togglingFollow = false;
       },
       error: () => {
         this.togglingFollow = false;
+      }
+    });
+  }
+
+  handleApproveIncomingRequest(): void {
+    if (!this.profile || this.processingFollowRequest) {
+      return;
+    }
+
+    this.processingFollowRequest = true;
+
+    this.userService
+      .approveFollowRequest(this.profile.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+      next: () => {
+        if (!this.profile) {
+          return;
+        }
+
+        this.profile = {
+          ...this.profile,
+          hasIncomingFollowRequest: false
+        };
+        this.showIncomingFollowRequest = false;
+        this.processingFollowRequest = false;
+      },
+      error: () => {
+        this.processingFollowRequest = false;
+      }
+    });
+  }
+
+  handleRejectIncomingRequest(): void {
+    if (!this.profile || this.processingFollowRequest) {
+      return;
+    }
+
+    this.processingFollowRequest = true;
+
+    this.userService
+      .rejectFollowRequest(this.profile.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+      next: () => {
+        if (!this.profile) {
+          return;
+        }
+
+        this.profile = {
+          ...this.profile,
+          hasIncomingFollowRequest: false
+        };
+        this.showIncomingFollowRequest = false;
+        this.processingFollowRequest = false;
+      },
+      error: () => {
+        this.processingFollowRequest = false;
       }
     });
   }

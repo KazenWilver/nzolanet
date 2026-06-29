@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,8 @@ public static class DbSeeder
         {
             await roleManager.CreateAsync(new IdentityRole<Guid>(UserRoleName));
         }
+
+        await CleanupAutomatedTestUsersAsync(userManager, logger);
 
         var seedSection = configuration.GetSection("SeedAdmin");
         var adminEmail = seedSection["Email"];
@@ -74,5 +77,38 @@ public static class DbSeeder
 
         await userManager.AddToRoleAsync(adminUser, AdminRoleName);
         logger.LogInformation("Utilizador admin de seed criado com sucesso.");
+    }
+
+    private static async Task CleanupAutomatedTestUsersAsync(
+        UserManager<User> userManager,
+        ILogger logger)
+    {
+        var testUserPattern = new Regex(@"^(audit|fix)A\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        foreach (var user in userManager.Users.ToList())
+        {
+            var username = user.UserName ?? string.Empty;
+            var isAutomatedTestUser =
+                testUserPattern.IsMatch(username) ||
+                user.DisplayName is "Alice Audit" or "Alice FixTest";
+
+            if (!isAutomatedTestUser)
+            {
+                continue;
+            }
+
+            var result = await userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                logger.LogInformation("Utilizador de teste automático removido: {Username}.", username);
+            }
+            else
+            {
+                logger.LogWarning(
+                    "Não foi possível remover o utilizador de teste {Username}: {Errors}",
+                    username,
+                    string.Join(", ", result.Errors.Select(error => error.Description)));
+            }
+        }
     }
 }

@@ -138,6 +138,81 @@ public class NotificationService : INotificationService
         }
     }
 
+    public async Task TryCreateFollowRequestNotificationAsync(Guid actorId, Guid recipientId)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "follow_request",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao criar notificação de pedido de seguimento para o utilizador {RecipientId}.", recipientId);
+        }
+    }
+
+    public async Task TryCreateFollowAcceptedNotificationAsync(Guid actorId, Guid recipientId)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "follow_accepted",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao criar notificação de pedido aceite para o utilizador {RecipientId}.", recipientId);
+        }
+    }
+
+    public async Task TryCreateFollowRejectedNotificationAsync(Guid actorId, Guid recipientId)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "follow_rejected",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao criar notificação de pedido recusado para o utilizador {RecipientId}.", recipientId);
+        }
+    }
+
     private NotificationResponseDto MapToDto(Notification notification)
     {
         var publicationText = notification.Publication?.Text;

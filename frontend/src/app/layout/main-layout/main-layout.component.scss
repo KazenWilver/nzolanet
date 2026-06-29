@@ -3,7 +3,8 @@
   justify-content: center;
   width: 100%;
   max-width: var(--width-layout-max);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   margin: 0 auto;
   background-color: var(--color-bg-primary);
   box-shadow: 0 0 0 1px var(--color-border);
@@ -27,6 +28,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow: hidden;
   padding: var(--spacing-sm) var(--spacing-md);
   border-right: var(--border-width) solid var(--color-border);
 
@@ -53,7 +55,9 @@
   max-width: var(--width-content);
   flex: 1 1 var(--width-content);
   min-width: 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-right: var(--border-width) solid var(--color-border);
   background-color: var(--color-bg-secondary);
   display: flex;
@@ -93,8 +97,8 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow: hidden;
   padding: var(--spacing-md) var(--spacing-lg);
-  overflow-y: auto;
 
   @media (min-width: 1536px) {
     padding: var(--spacing-lg) var(--spacing-xl);

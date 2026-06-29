@@ -97,4 +97,10 @@ public class FollowRepository : IFollowRepository
     {
         return await _context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId && !f.IsApproved);
     }
+
+    public async Task<bool> HasIncomingFollowRequestAsync(Guid recipientId, Guid requesterId)
+    {
+        return await _context.Follows.AnyAsync(
+            f => f.FollowerId == requesterId && f.FollowedId == recipientId && !f.IsApproved);
+    }
 }

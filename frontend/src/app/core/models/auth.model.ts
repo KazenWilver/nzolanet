@@ -41,4 +41,5 @@ export interface BackendUserDto {
   role?: string;
   isFollowing?: boolean;
   isPending?: boolean;
+  hasIncomingFollowRequest?: boolean;
 }

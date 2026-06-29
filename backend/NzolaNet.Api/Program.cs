@@ -11,6 +11,7 @@ using NzolaNet.Domain.Interfaces.Repositories;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Application.Services;
 using NzolaNet.Infrastructure.Data;
+using NzolaNet.Infrastructure.Identity;
 using NzolaNet.Infrastructure.Repositories;
 using NzolaNet.Infrastructure.Services;
 using NzolaNet.Api.Middleware;
@@ -47,6 +48,7 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
     options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
+.AddErrorDescriber<PortugueseIdentityErrorDescriber>()
 .AddDefaultTokenProviders();
 
 // 3. Configura a Autenticação JWT (Token Bearer)
@@ -94,6 +96,7 @@ builder.Services.AddScoped<ILikeRepository, LikeRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddScoped<IStorageService, StorageService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();

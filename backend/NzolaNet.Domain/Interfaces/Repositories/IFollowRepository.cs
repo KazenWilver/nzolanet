@@ -19,4 +19,5 @@ public interface IFollowRepository
     Task<Follow?> GetFollowRequestAsync(Guid followerId, Guid followedId);
     Task<bool> UpdateFollowAsync(Follow follow);
     Task<bool> IsFollowPendingAsync(Guid followerId, Guid followedId);
+    Task<bool> HasIncomingFollowRequestAsync(Guid recipientId, Guid requesterId);
 }

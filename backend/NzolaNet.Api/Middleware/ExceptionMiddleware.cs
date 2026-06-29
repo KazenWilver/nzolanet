@@ -62,12 +62,17 @@ public class ExceptionMiddleware
                     statusCode = HttpStatusCode.BadRequest;
                 }
 
-                message = exception.Message;
+                message = TranslateExceptionMessage(exception.Message);
+                break;
+            case InvalidOperationException invalidOpEx
+                when invalidOpEx.Message.Contains("cannot be tracked", StringComparison.OrdinalIgnoreCase):
+                statusCode = HttpStatusCode.BadRequest;
+                message = "Ocorreu um conflito ao processar os dados. Tenta novamente.";
                 break;
             default:
                 if (_env.IsDevelopment())
                 {
-                    message = exception.Message;
+                    message = TranslateExceptionMessage(exception.Message);
                 }
 
                 break;
@@ -86,5 +91,25 @@ public class ExceptionMiddleware
         var json = JsonSerializer.Serialize(response, options);
 
         return context.Response.WriteAsync(json);
+    }
+
+    private static string TranslateExceptionMessage(string message)
+    {
+        if (message.Contains("Passwords must have", StringComparison.OrdinalIgnoreCase))
+        {
+            return "A palavra-passe deve ter pelo menos 6 caracteres, incluindo maiúsculas, minúsculas e um dígito.";
+        }
+
+        if (message.Contains("Incorrect password", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Palavra-passe actual incorrecta.";
+        }
+
+        if (message.Contains("cannot be tracked", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Ocorreu um conflito ao processar os dados. Tenta novamente.";
+        }
+
+        return message;
     }
 }

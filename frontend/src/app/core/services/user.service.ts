@@ -118,12 +118,22 @@ export class UserService {
     return this.http.get<unknown[]>(`${this.baseUrl}/follow-requests`);
   }
 
-  aprovarPedido(followerId: string): Observable<unknown> {
-    return this.http.post(`${this.baseUrl}/follow-requests/${followerId}/approve`, {});
+  approveFollowRequest(followerId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/follow-requests/${followerId}/approve`, {});
   }
 
+  rejectFollowRequest(followerId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/follow-requests/${followerId}/reject`, {});
+  }
+
+  /** @deprecated Usar approveFollowRequest */
+  aprovarPedido(followerId: string): Observable<unknown> {
+    return this.approveFollowRequest(followerId);
+  }
+
+  /** @deprecated Usar rejectFollowRequest */
   rejeitarPedido(followerId: string): Observable<unknown> {
-    return this.http.post(`${this.baseUrl}/follow-requests/${followerId}/reject`, {});
+    return this.rejectFollowRequest(followerId);
   }
 
   /** @deprecated Usar SearchService.searchUsers */

@@ -12,6 +12,7 @@
 html {
   color-scheme: light;
   overflow-x: hidden;
+  height: 100%;
 }
 
 body.dark-theme {
@@ -27,6 +28,8 @@ body {
   color: var(--color-text-primary);
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 a,

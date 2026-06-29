@@ -71,6 +71,30 @@
       </div>
     </section>
 
+    @if (showIncomingFollowRequest && profile.hasIncomingFollowRequest && !isOwnProfile) {
+      <div class="profile-page__follow-request" role="region" aria-label="Pedido de seguimento">
+        <p><strong>{{ displayName }}</strong> pediu para te seguir.</p>
+        <div class="profile-page__follow-request-actions">
+          <button
+            type="button"
+            class="profile-page__btn profile-page__btn--primary"
+            [disabled]="processingFollowRequest"
+            (click)="handleApproveIncomingRequest()"
+          >
+            Aceitar
+          </button>
+          <button
+            type="button"
+            class="profile-page__btn profile-page__btn--secondary"
+            [disabled]="processingFollowRequest"
+            (click)="handleRejectIncomingRequest()"
+          >
+            Recusar
+          </button>
+        </div>
+      </div>
+    }
+
     <nav class="profile-page__tabs" aria-label="Secções do perfil">
       <button
         type="button"

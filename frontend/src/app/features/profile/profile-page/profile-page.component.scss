@@ -230,3 +230,25 @@
     outline-offset: 2px;
   }
 }
+
+.profile-page__follow-request {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid vars.$color-border;
+  background-color: color-mix(in srgb, var(--color-accent) 8%, vars.$color-background);
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: vars.$color-text;
+  }
+}
+
+.profile-page__follow-request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

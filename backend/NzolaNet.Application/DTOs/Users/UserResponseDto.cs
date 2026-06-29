@@ -13,5 +13,6 @@ public class UserResponseDto
     public DateTime CreatedAt { get; set; }
     public bool IsFollowing { get; set; }
     public bool IsPending { get; set; }
+    public bool HasIncomingFollowRequest { get; set; }
     public string? Role { get; set; }
 }

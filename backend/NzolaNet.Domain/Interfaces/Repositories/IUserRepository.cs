@@ -13,6 +13,12 @@ public interface IUserRepository
     Task<bool> ExistsByUsernameAsync(string username);
     Task<bool> CreateAsync(User user, string password);
     Task<bool> UpdateAsync(User user);
+    Task<bool> UpdateProfileFieldsAsync(
+        Guid id,
+        string? displayName = null,
+        string? bio = null,
+        bool? isPrivate = null,
+        string? profilePhoto = null);
     Task AddToRoleAsync(User user, string role);
     Task<IReadOnlyList<string>> GetRolesAsync(Guid userId);
     Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query);

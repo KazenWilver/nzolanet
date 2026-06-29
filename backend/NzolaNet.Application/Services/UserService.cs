@@ -18,17 +18,20 @@ public class UserService : IUserService
     private readonly IStorageService _storageService;
     private readonly IFollowRepository _followRepository;
     private readonly INotificationService _notificationService;
+    private readonly IEmailService _emailService;
 
     public UserService(
         IUserRepository userRepository, 
         IStorageService storageService, 
         IFollowRepository followRepository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IEmailService emailService)
     {
         _userRepository = userRepository;
         _storageService = storageService;
         _followRepository = followRepository;
         _notificationService = notificationService;
+        _emailService = emailService;
     }
 
     public async Task<UserResponseDto> GetUserResponseAsync(Guid userId, Guid? currentUserId = null)
@@ -69,6 +72,8 @@ public class UserService : IUserService
                 response.IsFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, userId);
                 response.IsPending = !response.IsFollowing &&
                     await _followRepository.IsFollowPendingAsync(currentUserId.Value, userId);
+                response.HasIncomingFollowRequest =
+                    await _followRepository.HasIncomingFollowRequestAsync(currentUserId.Value, userId);
             }
         }
 
@@ -133,7 +138,11 @@ public class UserService : IUserService
 
         user.UpdatedAt = DateTime.UtcNow;
 
-        var updated = await _userRepository.UpdateAsync(user);
+        var updated = await _userRepository.UpdateProfileFieldsAsync(
+            userId,
+            displayName: updateDto.DisplayName,
+            bio: updateDto.Bio,
+            isPrivate: updateDto.IsPrivate);
         if (!updated)
         {
             throw new ArgumentException("Não foi possível atualizar o perfil.");
@@ -164,7 +173,7 @@ public class UserService : IUserService
         user.ProfilePhoto = photoPath;
         user.UpdatedAt = DateTime.UtcNow;
 
-        await _userRepository.UpdateAsync(user);
+        await _userRepository.UpdateProfileFieldsAsync(userId, profilePhoto: photoPath);
 
         return await GetUserResponseAsync(userId);
     }
@@ -213,6 +222,16 @@ public class UserService : IUserService
         if (follow.IsApproved)
         {
             await _notificationService.TryCreateFollowNotificationAsync(followerId, followedId);
+        }
+        else
+        {
+            await _notificationService.TryCreateFollowRequestNotificationAsync(followerId, followedId);
+        }
+
+        var hasIncomingFromTarget = await _followRepository.HasIncomingFollowRequestAsync(followerId, followedId);
+        if (hasIncomingFromTarget)
+        {
+            await ApproveFollowRequestAsync(followerId, followedId);
         }
     }
 
@@ -265,6 +284,7 @@ public class UserService : IUserService
         if (updated)
         {
             await _notificationService.TryCreateFollowNotificationAsync(followerId, followedId);
+            await _notificationService.TryCreateFollowAcceptedNotificationAsync(followedId, followerId);
         }
 
         return updated;
@@ -272,7 +292,33 @@ public class UserService : IUserService
 
     public async Task<bool> RejectFollowRequestAsync(Guid followedId, Guid followerId)
     {
-        return await _followRepository.RemoveFollowAsync(followerId, followedId);
+        var follow = await _followRepository.GetFollowRequestAsync(followerId, followedId);
+        if (follow == null || follow.IsApproved)
+        {
+            return false;
+        }
+
+        var removed = await _followRepository.RemoveFollowAsync(followerId, followedId);
+        if (!removed)
+        {
+            return false;
+        }
+
+        var followed = await _userRepository.GetByIdAsync(followedId);
+        var follower = await _userRepository.GetByIdAsync(followerId);
+
+        if (followed != null && follower != null)
+        {
+            var rejectorName = followed.DisplayName ?? followed.UserName ?? "Utilizador";
+            if (!string.IsNullOrWhiteSpace(follower.Email))
+            {
+                await _emailService.SendFollowRequestRejectedEmailAsync(follower.Email, rejectorName);
+            }
+
+            await _notificationService.TryCreateFollowRejectedNotificationAsync(followedId, followerId);
+        }
+
+        return true;
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetFollowersAsync(Guid userId, Guid? currentUserId = null)

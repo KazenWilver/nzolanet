@@ -63,9 +63,57 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> UpdateAsync(User user)
     {
-        _context.Users.Update(user);
-        var affectedRows = await _context.SaveChangesAsync();
-        return affectedRows > 0;
+        var tracked = await _context.Users.FindAsync(user.Id);
+        if (tracked == null)
+        {
+            return false;
+        }
+
+        tracked.DisplayName = user.DisplayName;
+        tracked.Bio = user.Bio;
+        tracked.IsPrivate = user.IsPrivate;
+        tracked.ProfilePhoto = user.ProfilePhoto;
+        tracked.UpdatedAt = user.UpdatedAt;
+
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> UpdateProfileFieldsAsync(
+        Guid id,
+        string? displayName = null,
+        string? bio = null,
+        bool? isPrivate = null,
+        string? profilePhoto = null)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+        {
+            return false;
+        }
+
+        if (displayName != null)
+        {
+            user.DisplayName = displayName;
+        }
+
+        if (bio != null)
+        {
+            user.Bio = bio;
+        }
+
+        if (isPrivate.HasValue)
+        {
+            user.IsPrivate = isPrivate.Value;
+        }
+
+        if (profilePhoto != null)
+        {
+            user.ProfilePhoto = profilePhoto;
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        return await _context.SaveChangesAsync() > 0;
     }
 
     public async Task AddToRoleAsync(User user, string role)
