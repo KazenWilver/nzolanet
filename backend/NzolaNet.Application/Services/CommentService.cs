@@ -1,4 +1,5 @@
 using NzolaNet.Application.DTOs.Comments;
+using NzolaNet.Application.Helpers;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -53,11 +54,19 @@ public class CommentService : ICommentService
             }
         }
 
+        var text = createDto.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("O comentário não pode estar vazio.");
+        }
+
+        ContentLimits.ValidateCommentText(text);
+
         var comment = new Comment
         {
             UserId = userId,
             PostId = publicationId,
-            Text = createDto.Text,
+            Text = text,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -90,7 +99,14 @@ public class CommentService : ICommentService
             throw new UnauthorizedAccessException("Não tens permissão para editar este comentário.");
         }
 
-        comment.Text = updateDto.Text;
+        var text = updateDto.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("O comentário não pode estar vazio.");
+        }
+
+        ContentLimits.ValidateCommentText(text);
+        comment.Text = text;
         comment.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _commentRepository.UpdateAsync(comment);

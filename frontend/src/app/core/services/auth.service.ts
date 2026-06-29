@@ -102,7 +102,19 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) {
+      return false;
+    }
+
+    if (this.isTokenExpired(token)) {
+      localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.userKey);
+      this.currentUserSubject.next(null);
+      return false;
+    }
+
+    return true;
   }
 
   getToken(): string | null {
@@ -280,5 +292,23 @@ export class AuthService {
         }
       }
     });
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadSegment = token.split('.')[1];
+      if (!payloadSegment) {
+        return true;
+      }
+
+      const payload = JSON.parse(atob(payloadSegment)) as { exp?: number };
+      if (!payload.exp) {
+        return false;
+      }
+
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
   }
 }

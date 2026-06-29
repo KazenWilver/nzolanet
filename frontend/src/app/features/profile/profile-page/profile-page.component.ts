@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { PublicationService } from '../../../core/services/publication.service';
@@ -110,14 +111,23 @@ export class ProfilePageComponent implements OnInit {
     this.likedPublications = [];
     this.activeTab = 'publications';
 
-    this.userService.getProfile(userId).subscribe({
+    this.userService
+      .getProfile(userId)
+      .pipe(
+        finalize(() => {
+          if (requestId === this.profileRequestId) {
+            this.loadingProfile = false;
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
       next: profile => {
         if (requestId !== this.profileRequestId) {
           return;
         }
 
         this.profile = profile;
-        this.loadingProfile = false;
 
         if (this.canViewPublications) {
           this.loadPublications(userId);
@@ -130,7 +140,6 @@ export class ProfilePageComponent implements OnInit {
           return;
         }
 
-        this.loadingProfile = false;
         this.profileError = true;
       }
     });
@@ -161,7 +170,17 @@ export class ProfilePageComponent implements OnInit {
     this.privateAccount = false;
     this.contentLoadError = false;
 
-    this.publicationService.getByUser(userId).subscribe({
+    this.publicationService
+      .getByUser(userId)
+      .pipe(
+        finalize(() => {
+          if (requestId === this.publicationsRequestId) {
+            this.loadingPublications = false;
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
       next: publications => {
         if (requestId !== this.publicationsRequestId) {
           return;
@@ -170,14 +189,12 @@ export class ProfilePageComponent implements OnInit {
         this.publications = publications.sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
         );
-        this.loadingPublications = false;
       },
       error: (error: HttpErrorResponse) => {
         if (requestId !== this.publicationsRequestId) {
           return;
         }
 
-        this.loadingPublications = false;
         this.publications = [];
         if (error.status === 403) {
           this.privateAccount = true;
@@ -194,7 +211,17 @@ export class ProfilePageComponent implements OnInit {
     this.privateAccount = false;
     this.contentLoadError = false;
 
-    this.publicationService.getLikedByUser(userId).subscribe({
+    this.publicationService
+      .getLikedByUser(userId)
+      .pipe(
+        finalize(() => {
+          if (requestId === this.likesRequestId) {
+            this.loadingLikes = false;
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
       next: publications => {
         if (requestId !== this.likesRequestId) {
           return;
@@ -203,14 +230,12 @@ export class ProfilePageComponent implements OnInit {
         this.likedPublications = publications.sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
         );
-        this.loadingLikes = false;
       },
       error: (error: HttpErrorResponse) => {
         if (requestId !== this.likesRequestId) {
           return;
         }
 
-        this.loadingLikes = false;
         this.likedPublications = [];
         if (error.status === 403) {
           this.privateAccount = true;
@@ -248,7 +273,9 @@ export class ProfilePageComponent implements OnInit {
         ? this.userService.unfollow(this.profile.id)
         : this.userService.follow(this.profile.id);
 
-    request$.subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         if (!this.profile) {
           return;

@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, OnChanges, SimpleChanges, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -21,6 +22,7 @@ export class FollowersModalComponent implements OnChanges {
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input() open = false;
   @Input({ required: true }) profileUserId!: string;
@@ -59,7 +61,9 @@ export class FollowersModalComponent implements OnChanges {
         ? this.userService.getFollowers(this.profileUserId)
         : this.userService.getFollowing(this.profileUserId);
 
-    request$.subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: users => {
         this.users = users;
         this.loading = false;
@@ -99,7 +103,9 @@ export class FollowersModalComponent implements OnChanges {
       ? this.userService.unfollow(user.id)
       : this.userService.follow(user.id);
 
-    request$.subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         user.isFollowing = !wasFollowing;
         this.togglingUserId = null;
@@ -119,7 +125,10 @@ export class FollowersModalComponent implements OnChanges {
       return;
     }
 
-    this.userService.getFollowing(this.currentUserId).subscribe({
+    this.userService
+      .getFollowing(this.currentUserId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: following => {
         const followingIds = new Set(following.map(user => user.id));
         this.users = this.users.map(user => ({

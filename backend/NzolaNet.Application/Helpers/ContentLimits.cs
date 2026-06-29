@@ -8,6 +8,15 @@ public static class ContentLimits
     public const int PublicationTextMaxLength = 280;
     public const int BioMaxLength = 160;
     public const int DisplayNameMaxLength = 50;
+    public const int CommentTextMaxLength = 1000;
+
+    public static void ValidateCommentText(string? text)
+    {
+        if (text != null && text.Length > CommentTextMaxLength)
+        {
+            throw new ArgumentException($"O comentário não pode exceder {CommentTextMaxLength} caracteres.");
+        }
+    }
 
     public static void ValidatePublicationText(string? text)
     {

@@ -75,7 +75,9 @@ export class WhoToFollowComponent implements OnInit {
         ? this.userService.unfollow(user.id)
         : this.userService.follow(user.id);
 
-    request$.subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         if (wasFollowing || wasPending) {
           user.isFollowing = false;
@@ -103,7 +105,10 @@ export class WhoToFollowComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    this.userService.getSuggestions(this.count).subscribe({
+    this.userService
+      .getSuggestions(this.count)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: users => {
         this.suggestions = users;
         this.loading = false;

@@ -110,7 +110,9 @@ export class PublicationCardComponent implements OnChanges {
 
   saveEdit(): void {
     const text = this.editText.trim();
-    if (!text || this.savingEdit) {
+    const hasMedia = !!(this.publication.imageUrl || this.publication.videoUrl);
+
+    if ((!text && !hasMedia) || this.savingEdit) {
       return;
     }
 

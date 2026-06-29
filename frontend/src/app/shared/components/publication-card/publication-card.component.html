@@ -82,7 +82,7 @@
           <button
             type="button"
             class="publication-card__btn-primary"
-            [disabled]="!editText.trim() || savingEdit"
+            [disabled]="(!editText.trim() && !publication.imageUrl && !publication.videoUrl) || savingEdit"
             (click)="saveEdit()"
           >
             @if (savingEdit) {
