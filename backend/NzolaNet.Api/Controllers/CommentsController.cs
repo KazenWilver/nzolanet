@@ -90,9 +90,9 @@ public class CommentsController : ControllerBase
                 AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(comments);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 

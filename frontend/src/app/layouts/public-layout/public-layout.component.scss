@@ -22,7 +22,7 @@
   justify-content: center;
   padding: var(--spacing-3xl);
   background-color: var(--color-accent);
-  color: #fff;
+  color: var(--color-text-inverse);
 
   @media (min-width: 1280px) {
     padding: clamp(2rem, 5vw, 4rem);
@@ -40,7 +40,7 @@
   align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-3xl);
-  color: #fff;
+  color: var(--color-text-inverse);
   font-family: var(--font-family-extended);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-heavy);
@@ -71,7 +71,7 @@
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-heavy);
     line-height: var(--line-height-tight);
-    color: #fff;
+    color: var(--color-text-inverse);
   }
 
   p {

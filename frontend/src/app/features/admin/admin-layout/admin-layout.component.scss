@@ -65,7 +65,7 @@
 
   &--primary {
     background-color: vars.$color-primary;
-    color: #ffffff;
+    color: var(--color-text-inverse);
     border: none;
 
     &:hover {

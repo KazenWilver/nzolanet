@@ -90,6 +90,11 @@
 
   --color-danger: #f4212e;
   --color-success: rgb(var(--accent-green));
+  --color-success-foreground: #15803d;
+  --color-success-border: #22c55e;
+  --color-surface-muted: #fafafa;
+  --color-surface-subtle: #f0f0f0;
+  --color-danger-strong: #c91a4e;
   --color-overlay: rgba(15, 20, 25, 0.65);
   --color-overlay-light: rgba(15, 20, 25, 0.4);
   --color-media-bg: #000000;
@@ -246,6 +251,7 @@ body.dark-theme {
   --color-danger-bg: rgba(244, 33, 46, 0.15);
   --color-danger-bg-subtle: rgba(244, 33, 46, 0.08);
   --color-like-bg: rgba(249, 26, 130, 0.15);
+  --color-danger-strong: #e01a5a;
   --color-overlay: rgba(0, 0, 0, 0.75);
   --color-overlay-light: rgba(0, 0, 0, 0.55);
   --color-media-bg: #000000;

@@ -1,4 +1,0 @@
-<div class="avatar" [ngClass]="'avatar--' + tamanho">
-  <img *ngIf="fotoFinal && !erroImagem" [src]="fotoFinal" [alt]="nome || 'Avatar'" class="avatar__imagem" [class.avatar__imagem--loaded]="imagemCarregada" (load)="aoCarregar()" (error)="aoErro()" />
-  <span *ngIf="!fotoFinal || erroImagem" class="avatar__iniciais">{{ obterIniciais() }}</span>
-</div>

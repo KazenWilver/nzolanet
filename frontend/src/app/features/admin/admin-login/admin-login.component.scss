@@ -126,7 +126,7 @@
 
 .admin-login__btn {
   background-color: vars.$color-primary;
-  color: #ffffff;
+  color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 15px;
   border-radius: 9999px;

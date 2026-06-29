@@ -96,7 +96,7 @@
 .edit-profile__btn-primary {
   border: none;
   background-color: vars.$color-primary;
-  color: #fff;
+  color: var(--color-text-inverse);
   display: inline-flex;
   align-items: center;
   gap: 8px;

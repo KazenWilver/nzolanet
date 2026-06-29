@@ -54,10 +54,10 @@
 
   &--confirmar {
     background-color: vars.$color-like;
-    color: #ffffff;
+    color: var(--color-text-inverse);
 
     &:hover {
-      background-color: #c91a4e;
+      background-color: var(--color-danger-strong);
     }
   }
 

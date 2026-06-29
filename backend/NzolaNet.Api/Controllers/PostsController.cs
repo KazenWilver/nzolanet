@@ -38,9 +38,9 @@ public class PostsController : ControllerBase
 
             return Ok(ToLegacyPostDto(post));
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 
@@ -52,9 +52,9 @@ public class PostsController : ControllerBase
             var posts = await _postService.GetByUserIdAsync(utilizadorId, AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(posts.Select(ToLegacyPostDto));
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
         catch (ArgumentException ex)
         {

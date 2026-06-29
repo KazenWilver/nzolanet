@@ -56,7 +56,7 @@
 
   &--primary {
     background-color: vars.$color-primary;
-    color: #ffffff;
+    color: var(--color-text-inverse);
 
     &:hover:not(:disabled) {
       background-color: vars.$color-primary-hover;
@@ -75,10 +75,10 @@
 
   &--danger {
     background-color: vars.$color-like;
-    color: #ffffff;
+    color: var(--color-text-inverse);
 
     &:hover:not(:disabled) {
-      background-color: #c91a4e;
+      background-color: var(--color-danger-strong);
     }
   }
 
@@ -127,7 +127,7 @@
   flex-shrink: 0;
 
   &--neutral {
-    background-color: #f0f3f4;
+    background-color: var(--color-border);
     color: vars.$color-text-secondary;
   }
 }
@@ -221,7 +221,7 @@
 
   &--success {
     background-color: rgba(0, 184, 122, 0.1);
-    color: #00b87a;
+    color: var(--color-accent-green);
   }
 
   &--error {
@@ -318,8 +318,8 @@
     justify-content: space-between;
     font-size: 13px;
     padding: 6px 12px;
-    background-color: #fafafa;
-    border: 1px solid #f0f0f0;
+    background-color: var(--color-surface-muted);
+    border: 1px solid var(--color-surface-subtle);
     border-radius: 6px;
 
     strong {

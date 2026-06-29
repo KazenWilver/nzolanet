@@ -55,9 +55,9 @@ public class UsersController : ControllerBase
                 AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(publications);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 
@@ -67,7 +67,7 @@ public class UsersController : ControllerBase
     {
         if (!IsCurrentUser(id))
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create();
         }
 
         var updatedProfile = await _userService.UpdateProfileAsync(id, updateDto);
@@ -80,7 +80,7 @@ public class UsersController : ControllerBase
     {
         if (!IsCurrentUser(id))
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create();
         }
 
         if (photo == null || photo.Length == 0)
@@ -203,9 +203,9 @@ public class UsersController : ControllerBase
                 AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(followers);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 
@@ -218,9 +218,9 @@ public class UsersController : ControllerBase
                 AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(following);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 

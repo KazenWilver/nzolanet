@@ -54,9 +54,9 @@ public class PublicationsController : ControllerBase
 
             return Ok(publication);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 
@@ -68,9 +68,9 @@ public class PublicationsController : ControllerBase
             var publications = await _postService.GetByUserIdAsync(userId, AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(publications);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 
@@ -109,9 +109,9 @@ public class PublicationsController : ControllerBase
             var comments = await _commentService.GetByPublicationAsync(publicationId, AuthClaimsHelper.GetOptionalUserId(User));
             return Ok(comments);
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 
