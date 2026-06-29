@@ -16,13 +16,19 @@ export class EnterAnimationDirective implements AfterViewInit {
 
   @Input() enterVariant: EnterVariant = 'fadeUp';
   @Input() enterDelay = 0;
+  /** Índice na lista para escalonar entradas (atraso máx. ~360ms). */
+  @Input() enterIndex?: number;
 
   ngAfterViewInit(): void {
+    const staggerDelay = this.enterIndex != null
+      ? Math.min(this.enterIndex * 0.045, 0.36)
+      : 0;
+
     requestAnimationFrame(() => {
       this.animationService.enter(
         this.elementRef.nativeElement,
         this.enterVariant,
-        this.enterDelay
+        this.enterDelay + staggerDelay
       );
     });
   }

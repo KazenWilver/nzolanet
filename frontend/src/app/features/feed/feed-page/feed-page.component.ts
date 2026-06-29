@@ -15,7 +15,6 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { PublicationCardSkeletonComponent } from '../../../shared/components/publication-card-skeleton/publication-card-skeleton.component';
 import { EnterAnimationDirective } from '../../../shared/directives/enter-animation.directive';
 import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
-import { PageEnterDirective } from '../../../shared/directives/page-enter.directive';
 import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
 
 @Component({
@@ -29,7 +28,6 @@ import { PressScaleDirective } from '../../../shared/directives/press-scale.dire
     PublicationCardSkeletonComponent,
     InfiniteScrollDirective,
     EnterAnimationDirective,
-    PageEnterDirective,
     PressScaleDirective
   ],
   templateUrl: './feed-page.component.html',

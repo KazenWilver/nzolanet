@@ -1,4 +1,4 @@
-<section class="notifications-page" appPageEnter>
+<section class="notifications-page">
   <app-page-header title="Notificações" [showBack]="true" />
 
   @if (notifications.length > 0) {
@@ -46,7 +46,7 @@
 
   <ul class="notifications-page__list">
     @for (notification of notifications; track trackById($index, notification)) {
-      <li appEnterAnimation>
+      <li appEnterAnimation [enterIndex]="$index">
         <button
           type="button"
           class="notifications-page__item"

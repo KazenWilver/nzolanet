@@ -12,7 +12,6 @@ import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { PressScaleDirective } from '../../directives/press-scale.directive';
 
 @Component({
   selector: 'app-publication-card',
@@ -25,8 +24,7 @@ import { PressScaleDirective } from '../../directives/press-scale.directive';
     LinkifyTextPipe,
     AvatarComponent,
     ConfirmDialogComponent,
-    LoadingSpinnerComponent,
-    PressScaleDirective
+    LoadingSpinnerComponent
   ],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'

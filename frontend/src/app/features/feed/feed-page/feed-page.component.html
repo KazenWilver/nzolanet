@@ -1,4 +1,4 @@
-<div class="feed-page" appPageEnter>
+<div class="feed-page">
   <div class="feed-page__sticky-top">
     <app-page-header title="Início" [showBack]="false" />
 
@@ -7,7 +7,6 @@
         type="button"
         class="feed-page__tab"
         [class.feed-page__tab--active]="activeTab === 'para-ti'"
-        [class.nz-animate-tab]="activeTab === 'para-ti'"
         [attr.aria-selected]="activeTab === 'para-ti'"
         role="tab"
         appPressScale
@@ -19,7 +18,6 @@
         type="button"
         class="feed-page__tab"
         [class.feed-page__tab--active]="activeTab === 'a-seguir'"
-        [class.nz-animate-tab]="activeTab === 'a-seguir'"
         [attr.aria-selected]="activeTab === 'a-seguir'"
         role="tab"
         appPressScale
@@ -63,7 +61,7 @@
   }
 
   @for (publication of publications; track trackById($index, publication)) {
-    <div [id]="'publication-' + publication.id" appEnterAnimation>
+    <div [id]="'publication-' + publication.id" appEnterAnimation [enterIndex]="$index">
       <app-publication-card
         [publication]="publication"
         [currentUserId]="currentUserId"

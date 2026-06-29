@@ -10,7 +10,6 @@ import type { Publication } from '../../../core/models/publication.model';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { PublicationThreadModalComponent } from '../../../shared/components/publication-thread-modal/publication-thread-modal.component';
 import { PublicationCardSkeletonComponent } from '../../../shared/components/publication-card-skeleton/publication-card-skeleton.component';
-import { PageEnterDirective } from '../../../shared/directives/page-enter.directive';
 import { EnterAnimationDirective } from '../../../shared/directives/enter-animation.directive';
 
 @Component({
@@ -22,7 +21,6 @@ import { EnterAnimationDirective } from '../../../shared/directives/enter-animat
     PageHeaderComponent,
     PublicationThreadModalComponent,
     PublicationCardSkeletonComponent,
-    PageEnterDirective,
     EnterAnimationDirective
   ],
   templateUrl: './publication-detail-page.component.html',

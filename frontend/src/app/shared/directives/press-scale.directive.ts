@@ -12,8 +12,12 @@ export class PressScaleDirective {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly animationService = inject(AnimationService);
 
-  @HostListener('pointerdown')
-  handlePointerDown(): void {
+  @HostListener('pointerdown', ['$event'])
+  handlePointerDown(event: PointerEvent): void {
+    if (event.button !== 0) {
+      return;
+    }
+
     if (this.elementRef.nativeElement.disabled) {
       return;
     }

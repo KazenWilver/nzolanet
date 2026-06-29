@@ -54,7 +54,8 @@ export class AnimationService {
       opacity: 1,
       duration,
       ease: 'power2.out',
-      clearProps: 'transform'
+      overwrite: 'auto',
+      clearProps: 'transform,opacity'
     };
 
     switch (variant) {
@@ -106,7 +107,8 @@ export class AnimationService {
       duration: mobile ? 0.32 : 0.42,
       stagger: mobile ? stagger * 0.75 : stagger,
       ease: 'power2.out',
-      clearProps: 'transform'
+      overwrite: 'auto',
+      clearProps: 'transform,opacity'
     });
   }
 
@@ -129,14 +131,22 @@ export class AnimationService {
       scale: mobile ? 1 : 0.98
     });
 
-    gsap.to(overlay, { opacity: 1, duration: 0.22, ease: 'power1.out' });
+    gsap.to(overlay, {
+      opacity: 1,
+      duration: 0.22,
+      ease: 'power1.out',
+      overwrite: 'auto',
+      clearProps: 'opacity'
+    });
     gsap.to(dialog, {
       opacity: 1,
       y: 0,
       scale: 1,
       duration: mobile ? 0.36 : 0.42,
       ease: 'power3.out',
-      delay: 0.04
+      delay: 0.04,
+      overwrite: 'auto',
+      clearProps: 'opacity,transform'
     });
   }
 
