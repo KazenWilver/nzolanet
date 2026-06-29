@@ -37,16 +37,39 @@ import { CommonModule } from '@angular/common';
     .modal {
       position: fixed;
       inset: 0;
-      z-index: 1200;
+      z-index: var(--z-modal);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: var(--spacing-lg);
-      background-color: rgba(15, 20, 25, 0.65);
+      background-color: var(--color-overlay);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       overscroll-behavior: contain;
       isolation: isolate;
+      animation: modal-fade-in var(--transition-base) ease;
+    }
+
+    @keyframes modal-fade-in {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes modal-dialog-in {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
 
     .modal__dialog {
@@ -62,6 +85,7 @@ import { CommonModule } from '@angular/common';
       box-shadow: var(--color-shadow-menu);
       overflow: hidden;
       isolation: isolate;
+      animation: modal-dialog-in var(--transition-slow) ease;
     }
 
     .modal__header {
@@ -94,6 +118,11 @@ import { CommonModule } from '@angular/common';
       &:hover {
         background-color: var(--color-bg-hover);
       }
+
+      &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
     }
 
     .modal__body {
@@ -114,6 +143,8 @@ import { CommonModule } from '@angular/common';
         max-height: 92vh;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
+        animation: modal-dialog-in var(--transition-slow) ease;
+        transform-origin: bottom center;
       }
 
       .modal__body {

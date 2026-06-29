@@ -151,6 +151,11 @@ export class SearchPageComponent implements OnInit {
     return user.id;
   }
 
+  retrySearch(): void {
+    this.error = false;
+    this.searchControl.setValue(this.searchControl.value);
+  }
+
   private syncQueryParam(query: string): void {
     const trimmed = query.trim();
     const current = this.route.snapshot.queryParamMap.get('q') ?? '';

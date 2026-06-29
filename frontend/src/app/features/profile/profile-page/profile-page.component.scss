@@ -11,7 +11,7 @@
 
 .profile-page__cover {
   height: 200px;
-  background-color: #cfd9de;
+  background-color: var(--color-bg-cover);
 
   @media (min-width: 1280px) {
     height: 220px;
@@ -47,6 +47,11 @@
   padding: 8px 16px;
   min-height: 36px;
   cursor: pointer;
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+
   border: 1px solid vars.$color-border;
   color: vars.$color-text;
   background-color: vars.$color-background;
@@ -64,9 +69,14 @@
   }
 
   &--following:hover {
-    background-color: rgba(244, 33, 46, 0.1);
-    border-color: #f4212e;
-    color: #f4212e;
+    background-color: var(--color-danger-bg);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   &:disabled {
@@ -149,6 +159,7 @@
   color: vars.$color-text-secondary;
   cursor: pointer;
   position: relative;
+  transition: color var(--transition-base), background-color var(--transition-base);
 
   &--active {
     color: vars.$color-text;
@@ -163,11 +174,17 @@
       height: 4px;
       border-radius: 9999px;
       background-color: vars.$color-primary;
+      transition: width var(--transition-base), transform var(--transition-base);
     }
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: var(--color-bg-card-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
   }
 }
 
@@ -176,11 +193,13 @@
 .profile-page__empty,
 .profile-page__private {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 48px 16px;
   text-align: center;
   color: vars.$color-text-secondary;
+  gap: 16px;
 }
 
 .profile-page__private p,
@@ -189,4 +208,25 @@
   margin: 0;
   max-width: 320px;
   line-height: 1.5;
+}
+
+.profile-page__retry {
+  background-color: vars.$color-primary;
+  color: var(--color-text-inverse);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 9999px;
+  padding: 8px 24px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+
+  &:hover {
+    background-color: vars.$color-primary-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }

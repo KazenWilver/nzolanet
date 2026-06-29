@@ -77,7 +77,31 @@
   margin: 0;
 
   &--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     color: vars.$color-like;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.search-page__retry {
+  background-color: vars.$color-primary;
+  color: var(--color-text-inverse);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 9999px;
+  padding: 8px 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+
+  &:hover {
+    background-color: vars.$color-primary-hover;
   }
 }
 
@@ -106,7 +130,7 @@
 
   &:hover,
   &:focus-visible {
-    background-color: rgba(0, 0, 0, 0.02);
+    background-color: var(--color-bg-card-hover);
     outline: none;
   }
 }
@@ -151,6 +175,10 @@
   border: 1px solid vars.$color-border;
   background-color: vars.$color-text;
   color: vars.$color-background;
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
 
   &--following {
     background-color: transparent;

@@ -44,6 +44,12 @@ export class FollowersModalComponent implements OnChanges {
     return this.mode === 'followers' ? 'Seguidores' : 'A seguir';
   }
 
+  get emptyMessage(): string {
+    return this.mode === 'followers'
+      ? 'Ainda sem seguidores.'
+      : 'Ainda não segues ninguém.';
+  }
+
   loadUsers(): void {
     this.loading = true;
     this.error = false;

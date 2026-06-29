@@ -46,6 +46,7 @@ export class PublicationCardComponent implements OnChanges {
   likeError = '';
   deleting = false;
   commentsOpen = false;
+  likePulsing = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
@@ -146,6 +147,13 @@ export class PublicationCardComponent implements OnChanges {
       likesCount: previousLiked ? Math.max(0, previousCount - 1) : previousCount + 1
     };
     this.likeError = '';
+
+    if (!previousLiked) {
+      this.likePulsing = true;
+      setTimeout(() => {
+        this.likePulsing = false;
+      }, 400);
+    }
 
     const request$ = previousLiked
       ? this.publicationService.unlike(this.publication.id)

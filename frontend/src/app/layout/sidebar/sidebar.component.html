@@ -96,9 +96,16 @@
     <button type="button" class="sidebar__mobile-publish" (click)="handleOpenPublishModal()" aria-label="Publicar">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
     </button>
-    <a class="sidebar__mobile-link" routerLink="/settings" [class.sidebar__mobile-link--active]="isActive('/settings')">
-      <span class="sidebar__icon" data-icon="settings" aria-hidden="true"></span>
-      <span class="sr-only">Definições</span>
+    <a class="sidebar__mobile-link" routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')">
+      <span class="sidebar__icon-wrap">
+        <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>
+        @if (unreadCount > 0) {
+          <span class="sidebar__badge" aria-label="{{ unreadCount }} notificações por ler">
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+        }
+      </span>
+      <span class="sr-only">Notificações</span>
     </a>
     <a class="sidebar__mobile-link" [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)">
       @if (currentUser) {

@@ -33,10 +33,15 @@
   color: vars.$color-text-secondary;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-base);
 
   &:hover {
     background-color: var(--nz-color-widget-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }
 
@@ -116,9 +121,22 @@
   overflow: hidden;
   border: 1px solid vars.$color-border;
   max-width: 100%;
+  animation: create-post-preview-in var(--transition-slow) ease;
 
   @media (max-width: 500px) {
     margin-left: 0;
+  }
+}
+
+@keyframes create-post-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -126,8 +144,8 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background-color: rgba(15, 20, 25, 0.75);
-  color: #fff;
+  background-color: var(--color-overlay);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -148,7 +166,7 @@
 }
 
 .create-publication__preview-video {
-  background-color: #000;
+  background-color: var(--color-media-bg);
 }
 
 .create-publication__toolbar {
@@ -200,11 +218,21 @@
   border-radius: 9999px;
   padding: 8px 18px;
   cursor: pointer;
+  transition: background-color var(--transition-base), color var(--transition-base);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
 
 .create-publication__btn-publish {
   background-color: vars.$color-primary;
-  color: #fff;
+  color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 15px;
   border-radius: 9999px;
@@ -214,6 +242,16 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  transition: background-color var(--transition-base), opacity var(--transition-base);
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-primary-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 
   &:disabled {
     opacity: 0.5;

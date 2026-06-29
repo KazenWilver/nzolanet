@@ -6,11 +6,16 @@
   }
 
   @if (error) {
-    <p class="followers-modal__error">Não foi possível carregar a lista.</p>
+    <div class="followers-modal__error">
+      <p>Não foi possível carregar a lista.</p>
+      <button type="button" class="followers-modal__retry" (click)="loadUsers()">
+        Tentar novamente
+      </button>
+    </div>
   }
 
   @if (!loading && !error && users.length === 0) {
-    <p class="followers-modal__empty">Nenhum utilizador encontrado.</p>
+    <p class="followers-modal__empty">{{ emptyMessage }}</p>
   }
 
   <ul class="followers-modal__list">

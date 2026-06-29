@@ -8,10 +8,14 @@
 
 .followers-modal__error,
 .followers-modal__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   color: vars.$color-text-secondary;
   padding: 16px 0;
   margin: 0;
+  gap: 12px;
 }
 
 .followers-modal__list {
@@ -43,10 +47,22 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
-  padding: 0;
+  padding: 8px;
+  margin: -8px;
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-base);
 
-  &:hover strong {
-    text-decoration: underline;
+  &:hover {
+    background-color: var(--color-bg-hover);
+
+    strong {
+      text-decoration: underline;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }
 
@@ -79,14 +95,43 @@
   background: vars.$color-text;
   color: vars.$color-background;
   flex-shrink: 0;
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
 
   &--following {
     background: transparent;
     color: vars.$color-text;
   }
 
+  &:hover:not(:disabled) {
+    filter: brightness(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+}
+
+.followers-modal__retry {
+  background-color: vars.$color-primary;
+  color: var(--color-text-inverse);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 9999px;
+  padding: 8px 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+
+  &:hover {
+    background-color: vars.$color-primary-hover;
   }
 }

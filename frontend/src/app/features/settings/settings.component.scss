@@ -39,6 +39,16 @@
   color: vars.$color-text-secondary;
   cursor: pointer;
   white-space: nowrap;
+  transition: color var(--transition-base), background-color var(--transition-base);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
 
   &--active {
     color: vars.$color-text;
@@ -187,7 +197,7 @@
   }
 
   &--success {
-    color: #00ba7c;
+    color: var(--color-success);
   }
 }
 
@@ -196,13 +206,23 @@
   align-items: center;
   gap: 8px;
   background-color: vars.$color-primary;
-  color: #fff;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 9999px;
   padding: 10px 20px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+  transition: background-color var(--transition-base), opacity var(--transition-base);
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-primary-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 
   &:disabled {
     opacity: 0.6;
@@ -249,7 +269,7 @@
   height: 32px;
   border: none;
   border-radius: 9999px;
-  background-color: #cfd9de;
+  background-color: var(--color-border-light);
   cursor: pointer;
   flex-shrink: 0;
   transition: background-color 200ms ease;
@@ -272,8 +292,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: var(--color-text-inverse);
+  box-shadow: 0 1px 3px var(--color-shadow);
   transition: transform 200ms ease;
 }
 
@@ -323,6 +343,6 @@
 
   &:hover {
     background-color: vars.$color-like;
-    color: #fff;
+    color: var(--color-text-inverse);
   }
 }

@@ -90,6 +90,15 @@
 
   --color-danger: #f4212e;
   --color-success: rgb(var(--accent-green));
+  --color-overlay: rgba(15, 20, 25, 0.65);
+  --color-overlay-light: rgba(15, 20, 25, 0.4);
+  --color-media-bg: #000000;
+  --color-danger-bg: rgba(244, 33, 46, 0.1);
+  --color-danger-bg-subtle: rgba(244, 33, 46, 0.05);
+  --color-like-bg: rgba(249, 26, 130, 0.1);
+
+  --shadow-lg: 0 8px 24px var(--color-shadow);
+  --shadow-mobile-nav: 0 -4px 20px var(--color-shadow);
 
   --color-btn-follow-bg: #0f1419;
   --color-btn-follow-text: #ffffff;
@@ -233,6 +242,13 @@ body.dark-theme {
 
   --color-btn-follow-bg: #eff3f4;
   --color-btn-follow-text: #0f1419;
+
+  --color-danger-bg: rgba(244, 33, 46, 0.15);
+  --color-danger-bg-subtle: rgba(244, 33, 46, 0.08);
+  --color-like-bg: rgba(249, 26, 130, 0.15);
+  --color-overlay: rgba(0, 0, 0, 0.75);
+  --color-overlay-light: rgba(0, 0, 0, 0.55);
+  --color-media-bg: #000000;
 
   --nz-color-bg-canvas: var(--color-bg-primary);
   --nz-color-background: var(--color-bg-secondary);

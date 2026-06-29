@@ -44,7 +44,7 @@
 .comments-section__submit {
   align-self: flex-end;
   background-color: vars.$color-primary;
-  color: #fff;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 9999px;
   padding: 6px 16px;
@@ -186,7 +186,7 @@
 .comments-section__btn-primary {
   border: none;
   background-color: vars.$color-primary;
-  color: #fff;
+  color: var(--color-text-inverse);
 
   &:disabled {
     opacity: 0.5;
