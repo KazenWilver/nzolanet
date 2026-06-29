@@ -6,11 +6,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import type { Publication } from '../../../core/models/publication.model';
 import { PublicationService } from '../../../core/services/publication.service';
+import { AnimationService } from '../../../core/services/animation.service';
 import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
 import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { PressScaleDirective } from '../../directives/press-scale.directive';
 
 @Component({
   selector: 'app-publication-card',
@@ -23,13 +25,15 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
     LinkifyTextPipe,
     AvatarComponent,
     ConfirmDialogComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    PressScaleDirective
   ],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'
 })
 export class PublicationCardComponent implements OnChanges {
   private readonly publicationService = inject(PublicationService);
+  private readonly animationService = inject(AnimationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -56,6 +60,7 @@ export class PublicationCardComponent implements OnChanges {
   shareFeedback = '';
 
   @ViewChild('cardVideo') cardVideoRef?: ElementRef<HTMLVideoElement>;
+  @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
@@ -189,6 +194,10 @@ export class PublicationCardComponent implements OnChanges {
 
     if (!previousLiked) {
       this.likePulsing = true;
+      const likeButton = this.likeButtonRef?.nativeElement;
+      if (likeButton) {
+        this.animationService.likePop(likeButton);
+      }
       setTimeout(() => {
         this.likePulsing = false;
       }, 400);

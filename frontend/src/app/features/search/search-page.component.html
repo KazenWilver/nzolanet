@@ -1,4 +1,4 @@
-<section class="search-page">
+<section class="search-page" appPageEnter>
   <app-page-header title="Pesquisar" [showBack]="true" />
 
   <div class="search-page__input-wrap">
@@ -49,7 +49,7 @@
       <h2 class="search-page__results-title">Resultados</h2>
       <ul class="search-page__results">
         @for (user of results; track trackById($index, user)) {
-          <li>
+          <li appEnterAnimation enterVariant="slideRight">
             <article
               class="search-page__result"
               tabindex="0"
@@ -76,6 +76,7 @@
                 <button
                   type="button"
                   class="search-page__follow-btn"
+                  appPressScale
                   [class.search-page__follow-btn--following]="user.isFollowing || user.isPending"
                   [disabled]="togglingUserId === user.id"
                   (click)="toggleFollow(user, $event)"

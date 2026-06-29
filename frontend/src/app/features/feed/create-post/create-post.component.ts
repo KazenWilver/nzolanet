@@ -1,4 +1,4 @@
-import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -11,18 +11,23 @@ import type { Publication } from '../../../core/models/publication.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AnimationService } from '../../../core/services/animation.service';
+import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
 
 @Component({
   selector: 'app-create-post',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent, LoadingSpinnerComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, AvatarComponent, LoadingSpinnerComponent, ConfirmDialogComponent, PressScaleDirective],
   templateUrl: './create-post.component.html',
   styleUrl: './create-post.component.scss'
 })
 export class CreatePostComponent implements OnInit {
   private readonly publicationService = inject(PublicationService);
   private readonly authService = inject(AuthService);
+  private readonly animationService = inject(AnimationService);
   private readonly destroyRef = inject(DestroyRef);
+
+  @ViewChild('composerForm') composerFormRef?: ElementRef<HTMLFormElement>;
 
   @Input() modoModal = false;
   @Output() postCriado = new EventEmitter<Publication>();
@@ -52,6 +57,12 @@ export class CreatePostComponent implements OnInit {
 
     if (this.modoModal) {
       this.formOpen = true;
+      requestAnimationFrame(() => {
+        const form = this.composerFormRef?.nativeElement;
+        if (form) {
+          this.animationService.enter(form, 'fadeUp');
+        }
+      });
     }
   }
 
@@ -73,6 +84,12 @@ export class CreatePostComponent implements OnInit {
 
   openForm(): void {
     this.formOpen = true;
+    requestAnimationFrame(() => {
+      const form = this.composerFormRef?.nativeElement;
+      if (form) {
+        this.animationService.enter(form, 'fadeUp');
+      }
+    });
   }
 
   cancel(): void {

@@ -1,5 +1,18 @@
-import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AnimationService } from '../../../core/services/animation.service';
 
 @Component({
   selector: 'app-modal',
@@ -7,8 +20,9 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     @if (open) {
-      <div class="modal" role="presentation" (click)="handleBackdropClick()">
+      <div #modalOverlay class="modal" role="presentation" (click)="handleBackdropClick()">
         <div
+          #modalDialog
           class="modal__dialog"
           role="dialog"
           aria-modal="true"
@@ -47,29 +61,6 @@ import { CommonModule } from '@angular/common';
       -webkit-backdrop-filter: blur(4px);
       overscroll-behavior: contain;
       isolation: isolate;
-      animation: modal-fade-in var(--transition-base) ease;
-    }
-
-    @keyframes modal-fade-in {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes modal-dialog-in {
-      from {
-        opacity: 0;
-        transform: scale(0.96) translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
     }
 
     .modal__dialog {
@@ -85,7 +76,6 @@ import { CommonModule } from '@angular/common';
       box-shadow: var(--color-shadow-menu);
       overflow: hidden;
       isolation: isolate;
-      animation: modal-dialog-in var(--transition-slow) ease;
     }
 
     .modal__header {
@@ -143,7 +133,6 @@ import { CommonModule } from '@angular/common';
         max-height: 92vh;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-        animation: modal-dialog-in var(--transition-slow) ease;
         transform-origin: bottom center;
       }
 
@@ -165,14 +154,28 @@ import { CommonModule } from '@angular/common';
     }
   `
 })
-export class ModalComponent implements OnChanges {
+export class ModalComponent implements OnChanges, AfterViewChecked {
+  private readonly animationService = inject(AnimationService);
+
   @Input() open = false;
   @Input() title = '';
   @Output() closed = new EventEmitter<void>();
 
+  @ViewChild('modalOverlay') modalOverlayRef?: ElementRef<HTMLElement>;
+  @ViewChild('modalDialog') modalDialogRef?: ElementRef<HTMLElement>;
+
+  private pendingAnimation = false;
+
   ngOnChanges(changes: SimpleChanges): void {
     if ('open' in changes) {
       this.updateBodyScrollLock(this.open);
+      this.pendingAnimation = this.open;
+    }
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.pendingAnimation && this.modalOverlayRef && this.modalDialogRef) {
+      this.runOpenAnimation();
     }
   }
 
@@ -189,6 +192,17 @@ export class ModalComponent implements OnChanges {
 
   handleBackdropClick(): void {
     this.handleClose();
+  }
+
+  private runOpenAnimation(): void {
+    this.pendingAnimation = false;
+    requestAnimationFrame(() => {
+      const overlay = this.modalOverlayRef?.nativeElement;
+      const dialog = this.modalDialogRef?.nativeElement;
+      if (overlay && dialog) {
+        this.animationService.modalEnter(overlay, dialog);
+      }
+    });
   }
 
   private updateBodyScrollLock(locked: boolean): void {

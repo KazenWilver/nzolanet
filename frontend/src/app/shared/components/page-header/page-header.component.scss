@@ -2,7 +2,7 @@
 
 .page-header {
   position: sticky;
-  top: 0;
+  top: var(--sticky-offset-top, 0);
   z-index: 20;
   display: flex;
   align-items: center;
@@ -57,4 +57,20 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   @include mixins.text-truncate;
+}
+
+@media (max-width: 500px) {
+  .page-header {
+    min-height: 52px;
+    padding-inline: var(--spacing-sm);
+  }
+
+  .page-header__back {
+    width: 44px;
+    height: 44px;
+  }
+
+  .page-header__title {
+    font-size: var(--font-size-md);
+  }
 }

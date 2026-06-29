@@ -87,16 +87,16 @@
   </div>
 
   <nav class="sidebar__mobile" aria-label="Navegação mobile">
-    <a class="sidebar__mobile-link" routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)">
       <span class="sidebar__icon" data-icon="home" aria-hidden="true"></span>
     </a>
-    <a class="sidebar__mobile-link" routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')">
       <span class="sidebar__icon" data-icon="search" aria-hidden="true"></span>
     </a>
-    <button type="button" class="sidebar__mobile-publish" (click)="handleOpenPublishModal()" aria-label="Publicar">
+    <button type="button" class="sidebar__mobile-publish" appPressScale (click)="handleOpenPublishModal()" aria-label="Publicar">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
     </button>
-    <a class="sidebar__mobile-link" routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')">
       <span class="sidebar__icon-wrap">
         <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>
         @if (unreadCount > 0) {
@@ -107,7 +107,7 @@
       </span>
       <span class="sr-only">Notificações</span>
     </a>
-    <a class="sidebar__mobile-link" [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)">
+    <a class="sidebar__mobile-link" appPressScale [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)">
       @if (currentUser) {
         <app-avatar [src]="currentUser.profilePhotoUrl" [username]="currentUser.username" size="xs" />
       } @else {

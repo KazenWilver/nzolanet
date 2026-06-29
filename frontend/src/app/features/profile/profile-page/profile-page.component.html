@@ -15,7 +15,7 @@
     </button>
   </div>
 } @else if (profile) {
-  <div class="profile-page">
+  <div class="profile-page" appPageEnter>
     <app-page-header
       [title]="displayName"
       [subtitle]="'@' + profile.username"
@@ -115,6 +115,8 @@
         type="button"
         class="profile-page__tab"
         [class.profile-page__tab--active]="activeTab === 'publications'"
+        [class.nz-animate-tab]="activeTab === 'publications'"
+        appPressScale
         (click)="setActiveTab('publications')"
       >
         Publicações
@@ -123,6 +125,8 @@
         type="button"
         class="profile-page__tab"
         [class.profile-page__tab--active]="activeTab === 'media'"
+        [class.nz-animate-tab]="activeTab === 'media'"
+        appPressScale
         (click)="setActiveTab('media')"
       >
         Media
@@ -131,6 +135,8 @@
         type="button"
         class="profile-page__tab"
         [class.profile-page__tab--active]="activeTab === 'likes'"
+        [class.nz-animate-tab]="activeTab === 'likes'"
+        appPressScale
         (click)="setActiveTab('likes')"
       >
         Gostos
@@ -159,12 +165,14 @@
         </div>
       } @else {
         @for (publication of likedPublications; track trackById($index, publication)) {
-          <app-publication-card
+          <div appEnterAnimation>
+            <app-publication-card
             [publication]="publication"
             [currentUserId]="currentUserId"
             (deleted)="handlePublicationDeleted($event)"
             (updated)="handlePublicationUpdated($event)"
           />
+          </div>
         }
       }
     } @else if (activeTab === 'media') {
@@ -189,12 +197,14 @@
         </div>
       } @else {
         @for (publication of mediaPublications; track trackById($index, publication)) {
-          <app-publication-card
-            [publication]="publication"
-            [currentUserId]="currentUserId"
-            (deleted)="handlePublicationDeleted($event)"
-            (updated)="handlePublicationUpdated($event)"
-          />
+          <div appEnterAnimation>
+            <app-publication-card
+              [publication]="publication"
+              [currentUserId]="currentUserId"
+              (deleted)="handlePublicationDeleted($event)"
+              (updated)="handlePublicationUpdated($event)"
+            />
+          </div>
         }
 
         @if (loadingMoreMedia) {
@@ -233,12 +243,14 @@
         </div>
       } @else {
         @for (publication of publications; track trackById($index, publication)) {
-          <app-publication-card
-            [publication]="publication"
-            [currentUserId]="currentUserId"
-            (deleted)="handlePublicationDeleted($event)"
-            (updated)="handlePublicationUpdated($event)"
-          />
+          <div appEnterAnimation>
+            <app-publication-card
+              [publication]="publication"
+              [currentUserId]="currentUserId"
+              (deleted)="handlePublicationDeleted($event)"
+              (updated)="handlePublicationUpdated($event)"
+            />
+          </div>
         }
 
         @if (loadingMorePublications) {

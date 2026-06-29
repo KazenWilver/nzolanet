@@ -13,7 +13,10 @@ import { PublicationCardComponent } from '../../../shared/components/publication
 import { CreatePostComponent } from '../create-post/create-post.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { PublicationCardSkeletonComponent } from '../../../shared/components/publication-card-skeleton/publication-card-skeleton.component';
+import { EnterAnimationDirective } from '../../../shared/directives/enter-animation.directive';
 import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
+import { PageEnterDirective } from '../../../shared/directives/page-enter.directive';
+import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
 
 @Component({
   selector: 'app-feed-page',
@@ -24,7 +27,10 @@ import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scr
     CreatePostComponent,
     PageHeaderComponent,
     PublicationCardSkeletonComponent,
-    InfiniteScrollDirective
+    InfiniteScrollDirective,
+    EnterAnimationDirective,
+    PageEnterDirective,
+    PressScaleDirective
   ],
   templateUrl: './feed-page.component.html',
   styleUrl: './feed-page.component.scss'

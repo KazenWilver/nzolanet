@@ -8,6 +8,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 import { ThemeService } from '../../core/services/theme.service';
 import { PublishModalService } from '../../core/services/publish-modal.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
 
 interface SidebarLinkItem {
   type: 'link';
@@ -39,7 +40,7 @@ type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem | SidebarNotificatio
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, AvatarComponent],
+  imports: [CommonModule, RouterModule, AvatarComponent, PressScaleDirective],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })

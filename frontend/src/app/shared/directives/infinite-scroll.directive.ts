@@ -1,7 +1,7 @@
 import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 
 /**
- * Emite quando o elemento entra na viewport para carregar mais conteúdo.
+ * Emite quando o elemento entra na área visível do contentor com scroll.
  */
 @Directive({
   selector: '[appInfiniteScroll]',
@@ -16,6 +16,8 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
   @Output() readonly appInfiniteScroll = new EventEmitter<void>();
 
   ngOnInit(): void {
+    const root = this.infiniteScrollRoot ?? this.findScrollRoot();
+
     this.observer = new IntersectionObserver(
       entries => {
         const entry = entries[0];
@@ -24,7 +26,7 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
         }
       },
       {
-        root: this.infiniteScrollRoot,
+        root,
         rootMargin: '120px',
         threshold: 0
       }
@@ -35,5 +37,21 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+  }
+
+  private findScrollRoot(): HTMLElement | null {
+    let element = this.elementRef.nativeElement.parentElement;
+
+    while (element && element !== document.body) {
+      const { overflowY } = getComputedStyle(element);
+
+      if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') {
+        return element;
+      }
+
+      element = element.parentElement;
+    }
+
+    return null;
   }
 }

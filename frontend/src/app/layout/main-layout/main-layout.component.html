@@ -3,7 +3,10 @@
     <app-sidebar />
   </div>
 
-  <div class="main-layout__center">
+  <div
+    class="main-layout__center"
+    [class.main-layout__center--mobile-topbar]="showMobileTopbar"
+  >
     <app-topbar />
     <main class="main-layout__content">
       <router-outlet />

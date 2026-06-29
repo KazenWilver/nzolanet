@@ -19,11 +19,14 @@ import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { EnterAnimationDirective } from '../../shared/directives/enter-animation.directive';
+import { PageEnterDirective } from '../../shared/directives/page-enter.directive';
+import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
 
 @Component({
   selector: 'app-search-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, EnterAnimationDirective, PageEnterDirective, PressScaleDirective],
   templateUrl: './search-page.component.html',
   styleUrl: './search-page.component.scss'
 })

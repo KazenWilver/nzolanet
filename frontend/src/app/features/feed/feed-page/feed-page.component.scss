@@ -7,7 +7,7 @@
 
 .feed-page__sticky-top {
   position: sticky;
-  top: 0;
+  top: var(--sticky-offset-top, 0);
   z-index: 20;
   background-color: color-mix(in srgb, var(--color-bg-primary) 85%, transparent);
   backdrop-filter: blur(12px);
@@ -29,6 +29,17 @@
   display: flex;
   border-bottom: 1px solid var(--color-border);
   background-color: transparent;
+}
+
+@media (max-width: 500px) {
+  .feed-page__sticky-top app-page-header {
+    display: none;
+  }
+
+  .feed-page__tab {
+    padding: var(--spacing-md) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
 }
 
 .feed-page__tab {

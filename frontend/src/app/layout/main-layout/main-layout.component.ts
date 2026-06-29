@@ -1,6 +1,7 @@
 import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { AsideComponent } from '../aside/aside.component';
@@ -26,6 +27,7 @@ export class MainLayoutComponent {
   readonly accountMenu = inject(AccountMenuService);
 
   currentUser: User | null = null;
+  showMobileTopbar = false;
 
   constructor() {
     this.authService.currentUser$
@@ -35,6 +37,17 @@ export class MainLayoutComponent {
         if (!user) {
           this.accountMenu.close();
         }
+      });
+
+    this.updateMobileTopbar(this.router.url);
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(event => {
+        this.updateMobileTopbar(event.urlAfterRedirects);
       });
   }
 
@@ -59,6 +72,11 @@ export class MainLayoutComponent {
 
   handleAccountMenuNavigate(): void {
     this.accountMenu.close();
+  }
+
+  private updateMobileTopbar(url: string): void {
+    const path = url.split('?')[0];
+    this.showMobileTopbar = path === '/feed';
   }
 
   @HostListener('document:keydown.escape')

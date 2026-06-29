@@ -82,12 +82,19 @@
     max-width: none;
     flex: 1 1 auto;
     border-right: none;
+    --sticky-offset-top: env(safe-area-inset-top, 0px);
     scroll-padding-bottom: calc(
       var(--height-mobile-nav) + var(--spacing-xl) + env(safe-area-inset-bottom, 0px)
     );
     padding-bottom: calc(
       var(--height-mobile-nav) + var(--spacing-2xl) + env(safe-area-inset-bottom, 0px)
     );
+
+    &.main-layout__center--mobile-topbar {
+      --sticky-offset-top: calc(
+        var(--height-mobile-topbar, 52px) + env(safe-area-inset-top, 0px)
+      );
+    }
   }
 }
 

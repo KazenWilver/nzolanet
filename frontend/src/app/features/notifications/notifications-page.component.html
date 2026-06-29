@@ -1,4 +1,4 @@
-<section class="notifications-page">
+<section class="notifications-page" appPageEnter>
   <app-page-header title="Notificações" [showBack]="true" />
 
   @if (notifications.length > 0) {
@@ -7,6 +7,7 @@
         type="button"
         class="notifications-page__mark-all"
         [disabled]="markingAll"
+        appPressScale
         (click)="handleMarkAllAsRead()"
       >
         @if (markingAll) {
@@ -45,7 +46,7 @@
 
   <ul class="notifications-page__list">
     @for (notification of notifications; track trackById($index, notification)) {
-      <li>
+      <li appEnterAnimation>
         <button
           type="button"
           class="notifications-page__item"

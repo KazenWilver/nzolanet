@@ -1,12 +1,14 @@
 @if (embedded || open) {
   @if (!embedded) {
     <div
+      #threadOverlay
       class="thread-modal"
       [class.thread-modal--media]="useMediaLayout"
       role="presentation"
       (click)="handleBackdropClick()"
     >
       <div
+        #threadShell
         class="thread-modal__shell"
         role="dialog"
         aria-modal="true"

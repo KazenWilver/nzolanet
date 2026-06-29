@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AnimationService } from '../../../core/services/animation.service';
 import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicationService } from '../../../core/services/publication.service';
@@ -48,6 +49,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   private readonly commentService = inject(CommentService);
   private readonly authService = inject(AuthService);
   private readonly publicationService = inject(PublicationService);
+  private readonly animationService = inject(AnimationService);
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) publication!: Publication;
@@ -60,6 +62,8 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   @Output() publicationChange = new EventEmitter<Publication>();
 
   @ViewChild('modalVideo') modalVideoRef?: ElementRef<HTMLVideoElement>;
+  @ViewChild('threadOverlay') threadOverlayRef?: ElementRef<HTMLElement>;
+  @ViewChild('threadShell') threadShellRef?: ElementRef<HTMLElement>;
 
   comments: Comment[] = [];
   loading = true;
@@ -97,6 +101,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
       this.loadComments();
       if (!this.embedded) {
         document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => this.animateModalOpen());
       }
       if (this.useMediaLayout && this.publication?.videoUrl) {
         setTimeout(() => this.syncModalVideo(), 0);
@@ -372,5 +377,13 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   private pauseModalVideo(): void {
     const video = this.modalVideoRef?.nativeElement;
     video?.pause();
+  }
+
+  private animateModalOpen(): void {
+    const overlay = this.threadOverlayRef?.nativeElement;
+    const shell = this.threadShellRef?.nativeElement;
+    if (overlay && shell) {
+      this.animationService.modalEnter(overlay, shell);
+    }
   }
 }

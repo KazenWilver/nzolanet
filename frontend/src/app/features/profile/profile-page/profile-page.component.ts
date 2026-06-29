@@ -16,6 +16,9 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { PublicationCardSkeletonComponent } from '../../../shared/components/publication-card-skeleton/publication-card-skeleton.component';
 import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
+import { EnterAnimationDirective } from '../../../shared/directives/enter-animation.directive';
+import { PageEnterDirective } from '../../../shared/directives/page-enter.directive';
+import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
 import { EditProfileModalComponent } from '../edit-profile-modal/edit-profile-modal.component';
 import { FollowersModalComponent } from '../followers-modal/followers-modal.component';
 
@@ -34,6 +37,9 @@ type ProfileTab = 'publications' | 'media' | 'likes';
     PageHeaderComponent,
     PublicationCardSkeletonComponent,
     InfiniteScrollDirective,
+    EnterAnimationDirective,
+    PageEnterDirective,
+    PressScaleDirective,
     EditProfileModalComponent,
     FollowersModalComponent
   ],
