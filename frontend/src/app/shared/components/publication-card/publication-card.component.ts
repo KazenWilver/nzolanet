@@ -1,4 +1,5 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -47,6 +48,7 @@ export class PublicationCardComponent implements OnChanges {
   deleting = false;
   commentsOpen = false;
   likePulsing = false;
+  likingInProgress = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
@@ -138,6 +140,10 @@ export class PublicationCardComponent implements OnChanges {
   }
 
   toggleLike(): void {
+    if (this.likingInProgress) {
+      return;
+    }
+
     const previousLiked = this.publication.hasLiked ?? false;
     const previousCount = this.publication.likesCount;
 
@@ -159,14 +165,30 @@ export class PublicationCardComponent implements OnChanges {
       ? this.publicationService.unlike(this.publication.id)
       : this.publicationService.like(this.publication.id);
 
+    this.likingInProgress = true;
+
     request$.subscribe({
-      error: () => {
+      next: () => {
+        this.likingInProgress = false;
+      },
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 409) {
+          this.publication = {
+            ...this.publication,
+            hasLiked: true,
+            likesCount: Math.max(this.publication.likesCount, previousCount)
+          };
+          this.likingInProgress = false;
+          return;
+        }
+
         this.publication = {
           ...this.publication,
           hasLiked: previousLiked,
           likesCount: previousCount
         };
         this.likeError = 'Não foi possível actualizar o baze.';
+        this.likingInProgress = false;
         setTimeout(() => {
           this.likeError = '';
         }, 4000);

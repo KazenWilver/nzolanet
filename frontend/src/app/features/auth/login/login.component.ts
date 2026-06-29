@@ -1,8 +1,8 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -14,10 +14,11 @@ import { HttpErrorResponse } from '@angular/common/http';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loginForm = this.formBuilder.nonNullable.group({
@@ -35,6 +36,15 @@ export class LoginComponent {
   showForgotPassword = false;
   errorMessage = '';
   forgotSuccessMessage = '';
+  sessionExpiredMessage = '';
+
+  ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.sessionExpiredMessage = params.get('sessionExpired') === '1'
+        ? 'A tua sessão expirou. Inicia sessão novamente.'
+        : '';
+    });
+  }
 
   handleSubmit(): void {
     this.loginForm.markAllAsTouched();

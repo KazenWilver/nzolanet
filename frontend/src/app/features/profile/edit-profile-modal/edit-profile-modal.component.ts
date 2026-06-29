@@ -26,6 +26,7 @@ export class EditProfileModalComponent implements OnChanges {
   @Output() saved = new EventEmitter<User>();
 
   readonly maxBioLength = 160;
+  readonly maxImageBytes = 10 * 1024 * 1024;
 
   displayName = '';
   bio = '';
@@ -56,6 +57,19 @@ export class EditProfileModalComponent implements OnChanges {
     }
 
     const file = input.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Selecciona um ficheiro de imagem válido.';
+      input.value = '';
+      return;
+    }
+
+    if (file.size > this.maxImageBytes) {
+      this.error = 'A imagem não pode exceder 10 MB.';
+      input.value = '';
+      return;
+    }
+
     this.selectedPhoto = file;
     if (this.photoPreviewUrl) {
       URL.revokeObjectURL(this.photoPreviewUrl);

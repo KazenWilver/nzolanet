@@ -126,6 +126,9 @@ export class FollowersModalComponent implements OnChanges {
           ...user,
           isFollowing: followingIds.has(user.id)
         }));
+      },
+      error: () => {
+        // Mantém a lista visível mesmo se o estado de seguimento falhar
       }
     });
   }

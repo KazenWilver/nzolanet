@@ -12,6 +12,7 @@ public class PostService : IPostService
     private readonly IUserRepository _userRepository;
     private readonly IFollowRepository _followRepository;
     private readonly ILikeRepository _likeRepository;
+    private readonly INotificationRepository _notificationRepository;
     private readonly IStorageService _storageService;
 
     public PostService(
@@ -19,12 +20,14 @@ public class PostService : IPostService
         IUserRepository userRepository,
         IFollowRepository followRepository,
         ILikeRepository likeRepository,
+        INotificationRepository notificationRepository,
         IStorageService storageService)
     {
         _postRepository = postRepository;
         _userRepository = userRepository;
         _followRepository = followRepository;
         _likeRepository = likeRepository;
+        _notificationRepository = notificationRepository;
         _storageService = storageService;
     }
 
@@ -45,14 +48,16 @@ public class PostService : IPostService
             throw new ArgumentException("A publicação deve conter texto, imagem ou vídeo.");
         }
 
+        ContentLimits.ValidatePublicationText(createDto.Text);
+
         if (hasImage)
         {
-            FileHelper.ValidateImageExtension(createDto.Image!.FileName);
+            FileHelper.ValidateImageFile(createDto.Image!);
         }
 
         if (hasVideo)
         {
-            FileHelper.ValidateVideoExtension(createDto.Video!.FileName);
+            FileHelper.ValidateVideoFile(createDto.Video!);
         }
 
         var post = new Post
@@ -104,6 +109,7 @@ public class PostService : IPostService
 
         if (updateDto.Text != null)
         {
+            ContentLimits.ValidatePublicationText(updateDto.Text);
             post.Text = updateDto.Text;
         }
 
@@ -140,6 +146,8 @@ public class PostService : IPostService
         {
             _storageService.DeleteFile(post.VideoPath);
         }
+
+        await _notificationRepository.DeleteByPublicationIdAsync(postId);
 
         var deleted = await _postRepository.DeleteAsync(post);
         if (!deleted)

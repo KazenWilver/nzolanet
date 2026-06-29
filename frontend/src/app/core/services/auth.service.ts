@@ -87,11 +87,14 @@ export class AuthService {
     });
   }
 
-  logout(): void {
+  logout(options?: { sessionExpired?: boolean }): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.currentUserSubject.next(null);
-    void this.router.navigate(['/login'], { replaceUrl: true });
+    void this.router.navigate(['/login'], {
+      replaceUrl: true,
+      queryParams: options?.sessionExpired ? { sessionExpired: '1' } : {}
+    });
   }
 
   getCurrentUser(): User | null {

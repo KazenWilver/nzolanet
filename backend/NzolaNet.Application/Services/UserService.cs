@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Users;
 using NzolaNet.Application.Exceptions;
+using NzolaNet.Application.Helpers;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -126,6 +127,10 @@ public class UserService : IUserService
         if (updateDto.DisplayName != null) user.DisplayName = updateDto.DisplayName;
         if (updateDto.Bio != null) user.Bio = updateDto.Bio;
         if (updateDto.IsPrivate.HasValue) user.IsPrivate = updateDto.IsPrivate.Value;
+
+        ContentLimits.ValidateDisplayName(user.DisplayName);
+        ContentLimits.ValidateBio(user.Bio);
+
         user.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _userRepository.UpdateAsync(user);
@@ -144,6 +149,8 @@ public class UserService : IUserService
         {
             throw new ArgumentException("Utilizador não encontrado.");
         }
+
+        FileHelper.ValidateImageFile(photoFile);
 
         if (!string.IsNullOrEmpty(user.ProfilePhoto))
         {

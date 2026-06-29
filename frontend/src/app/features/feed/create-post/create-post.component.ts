@@ -26,6 +26,8 @@ export class CreatePostComponent implements OnInit {
   @Output() cancelado = new EventEmitter<void>();
 
   readonly maxChars = 280;
+  readonly maxImageBytes = 10 * 1024 * 1024;
+  readonly maxVideoBytes = 50 * 1024 * 1024;
 
   currentUser: User | null = null;
   formOpen = false;
@@ -88,6 +90,33 @@ export class CreatePostComponent implements OnInit {
     }
 
     const file = input.files[0];
+
+    if (type === 'image') {
+      if (!file.type.startsWith('image/')) {
+        this.error = 'Selecciona um ficheiro de imagem válido.';
+        input.value = '';
+        return;
+      }
+      if (file.size > this.maxImageBytes) {
+        this.error = 'A imagem não pode exceder 10 MB.';
+        input.value = '';
+        return;
+      }
+    }
+
+    if (type === 'video') {
+      if (!file.type.startsWith('video/')) {
+        this.error = 'Selecciona um ficheiro de vídeo válido.';
+        input.value = '';
+        return;
+      }
+      if (file.size > this.maxVideoBytes) {
+        this.error = 'O vídeo não pode exceder 50 MB.';
+        input.value = '';
+        return;
+      }
+    }
+
     this.selectedFile = file;
     this.mediaType = type;
     this.previewUrl = URL.createObjectURL(file);
@@ -131,7 +160,7 @@ export class CreatePostComponent implements OnInit {
       },
       error: () => {
         this.publishing = false;
-        this.error = 'Erro ao publicar. Verifica o ficheiro e tenta novamente (máx. 30MB para vídeos).';
+        this.error = 'Erro ao publicar. Verifica o ficheiro e tenta novamente (máx. 10 MB imagem, 50 MB vídeo).';
       }
     });
   }

@@ -48,6 +48,16 @@
   text-align: center;
 }
 
+.auth-form__info {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  border: var(--border-width) solid var(--color-primary);
+  background-color: rgba(29, 155, 240, 0.1);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .auth-form__field {
   display: flex;
   flex-direction: column;

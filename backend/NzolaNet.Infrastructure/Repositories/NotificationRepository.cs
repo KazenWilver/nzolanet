@@ -91,4 +91,41 @@ public class NotificationRepository : INotificationRepository
         _context.Notifications.Remove(notification);
         return await _context.SaveChangesAsync() > 0;
     }
+
+    public async Task DeleteByPublicationIdAsync(Guid publicationId)
+    {
+        var commentIds = await _context.Comments
+            .Where(c => c.PostId == publicationId)
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        var notifications = await _context.Notifications
+            .Where(n =>
+                n.PublicationId == publicationId ||
+                (n.CommentId != null && commentIds.Contains(n.CommentId.Value)))
+            .ToListAsync();
+
+        if (notifications.Count == 0)
+        {
+            return;
+        }
+
+        _context.Notifications.RemoveRange(notifications);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteByCommentIdAsync(Guid commentId)
+    {
+        var notifications = await _context.Notifications
+            .Where(n => n.CommentId == commentId)
+            .ToListAsync();
+
+        if (notifications.Count == 0)
+        {
+            return;
+        }
+
+        _context.Notifications.RemoveRange(notifications);
+        await _context.SaveChangesAsync();
+    }
 }

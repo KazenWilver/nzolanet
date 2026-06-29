@@ -12,19 +12,22 @@ public class CommentService : ICommentService
     private readonly IUserRepository _userRepository;
     private readonly IFollowRepository _followRepository;
     private readonly INotificationService _notificationService;
+    private readonly INotificationRepository _notificationRepository;
 
     public CommentService(
         ICommentRepository commentRepository,
         IPostRepository postRepository,
         IUserRepository userRepository,
         IFollowRepository followRepository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        INotificationRepository notificationRepository)
     {
         _commentRepository = commentRepository;
         _postRepository = postRepository;
         _userRepository = userRepository;
         _followRepository = followRepository;
         _notificationService = notificationService;
+        _notificationRepository = notificationRepository;
     }
 
     public async Task<CommentResponseDto> CreateAsync(Guid userId, Guid publicationId, CreateCommentDto createDto)
@@ -111,6 +114,8 @@ public class CommentService : ICommentService
         {
             throw new UnauthorizedAccessException("Não tens permissão para eliminar este comentário.");
         }
+
+        await _notificationRepository.DeleteByCommentIdAsync(commentId);
 
         var deleted = await _commentRepository.DeleteAsync(comment);
         if (!deleted)

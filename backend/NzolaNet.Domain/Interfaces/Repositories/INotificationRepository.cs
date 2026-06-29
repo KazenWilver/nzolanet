@@ -11,4 +11,6 @@ public interface INotificationRepository
     Task<bool> MarkAsReadAsync(Guid recipientId, Guid notificationId);
     Task<bool> MarkAllAsReadAsync(Guid recipientId);
     Task<bool> DeleteAsync(Guid recipientId, Guid notificationId);
+    Task DeleteByPublicationIdAsync(Guid publicationId);
+    Task DeleteByCommentIdAsync(Guid commentId);
 }

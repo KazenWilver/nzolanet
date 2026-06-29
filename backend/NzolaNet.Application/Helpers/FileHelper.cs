@@ -12,6 +12,9 @@ public static class FileHelper
         ".mp4", ".mov", ".avi"
     };
 
+    public const long MaxImageBytes = 10 * 1024 * 1024;
+    public const long MaxVideoBytes = 52_428_800;
+
     public static void ValidateImageExtension(string fileName)
     {
         var extension = Path.GetExtension(fileName);
@@ -29,6 +32,24 @@ public static class FileHelper
         {
             throw new ArgumentException(
                 "Extensão de vídeo inválida. Extensões permitidas: .mp4, .mov, .avi.");
+        }
+    }
+
+    public static void ValidateImageFile(Microsoft.AspNetCore.Http.IFormFile file)
+    {
+        ValidateImageExtension(file.FileName);
+        if (file.Length > MaxImageBytes)
+        {
+            throw new ArgumentException("A imagem não pode exceder 10 MB.");
+        }
+    }
+
+    public static void ValidateVideoFile(Microsoft.AspNetCore.Http.IFormFile file)
+    {
+        ValidateVideoExtension(file.FileName);
+        if (file.Length > MaxVideoBytes)
+        {
+            throw new ArgumentException("O vídeo não pode exceder 50 MB.");
         }
     }
 

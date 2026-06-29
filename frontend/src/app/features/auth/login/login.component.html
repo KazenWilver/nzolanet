@@ -5,6 +5,10 @@
       <p class="auth-form__subtitle">Usa o teu email e palavra-passe para continuar.</p>
     </header>
 
+    @if (sessionExpiredMessage) {
+      <p class="auth-form__info" role="status">{{ sessionExpiredMessage }}</p>
+    }
+
     @if (errorMessage) {
       <p class="auth-form__error" role="alert">{{ errorMessage }}</p>
     }

@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -45,6 +46,7 @@ export class ProfilePageComponent implements OnInit {
   loadingPublications = false;
   loadingLikes = false;
   profileError = false;
+  contentLoadError = false;
   privateAccount = false;
   togglingFollow = false;
   editModalOpen = false;
@@ -98,6 +100,7 @@ export class ProfilePageComponent implements OnInit {
   loadProfile(userId: string): void {
     this.loadingProfile = true;
     this.profileError = false;
+    this.contentLoadError = false;
     this.privateAccount = false;
     this.publications = [];
     this.likedPublications = [];
@@ -127,9 +130,23 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
+  retryContentLoad(): void {
+    if (!this.profile) {
+      return;
+    }
+
+    this.contentLoadError = false;
+    if (this.activeTab === 'likes') {
+      this.loadLikedPublications(this.profile.id);
+    } else {
+      this.loadPublications(this.profile.id);
+    }
+  }
+
   loadPublications(userId: string): void {
     this.loadingPublications = true;
     this.privateAccount = false;
+    this.contentLoadError = false;
 
     this.publicationService.getByUser(userId).subscribe({
       next: publications => {
@@ -138,10 +155,14 @@ export class ProfilePageComponent implements OnInit {
         );
         this.loadingPublications = false;
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.loadingPublications = false;
-        this.privateAccount = true;
         this.publications = [];
+        if (error.status === 403) {
+          this.privateAccount = true;
+        } else {
+          this.contentLoadError = true;
+        }
       }
     });
   }
@@ -149,6 +170,7 @@ export class ProfilePageComponent implements OnInit {
   loadLikedPublications(userId: string): void {
     this.loadingLikes = true;
     this.privateAccount = false;
+    this.contentLoadError = false;
 
     this.publicationService.getLikedByUser(userId).subscribe({
       next: publications => {
@@ -157,10 +179,14 @@ export class ProfilePageComponent implements OnInit {
         );
         this.loadingLikes = false;
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.loadingLikes = false;
-        this.privateAccount = true;
         this.likedPublications = [];
+        if (error.status === 403) {
+          this.privateAccount = true;
+        } else {
+          this.contentLoadError = true;
+        }
       }
     });
   }
