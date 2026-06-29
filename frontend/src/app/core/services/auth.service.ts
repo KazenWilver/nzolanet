@@ -297,10 +297,14 @@ export class AuthService {
   }
 
   private isTokenExpired(token: string): boolean {
+    if (!token.includes('.')) {
+      return false;
+    }
+
     try {
       const payloadSegment = token.split('.')[1];
       if (!payloadSegment) {
-        return true;
+        return false;
       }
 
       const payload = JSON.parse(atob(payloadSegment)) as { exp?: number };
@@ -310,7 +314,7 @@ export class AuthService {
 
       return Date.now() >= payload.exp * 1000;
     } catch {
-      return true;
+      return false;
     }
   }
 }

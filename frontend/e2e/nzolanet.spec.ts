@@ -6,189 +6,151 @@ import { test, expect } from '@playwright/test';
 
 test.describe('NzolaNet — Testes E2E Completos', () => {
 
-  // ── 1. TEMA ESCURO (Carbon Aurora) ──────────────────────────
   test('1. Validar tema escuro (Carbon Aurora) na página de login', async ({ page }) => {
-    await page.goto('/auth/login');
-    const loginContent = page.locator('.login__content');
-    await expect(loginContent).toBeVisible();
+    await page.addInitScript(() => {
+      localStorage.setItem('nzolanet_theme', 'dark');
+    });
+    await page.goto('/login');
+    await expect(page.locator('.auth-form__title')).toBeVisible();
 
-    // Fundo do body deve ser a cor escura do canvas (#07080A → rgb(7, 8, 10))
     const bodyBg = await page.locator('body').evaluate(
       el => window.getComputedStyle(el).backgroundColor
     );
-    expect(bodyBg).toBe('rgb(7, 8, 10)');
-    console.log('✅ Tema escuro Carbon Aurora detectado: ' + bodyBg);
+    expect(bodyBg).toBe('rgb(0, 0, 0)');
 
-    // Font-family deve conter Inter
     const fontFamily = await page.locator('body').evaluate(
       el => window.getComputedStyle(el).fontFamily
     );
     expect(fontFamily.toLowerCase()).toContain('inter');
-    console.log('✅ Fonte Inter detectada: ' + fontFamily);
   });
 
-  // ── 2. LOGIN ────────────────────────────────────────────────
   test('2. Login com credenciais válidas e redireccionamento ao feed', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
 
-    await page.fill('input#email', 'demo@demo.com');
-    await page.fill('input#senha', 'senha123');
+    await page.fill('#login-email', 'demo@demo.com');
+    await page.fill('#login-password', 'senha123');
     await page.click('button[type="submit"]');
 
-    // Deve redirecionar para o feed
     await page.waitForURL('**/feed', { timeout: 10000 });
-    console.log('✅ Login bem-sucedido — redireccionado para /feed');
   });
 
-  // ── 3. FEED — Visualizar publicações ────────────────────────
   test('3. Feed carrega publicações do mock backend', async ({ page }) => {
     await fazerLogin(page);
 
-    // Aguardar pelo menos um publication-card visível
     const publicationCard = page.locator('app-publication-card').first();
     await expect(publicationCard).toBeVisible({ timeout: 10000 });
 
-    // O post deve ter texto legível (não "undefined" ou vazio)
     const textoPost = await publicationCard.innerText();
     expect(textoPost.length).toBeGreaterThan(5);
     expect(textoPost).not.toContain('undefined');
-    console.log('✅ Feed carregou publicações com conteúdo real');
   });
 
-  // ── 4. CRIAR PUBLICAÇÃO ─────────────────────────────────────
   test('4. Criar nova publicação no feed', async ({ page }) => {
     await fazerLogin(page);
 
-    const gatilho = page.locator('button.criar-post__gatilho');
+    const gatilho = page.locator('button.create-publication__trigger');
     await expect(gatilho).toBeVisible({ timeout: 10000 });
     await gatilho.click();
 
-    const textarea = page.locator('textarea.criar-post__textarea');
+    const textarea = page.locator('textarea.create-publication__textarea');
     await expect(textarea).toBeVisible();
-    await textarea.fill('Publicação de teste E2E automatizado');
-    await page.click('button.criar-post__btn-publicar');
+    await textarea.fill(`Publicação E2E ${Date.now()}`);
+    await page.click('button.create-publication__btn-publish');
 
-    // Aguardar o post aparecer no feed
-    await page.waitForTimeout(2000);
-    console.log('✅ Publicação criada com sucesso');
+    await expect(page.locator('app-publication-card').first()).toBeVisible({ timeout: 10000 });
   });
 
-  // ── 5. PESQUISA ─────────────────────────────────────────────
-  test('5. Pesquisar publicações por termo', async ({ page }) => {
+  test('5. Pesquisar utilizadores por termo', async ({ page }) => {
     await fazerLogin(page);
 
-    await page.goto('/pesquisar');
+    await page.goto('/search');
     const input = page.locator('.search-page__input');
     await expect(input).toBeVisible({ timeout: 10000 });
 
-    await input.fill('fotografia');
-    await page.click('.search-page__button');
-
-    // Aguardar resultado (utilizador ou mensagem vazia)
-    await page.waitForTimeout(2000);
-    console.log('✅ Pesquisa executada com sucesso');
+    await input.fill('ana');
+    await expect(page.locator('.search-page__results li').first()).toBeVisible({ timeout: 10000 });
   });
 
-  // ── 6. PERFIL ───────────────────────────────────────────────
   test('6. Navegar até ao perfil do utilizador autenticado', async ({ page }) => {
     await fazerLogin(page);
 
-    await page.goto('/perfil/1');
+    await page.goto('/profile/1');
     await page.waitForLoadState('networkidle');
 
-    // O nome do perfil deve estar presente
-    const perfilNome = page.locator('.perfil__nome');
+    const perfilNome = page.locator('.profile-page__name');
     await expect(perfilNome).toBeVisible({ timeout: 10000 });
-
-    const nomeTexto = await perfilNome.innerText();
-    expect(nomeTexto.length).toBeGreaterThan(0);
-    console.log('✅ Perfil carregado: ' + nomeTexto);
+    await expect(perfilNome).toContainText('Demo');
   });
 
-  // ── 7. NOTIFICAÇÕES ─────────────────────────────────────────
   test('7. Navegar até à página de notificações', async ({ page }) => {
     await fazerLogin(page);
 
-    await page.goto('/notificacoes');
+    await page.goto('/notifications');
     await page.waitForLoadState('networkidle');
 
-    const header = page.locator('.notifications-page__header');
-    await expect(header).toBeVisible({ timeout: 10000 });
-    console.log('✅ Página de notificações carregada');
+    await expect(page.locator('.page-header__title')).toHaveText('Notificações');
   });
 
-  // ── 8. NAVEGAÇÃO GERAL ─────────────────────────────────────
   test('8. Verificar que todas as rotas principais carregam sem erro', async ({ page }) => {
     await fazerLogin(page);
 
-    // Feed
     await page.goto('/feed');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('.criar-post')).toBeVisible({ timeout: 10000 });
-    console.log('  ✓ /feed OK');
+    await expect(page.locator('app-create-post')).toBeVisible({ timeout: 10000 });
 
-    // Pesquisa
-    await page.goto('/pesquisar');
+    await page.goto('/search');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('.search-page')).toBeVisible({ timeout: 10000 });
-    console.log('  ✓ /pesquisar OK');
 
-    // Notificações
-    await page.goto('/notificacoes');
+    await page.goto('/notifications');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('.notifications-page__header')).toBeVisible({ timeout: 10000 });
-    console.log('  ✓ /notificacoes OK');
+    await expect(page.locator('.page-header__title')).toHaveText('Notificações');
 
-    // Perfil
-    await page.goto('/perfil/1');
+    await page.goto('/profile/1');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('.perfil')).toBeVisible({ timeout: 10000 });
-    console.log('  ✓ /perfil/:id OK');
-
-    console.log('✅ Todas as rotas principais carregam correctamente');
+    await expect(page.locator('.profile-page')).toBeVisible({ timeout: 10000 });
   });
 
-  // ── 9. LOGIN INVÁLIDO ───────────────────────────────────────
   test('9. Login com credenciais inválidas mostra erro', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
 
-    await page.fill('input#email', 'invalido@email.com');
-    await page.fill('input#senha', 'senhaerrada');
+    await page.fill('#login-email', 'invalido@email.com');
+    await page.fill('#login-password', 'senhaerrada');
     await page.click('button[type="submit"]');
 
-    // Deve mostrar mensagem de erro
-    const erro = page.locator('.login__erro');
+    const erro = page.locator('.auth-form__error');
     await expect(erro).toBeVisible({ timeout: 5000 });
-    console.log('✅ Login inválido mostra mensagem de erro');
   });
 
-  // ── 10. REGISTO ─────────────────────────────────────────────
   test('10. Página de registo carrega correctamente', async ({ page }) => {
-    await page.goto('/auth/registar');
+    await page.goto('/register');
     await page.waitForLoadState('networkidle');
 
-    // Deve ter campos de registo visíveis
-    const formVisivel = page.locator('form');
-    await expect(formVisivel).toBeVisible({ timeout: 10000 });
-    console.log('✅ Página de registo carregada');
+    await expect(page.locator('form')).toBeVisible({ timeout: 10000 });
   });
 
-  // ── 11. RECUPERAR SENHA ─────────────────────────────────────
   test('11. Página de recuperação de senha carrega correctamente', async ({ page }) => {
-    await page.goto('/auth/recuperar-senha');
+    await page.goto('/forgot-password');
     await page.waitForLoadState('networkidle');
 
-    const formVisivel = page.locator('form');
-    await expect(formVisivel).toBeVisible({ timeout: 10000 });
-    console.log('✅ Página de recuperação de senha carregada');
+    await expect(page.locator('form')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('12. Baze dispara feedback visual sem erro', async ({ page }) => {
+    await fazerLogin(page);
+
+    const likeButton = page.locator('button.publication-card__action--like').first();
+    await expect(likeButton).toBeVisible({ timeout: 10000 });
+    await likeButton.click();
+
+    await expect(likeButton).toHaveAttribute('aria-pressed', 'true');
   });
 });
 
-// ── HELPER ─────────────────────────────────────────────────────
-async function fazerLogin(page) {
-  await page.goto('/auth/login');
-  await page.fill('input#email', 'demo@demo.com');
-  await page.fill('input#senha', 'senha123');
+async function fazerLogin(page: import('@playwright/test').Page): Promise<void> {
+  await page.goto('/login');
+  await page.fill('#login-email', 'demo@demo.com');
+  await page.fill('#login-password', 'senha123');
   await page.click('button[type="submit"]');
   await page.waitForURL('**/feed', { timeout: 10000 });
 }

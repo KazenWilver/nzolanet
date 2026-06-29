@@ -61,7 +61,10 @@ export class LoginComponent implements OnInit {
       .login({ email, password })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => void this.router.navigate(['/feed']),
+        next: () => {
+          this.isLoading = false;
+          void this.router.navigate(['/feed']);
+        },
         error: (error: HttpErrorResponse) => {
           this.isLoading = false;
           this.errorMessage =

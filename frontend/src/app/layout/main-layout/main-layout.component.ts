@@ -1,6 +1,6 @@
 import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
@@ -10,6 +10,7 @@ import { CreatePostComponent } from '../../features/feed/create-post/create-post
 import { PublishModalService } from '../../core/services/publish-modal.service';
 import { AccountMenuService } from '../../core/services/account-menu.service';
 import { AuthService } from '../../core/services/auth.service';
+import { RouteTransitionService } from '../../core/services/route-transition.service';
 import type { User } from '../../core/models/user.model';
 
 @Component({
@@ -23,11 +24,14 @@ export class MainLayoutComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly routeTransition = inject(RouteTransitionService);
   readonly publishModal = inject(PublishModalService);
   readonly accountMenu = inject(AccountMenuService);
 
   currentUser: User | null = null;
   showMobileTopbar = false;
+  private initialNavigation = true;
+  private previousPath = '';
 
   constructor() {
     this.authService.currentUser$
@@ -39,15 +43,43 @@ export class MainLayoutComponent {
         }
       });
 
+    this.previousPath = this.router.url.split('?')[0];
     this.updateMobileTopbar(this.router.url);
 
     this.router.events
       .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        filter(
+          (event): event is NavigationStart | NavigationEnd =>
+            event instanceof NavigationStart || event instanceof NavigationEnd
+        ),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(event => {
+        if (event instanceof NavigationStart) {
+          const nextPath = event.url.split('?')[0];
+          if (nextPath !== this.previousPath) {
+            this.routeTransition.animateOut();
+          }
+          return;
+        }
+
+        const currentPath = event.urlAfterRedirects.split('?')[0];
         this.updateMobileTopbar(event.urlAfterRedirects);
+
+        if (this.initialNavigation) {
+          this.initialNavigation = false;
+          this.routeTransition.skipEnterOnce();
+          this.previousPath = currentPath;
+          return;
+        }
+
+        if (currentPath !== this.previousPath) {
+          requestAnimationFrame(() => {
+            this.routeTransition.animateIn();
+          });
+        }
+
+        this.previousPath = currentPath;
       });
   }
 

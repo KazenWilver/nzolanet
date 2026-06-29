@@ -18,6 +18,7 @@ import { PublicationCardSkeletonComponent } from '../../../shared/components/pub
 import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
 import { EnterAnimationDirective } from '../../../shared/directives/enter-animation.directive';
 import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
+import { ProfileParallaxDirective } from '../../../shared/directives/profile-parallax.directive';
 import { EditProfileModalComponent } from '../edit-profile-modal/edit-profile-modal.component';
 import { FollowersModalComponent } from '../followers-modal/followers-modal.component';
 
@@ -38,6 +39,7 @@ type ProfileTab = 'publications' | 'media' | 'likes';
     InfiniteScrollDirective,
     EnterAnimationDirective,
     PressScaleDirective,
+    ProfileParallaxDirective,
     EditProfileModalComponent,
     FollowersModalComponent
   ],

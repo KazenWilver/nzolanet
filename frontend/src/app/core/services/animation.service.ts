@@ -223,4 +223,94 @@ export class AnimationService {
       }
     );
   }
+
+  /**
+   * Explosão de confetti a partir do centro de um elemento (ex.: botão Baze).
+   */
+  confettiBurst(origin: Element): void {
+    if (!this.isEnabled) {
+      return;
+    }
+
+    const rect = origin.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    const colors = ['#f91880', '#7856ff', '#1d9bf0', '#ffd400', '#00ba7c'];
+
+    let canvas = document.getElementById('nz-confetti-canvas') as HTMLCanvasElement | null;
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'nz-confetti-canvas';
+      canvas.setAttribute('aria-hidden', 'true');
+      canvas.style.cssText =
+        'position:fixed;inset:0;pointer-events:none;z-index:9999;width:100%;height:100%';
+      document.body.appendChild(canvas);
+    }
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return;
+    }
+
+    type Particle = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      color: string;
+      rotation: number;
+      rotationSpeed: number;
+      life: number;
+    };
+
+    const particles: Particle[] = Array.from({ length: 28 }, () => ({
+      x: originX,
+      y: originY,
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 1) * 12 - 5,
+      size: 4 + Math.random() * 5,
+      color: colors[Math.floor(Math.random() * colors.length)] ?? colors[0],
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 24,
+      life: 1
+    }));
+
+    const render = (): void => {
+      context.clearRect(0, 0, canvas!.width, canvas!.height);
+      let alive = false;
+
+      for (const particle of particles) {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.38;
+        particle.life -= 0.022;
+        particle.rotation += particle.rotationSpeed;
+
+        if (particle.life <= 0) {
+          continue;
+        }
+
+        alive = true;
+        context.save();
+        context.translate(particle.x, particle.y);
+        context.rotate((particle.rotation * Math.PI) / 180);
+        context.globalAlpha = particle.life;
+        context.fillStyle = particle.color;
+        context.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size * 0.65);
+        context.restore();
+      }
+
+      if (alive) {
+        requestAnimationFrame(render);
+        return;
+      }
+
+      context.clearRect(0, 0, canvas!.width, canvas!.height);
+    };
+
+    requestAnimationFrame(render);
+  }
 }

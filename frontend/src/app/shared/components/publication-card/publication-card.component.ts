@@ -190,6 +190,7 @@ export class PublicationCardComponent implements OnChanges {
       const likeButton = this.likeButtonRef?.nativeElement;
       if (likeButton) {
         this.animationService.likePop(likeButton);
+        this.animationService.confettiBurst(likeButton);
       }
       setTimeout(() => {
         this.likePulsing = false;

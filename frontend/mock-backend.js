@@ -197,14 +197,66 @@ const followRequests = [];
 
 function transformarUtilizador(u) {
   if (!u) return u;
-  const mapped = { ...u };
-  mapped.username = u.nomeUtilizador;
-  mapped.profilePhoto = u.fotoPerfil || '';
-  mapped.followersCount = u.totalSeguidores || 0;
-  mapped.followingCount = u.totalSeguindo || 0;
-  mapped.isPrivate = u.privado || false;
-  mapped.createdAt = u.criadoEm;
-  return mapped;
+  return mapUserDto(u);
+}
+
+function mapUserDto(u) {
+  return {
+    id: String(u.id),
+    username: u.nomeUtilizador,
+    displayName: u.nome,
+    email: u.email,
+    bio: u.bio || '',
+    profilePhotoUrl: u.fotoPerfil || '',
+    coverPhotoUrl: u.fotoCapa || '',
+    isPrivate: u.privado || false,
+    followersCount: u.totalSeguidores || 0,
+    followingCount: u.totalSeguindo || 0,
+    createdAt: u.criadoEm
+  };
+}
+
+function mapPostToPublication(post, currentUser = null) {
+  const author = users.find(u => u.id === post.autorId);
+  return {
+    id: String(post.id),
+    text: post.texto,
+    imageUrl: post.imagemUrl || '',
+    videoUrl: post.videoUrl || '',
+    createdAt: post.criadoEm,
+    updatedAt: post.criadoEm,
+    authorId: String(post.autorId),
+    authorUsername: author?.nomeUtilizador || post.autorNomeUtilizador || 'user',
+    authorDisplayName: author?.nome || post.autorNome || 'Utilizador',
+    authorPhotoUrl: author?.fotoPerfil || '',
+    likesCount: post.totalBazes || 0,
+    commentsCount: post.totalComentarios || 0,
+    hasLiked: !!post.utilizadorDeuBaze
+  };
+}
+
+function paginatePublications(items, page, pageSize) {
+  const safePage = Math.max(1, page);
+  const safeSize = Math.max(1, pageSize);
+  const start = (safePage - 1) * safeSize;
+  const slice = items.slice(start, start + safeSize);
+  return {
+    items: slice,
+    page: safePage,
+    pageSize: safeSize,
+    totalCount: items.length,
+    hasMore: start + safeSize < items.length
+  };
+}
+
+function getVisibleFeedPosts(currentUser) {
+  const followedIds = currentUser
+    ? follows.filter(f => f.followerId === currentUser.id).map(f => f.followingId)
+    : [];
+  return posts.filter(post => {
+    const author = users.find(u => u.id === post.autorId);
+    return !author?.privado || followedIds.includes(post.autorId) || post.autorId === currentUser?.id;
+  });
 }
 
 function transformarPost(p) {
@@ -272,7 +324,7 @@ app.post('/api/auth/login', (req, res) => {
   // Não expor a flag `eAdmin` diretamente na resposta para evitar revelar existência do painel
   const utilizadorSemFlag = { ...user };
   delete utilizadorSemFlag.eAdmin;
-  return res.json({ token: criarTokenParaUtilizador(user), utilizador: transformarUtilizador(utilizadorSemFlag) });
+  return res.json({ token: criarTokenParaUtilizador(user), user: mapUserDto(utilizadorSemFlag) });
 });
 
 const handleRegister = (req, res) => {
@@ -303,7 +355,7 @@ const handleRegister = (req, res) => {
     criadoEm: new Date().toISOString()
   };
   users.push(novo);
-  return res.json({ token: criarTokenParaUtilizador(novo), utilizador: transformarUtilizador(novo) });
+  return res.json({ token: criarTokenParaUtilizador(novo), user: mapUserDto(novo) });
 };
 
 app.post('/api/auth/registar', handleRegister);
@@ -561,6 +613,17 @@ app.get('/api/admin/comments/reported', (req, res) => {
   return res.json(denunciados);
 });
 
+app.get('/api/users/search', (req, res) => {
+  const q = (req.query.q || '').toString().toLowerCase();
+  if (q.length < 2) return res.json([]);
+  const results = users.filter(u =>
+    u.nomeUtilizador.toLowerCase().includes(q) ||
+    u.nome.toLowerCase().includes(q) ||
+    u.email.toLowerCase().includes(q)
+  );
+  return res.json(results.map(mapUserDto));
+});
+
 app.get('/api/users/:id', (req, res) => {
   const user = users.find(u => u.id === Number(req.params.id));
   if (!user) return res.status(404).json({ message: 'Utilizador não encontrado.' });
@@ -644,6 +707,206 @@ app.post('/api/notificacoes/marcar-lidas', (req, res) => {
 });
 
 app.delete('/api/notificacoes/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const idx = notificacoes.findIndex(n => n.id === id);
+  if (idx === -1) return res.status(404).json({ message: 'Notificação não encontrada.' });
+  notificacoes.splice(idx, 1);
+  return res.status(204).send();
+});
+
+function mapNotificationDto(notification) {
+  const actor = users.find(u => u.id === notification.utilizadorId);
+  const typeMap = {
+    baze: 'Like',
+    comentario: 'Comment',
+    seguidor: 'Follow',
+    pedido_seguir: 'FollowRequest'
+  };
+
+  return {
+    id: String(notification.id),
+    type: typeMap[notification.tipo] || 'Like',
+    isRead: notification.lida ?? false,
+    createdAt: notification.criadoEm,
+    actorId: String(notification.utilizadorId),
+    actorUsername: actor?.nomeUtilizador || notification.utilizadorNome || 'user',
+    actorDisplayName: actor?.nome || notification.utilizadorNome || 'Utilizador',
+    actorPhotoUrl: actor?.fotoPerfil || '',
+    publicationId: notification.postId ? String(notification.postId) : undefined,
+    publicationText: notification.postId
+      ? posts.find(p => p.id === notification.postId)?.texto
+      : undefined
+  };
+}
+
+// ── API moderna (publications / notifications / users) ──
+app.get('/api/publications', (req, res) => {
+  const page = parseInt(req.query.page ?? '1', 10);
+  const pageSize = parseInt(req.query.pageSize ?? '20', 10);
+  const mapped = posts.map(post => mapPostToPublication(post));
+  return res.json(paginatePublications(mapped, page, pageSize));
+});
+
+app.get('/api/publications/feed', (req, res) => {
+  const page = parseInt(req.query.page ?? '1', 10);
+  const pageSize = parseInt(req.query.pageSize ?? '20', 10);
+  const user = findUserByToken(req);
+  const feed = getVisibleFeedPosts(user).map(post => mapPostToPublication(post, user));
+  return res.json(paginatePublications(feed, page, pageSize));
+});
+
+app.get('/api/publications/user/:id', (req, res) => {
+  const userId = Number(req.params.id);
+  const page = parseInt(req.query.page ?? '1', 10);
+  const pageSize = parseInt(req.query.pageSize ?? '20', 10);
+  const mediaOnly = req.query.mediaOnly === 'true';
+  let userPosts = posts.filter(p => p.autorId === userId);
+  if (mediaOnly) {
+    userPosts = userPosts.filter(p => p.imagemUrl || p.videoUrl);
+  }
+  const mapped = userPosts.map(post => mapPostToPublication(post));
+  return res.json(paginatePublications(mapped, page, pageSize));
+});
+
+app.get('/api/publications/:id', (req, res) => {
+  const post = posts.find(p => String(p.id) === req.params.id);
+  if (!post) return res.status(404).json({ message: 'Publicação não encontrada.' });
+  return res.json(mapPostToPublication(post));
+});
+
+app.post('/api/publications', upload.fields([{ name: 'image' }, { name: 'video' }, { name: 'imagem' }]), (req, res) => {
+  const user = findUserByToken(req) || users[0];
+  const text = req.body.text || req.body.Text || req.body.texto || '';
+  const novo = {
+    id: posts.length + 1,
+    autorId: user.id,
+    autorNome: user.nome,
+    autorFoto: user.fotoPerfil || '',
+    autorNomeUtilizador: user.nomeUtilizador,
+    texto: text,
+    imagemUrl: '',
+    videoUrl: '',
+    totalBazes: 0,
+    totalComentarios: 0,
+    utilizadorDeuBaze: false,
+    criadoEm: new Date().toISOString()
+  };
+  posts.unshift(novo);
+  return res.status(201).json(mapPostToPublication(novo));
+});
+
+app.put('/api/publications/:id', (req, res) => {
+  const post = posts.find(p => String(p.id) === req.params.id);
+  if (!post) return res.status(404).json({ message: 'Publicação não encontrada.' });
+  post.texto = req.body.text ?? post.texto;
+  return res.json(mapPostToPublication(post));
+});
+
+app.delete('/api/publications/:id', (req, res) => {
+  const idx = posts.findIndex(p => String(p.id) === req.params.id);
+  if (idx === -1) return res.status(404).json({ message: 'Publicação não encontrada.' });
+  posts.splice(idx, 1);
+  return res.status(204).send();
+});
+
+app.post('/api/publications/:id/like', (req, res) => {
+  const post = posts.find(p => String(p.id) === req.params.id);
+  if (!post) return res.status(404).json({ message: 'Publicação não encontrada.' });
+  post.totalBazes = (post.totalBazes || 0) + 1;
+  post.utilizadorDeuBaze = true;
+  return res.status(200).send();
+});
+
+app.delete('/api/publications/:id/like', (req, res) => {
+  const post = posts.find(p => String(p.id) === req.params.id);
+  if (!post) return res.status(404).json({ message: 'Publicação não encontrada.' });
+  post.totalBazes = Math.max(0, (post.totalBazes || 0) - 1);
+  post.utilizadorDeuBaze = false;
+  return res.status(204).send();
+});
+
+app.get('/api/users/:id/liked-publications', (req, res) => {
+  const liked = posts.filter(p => p.utilizadorDeuBaze).map(post => mapPostToPublication(post));
+  return res.json(liked);
+});
+
+app.get('/api/users/:id/followers', (req, res) => {
+  const id = Number(req.params.id);
+  const seguidores = follows.filter(f => f.followingId === id).map(f => users.find(u => u.id === f.followerId));
+  return res.json(seguidores.filter(Boolean).map(mapUserDto));
+});
+
+app.get('/api/users/:id/following', (req, res) => {
+  const id = Number(req.params.id);
+  const seguindo = follows.filter(f => f.followerId === id).map(f => users.find(u => u.id === f.followingId));
+  return res.json(seguindo.filter(Boolean).map(mapUserDto));
+});
+
+app.post('/api/users/:id/follow', (req, res) => {
+  const alvo = Number(req.params.id);
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  if (user.id === alvo) return res.status(400).json({ message: 'Não pode seguir a si próprio.' });
+  const exists = follows.some(f => f.followerId === user.id && f.followingId === alvo);
+  if (!exists) {
+    follows.push({ followerId: user.id, followingId: alvo });
+    const alvoUser = users.find(u => u.id === alvo);
+    if (alvoUser) alvoUser.totalSeguidores += 1;
+    user.totalSeguindo += 1;
+    notificacoes.unshift({
+      id: notificacoes.length + 1,
+      tipo: 'seguidor',
+      utilizadorId: user.id,
+      utilizadorNome: user.nomeUtilizador,
+      lida: false,
+      criadoEm: new Date().toISOString()
+    });
+  }
+  return res.status(204).send();
+});
+
+app.delete('/api/users/:id/follow', (req, res) => {
+  const alvo = Number(req.params.id);
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const idx = follows.findIndex(f => f.followerId === user.id && f.followingId === alvo);
+  if (idx !== -1) {
+    follows.splice(idx, 1);
+    const alvoUser = users.find(u => u.id === alvo);
+    if (alvoUser) alvoUser.totalSeguidores = Math.max(0, alvoUser.totalSeguidores - 1);
+    user.totalSeguindo = Math.max(0, user.totalSeguindo - 1);
+  }
+  return res.status(204).send();
+});
+
+app.get('/api/notifications', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  return res.json(notificacoes.map(mapNotificationDto));
+});
+
+app.get('/api/notifications/unread-count', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const count = notificacoes.filter(n => !n.lida).length;
+  return res.json({ count });
+});
+
+app.put('/api/notifications/read-all', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  notificacoes.forEach(n => { n.lida = true; });
+  return res.status(204).send();
+});
+
+app.put('/api/notifications/:id/read', (req, res) => {
+  const notification = notificacoes.find(n => String(n.id) === req.params.id);
+  if (!notification) return res.status(404).json({ message: 'Notificação não encontrada.' });
+  notification.lida = true;
+  return res.status(204).send();
+});
+
+app.delete('/api/notifications/:id', (req, res) => {
   const id = Number(req.params.id);
   const idx = notificacoes.findIndex(n => n.id === id);
   if (idx === -1) return res.status(404).json({ message: 'Notificação não encontrada.' });
