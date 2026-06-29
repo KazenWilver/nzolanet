@@ -194,6 +194,7 @@ var app = builder.Build();
 
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "profiles"));
+Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "covers"));
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "publications"));
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "comments"));
 

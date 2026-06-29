@@ -1,5 +1,25 @@
 <app-modal [open]="open" title="Editar perfil" (closed)="handleClose()">
   <form class="edit-profile" (ngSubmit)="save()">
+    <div class="edit-profile__cover">
+      <div
+        class="edit-profile__cover-preview"
+        [class.edit-profile__cover-preview--empty]="!coverPreview"
+        [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null"
+        aria-hidden="true"
+      ></div>
+      <label class="edit-profile__cover-btn" for="edit-profile-cover">
+        <input
+          id="edit-profile-cover"
+          name="coverPhoto"
+          type="file"
+          accept="image/*"
+          (change)="handleCoverSelect($event)"
+          hidden
+        />
+        Alterar capa
+      </label>
+    </div>
+
     <div class="edit-profile__photo">
       <app-avatar
         [src]="photoPreview"

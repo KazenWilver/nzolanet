@@ -35,6 +35,8 @@ export class EditProfileModalComponent implements OnChanges {
   bio = '';
   selectedPhoto: File | null = null;
   photoPreviewUrl: string | null = null;
+  selectedCover: File | null = null;
+  coverPreviewUrl: string | null = null;
   saving = false;
   error = '';
 
@@ -42,7 +44,7 @@ export class EditProfileModalComponent implements OnChanges {
     if (this.user && changes['open']?.currentValue === true) {
       this.displayName = this.user.displayName ?? this.user.username;
       this.bio = this.user.bio ?? '';
-      this.resetPhotoSelection();
+      this.resetMediaSelection();
       this.error = '';
     }
   }
@@ -53,6 +55,10 @@ export class EditProfileModalComponent implements OnChanges {
 
   get photoPreviewKey(): string {
     return this.photoPreviewUrl ?? this.user?.profilePhotoUrl ?? 'default';
+  }
+
+  get coverPreview(): string | undefined {
+    return this.coverPreviewUrl ?? this.user?.coverPhotoUrl;
   }
 
   get remainingBioChars(): number {
@@ -66,15 +72,9 @@ export class EditProfileModalComponent implements OnChanges {
     }
 
     const file = input.files[0];
-
-    if (!file.type.startsWith('image/')) {
-      this.error = 'Selecciona um ficheiro de imagem válido.';
-      input.value = '';
-      return;
-    }
-
-    if (file.size > this.maxImageBytes) {
-      this.error = 'A imagem não pode exceder 10 MB.';
+    const validationError = this.validateImageFile(file);
+    if (validationError) {
+      this.error = validationError;
       input.value = '';
       return;
     }
@@ -87,8 +87,30 @@ export class EditProfileModalComponent implements OnChanges {
     input.value = '';
   }
 
+  handleCoverSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
+
+    const file = input.files[0];
+    const validationError = this.validateImageFile(file);
+    if (validationError) {
+      this.error = validationError;
+      input.value = '';
+      return;
+    }
+
+    this.selectedCover = file;
+    if (this.coverPreviewUrl) {
+      URL.revokeObjectURL(this.coverPreviewUrl);
+    }
+    this.coverPreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+  }
+
   handleClose(): void {
-    this.resetPhotoSelection();
+    this.resetMediaSelection();
     this.error = '';
     this.closed.emit();
   }
@@ -113,13 +135,19 @@ export class EditProfileModalComponent implements OnChanges {
           }
           return of(updatedUser);
         }),
+        switchMap(updatedUser => {
+          if (this.selectedCover) {
+            return this.userService.uploadCoverPhoto(this.user.id, this.selectedCover);
+          }
+          return of(updatedUser);
+        }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: updatedUser => {
           this.authService.updateCurrentUser(updatedUser);
           this.saving = false;
-          this.resetPhotoSelection();
+          this.resetMediaSelection();
           this.saved.emit(updatedUser);
           this.closed.emit();
         },
@@ -132,11 +160,28 @@ export class EditProfileModalComponent implements OnChanges {
       });
   }
 
-  private resetPhotoSelection(): void {
+  private validateImageFile(file: File): string | null {
+    if (!file.type.startsWith('image/')) {
+      return 'Selecciona um ficheiro de imagem válido.';
+    }
+
+    if (file.size > this.maxImageBytes) {
+      return 'A imagem não pode exceder 10 MB.';
+    }
+
+    return null;
+  }
+
+  private resetMediaSelection(): void {
     if (this.photoPreviewUrl) {
       URL.revokeObjectURL(this.photoPreviewUrl);
     }
+    if (this.coverPreviewUrl) {
+      URL.revokeObjectURL(this.coverPreviewUrl);
+    }
     this.selectedPhoto = null;
     this.photoPreviewUrl = null;
+    this.selectedCover = null;
+    this.coverPreviewUrl = null;
   }
 }

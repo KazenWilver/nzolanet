@@ -71,6 +71,7 @@ public class UserRepository : IUserRepository
         tracked.Bio = user.Bio;
         tracked.IsPrivate = user.IsPrivate;
         tracked.ProfilePhoto = user.ProfilePhoto;
+        tracked.CoverPhoto = user.CoverPhoto;
         tracked.UpdatedAt = user.UpdatedAt;
 
         return await _context.SaveChangesAsync() > 0;
@@ -81,7 +82,8 @@ public class UserRepository : IUserRepository
         string? displayName = null,
         string? bio = null,
         bool? isPrivate = null,
-        string? profilePhoto = null)
+        string? profilePhoto = null,
+        string? coverPhoto = null)
     {
         var user = await _context.Users.FindAsync(id);
         if (user == null)
@@ -107,6 +109,11 @@ public class UserRepository : IUserRepository
         if (profilePhoto != null)
         {
             user.ProfilePhoto = profilePhoto;
+        }
+
+        if (coverPhoto != null)
+        {
+            user.CoverPhoto = coverPhoto;
         }
 
         user.UpdatedAt = DateTime.UtcNow;

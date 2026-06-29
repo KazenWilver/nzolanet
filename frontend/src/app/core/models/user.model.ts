@@ -8,6 +8,7 @@ export interface User {
   email?: string;
   bio?: string;
   profilePhotoUrl?: string;
+  coverPhotoUrl?: string;
   isPrivate: boolean;
   followersCount: number;
   followingCount: number;
@@ -83,6 +84,7 @@ export const mapBackendUser = (dto: BackendUserDto): User => ({
   email: dto.email,
   bio: dto.bio,
   profilePhotoUrl: resolveMediaUrl(dto.profilePhotoUrl ?? dto.profilePhoto),
+  coverPhotoUrl: resolveMediaUrl(dto.coverPhotoUrl ?? dto.coverPhoto),
   isPrivate: dto.isPrivate ?? false,
   followersCount: dto.followersCount ?? 0,
   followingCount: dto.followingCount ?? 0,
@@ -99,6 +101,7 @@ export const toLegacyUser = (user: User): LegacyUser => ({
   nomeUtilizador: user.username,
   email: user.email ?? '',
   fotoPerfil: user.profilePhotoUrl,
+  fotoCapa: user.coverPhotoUrl,
   bio: user.bio,
   totalSeguidores: user.followersCount,
   totalSeguindo: user.followingCount,

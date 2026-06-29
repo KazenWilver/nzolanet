@@ -12,6 +12,7 @@
 .profile-page__cover {
   height: 200px;
   background-color: var(--color-bg-cover);
+  overflow: hidden;
 
   @media (min-width: 1280px) {
     height: 220px;
@@ -20,6 +21,13 @@
   @media (max-width: 500px) {
     height: 150px;
   }
+}
+
+.profile-page__cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .profile-page__info {

@@ -33,6 +33,8 @@ export interface BackendUserDto {
   bio?: string;
   profilePhotoUrl?: string;
   profilePhoto?: string;
+  coverPhotoUrl?: string;
+  coverPhoto?: string;
   email?: string;
   isPrivate: boolean;
   followersCount: number;

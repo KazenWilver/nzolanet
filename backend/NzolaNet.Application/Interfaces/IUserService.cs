@@ -10,6 +10,7 @@ public interface IUserService
     Task<UserProfileDto> GetProfileAsync(Guid userId, Guid? currentUserId = null);
     Task<UserResponseDto> UpdateProfileAsync(Guid userId, UpdateProfileDto updateDto);
     Task<UserResponseDto> UploadPhotoAsync(Guid userId, IFormFile photoFile);
+    Task<UserResponseDto> UploadCoverPhotoAsync(Guid userId, IFormFile photoFile);
     Task FollowUserAsync(Guid followerId, Guid followedId);
     Task UnfollowUserAsync(Guid followerId, Guid followedId);
     Task<IEnumerable<FollowRequestDto>> GetPendingRequestsAsync(Guid userId);

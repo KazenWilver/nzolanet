@@ -40,6 +40,15 @@ export class UserService {
       .pipe(map(user => this.mapUser(user)));
   }
 
+  uploadCoverPhoto(userId: string, file: File): Observable<User> {
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    return this.http
+      .put<BackendUserDto>(`${this.baseUrl}/${userId}/cover`, formData)
+      .pipe(map(user => this.mapUser(user)));
+  }
+
   follow(userId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${userId}/follow`, {}).pipe(
       tap(() => this.feedTabService.markFollowingStale())
@@ -155,7 +164,8 @@ export class UserService {
     const user = mapBackendUser(dto);
     return {
       ...user,
-      profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl)
+      profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl),
+      coverPhotoUrl: resolveMediaUrl(user.coverPhotoUrl)
     };
   }
 }

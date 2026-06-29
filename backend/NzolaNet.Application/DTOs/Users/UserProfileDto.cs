@@ -9,6 +9,7 @@ public class UserProfileDto
     public string? DisplayName { get; set; }
     public string Email { get; set; } = string.Empty;
     public string? ProfilePhoto { get; set; }
+    public string? CoverPhoto { get; set; }
     public bool IsPrivate { get; set; }
     public string? Bio { get; set; }
     public int FollowersCount { get; set; }

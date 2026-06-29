@@ -94,6 +94,24 @@ public class UsersController : ControllerBase
     }
 
     [Authorize]
+    [HttpPut("{id}/cover")]
+    public async Task<IActionResult> UploadCoverPhoto(Guid id, IFormFile photo)
+    {
+        if (!IsCurrentUser(id))
+        {
+            return ForbiddenResultHelper.Create();
+        }
+
+        if (photo == null || photo.Length == 0)
+        {
+            return BadRequest(new { message = "Por favor, envie um ficheiro de imagem válido." });
+        }
+
+        var user = await _userService.UploadCoverPhotoAsync(id, photo);
+        return Ok(user);
+    }
+
+    [Authorize]
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfileLegacy([FromBody] UpdateProfileDto updateDto)
     {

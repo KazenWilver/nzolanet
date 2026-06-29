@@ -6,11 +6,50 @@
   gap: 16px;
 }
 
+.edit-profile__cover {
+  position: relative;
+  margin: -8px -24px 0;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+}
+
+.edit-profile__cover-preview {
+  height: 120px;
+  background-color: var(--color-bg-cover);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &--empty {
+    background-image: none !important;
+  }
+}
+
+.edit-profile__cover-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(15, 20, 25, 0.75);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(15, 20, 25, 0.9);
+  }
+}
+
 .edit-profile__photo {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 1;
 }
 
 .edit-profile__photo-btn {

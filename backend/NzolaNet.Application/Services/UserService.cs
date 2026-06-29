@@ -52,6 +52,7 @@ public class UserService : IUserService
             DisplayName = user.DisplayName,
             Bio = user.Bio,
             ProfilePhotoUrl = user.ProfilePhoto,
+            CoverPhotoUrl = user.CoverPhoto,
             IsPrivate = user.IsPrivate,
             FollowersCount = followersCount,
             FollowingCount = followingCount,
@@ -98,6 +99,7 @@ public class UserService : IUserService
             DisplayName = user.DisplayName,
             Email = user.Email ?? string.Empty,
             ProfilePhoto = user.ProfilePhoto,
+            CoverPhoto = user.CoverPhoto,
             IsPrivate = user.IsPrivate,
             Bio = user.Bio,
             FollowersCount = followersCount,
@@ -174,6 +176,30 @@ public class UserService : IUserService
         user.UpdatedAt = DateTime.UtcNow;
 
         await _userRepository.UpdateProfileFieldsAsync(userId, profilePhoto: photoPath);
+
+        return await GetUserResponseAsync(userId);
+    }
+
+    public async Task<UserResponseDto> UploadCoverPhotoAsync(Guid userId, IFormFile photoFile)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        FileHelper.ValidateImageFile(photoFile);
+
+        if (!string.IsNullOrEmpty(user.CoverPhoto))
+        {
+            _storageService.DeleteFile(user.CoverPhoto);
+        }
+
+        var extension = Path.GetExtension(photoFile.FileName);
+        var fileName = $"{userId}_cover_{DateTime.UtcNow:yyyyMMddHHmmss}{extension}";
+        var photoPath = await _storageService.SaveFileAsync(photoFile, "uploads/covers", fileName);
+
+        await _userRepository.UpdateProfileFieldsAsync(userId, coverPhoto: photoPath);
 
         return await GetUserResponseAsync(userId);
     }

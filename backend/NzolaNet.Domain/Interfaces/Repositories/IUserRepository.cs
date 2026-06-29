@@ -18,7 +18,8 @@ public interface IUserRepository
         string? displayName = null,
         string? bio = null,
         bool? isPrivate = null,
-        string? profilePhoto = null);
+        string? profilePhoto = null,
+        string? coverPhoto = null);
     Task AddToRoleAsync(User user, string role);
     Task<IReadOnlyList<string>> GetRolesAsync(Guid userId);
     Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query);

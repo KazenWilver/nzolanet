@@ -17,7 +17,15 @@
 } @else if (profile) {
   <div class="profile-page">
     <section class="profile-page__header">
-      <div class="profile-page__cover" aria-hidden="true"></div>
+      <div class="profile-page__cover" aria-hidden="true">
+        @if (profile.coverPhotoUrl) {
+          <img
+            [src]="profile.coverPhotoUrl"
+            alt=""
+            class="profile-page__cover-image"
+          />
+        }
+      </div>
 
       <div class="profile-page__info">
         <div class="profile-page__avatar">
