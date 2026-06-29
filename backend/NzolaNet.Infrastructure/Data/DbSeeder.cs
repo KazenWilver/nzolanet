@@ -83,14 +83,15 @@ public static class DbSeeder
         UserManager<User> userManager,
         ILogger logger)
     {
-        var testUserPattern = new Regex(@"^(audit|fix)A\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var testUserPattern = new Regex(@"^(audit|fix|feed)A?\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         foreach (var user in userManager.Users.ToList())
         {
             var username = user.UserName ?? string.Empty;
             var isAutomatedTestUser =
                 testUserPattern.IsMatch(username) ||
-                user.DisplayName is "Alice Audit" or "Alice FixTest";
+                user.DisplayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" ||
+                (user.DisplayName?.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase) ?? false);
 
             if (!isAutomatedTestUser)
             {

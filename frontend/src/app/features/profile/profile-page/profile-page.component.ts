@@ -7,6 +7,7 @@ import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { PublicationService } from '../../../core/services/publication.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import type { User } from '../../../core/models/user.model';
 import type { Publication } from '../../../core/models/publication.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
@@ -38,6 +39,7 @@ export class ProfilePageComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly publicationService = inject(PublicationService);
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
   profile: User | null = null;
@@ -385,6 +387,7 @@ export class ProfilePageComponent implements OnInit {
         };
         this.showIncomingFollowRequest = false;
         this.processingFollowRequest = false;
+        this.notificationService.refreshUnreadCount().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
       },
       error: () => {
         this.processingFollowRequest = false;
@@ -414,6 +417,7 @@ export class ProfilePageComponent implements OnInit {
         };
         this.showIncomingFollowRequest = false;
         this.processingFollowRequest = false;
+        this.notificationService.refreshUnreadCount().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
       },
       error: () => {
         this.processingFollowRequest = false;

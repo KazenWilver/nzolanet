@@ -79,17 +79,9 @@ export class WhoToFollowComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: () => {
-        if (wasFollowing || wasPending) {
-          user.isFollowing = false;
-          user.isPending = false;
-        } else if (user.isPrivate) {
-          user.isFollowing = false;
-          user.isPending = true;
-        } else {
-          user.isFollowing = true;
-          user.isPending = false;
-        }
+        this.suggestions = this.suggestions.filter(item => item.id !== user.id);
         this.togglingUserId = null;
+        this.loadReplacementSuggestion();
       },
       error: () => {
         this.togglingUserId = null;
@@ -117,6 +109,25 @@ export class WhoToFollowComponent implements OnInit {
         this.loading = false;
         this.error = true;
         this.suggestions = [];
+      }
+    });
+  }
+
+  private loadReplacementSuggestion(): void {
+    if (this.suggestions.length >= this.count) {
+      return;
+    }
+
+    this.userService
+      .getSuggestions(1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+      next: users => {
+        const existingIds = new Set(this.suggestions.map(user => user.id));
+        const replacement = users.find(user => !existingIds.has(user.id));
+        if (replacement) {
+          this.suggestions = [...this.suggestions, replacement];
+        }
       }
     });
   }

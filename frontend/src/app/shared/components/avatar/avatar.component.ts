@@ -82,6 +82,7 @@ export class AvatarComponent implements OnChanges {
   @Input() src?: string;
   @Input() username = '';
   @Input() size: AvatarSize = 'md';
+  @Input() avatarKey = '';
 
   resolvedSrc?: string;
   imageError = false;
@@ -89,7 +90,7 @@ export class AvatarComponent implements OnChanges {
   avatarColor = '#1d9bf0';
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['src']) {
+    if (changes['src'] || changes['avatarKey']) {
       this.imageError = false;
       this.resolvedSrc = resolveMediaUrl(this.src);
     }

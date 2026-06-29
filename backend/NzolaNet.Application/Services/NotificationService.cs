@@ -147,6 +147,12 @@ public class NotificationService : INotificationService
 
         try
         {
+            var alreadyExists = await _notificationRepository.ExistsFollowRequestNotificationAsync(recipientId, actorId);
+            if (alreadyExists)
+            {
+                return;
+            }
+
             var notification = new Notification
             {
                 RecipientId = recipientId,
@@ -210,6 +216,22 @@ public class NotificationService : INotificationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao criar notificação de pedido recusado para o utilizador {RecipientId}.", recipientId);
+        }
+    }
+
+    public async Task CleanupFollowRequestNotificationsAsync(Guid recipientId, Guid actorId)
+    {
+        try
+        {
+            await _notificationRepository.DeleteFollowRequestsAsync(recipientId, actorId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao limpar notificações de pedido de seguimento entre {ActorId} e {RecipientId}.",
+                actorId,
+                recipientId);
         }
     }
 

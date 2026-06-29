@@ -184,9 +184,10 @@ export class NotificationsPageComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: () => {
+        const wasUnread = !notification.isRead;
         this.notifications = this.notifications.filter(item => item.id !== notification.id);
+        this.notificationService.notifyUnreadDecreased(wasUnread);
         this.processingRequestId = null;
-        this.markNotificationRead(notification);
       },
       error: () => {
         this.processingRequestId = null;
@@ -203,14 +204,7 @@ export class NotificationsPageComponent implements OnInit {
       item.id === notification.id ? { ...item, isRead: true } : item
     );
 
-    this.notificationService
-      .markAsRead(notification.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-      error: () => {
-        // Mantém navegação mesmo se marcar como lida falhar
-      }
-    });
+    this.notificationService.markAsReadLocally(notification.id);
   }
 
   private navigateForNotification(notification: AppNotification): void {

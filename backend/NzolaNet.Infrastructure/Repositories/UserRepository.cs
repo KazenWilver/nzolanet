@@ -1,6 +1,4 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NzolaNet.Domain.Entities;
@@ -158,13 +156,38 @@ public class UserRepository : IUserRepository
 
         excludedIds.Add(currentUserId);
 
-        return await _context.Users
+        var poolSize = Math.Clamp(count * 5, 15, 50);
+
+        var candidates = await _context.Users
             .Where(u => !excludedIds.Contains(u.Id))
-            .OrderByDescending(u =>
-                _context.Follows.Count(f => f.FollowedId == u.Id && f.IsApproved))
-            .Take(count)
+            .OrderBy(_ => Guid.NewGuid())
+            .Take(poolSize)
             .ToListAsync();
+
+        return candidates
+            .Where(u => !IsAutomatedTestUser(u))
+            .Take(count)
+            .ToList();
     }
+
+    private static bool IsAutomatedTestUser(User user)
+    {
+        var username = user.UserName ?? string.Empty;
+        var displayName = user.DisplayName ?? string.Empty;
+
+        if (AutomatedTestUsernamePattern.IsMatch(username))
+        {
+            return true;
+        }
+
+        return displayName is "Alice Audit" or "Alice FixTest" or "Feed Alice"
+            || displayName.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase)
+            || displayName.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static readonly Regex AutomatedTestUsernamePattern = new(
+        @"^(audit|fix|feed)A?\d+$",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public Task<int> GetTotalCountAsync()
     {

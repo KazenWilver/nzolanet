@@ -5,7 +5,7 @@ export const resolveMediaUrl = (url: string | undefined | null): string | undefi
     return undefined;
   }
 
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
     return url;
   }
 

@@ -283,6 +283,7 @@ public class UserService : IUserService
         var updated = await _followRepository.UpdateFollowAsync(follow);
         if (updated)
         {
+            await _notificationService.CleanupFollowRequestNotificationsAsync(followedId, followerId);
             await _notificationService.TryCreateFollowNotificationAsync(followerId, followedId);
             await _notificationService.TryCreateFollowAcceptedNotificationAsync(followedId, followerId);
         }
@@ -304,6 +305,7 @@ public class UserService : IUserService
             return false;
         }
 
+        await _notificationService.CleanupFollowRequestNotificationsAsync(followedId, followerId);
         var followed = await _userRepository.GetByIdAsync(followedId);
         var follower = await _userRepository.GetByIdAsync(followerId);
 

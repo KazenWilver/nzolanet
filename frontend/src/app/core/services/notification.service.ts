@@ -52,9 +52,19 @@ export class NotificationService {
   }
 
   markAsRead(id: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}/read`, {}).pipe(
-      tap(() => this.decrementUnreadCount())
-    );
+    return this.http.put<void>(`${this.baseUrl}/${id}/read`, {});
+  }
+
+  markAsReadLocally(id: string): void {
+    this.decrementUnreadCount();
+    this.markAsRead(id)
+      .pipe(
+        catchError(() => {
+          this.refreshUnreadCount().subscribe();
+          return of(undefined);
+        })
+      )
+      .subscribe();
   }
 
   markAllAsRead(): Observable<void> {

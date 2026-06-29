@@ -1,4 +1,4 @@
-import { Component, DestroyRef, EventEmitter, Input, Output, inject, OnChanges } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, Output, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -38,15 +38,21 @@ export class EditProfileModalComponent implements OnChanges {
   saving = false;
   error = '';
 
-  ngOnChanges(): void {
-    if (this.user) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.user && changes['open']?.currentValue === true) {
       this.displayName = this.user.displayName ?? this.user.username;
       this.bio = this.user.bio ?? '';
+      this.resetPhotoSelection();
+      this.error = '';
     }
   }
 
   get photoPreview(): string | undefined {
     return this.photoPreviewUrl ?? this.user?.profilePhotoUrl;
+  }
+
+  get photoPreviewKey(): string {
+    return this.photoPreviewUrl ?? this.user?.profilePhotoUrl ?? 'default';
   }
 
   get remainingBioChars(): number {

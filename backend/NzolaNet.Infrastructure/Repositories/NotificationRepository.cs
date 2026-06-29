@@ -128,4 +128,30 @@ public class NotificationRepository : INotificationRepository
         _context.Notifications.RemoveRange(notifications);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<bool> ExistsFollowRequestNotificationAsync(Guid recipientId, Guid actorId)
+    {
+        return await _context.Notifications.AnyAsync(
+            n => n.RecipientId == recipientId &&
+                 n.ActorId == actorId &&
+                 n.Type == "follow_request");
+    }
+
+    public async Task DeleteFollowRequestsAsync(Guid recipientId, Guid actorId)
+    {
+        var notifications = await _context.Notifications
+            .Where(n =>
+                n.RecipientId == recipientId &&
+                n.ActorId == actorId &&
+                n.Type == "follow_request")
+            .ToListAsync();
+
+        if (notifications.Count == 0)
+        {
+            return;
+        }
+
+        _context.Notifications.RemoveRange(notifications);
+        await _context.SaveChangesAsync();
+    }
 }
