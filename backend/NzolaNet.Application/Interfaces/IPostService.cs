@@ -11,5 +11,6 @@ public interface IPostService
     Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId);
     Task<IEnumerable<PublicationResponseDto>> GetFollowingFeedAsync(Guid userId);
     Task<IEnumerable<PublicationResponseDto>> GetByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
+    Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
     Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
 }

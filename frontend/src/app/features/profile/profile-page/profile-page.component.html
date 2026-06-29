@@ -5,6 +5,9 @@
 } @else if (profileError) {
   <div class="profile-page__error">
     <p>Não foi possível carregar o perfil.</p>
+    <button type="button" class="profile-page__retry" (click)="retryLoadProfile()">
+      Tentar novamente
+    </button>
   </div>
 } @else if (profile) {
   <div class="profile-page">
@@ -83,7 +86,28 @@
     </nav>
 
     @if (activeTab === 'likes') {
-      <app-placeholder-feature featureName="Gostos" />
+      @if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver os gostos.</p>
+        </div>
+      } @else if (loadingLikes) {
+        <div class="profile-page__loading">
+          <app-loading-spinner tamanho="md" />
+        </div>
+      } @else if (likedPublications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem gostos.</p>
+        </div>
+      } @else {
+        @for (publication of likedPublications; track trackById($index, publication)) {
+          <app-publication-card
+            [publication]="publication"
+            [currentUserId]="currentUserId"
+            (deleted)="handlePublicationDeleted($event)"
+            (updated)="handlePublicationUpdated($event)"
+          />
+        }
+      }
     } @else if (privateAccount) {
       <div class="profile-page__private">
         <p>Esta conta é privada. Segue para ver as publicações.</p>

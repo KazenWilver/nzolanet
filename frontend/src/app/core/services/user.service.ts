@@ -64,6 +64,12 @@ export class UserService {
       .pipe(map(users => users.map(user => this.mapUser(user))));
   }
 
+  getSuggestions(count = 3): Observable<User[]> {
+    return this.http
+      .get<BackendUserDto[]>(`${this.baseUrl}/suggestions?count=${count}`)
+      .pipe(map(users => users.map(user => this.mapUser(user))));
+  }
+
   /** @deprecated Usar getProfile */
   obterPorId(id: string): Observable<LegacyUser> {
     return this.getProfile(id).pipe(map(user => toLegacyUser(user)));

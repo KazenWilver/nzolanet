@@ -11,17 +11,12 @@ namespace NzolaNet.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IPostService _postService;
 
-    public UsersController(IUserService userService)
+    public UsersController(IUserService userService, IPostService postService)
     {
         _userService = userService;
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetProfile(Guid id)
-    {
-        var profile = await _userService.GetUserResponseAsync(id, AuthClaimsHelper.GetOptionalUserId(User));
-        return Ok(profile);
+        _postService = postService;
     }
 
     [HttpGet("search")]
@@ -34,6 +29,38 @@ public class UsersController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("suggestions")]
+    public async Task<IActionResult> GetSuggestions([FromQuery] int count = 3)
+    {
+        var currentUserId = AuthClaimsHelper.GetUserId(User);
+        var safeCount = Math.Clamp(count, 1, 10);
+        var suggestions = await _userService.GetSuggestionsAsync(currentUserId, safeCount);
+        return Ok(suggestions);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetProfile(Guid id)
+    {
+        var profile = await _userService.GetUserResponseAsync(id, AuthClaimsHelper.GetOptionalUserId(User));
+        return Ok(profile);
+    }
+
+    [HttpGet("{id}/liked-publications")]
+    public async Task<IActionResult> GetLikedPublications(Guid id)
+    {
+        try
+        {
+            var publications = await _postService.GetLikedByUserIdAsync(
+                id,
+                AuthClaimsHelper.GetOptionalUserId(User));
+            return Ok(publications);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileDto updateDto)
     {

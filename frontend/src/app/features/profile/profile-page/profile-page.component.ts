@@ -9,7 +9,6 @@ import type { User } from '../../../core/models/user.model';
 import type { Publication } from '../../../core/models/publication.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { PublicationCardComponent } from '../../../shared/components/publication-card/publication-card.component';
-import { PlaceholderFeatureComponent } from '../../../shared/components/placeholder-feature/placeholder-feature.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { EditProfileModalComponent } from '../edit-profile-modal/edit-profile-modal.component';
 import { FollowersModalComponent } from '../followers-modal/followers-modal.component';
@@ -24,7 +23,6 @@ type ProfileTab = 'publications' | 'likes';
     DatePipe,
     AvatarComponent,
     PublicationCardComponent,
-    PlaceholderFeatureComponent,
     LoadingSpinnerComponent,
     EditProfileModalComponent,
     FollowersModalComponent
@@ -41,8 +39,11 @@ export class ProfilePageComponent implements OnInit {
 
   profile: User | null = null;
   publications: Publication[] = [];
+  likedPublications: Publication[] = [];
+  private lastProfileUserId = '';
   loadingProfile = true;
   loadingPublications = false;
+  loadingLikes = false;
   profileError = false;
   privateAccount = false;
   togglingFollow = false;
@@ -61,6 +62,7 @@ export class ProfilePageComponent implements OnInit {
 
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const id = params.get('id') ?? '';
+      this.lastProfileUserId = id;
       this.loadProfile(id);
     });
   }
@@ -98,6 +100,7 @@ export class ProfilePageComponent implements OnInit {
     this.profileError = false;
     this.privateAccount = false;
     this.publications = [];
+    this.likedPublications = [];
     this.activeTab = 'publications';
 
     this.userService.getProfile(userId).subscribe({
@@ -118,6 +121,12 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
+  retryLoadProfile(): void {
+    if (this.lastProfileUserId) {
+      this.loadProfile(this.lastProfileUserId);
+    }
+  }
+
   loadPublications(userId: string): void {
     this.loadingPublications = true;
     this.privateAccount = false;
@@ -133,6 +142,25 @@ export class ProfilePageComponent implements OnInit {
         this.loadingPublications = false;
         this.privateAccount = true;
         this.publications = [];
+      }
+    });
+  }
+
+  loadLikedPublications(userId: string): void {
+    this.loadingLikes = true;
+    this.privateAccount = false;
+
+    this.publicationService.getLikedByUser(userId).subscribe({
+      next: publications => {
+        this.likedPublications = publications.sort(
+          (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+        );
+        this.loadingLikes = false;
+      },
+      error: () => {
+        this.loadingLikes = false;
+        this.privateAccount = true;
+        this.likedPublications = [];
       }
     });
   }
@@ -209,14 +237,26 @@ export class ProfilePageComponent implements OnInit {
 
   setActiveTab(tab: ProfileTab): void {
     this.activeTab = tab;
+
+    if (!this.profile || !this.canViewPublications) {
+      return;
+    }
+
+    if (tab === 'likes' && this.likedPublications.length === 0 && !this.loadingLikes) {
+      this.loadLikedPublications(this.profile.id);
+    }
   }
 
   handlePublicationDeleted(id: string): void {
     this.publications = this.publications.filter(publication => publication.id !== id);
+    this.likedPublications = this.likedPublications.filter(publication => publication.id !== id);
   }
 
   handlePublicationUpdated(publication: Publication): void {
     this.publications = this.publications.map(item =>
+      item.id === publication.id ? publication : item
+    );
+    this.likedPublications = this.likedPublications.map(item =>
       item.id === publication.id ? publication : item
     );
   }

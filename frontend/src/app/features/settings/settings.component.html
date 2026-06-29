@@ -138,7 +138,63 @@
       @if (activeSection === 'password') {
         <section class="settings__panel" aria-labelledby="settings-password-title">
           <h2 id="settings-password-title" class="settings__panel-title">Palavra-passe</h2>
-          <app-placeholder-feature featureName="Alterar palavra-passe" />
+
+          <label class="settings__field" for="settings-current-password">
+            <span class="settings__label">Palavra-passe actual</span>
+            <input
+              id="settings-current-password"
+              name="currentPassword"
+              type="password"
+              autocomplete="current-password"
+              [(ngModel)]="currentPassword"
+            />
+          </label>
+
+          <label class="settings__field" for="settings-new-password">
+            <span class="settings__label">Nova palavra-passe</span>
+            <input
+              id="settings-new-password"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+              [(ngModel)]="newPassword"
+              minlength="6"
+            />
+          </label>
+
+          <label class="settings__field" for="settings-confirm-password">
+            <span class="settings__label">Confirmar nova palavra-passe</span>
+            <input
+              id="settings-confirm-password"
+              name="confirmNewPassword"
+              type="password"
+              autocomplete="new-password"
+              [(ngModel)]="confirmNewPassword"
+              minlength="6"
+            />
+          </label>
+
+          @if (passwordError) {
+            <p class="settings__message settings__message--error" role="alert">{{ passwordError }}</p>
+          }
+          @if (passwordSuccess) {
+            <p class="settings__message settings__message--success" role="status">
+              Palavra-passe alterada com sucesso.
+            </p>
+          }
+
+          <button
+            type="button"
+            class="settings__btn-primary"
+            [disabled]="savingPassword"
+            (click)="changePassword()"
+          >
+            @if (savingPassword) {
+              <app-loading-spinner tamanho="sm" />
+            } @else {
+              Alterar palavra-passe
+            }
+          </button>
         </section>
       }
     </div>

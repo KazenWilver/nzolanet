@@ -14,17 +14,20 @@ public class AuthService : IAuthService
     private readonly IJwtTokenService _tokenService;
     private readonly IUserService _userService;
     private readonly SignInManager<User> _signInManager;
+    private readonly UserManager<User> _userManager;
 
     public AuthService(
         IUserRepository userRepository,
         IJwtTokenService tokenService,
         IUserService userService,
-        SignInManager<User> signInManager)
+        SignInManager<User> signInManager,
+        UserManager<User> userManager)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _userService = userService;
         _signInManager = signInManager;
+        _userManager = userManager;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
@@ -94,5 +97,42 @@ public class AuthService : IAuthService
         // TODO: integrar serviço de email
         _ = forgotPasswordDto;
         return Task.FromResult("Se o email existir, receberás instruções.");
+    }
+
+    public async Task<string> ChangePasswordAsync(Guid userId, ChangePasswordDto changePasswordDto)
+    {
+        if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
+        {
+            throw new ArgumentException("A nova palavra-passe e a confirmação não coincidem.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        var currentPasswordValid = await _signInManager.CheckPasswordSignInAsync(
+            user,
+            changePasswordDto.CurrentPassword,
+            false);
+
+        if (!currentPasswordValid.Succeeded)
+        {
+            throw new InvalidCredentialsException("Palavra-passe actual incorrecta.");
+        }
+
+        var result = await _userManager.ChangePasswordAsync(
+            user,
+            changePasswordDto.CurrentPassword,
+            changePasswordDto.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(" ", result.Errors.Select(error => error.Description));
+            throw new ArgumentException(errors);
+        }
+
+        return "Palavra-passe alterada com sucesso.";
     }
 }

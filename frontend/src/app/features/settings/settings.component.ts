@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import type { User } from '../../core/models/user.model';
-import { PlaceholderFeatureComponent } from '../../shared/components/placeholder-feature/placeholder-feature.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 
 type SettingsSection = 'account' | 'privacy' | 'password';
@@ -13,7 +12,7 @@ type SettingsSection = 'account' | 'privacy' | 'password';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlaceholderFeatureComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, LoadingSpinnerComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
@@ -41,6 +40,13 @@ export class SettingsComponent implements OnInit {
   privacyLoading = false;
   privacyError = '';
 
+  currentPassword = '';
+  newPassword = '';
+  confirmNewPassword = '';
+  savingPassword = false;
+  passwordError = '';
+  passwordSuccess = false;
+
   ngOnInit(): void {
     this.authService.currentUser$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -62,6 +68,8 @@ export class SettingsComponent implements OnInit {
     this.accountSuccess = false;
     this.accountError = '';
     this.privacyError = '';
+    this.passwordError = '';
+    this.passwordSuccess = false;
   }
 
   saveAccount(): void {
@@ -122,5 +130,54 @@ export class SettingsComponent implements OnInit {
 
   handleLogout(): void {
     this.authService.logout();
+  }
+
+  changePassword(): void {
+    if (this.savingPassword) {
+      return;
+    }
+
+    this.passwordError = '';
+    this.passwordSuccess = false;
+
+    if (!this.currentPassword || !this.newPassword || !this.confirmNewPassword) {
+      this.passwordError = 'Preenche todos os campos.';
+      return;
+    }
+
+    if (this.newPassword.length < 6) {
+      this.passwordError = 'A nova palavra-passe deve ter pelo menos 6 caracteres.';
+      return;
+    }
+
+    if (this.newPassword !== this.confirmNewPassword) {
+      this.passwordError = 'A nova palavra-passe e a confirmação não coincidem.';
+      return;
+    }
+
+    this.savingPassword = true;
+
+    this.authService
+      .changePassword(this.currentPassword, this.newPassword, this.confirmNewPassword)
+      .subscribe({
+        next: () => {
+          this.savingPassword = false;
+          this.passwordSuccess = true;
+          this.currentPassword = '';
+          this.newPassword = '';
+          this.confirmNewPassword = '';
+        },
+        error: error => {
+          this.savingPassword = false;
+          const apiError = error?.error;
+          const message =
+            apiError?.message ??
+            (Array.isArray(apiError?.errors)
+              ? Object.values(apiError.errors as Record<string, string[]>).flat().join(' ')
+              : null);
+          this.passwordError =
+            message ?? 'Não foi possível alterar a palavra-passe.';
+        }
+      });
   }
 }

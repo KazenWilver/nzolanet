@@ -75,6 +75,18 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.baseUrl}/forgot-password`, dto);
   }
 
+  changePassword(
+    currentPassword: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.baseUrl}/change-password`, {
+      currentPassword,
+      newPassword,
+      confirmNewPassword
+    });
+  }
+
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);

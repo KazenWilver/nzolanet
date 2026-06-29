@@ -12,4 +12,5 @@ public interface ILikeRepository
     Task<bool> HasUserLikedAsync(Guid userId, Guid postId);
     Task<bool> CreateAsync(Like like);
     Task<bool> DeleteAsync(Like like);
+    Task<IEnumerable<Post>> GetLikedPostsByUserAsync(Guid userId);
 }

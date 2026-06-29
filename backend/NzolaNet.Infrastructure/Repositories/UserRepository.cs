@@ -103,4 +103,21 @@ public class UserRepository : IUserRepository
             .Take(20)
             .ToListAsync();
     }
+
+    public async Task<System.Collections.Generic.IEnumerable<User>> GetSuggestionsAsync(Guid currentUserId, int count)
+    {
+        var excludedIds = await _context.Follows
+            .Where(f => f.FollowerId == currentUserId)
+            .Select(f => f.FollowedId)
+            .ToListAsync();
+
+        excludedIds.Add(currentUserId);
+
+        return await _context.Users
+            .Where(u => !excludedIds.Contains(u.Id))
+            .OrderByDescending(u =>
+                _context.Follows.Count(f => f.FollowedId == u.Id && f.IsApproved))
+            .Take(count)
+            .ToListAsync();
+    }
 }

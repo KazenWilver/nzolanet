@@ -3,12 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
-import { PlaceholderFeatureComponent } from '../../shared/components/placeholder-feature/placeholder-feature.component';
+import { WhoToFollowComponent } from '../../shared/components/who-to-follow/who-to-follow.component';
 
 @Component({
   selector: 'app-aside',
   standalone: true,
-  imports: [FormsModule, PlaceholderFeatureComponent],
+  imports: [FormsModule, WhoToFollowComponent],
   templateUrl: './aside.component.html',
   styleUrl: './aside.component.scss'
 })

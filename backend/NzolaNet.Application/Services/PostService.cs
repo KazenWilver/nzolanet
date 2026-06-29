@@ -11,17 +11,20 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
     private readonly IFollowRepository _followRepository;
+    private readonly ILikeRepository _likeRepository;
     private readonly IStorageService _storageService;
 
     public PostService(
         IPostRepository postRepository,
         IUserRepository userRepository,
         IFollowRepository followRepository,
+        ILikeRepository likeRepository,
         IStorageService storageService)
     {
         _postRepository = postRepository;
         _userRepository = userRepository;
         _followRepository = followRepository;
+        _likeRepository = likeRepository;
         _storageService = storageService;
     }
 
@@ -231,6 +234,53 @@ public class PostService : IPostService
         var posts = await _postRepository.GetAllAsync();
         var userPosts = posts.Where(p => p.UserId == targetUserId);
         return userPosts.Select(p => MapToDto(p, currentUserId));
+    }
+
+    public async Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
+    {
+        var targetUser = await _userRepository.GetByIdAsync(targetUserId);
+        if (targetUser == null)
+        {
+            throw new ArgumentException("Utilizador não encontrado.");
+        }
+
+        if (targetUser.IsPrivate && targetUserId != currentUserId)
+        {
+            if (!currentUserId.HasValue)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+
+            var isFollowing = await _followRepository.IsFollowingAsync(currentUserId.Value, targetUserId);
+            if (!isFollowing)
+            {
+                throw new UnauthorizedAccessException("Este perfil é privado.");
+            }
+        }
+
+        var likedPosts = await _likeRepository.GetLikedPostsByUserAsync(targetUserId);
+        var publications = new List<PublicationResponseDto>();
+
+        foreach (var post in likedPosts)
+        {
+            if (post.User?.IsPrivate == true && post.UserId != currentUserId)
+            {
+                if (!currentUserId.HasValue)
+                {
+                    continue;
+                }
+
+                var canViewAuthor = await _followRepository.IsFollowingAsync(currentUserId.Value, post.UserId);
+                if (!canViewAuthor)
+                {
+                    continue;
+                }
+            }
+
+            publications.Add(MapToDto(post, currentUserId));
+        }
+
+        return publications;
     }
 
     private static PublicationResponseDto MapToDto(Post post, Guid? currentUserId = null)

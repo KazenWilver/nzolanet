@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -43,5 +44,20 @@ public class LikeRepository : ILikeRepository
     {
         _context.Likes.Remove(like);
         return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<IEnumerable<Post>> GetLikedPostsByUserAsync(Guid userId)
+    {
+        return await _context.Likes
+            .Where(l => l.UserId == userId)
+            .Include(l => l.Post)
+                .ThenInclude(p => p.User)
+            .Include(l => l.Post)
+                .ThenInclude(p => p.Likes)
+            .Include(l => l.Post)
+                .ThenInclude(p => p.Comments)
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(l => l.Post)
+            .ToListAsync();
     }
 }

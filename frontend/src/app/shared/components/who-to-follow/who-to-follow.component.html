@@ -1,0 +1,49 @@
+<section class="who-to-follow" aria-labelledby="who-to-follow-title">
+  <h2 id="who-to-follow-title" class="who-to-follow__title">Quem seguir</h2>
+
+  @if (loading) {
+    <div class="who-to-follow__loading">
+      <app-loading-spinner tamanho="sm" />
+    </div>
+  } @else if (error) {
+    <p class="who-to-follow__message">Não foi possível carregar sugestões.</p>
+  } @else if (suggestions.length === 0) {
+    <p class="who-to-follow__message">Sem sugestões por agora.</p>
+  } @else {
+    <ul class="who-to-follow__list">
+      @for (user of suggestions; track trackById($index, user)) {
+        <li>
+          <article
+            class="who-to-follow__item"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Ver perfil de ' + getDisplayName(user)"
+            (click)="navigateToProfile(user.id)"
+            (keydown.enter)="navigateToProfile(user.id)"
+          >
+            <app-avatar
+              [src]="user.profilePhotoUrl"
+              [username]="user.username"
+              size="sm"
+            />
+
+            <div class="who-to-follow__info">
+              <strong class="who-to-follow__name">{{ getDisplayName(user) }}</strong>
+              <span class="who-to-follow__username">@{{ user.username }}</span>
+            </div>
+
+            <button
+              type="button"
+              class="who-to-follow__follow-btn"
+              [class.who-to-follow__follow-btn--following]="user.isFollowing || user.isPending"
+              [disabled]="togglingUserId === user.id"
+              (click)="toggleFollow(user, $event)"
+            >
+              {{ getFollowLabel(user) }}
+            </button>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>

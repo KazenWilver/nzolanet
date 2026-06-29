@@ -42,6 +42,12 @@ export class PublicationService {
       .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
   }
 
+  getLikedByUser(userId: string): Observable<Publication[]> {
+    return this.http
+      .get<BackendPublicationDto[]>(`${environment.apiUrl}/users/${userId}/liked-publications`)
+      .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
+  }
+
   create(formData: FormData): Observable<Publication> {
     return this.http
       .post<BackendPublicationDto>(this.baseUrl, formData)

@@ -54,6 +54,20 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = AuthClaimsHelper.GetUserId(User);
+        var message = await _authService.ChangePasswordAsync(userId, changePasswordDto);
+        return Ok(new { message });
+    }
+
+    [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser([FromServices] IUserService userService)
     {

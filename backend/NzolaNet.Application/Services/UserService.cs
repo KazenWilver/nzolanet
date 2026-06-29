@@ -348,4 +348,16 @@ public class UserService : IUserService
         }
         return dtos;
     }
+
+    public async Task<IEnumerable<UserResponseDto>> GetSuggestionsAsync(Guid currentUserId, int count = 3)
+    {
+        var users = await _userRepository.GetSuggestionsAsync(currentUserId, count);
+        var dtos = new List<UserResponseDto>();
+        foreach (var user in users)
+        {
+            dtos.Add(await GetUserResponseAsync(user.Id, currentUserId));
+        }
+
+        return dtos;
+    }
 }

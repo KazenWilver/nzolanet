@@ -1,0 +1,96 @@
+.who-to-follow {
+  padding: 12px 16px;
+}
+
+.who-to-follow__title {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.who-to-follow__loading {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.who-to-follow__message {
+  margin: 0;
+  padding: 8px 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+}
+
+.who-to-follow__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.who-to-follow__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  padding: 4px;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+    outline: none;
+  }
+}
+
+.who-to-follow__info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.who-to-follow__name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.who-to-follow__username {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.who-to-follow__follow-btn {
+  min-width: 72px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-full);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &--following {
+    background: transparent;
+    color: var(--color-text-primary);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
