@@ -18,10 +18,11 @@ export class PressScaleDirective {
       return;
     }
 
-    if (this.elementRef.nativeElement.disabled) {
+    const element = this.elementRef.nativeElement;
+    if (element.matches(':disabled') || element.getAttribute('aria-disabled') === 'true') {
       return;
     }
 
-    this.animationService.pressFeedback(this.elementRef.nativeElement);
+    this.animationService.pressFeedback(element);
   }
 }

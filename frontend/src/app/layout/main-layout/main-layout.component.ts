@@ -1,6 +1,6 @@
 import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, NavigationStart, Router, RouterModule } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
@@ -49,12 +49,20 @@ export class MainLayoutComponent {
     this.router.events
       .pipe(
         filter(
-          (event): event is NavigationStart | NavigationEnd =>
-            event instanceof NavigationStart || event instanceof NavigationEnd
+          (event): event is NavigationStart | NavigationEnd | NavigationCancel | NavigationError =>
+            event instanceof NavigationStart ||
+            event instanceof NavigationEnd ||
+            event instanceof NavigationCancel ||
+            event instanceof NavigationError
         ),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(event => {
+        if (event instanceof NavigationCancel || event instanceof NavigationError) {
+          this.routeTransition.resetRouteHost();
+          return;
+        }
+
         if (event instanceof NavigationStart) {
           const nextPath = event.url.split('?')[0];
           if (nextPath !== this.previousPath) {
@@ -74,9 +82,7 @@ export class MainLayoutComponent {
         }
 
         if (currentPath !== this.previousPath) {
-          requestAnimationFrame(() => {
-            this.routeTransition.animateIn();
-          });
+          this.routeTransition.animateIn();
         }
 
         this.previousPath = currentPath;

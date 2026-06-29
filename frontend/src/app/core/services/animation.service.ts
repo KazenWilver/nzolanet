@@ -12,6 +12,20 @@ export class AnimationService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private reducedMotion = false;
+  private confettiRafId = 0;
+  private confettiCanvas: HTMLCanvasElement | null = null;
+  private confettiContext: CanvasRenderingContext2D | null = null;
+  private confettiParticles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: string;
+    rotation: number;
+    rotationSpeed: number;
+    life: number;
+  }> = [];
 
   constructor() {
     if (this.isBrowser) {
@@ -117,11 +131,13 @@ export class AnimationService {
   }
 
   modalEnter(overlay: Element, dialog: Element): void {
+    gsap.killTweensOf([overlay, dialog]);
+
     if (!this.isEnabled) {
+      gsap.set([overlay, dialog], { clearProps: 'opacity,transform,scale,y' });
       return;
     }
 
-    gsap.killTweensOf([overlay, dialog]);
     const mobile = this.isMobile;
 
     gsap.set(overlay, { opacity: 0 });
@@ -155,6 +171,7 @@ export class AnimationService {
       return;
     }
 
+    gsap.killTweensOf(element);
     gsap.fromTo(
       element,
       { scale: 1 },
@@ -163,7 +180,10 @@ export class AnimationService {
         duration: 0.18,
         ease: 'power2.out',
         yoyo: true,
-        repeat: 1
+        repeat: 1,
+        onComplete: () => {
+          gsap.set(element, { clearProps: 'transform' });
+        }
       }
     );
   }
@@ -173,6 +193,7 @@ export class AnimationService {
       return;
     }
 
+    gsap.killTweensOf(element);
     gsap.fromTo(
       element,
       { scale: 1 },
@@ -181,7 +202,10 @@ export class AnimationService {
         duration: 0.08,
         ease: 'power2.in',
         yoyo: true,
-        repeat: 1
+        repeat: 1,
+        onComplete: () => {
+          gsap.set(element, { clearProps: 'transform' });
+        }
       }
     );
   }
@@ -237,36 +261,24 @@ export class AnimationService {
     const originY = rect.top + rect.height / 2;
     const colors = ['#f91880', '#7856ff', '#1d9bf0', '#ffd400', '#00ba7c'];
 
-    let canvas = document.getElementById('nz-confetti-canvas') as HTMLCanvasElement | null;
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.id = 'nz-confetti-canvas';
-      canvas.setAttribute('aria-hidden', 'true');
-      canvas.style.cssText =
+    if (!this.confettiCanvas) {
+      this.confettiCanvas = document.createElement('canvas');
+      this.confettiCanvas.id = 'nz-confetti-canvas';
+      this.confettiCanvas.setAttribute('aria-hidden', 'true');
+      this.confettiCanvas.style.cssText =
         'position:fixed;inset:0;pointer-events:none;z-index:9999;width:100%;height:100%';
-      document.body.appendChild(canvas);
+      document.body.appendChild(this.confettiCanvas);
+      this.confettiContext = this.confettiCanvas.getContext('2d');
     }
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const context = canvas.getContext('2d');
-    if (!context) {
+    this.confettiCanvas.width = window.innerWidth;
+    this.confettiCanvas.height = window.innerHeight;
+
+    if (!this.confettiContext) {
       return;
     }
 
-    type Particle = {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      color: string;
-      rotation: number;
-      rotationSpeed: number;
-      life: number;
-    };
-
-    const particles: Particle[] = Array.from({ length: 28 }, () => ({
+    const batch = Array.from({ length: 24 }, () => ({
       x: originX,
       y: originY,
       vx: (Math.random() - 0.5) * 14,
@@ -278,39 +290,53 @@ export class AnimationService {
       life: 1
     }));
 
-    const render = (): void => {
-      context.clearRect(0, 0, canvas!.width, canvas!.height);
-      let alive = false;
+    this.confettiParticles.push(...batch);
 
-      for (const particle of particles) {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        particle.vy += 0.38;
-        particle.life -= 0.022;
-        particle.rotation += particle.rotationSpeed;
+    if (!this.confettiRafId) {
+      this.confettiRafId = requestAnimationFrame(() => this.renderConfetti());
+    }
+  }
 
-        if (particle.life <= 0) {
-          continue;
-        }
+  private renderConfetti(): void {
+    const canvas = this.confettiCanvas;
+    const context = this.confettiContext;
+    if (!canvas || !context) {
+      this.confettiRafId = 0;
+      return;
+    }
 
-        alive = true;
-        context.save();
-        context.translate(particle.x, particle.y);
-        context.rotate((particle.rotation * Math.PI) / 180);
-        context.globalAlpha = particle.life;
-        context.fillStyle = particle.color;
-        context.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size * 0.65);
-        context.restore();
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    const nextParticles = [];
+
+    for (const particle of this.confettiParticles) {
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      particle.vy += 0.38;
+      particle.life -= 0.022;
+      particle.rotation += particle.rotationSpeed;
+
+      if (particle.life <= 0) {
+        continue;
       }
 
-      if (alive) {
-        requestAnimationFrame(render);
-        return;
-      }
+      nextParticles.push(particle);
+      context.save();
+      context.translate(particle.x, particle.y);
+      context.rotate((particle.rotation * Math.PI) / 180);
+      context.globalAlpha = particle.life;
+      context.fillStyle = particle.color;
+      context.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size * 0.65);
+      context.restore();
+    }
 
-      context.clearRect(0, 0, canvas!.width, canvas!.height);
-    };
+    this.confettiParticles = nextParticles;
 
-    requestAnimationFrame(render);
+    if (this.confettiParticles.length > 0) {
+      this.confettiRafId = requestAnimationFrame(() => this.renderConfetti());
+      return;
+    }
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    this.confettiRafId = 0;
   }
 }

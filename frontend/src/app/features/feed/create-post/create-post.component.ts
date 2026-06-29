@@ -57,12 +57,12 @@ export class CreatePostComponent implements OnInit {
 
     if (this.modoModal) {
       this.formOpen = true;
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const form = this.composerFormRef?.nativeElement;
         if (form) {
           this.animationService.enter(form, 'fadeUp');
         }
-      });
+      }, 0);
     }
   }
 
@@ -84,12 +84,12 @@ export class CreatePostComponent implements OnInit {
 
   openForm(): void {
     this.formOpen = true;
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       const form = this.composerFormRef?.nativeElement;
       if (form) {
         this.animationService.enter(form, 'fadeUp');
       }
-    });
+    }, 0);
   }
 
   cancel(): void {

@@ -14,6 +14,7 @@ export class ProfileParallaxDirective implements AfterViewInit, OnDestroy {
   private readonly animationService = inject(AnimationService);
 
   private scrollContainer: HTMLElement | null = null;
+  private coverElement: HTMLElement | null = null;
   private parallaxLayer: HTMLElement | null = null;
   private rafId = 0;
   private readonly handleScroll = (): void => {
@@ -33,11 +34,10 @@ export class ProfileParallaxDirective implements AfterViewInit, OnDestroy {
     }
 
     this.scrollContainer = document.querySelector('.main-layout__center');
-    this.parallaxLayer =
-      this.elementRef.nativeElement.querySelector('.profile-page__cover-image') ??
-      this.elementRef.nativeElement.querySelector('.profile-page__cover');
+    this.coverElement = this.elementRef.nativeElement.querySelector('.profile-page__cover');
+    this.parallaxLayer = this.elementRef.nativeElement.querySelector('.profile-page__cover-image');
 
-    if (!this.scrollContainer || !this.parallaxLayer) {
+    if (!this.scrollContainer || !this.coverElement || !this.parallaxLayer) {
       return;
     }
 
@@ -59,13 +59,16 @@ export class ProfileParallaxDirective implements AfterViewInit, OnDestroy {
   }
 
   private applyParallax(): void {
-    if (!this.scrollContainer || !this.parallaxLayer) {
+    if (!this.scrollContainer || !this.coverElement || !this.parallaxLayer) {
       return;
     }
 
-    const scrollTop = this.scrollContainer.scrollTop;
-    const offset = Math.min(scrollTop * 0.42, 96);
-    const scale = 1 + Math.min(scrollTop / 2400, 0.08);
+    const containerRect = this.scrollContainer.getBoundingClientRect();
+    const coverRect = this.coverElement.getBoundingClientRect();
+    const coverTopInScroll = coverRect.top - containerRect.top;
+    const scrollAmount = Math.max(0, -coverTopInScroll);
+    const offset = Math.min(scrollAmount * 0.42, 96);
+    const scale = 1 + Math.min(scrollAmount / 2400, 0.08);
 
     gsap.set(this.parallaxLayer, {
       y: offset,

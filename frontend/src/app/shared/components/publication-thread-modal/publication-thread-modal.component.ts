@@ -109,23 +109,30 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
 
     const isOpen = this.embedded || this.open || changes['open']?.currentValue === true;
 
-    if (
+    const openingOverlay =
+      !this.embedded &&
+      this.open &&
+      (changes['open']?.previousValue !== true || changes['open']?.firstChange);
+
+    const shouldLoadComments =
       isOpen &&
       (
         publicationChanged ||
         (changes['publication']?.firstChange && !!changes['publication'].currentValue) ||
-        changes['open']?.currentValue === true ||
+        openingOverlay ||
         changes['embedded']?.currentValue === true
-      )
-    ) {
+      );
+
+    if (shouldLoadComments) {
       this.loadComments();
-      if (!this.embedded) {
-        this.scrollLock.lock();
-        this.pendingModalAnimation = true;
-      }
       if (this.useMediaLayout && this.publication?.videoUrl) {
         setTimeout(() => this.syncModalVideo(), 0);
       }
+    }
+
+    if (openingOverlay) {
+      this.scrollLock.lock();
+      this.pendingModalAnimation = true;
     }
 
     if (!this.embedded && changes['open']?.currentValue === false) {

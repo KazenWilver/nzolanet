@@ -12,6 +12,7 @@ export class RouteTransitionService {
   private readonly animationService = inject(AnimationService);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private outgoingTween: gsap.core.Tween | null = null;
+  private incomingTween: gsap.core.Tween | null = null;
   private skipNextIn = false;
 
   animateOut(): void {
@@ -24,6 +25,7 @@ export class RouteTransitionService {
       return;
     }
 
+    this.incomingTween?.kill();
     this.outgoingTween?.kill();
     this.outgoingTween = gsap.to(target, {
       opacity: 0,
@@ -46,24 +48,44 @@ export class RouteTransitionService {
       return;
     }
 
-    const target = this.getRouteHost();
-    if (!target) {
-      this.resetScroll();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const target = this.getRouteHost();
+        if (!target) {
+          this.resetScroll();
+          return;
+        }
+
+        this.outgoingTween?.kill();
+        this.incomingTween?.kill();
+        gsap.killTweensOf(target);
+        gsap.set(target, { opacity: 0, y: 14 });
+        this.incomingTween = gsap.to(target, {
+          opacity: 1,
+          y: 0,
+          duration: 0.34,
+          ease: 'power2.out',
+          overwrite: 'auto',
+          clearProps: 'transform,opacity'
+        });
+        this.resetScroll();
+      });
+    });
+  }
+
+  resetRouteHost(): void {
+    if (!this.isBrowser) {
       return;
     }
 
+    const target = this.getRouteHost();
     this.outgoingTween?.kill();
-    gsap.killTweensOf(target);
-    gsap.set(target, { opacity: 0, y: 14 });
-    gsap.to(target, {
-      opacity: 1,
-      y: 0,
-      duration: 0.34,
-      ease: 'power2.out',
-      overwrite: 'auto',
-      clearProps: 'transform,opacity'
-    });
-    this.resetScroll();
+    this.incomingTween?.kill();
+
+    if (target) {
+      gsap.killTweensOf(target);
+      gsap.set(target, { clearProps: 'opacity,transform,y' });
+    }
   }
 
   skipEnterOnce(): void {

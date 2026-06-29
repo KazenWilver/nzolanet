@@ -1,4 +1,5 @@
-import { AfterViewInit, Directive, ElementRef, Input, inject } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, Input, OnDestroy, inject } from '@angular/core';
+import gsap from 'gsap';
 import { AnimationService } from '../../core/services/animation.service';
 
 type EnterVariant = 'fadeUp' | 'fadeIn' | 'scaleIn' | 'slideRight';
@@ -10,26 +11,45 @@ type EnterVariant = 'fadeUp' | 'fadeIn' | 'scaleIn' | 'slideRight';
   selector: '[appEnterAnimation]',
   standalone: true
 })
-export class EnterAnimationDirective implements AfterViewInit {
+export class EnterAnimationDirective implements AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly animationService = inject(AnimationService);
 
   @Input() enterVariant: EnterVariant = 'fadeUp';
   @Input() enterDelay = 0;
-  /** Índice na lista para escalonar entradas (atraso máx. ~360ms). */
+  /** Índice na lista para escalonar entradas. */
   @Input() enterIndex?: number;
+  /** Máximo de itens com animação escalonada (resto aparece instantâneo). */
+  @Input() enterStaggerMax = 7;
+  @Input() skipEnter = false;
+
+  private tween: gsap.core.Tween | null = null;
 
   ngAfterViewInit(): void {
-    const staggerDelay = this.enterIndex != null
-      ? Math.min(this.enterIndex * 0.045, 0.36)
-      : 0;
+    if (this.skipEnter) {
+      return;
+    }
+
+    const index = this.enterIndex ?? 0;
+    if (index > this.enterStaggerMax) {
+      return;
+    }
+
+    const staggerDelay = Math.min(index * 0.045, 0.36);
 
     requestAnimationFrame(() => {
-      this.animationService.enter(
+      this.tween = this.animationService.enter(
         this.elementRef.nativeElement,
         this.enterVariant,
         this.enterDelay + staggerDelay
       );
     });
+  }
+
+  ngOnDestroy(): void {
+    const element = this.elementRef.nativeElement;
+    this.tween?.kill();
+    gsap.killTweensOf(element);
+    gsap.set(element, { clearProps: 'opacity,transform,scale,x,y' });
   }
 }

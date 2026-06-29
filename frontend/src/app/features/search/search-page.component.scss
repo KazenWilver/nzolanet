@@ -104,6 +104,14 @@
   padding: 0;
 }
 
+.search-page__result-item {
+  animation: nz-fade-up 0.32s var(--ease-spring) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 .search-page__result {
   display: flex;
   align-items: flex-start;
