@@ -1,14 +1,13 @@
-import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Notificacao } from '../../../core/services/notification.service';
-import { LegacyUser } from '../../../core/models/user.model';
+import type { AppNotification } from '../../../core/models/notification.model';
+import type { LegacyUser } from '../../../core/models/user.model';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -18,29 +17,33 @@ import { takeUntil } from 'rxjs/operators';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
+
   utilizadorAtual: LegacyUser | null = null;
   termoPesquisa = '';
   menuAberto = false;
   totalNotificacoes = 0;
   notificacoesAberto = false;
-  notificacoesPreview: Notificacao[] = [];
-  private destroy$ = new Subject<void>();
+  notificacoesPreview: AppNotification[] = [];
   modoEscuro = false;
-
-  constructor(
-    private authService: AuthService,
-    private notificationService: NotificationService,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     const savedTheme = localStorage.getItem('nzolanet_theme');
     this.modoEscuro = savedTheme === 'dark';
     document.body.classList.toggle('light-theme', !this.modoEscuro);
 
-    this.authService.utilizador$.pipe(takeUntil(this.destroy$)).subscribe((u: LegacyUser | null) => {
-      this.utilizadorAtual = u;
-      if (u) this.carregarNotificacoes();
+    this.authService.utilizador$.pipe(takeUntil(this.destroy$)).subscribe((user: LegacyUser | null) => {
+      this.utilizadorAtual = user;
+      if (user) {
+        this.carregarNotificacoes();
+      }
+    });
+
+    this.notificationService.unreadCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
+      this.totalNotificacoes = count;
     });
   }
 
@@ -61,12 +64,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   carregarNotificacoes(): void {
-    this.notificationService.obterNotificacoes().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (notificacoes) => {
-        this.notificacoesPreview = notificacoes;
-        this.totalNotificacoes = notificacoes.filter(n => !n.lida).length;
+    this.notificationService.getNotifications().pipe(takeUntil(this.destroy$)).subscribe({
+      next: notifications => {
+        this.notificacoesPreview = notifications.slice(0, 5);
       },
-      error: () => { this.totalNotificacoes = 0; }
+      error: () => {
+        this.notificacoesPreview = [];
+      }
     });
   }
 
@@ -78,8 +82,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   marcarTodasComoLidas(): void {
-    this.notificationService.marcarComoLidas().subscribe({
-      next: () => this.carregarNotificacoes(),
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notificacoesPreview = this.notificacoesPreview.map(notification => ({
+          ...notification,
+          isRead: true
+        }));
+      },
       error: () => {}
     });
   }
@@ -90,8 +99,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
-  alternarMenuUtilizador(): void { this.menuAberto = !this.menuAberto; }
-  fecharMenu(): void { this.menuAberto = false; }
+  alternarMenuUtilizador(): void {
+    this.menuAberto = !this.menuAberto;
+  }
+
+  fecharMenu(): void {
+    this.menuAberto = false;
+  }
 
   terminarSessao(): void {
     this.menuAberto = false;
@@ -110,6 +124,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   fecharMenuAoClicarFora(evento: MouseEvent): void {
     const alvo = evento.target as HTMLElement;
     if (!alvo.closest('.navbar__avatar-wrap')) this.menuAberto = false;
-    if (!alvo.closest('.navbar__notificacoes') && !alvo.closest('.navbar__btn--notificacao')) this.notificacoesAberto = false;
+    if (!alvo.closest('.navbar__notificacoes') && !alvo.closest('.navbar__btn--notificacao')) {
+      this.notificacoesAberto = false;
+    }
   }
 }

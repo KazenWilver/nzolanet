@@ -7,14 +7,32 @@
 
     <nav class="sidebar__nav">
       @for (item of primaryNavItems; track item.id) {
-        <a
-          class="sidebar__link"
-          [class.sidebar__link--active]="isActive(item.route, item.type === 'link' ? item.exact : false)"
-          [routerLink]="item.route"
-        >
-          <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
-          <span class="sidebar__label">{{ item.label }}</span>
-        </a>
+        @if (isNotificationsItem(item)) {
+          <a
+            class="sidebar__link sidebar__link--notifications"
+            [class.sidebar__link--active]="isActive(item.route)"
+            [routerLink]="item.route"
+          >
+            <span class="sidebar__icon-wrap">
+              <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+              @if (unreadCount > 0) {
+                <span class="sidebar__badge" aria-label="{{ unreadCount }} notificações por ler">
+                  {{ unreadCount > 99 ? '99+' : unreadCount }}
+                </span>
+              }
+            </span>
+            <span class="sidebar__label">{{ item.label }}</span>
+          </a>
+        } @else {
+          <a
+            class="sidebar__link"
+            [class.sidebar__link--active]="isActive(item.route, item.type === 'link' ? item.exact : false)"
+            [routerLink]="item.route"
+          >
+            <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+            <span class="sidebar__label">{{ item.label }}</span>
+          </a>
+        }
       }
 
       <a

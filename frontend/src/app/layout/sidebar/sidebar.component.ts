@@ -7,6 +7,7 @@ import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { ThemeService } from '../../core/services/theme.service';
 import { PublishModalService } from '../../core/services/publish-modal.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 interface SidebarLinkItem {
   type: 'link';
@@ -25,7 +26,15 @@ interface SidebarPlaceholderItem {
   icon: string;
 }
 
-type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem;
+interface SidebarNotificationsItem {
+  type: 'notifications';
+  id: string;
+  label: string;
+  route: string;
+  icon: string;
+}
+
+type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem | SidebarNotificationsItem;
 
 @Component({
   selector: 'app-sidebar',
@@ -38,15 +47,17 @@ export class SidebarComponent {
   private readonly authService = inject(AuthService);
   readonly themeService = inject(ThemeService);
   private readonly publishModal = inject(PublishModalService);
+  private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   currentUser: User | null = null;
+  unreadCount = 0;
 
   readonly primaryNavItems: SidebarItem[] = [
     { type: 'link', id: 'feed', label: 'Feed', route: '/feed', exact: true, icon: 'home' },
     { type: 'link', id: 'search', label: 'Pesquisar', route: '/search', icon: 'search' },
-    { type: 'placeholder', id: 'notifications', label: 'Notificações', route: '/notifications', icon: 'bell' },
+    { type: 'notifications', id: 'notifications', label: 'Notificações', route: '/notifications', icon: 'bell' },
     { type: 'placeholder', id: 'messages', label: 'Mensagens', route: '/messages', icon: 'mail' }
   ];
 
@@ -60,6 +71,12 @@ export class SidebarComponent {
       .subscribe(user => {
         this.currentUser = user;
       });
+
+    this.notificationService.unreadCount$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(count => {
+        this.unreadCount = count;
+      });
   }
 
   get profileRoute(): string {
@@ -68,6 +85,10 @@ export class SidebarComponent {
 
   get displayName(): string {
     return this.currentUser?.displayName ?? this.currentUser?.username ?? 'Utilizador';
+  }
+
+  isNotificationsItem(item: SidebarItem): item is SidebarNotificationsItem {
+    return item.type === 'notifications';
   }
 
   handleOpenPublishModal(): void {

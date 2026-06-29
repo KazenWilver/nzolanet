@@ -55,11 +55,15 @@
   }
 
   @for (publication of publications; track trackById($index, publication)) {
-    <app-publication-card
-      [publication]="publication"
-      [currentUserId]="currentUserId"
-      (deleted)="handleDeleted($event)"
-      (updated)="handleUpdated($event)"
-    />
+    <div [id]="'publication-' + publication.id">
+      <app-publication-card
+        [publication]="publication"
+        [currentUserId]="currentUserId"
+        [highlighted]="publication.id === focusPublicationId"
+        [expandComments]="publication.id === expandCommentsForPublicationId"
+        (deleted)="handleDeleted($event)"
+        (updated)="handleUpdated($event)"
+      />
+    </div>
   }
 </div>

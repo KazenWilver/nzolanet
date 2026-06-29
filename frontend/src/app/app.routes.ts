@@ -61,8 +61,7 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadComponent: () =>
-          import('./features/placeholder/placeholder-page.component').then(m => m.PlaceholderPageComponent),
-        data: { featureName: 'Notificações' }
+          import('./features/notifications/notifications-page.component').then(m => m.NotificationsPageComponent)
       },
       {
         path: 'messages',

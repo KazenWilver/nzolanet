@@ -18,6 +18,10 @@
   @media (min-width: 1280px) {
     padding: 16px 20px;
   }
+
+  &--highlighted {
+    background-color: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-primary));
+  }
 }
 
 .publication-card__header {

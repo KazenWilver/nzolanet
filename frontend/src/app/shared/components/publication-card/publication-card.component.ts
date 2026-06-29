@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -26,12 +26,14 @@ import { CommentsSectionComponent } from '../comments-section/comments-section.c
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'
 })
-export class PublicationCardComponent {
+export class PublicationCardComponent implements OnChanges {
   private readonly publicationService = inject(PublicationService);
   private readonly router = inject(Router);
 
   @Input({ required: true }) publication!: Publication;
   @Input() currentUserId?: string;
+  @Input() expandComments = false;
+  @Input() highlighted = false;
   @Output() deleted = new EventEmitter<string>();
   @Output() updated = new EventEmitter<Publication>();
 
@@ -44,6 +46,12 @@ export class PublicationCardComponent {
   likeError = '';
   deleting = false;
   commentsOpen = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['expandComments']?.currentValue === true) {
+      this.commentsOpen = true;
+    }
+  }
 
   get isAuthor(): boolean {
     return !!this.currentUserId && this.currentUserId === this.publication.authorId;

@@ -31,6 +31,8 @@ export class FeedPageComponent implements OnInit {
   error = false;
   currentUserId?: string;
   activeTab: FeedTab = 'para-ti';
+  focusPublicationId?: string;
+  expandCommentsForPublicationId?: string;
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id;
@@ -38,6 +40,10 @@ export class FeedPageComponent implements OnInit {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const tab = params.get('tab');
       this.activeTab = tab === 'a-seguir' ? 'a-seguir' : 'para-ti';
+      this.focusPublicationId = params.get('publicacao') ?? undefined;
+      const expandComments = params.get('comentarios') === '1';
+      this.expandCommentsForPublicationId =
+        expandComments && this.focusPublicationId ? this.focusPublicationId : undefined;
       this.loadFeed();
     });
 
@@ -104,6 +110,8 @@ export class FeedPageComponent implements OnInit {
         if (this.isFollowingTab) {
           this.feedTabService.clearFollowingStale();
         }
+
+        this.scrollToFocusedPublication();
       },
       error: () => {
         this.loading = false;
@@ -150,5 +158,16 @@ export class FeedPageComponent implements OnInit {
     return [...publications].sort(
       (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
     );
+  }
+
+  private scrollToFocusedPublication(): void {
+    if (!this.focusPublicationId) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const element = document.getElementById(`publication-${this.focusPublicationId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
 }

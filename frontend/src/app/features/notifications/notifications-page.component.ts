@@ -1,47 +1,149 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { NotificationService, Notificacao } from '../../core/services/notification.service';
+import { Router } from '@angular/router';
+import { NotificationService } from '../../core/services/notification.service';
+import type { AppNotification } from '../../core/models/notification.model';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
 
 @Component({
   selector: 'app-notifications-page',
   standalone: true,
-  imports: [CommonModule, LoadingSpinnerComponent],
+  imports: [CommonModule, AvatarComponent, LoadingSpinnerComponent, TimeAgoPipe],
   templateUrl: './notifications-page.component.html',
   styleUrl: './notifications-page.component.scss'
 })
 export class NotificationsPageComponent implements OnInit {
-  notificacoes: Notificacao[] = [];
-  aCarregar = true;
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private notificationService: NotificationService) {}
+  notifications: AppNotification[] = [];
+  loading = true;
+  error = false;
+  markingAll = false;
 
   ngOnInit(): void {
-    this.carregarNotificacoes();
+    this.loadNotifications();
   }
 
-  carregarNotificacoes(): void {
-    this.aCarregar = true;
-    this.notificationService.obterNotificacoes().subscribe({
-      next: notificacoes => {
-        this.notificacoes = notificacoes;
-        this.aCarregar = false;
+  loadNotifications(): void {
+    this.loading = true;
+    this.error = false;
+
+    this.notificationService.getNotifications().subscribe({
+      next: notifications => {
+        this.notifications = notifications;
+        this.loading = false;
+        this.notificationService.refreshUnreadCount().subscribe();
       },
-      error: () => { this.notificacoes = []; this.aCarregar = false; }
+      error: () => {
+        this.loading = false;
+        this.error = true;
+      }
     });
   }
 
-  marcarComoLidas(): void {
-    this.notificationService.marcarComoLidas().subscribe({
-      next: () => this.carregarNotificacoes(),
-      error: () => {}
+  handleMarkAllAsRead(): void {
+    if (this.markingAll) {
+      return;
+    }
+
+    this.markingAll = true;
+
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications = this.notifications.map(notification => ({
+          ...notification,
+          isRead: true
+        }));
+        this.markingAll = false;
+      },
+      error: () => {
+        this.markingAll = false;
+      }
     });
   }
 
-  remover(id: string): void {
-    this.notificationService.remover(id).subscribe({
-      next: () => { this.notificacoes = this.notificacoes.filter(n => n.id !== id); },
-      error: () => {}
+  handleNotificationClick(notification: AppNotification): void {
+    const wasUnread = !notification.isRead;
+
+    if (wasUnread) {
+      this.notificationService.markAsRead(notification.id).subscribe({
+        next: () => {
+          this.notifications = this.notifications.map(item =>
+            item.id === notification.id ? { ...item, isRead: true } : item
+          );
+        }
+      });
+    }
+
+    this.navigateForNotification(notification);
+  }
+
+  handleDelete(notification: AppNotification, event: MouseEvent): void {
+    event.stopPropagation();
+
+    const wasUnread = !notification.isRead;
+
+    this.notificationService.deleteNotification(notification.id).subscribe({
+      next: () => {
+        this.notifications = this.notifications.filter(item => item.id !== notification.id);
+        this.notificationService.notifyUnreadDecreased(wasUnread);
+      }
     });
+  }
+
+  handleNotificationKeydown(notification: AppNotification, event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.handleNotificationClick(notification);
+    }
+  }
+
+  getMessage(notification: AppNotification): string {
+    switch (notification.type) {
+      case 'baze':
+        return 'deu baze na tua publicação';
+      case 'comment':
+        return 'comentou na tua publicação';
+      case 'follow':
+        return 'começou a seguir-te';
+      default:
+        return '';
+    }
+  }
+
+  getContextText(notification: AppNotification): string | undefined {
+    if (notification.type === 'comment') {
+      return notification.commentText ?? notification.publicationText;
+    }
+
+    return notification.publicationText;
+  }
+
+  trackById(_: number, notification: AppNotification): string {
+    return notification.id;
+  }
+
+  private navigateForNotification(notification: AppNotification): void {
+    if (notification.type === 'follow') {
+      void this.router.navigate(['/profile', notification.actorId]);
+      return;
+    }
+
+    if (notification.publicationId) {
+      void this.router.navigate(['/feed'], {
+        queryParams: {
+          publicacao: notification.publicationId,
+          comentarios: notification.type === 'comment' ? '1' : null
+        }
+      });
+      return;
+    }
+
+    void this.router.navigate(['/feed']);
   }
 }

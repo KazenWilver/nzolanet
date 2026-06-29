@@ -51,18 +51,18 @@
         <div *ngIf="notificacoesPreview.length === 0" class="navbar__notificacoes-empty">
           Não há notificações.
         </div>
-        <a *ngFor="let notificacao of notificacoesPreview" class="navbar__notificacoes-item" [routerLink]="['/notificacoes']" (click)="notificacoesAberto = false">
-          <span class="navbar__notificacoes-indicator" *ngIf="!notificacao.lida"></span>
+        <a *ngFor="let notificacao of notificacoesPreview" class="navbar__notificacoes-item" [routerLink]="['/notifications']" (click)="notificacoesAberto = false">
+          <span class="navbar__notificacoes-indicator" *ngIf="!notificacao.isRead"></span>
           <div>
             <div class="navbar__notificacoes-title">
-              <strong>{{ notificacao.utilizadorNome }}</strong>
-              <span>{{ notificacao.tipo | titlecase }}</span>
+              <strong>{{ notificacao.actorDisplayName || notificacao.actorUsername }}</strong>
+              <span>{{ notificacao.type }}</span>
             </div>
-            <p *ngIf="notificacao.postId">Publicação #{{ notificacao.postId }}</p>
+            <p *ngIf="notificacao.publicationText">{{ notificacao.publicationText }}</p>
           </div>
         </a>
       </div>
-      <a class="navbar__notificacoes-ver-todas" [routerLink]="['/notificacoes']" (click)="notificacoesAberto = false">Ver todas</a>
+      <a class="navbar__notificacoes-ver-todas" [routerLink]="['/notifications']" (click)="notificacoesAberto = false">Ver todas</a>
     </div>
 
     <div class="navbar__avatar-wrap" (click)="alternarMenuUtilizador()">
