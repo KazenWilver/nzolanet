@@ -86,6 +86,7 @@ export class SettingsComponent implements OnInit {
         displayName: this.displayName.trim() || this.user.username,
         bio: this.bio.trim()
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: updatedUser => {
           this.authService.updateCurrentUser(updatedUser);
@@ -112,7 +113,10 @@ export class SettingsComponent implements OnInit {
     this.privacyLoading = true;
     this.privacyError = '';
 
-    this.userService.updateProfile(this.user.id, { isPrivate: nextValue }).subscribe({
+    this.userService
+      .updateProfile(this.user.id, { isPrivate: nextValue })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: updatedUser => {
         this.authService.updateCurrentUser(updatedUser);
         this.user = updatedUser;
@@ -159,6 +163,7 @@ export class SettingsComponent implements OnInit {
 
     this.authService
       .changePassword(this.currentPassword, this.newPassword, this.confirmNewPassword)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.savingPassword = false;

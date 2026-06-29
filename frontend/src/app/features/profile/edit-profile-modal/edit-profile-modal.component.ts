@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject, OnChanges } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, Output, inject, OnChanges } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { switchMap, of } from 'rxjs';
@@ -19,6 +20,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 export class EditProfileModalComponent implements OnChanges {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) user!: User;
   @Input() open = false;
@@ -103,7 +105,8 @@ export class EditProfileModalComponent implements OnChanges {
             return this.userService.uploadPhoto(this.user.id, this.selectedPhoto);
           }
           return of(updatedUser);
-        })
+        }),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: updatedUser => {

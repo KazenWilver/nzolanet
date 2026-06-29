@@ -127,7 +127,9 @@ export class SearchPageComponent implements OnInit {
         ? this.userService.unfollow(user.id)
         : this.userService.follow(user.id);
 
-    request$.subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         if (wasFollowing || wasPending) {
           user.isFollowing = false;

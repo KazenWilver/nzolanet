@@ -1,16 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { AdminService, AdminMetrics, ComentarioReportado } from '../../../core/services/admin.service';
 
 @Component({
   selector: 'app-admin-page',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule],
   templateUrl: './admin-page.component.html',
   styleUrls: ['./admin-page.component.scss']
 })
 export class AdminPageComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
+  private readonly destroyRef = inject(DestroyRef);
+
   carregandoMetrics = false;
   carregandoComentarios = false;
   carregandoRemocao = false;
@@ -19,8 +22,6 @@ export class AdminPageComponent implements OnInit {
   mensagemSucesso = '';
   metrics: AdminMetrics | null = null;
   comentarios: ComentarioReportado[] = [];
-
-  constructor(private adminService: AdminService) {}
 
   ngOnInit(): void {
     this.atualizarDashboard();
@@ -35,7 +36,10 @@ export class AdminPageComponent implements OnInit {
   carregarMetrics(): void {
     this.carregandoMetrics = true;
     this.erroMetrics = '';
-    this.adminService.obterMetricas().subscribe({
+    this.adminService
+      .obterMetricas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (dados) => { this.metrics = dados; },
       error: () => { this.erroMetrics = 'Não foi possível carregar os indicadores.'; },
       complete: () => { this.carregandoMetrics = false; }
@@ -45,7 +49,10 @@ export class AdminPageComponent implements OnInit {
   carregarComentariosDenunciados(): void {
     this.carregandoComentarios = true;
     this.erroComentarios = '';
-    this.adminService.obterComentariosDenunciados().subscribe({
+    this.adminService
+      .obterComentariosDenunciados()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (dados) => { this.comentarios = dados; },
       error: () => { this.erroComentarios = 'Não foi possível carregar os comentários denunciados.'; },
       complete: () => { this.carregandoComentarios = false; }
@@ -66,7 +73,10 @@ export class AdminPageComponent implements OnInit {
     this.erroComentarios = '';
     this.mensagemSucesso = '';
 
-    this.adminService.removerComentario(id).subscribe({
+    this.adminService
+      .removerComentario(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.comentarios = this.comentarios.filter((comentario) => comentario.id !== id);
         if (this.metrics) {
