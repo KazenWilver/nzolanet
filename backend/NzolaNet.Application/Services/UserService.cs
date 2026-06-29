@@ -16,15 +16,18 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IStorageService _storageService;
     private readonly IFollowRepository _followRepository;
+    private readonly INotificationService _notificationService;
 
     public UserService(
         IUserRepository userRepository, 
         IStorageService storageService, 
-        IFollowRepository followRepository)
+        IFollowRepository followRepository,
+        INotificationService notificationService)
     {
         _userRepository = userRepository;
         _storageService = storageService;
         _followRepository = followRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<UserResponseDto> GetUserResponseAsync(Guid userId, Guid? currentUserId = null)
@@ -199,6 +202,11 @@ public class UserService : IUserService
         {
             throw new ArgumentException("Não foi possível seguir o utilizador.");
         }
+
+        if (follow.IsApproved)
+        {
+            await _notificationService.TryCreateFollowNotificationAsync(followerId, followedId);
+        }
     }
 
     public async Task UnfollowUserAsync(Guid followerId, Guid followedId)
@@ -246,7 +254,13 @@ public class UserService : IUserService
         }
 
         follow.IsApproved = true;
-        return await _followRepository.UpdateFollowAsync(follow);
+        var updated = await _followRepository.UpdateFollowAsync(follow);
+        if (updated)
+        {
+            await _notificationService.TryCreateFollowNotificationAsync(followerId, followedId);
+        }
+
+        return updated;
     }
 
     public async Task<bool> RejectFollowRequestAsync(Guid followedId, Guid followerId)

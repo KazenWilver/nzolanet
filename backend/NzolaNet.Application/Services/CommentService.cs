@@ -11,17 +11,20 @@ public class CommentService : ICommentService
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
     private readonly IFollowRepository _followRepository;
+    private readonly INotificationService _notificationService;
 
     public CommentService(
         ICommentRepository commentRepository,
         IPostRepository postRepository,
         IUserRepository userRepository,
-        IFollowRepository followRepository)
+        IFollowRepository followRepository,
+        INotificationService notificationService)
     {
         _commentRepository = commentRepository;
         _postRepository = postRepository;
         _userRepository = userRepository;
         _followRepository = followRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<CommentResponseDto> CreateAsync(Guid userId, Guid publicationId, CreateCommentDto createDto)
@@ -62,6 +65,12 @@ public class CommentService : ICommentService
         }
 
         comment.User = user;
+        await _notificationService.TryCreateCommentNotificationAsync(
+            userId,
+            publicationId,
+            comment.Id,
+            post.UserId);
+
         return MapToResponseDto(comment);
     }
 

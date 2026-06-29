@@ -9,11 +9,16 @@ public class LikeService : ILikeService
 {
     private readonly ILikeRepository _likeRepository;
     private readonly IPostRepository _postRepository;
+    private readonly INotificationService _notificationService;
 
-    public LikeService(ILikeRepository likeRepository, IPostRepository postRepository)
+    public LikeService(
+        ILikeRepository likeRepository,
+        IPostRepository postRepository,
+        INotificationService notificationService)
     {
         _likeRepository = likeRepository;
         _postRepository = postRepository;
+        _notificationService = notificationService;
     }
 
     public async Task LikeAsync(Guid userId, Guid postId)
@@ -41,6 +46,8 @@ public class LikeService : ILikeService
         {
             throw new ArgumentException("Não foi possível dar baze na publicação.");
         }
+
+        await _notificationService.TryCreateBazeNotificationAsync(userId, postId, post.UserId);
     }
 
     public async Task UnlikeAsync(Guid userId, Guid postId)

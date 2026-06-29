@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Comment> Comments { get; set; } = null!;
     public DbSet<Follow> Follows { get; set; } = null!;
     public DbSet<Like> Likes { get; set; } = null!;
+    public DbSet<Notification> Notifications { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -92,6 +93,34 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(l => new { l.UserId, l.PostId }).IsUnique();
+        });
+
+        builder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(n => n.Id);
+            entity.Property(n => n.Type).IsRequired().HasMaxLength(20);
+
+            entity.HasOne(n => n.Recipient)
+                  .WithMany()
+                  .HasForeignKey(n => n.RecipientId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(n => n.Actor)
+                  .WithMany()
+                  .HasForeignKey(n => n.ActorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(n => n.Publication)
+                  .WithMany()
+                  .HasForeignKey(n => n.PublicationId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(n => n.Comment)
+                  .WithMany()
+                  .HasForeignKey(n => n.CommentId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasIndex(n => new { n.RecipientId, n.IsRead, n.CreatedAt });
         });
     }
 }

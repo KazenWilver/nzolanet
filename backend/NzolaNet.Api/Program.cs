@@ -82,6 +82,7 @@ builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -90,6 +91,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // 4.5. Configura a política de CORS para o frontend Angular
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
