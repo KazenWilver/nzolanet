@@ -64,7 +64,10 @@ export class CommentsSectionComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    this.commentService.getByPublication(this.publicationId).subscribe({
+    this.commentService
+      .getByPublication(this.publicationId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: comments => {
         this.comments = this.sortByCreatedAtAsc(comments);
         this.loading = false;
@@ -102,7 +105,10 @@ export class CommentsSectionComponent implements OnInit {
     this.newCommentText = '';
     this.countChange.emit(this.comments.length);
 
-    this.commentService.create(this.publicationId, { text }).subscribe({
+    this.commentService
+      .create(this.publicationId, { text })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: comment => {
         this.comments = this.sortByCreatedAtAsc(
           this.comments.map(item => (item.id === tempId ? comment : item))
@@ -136,7 +142,10 @@ export class CommentsSectionComponent implements OnInit {
 
     this.savingEditId = comment.id;
 
-    this.commentService.update(comment.id, { text }).subscribe({
+    this.commentService
+      .update(comment.id, { text })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: updated => {
         this.comments = this.comments.map(item => (item.id === comment.id ? updated : item));
         this.editingCommentId = null;
@@ -160,7 +169,10 @@ export class CommentsSectionComponent implements OnInit {
     this.comments = this.comments.filter(item => item.id !== comment.id);
     this.countChange.emit(this.comments.length);
 
-    this.commentService.delete(comment.id).subscribe({
+    this.commentService
+      .delete(comment.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.deletingId = null;
       },

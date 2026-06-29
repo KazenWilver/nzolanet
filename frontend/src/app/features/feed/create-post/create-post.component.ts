@@ -1,5 +1,6 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PublicationService } from '../../../core/services/publication.service';
@@ -152,15 +153,21 @@ export class CreatePostComponent implements OnInit {
       formData.append('Video', this.selectedFile);
     }
 
-    this.publicationService.create(formData).subscribe({
+    this.publicationService
+      .create(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: publication => {
         this.postCriado.emit(publication);
         this.publishing = false;
         this.resetForm();
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.publishing = false;
-        this.error = 'Erro ao publicar. Verifica o ficheiro e tenta novamente (máx. 10 MB imagem, 50 MB vídeo).';
+        const apiMessage = error.error?.message ?? error.error?.Message;
+        this.error =
+          apiMessage ??
+          'Erro ao publicar. Verifica o ficheiro e tenta novamente (máx. 10 MB imagem, 50 MB vídeo).';
       }
     });
   }

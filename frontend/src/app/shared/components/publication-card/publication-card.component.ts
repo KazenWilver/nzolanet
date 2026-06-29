@@ -1,4 +1,5 @@
-import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +31,7 @@ import { CommentsSectionComponent } from '../comments-section/comments-section.c
 export class PublicationCardComponent implements OnChanges {
   private readonly publicationService = inject(PublicationService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) publication!: Publication;
   @Input() currentUserId?: string;
@@ -119,7 +121,10 @@ export class PublicationCardComponent implements OnChanges {
     this.savingEdit = true;
     this.editError = '';
 
-    this.publicationService.update(this.publication.id, { text }).subscribe({
+    this.publicationService
+      .update(this.publication.id, { text })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: updated => {
         this.publication = updated;
         this.editing = false;
@@ -145,7 +150,10 @@ export class PublicationCardComponent implements OnChanges {
 
     this.deleting = true;
     this.deleteError = '';
-    this.publicationService.delete(this.publication.id).subscribe({
+    this.publicationService
+      .delete(this.publication.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.deleteDialogOpen = false;
         this.deleting = false;
@@ -186,7 +194,9 @@ export class PublicationCardComponent implements OnChanges {
 
     this.likingInProgress = true;
 
-    request$.subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.likingInProgress = false;
       },

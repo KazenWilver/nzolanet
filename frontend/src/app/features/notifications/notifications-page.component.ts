@@ -33,11 +33,17 @@ export class NotificationsPageComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    this.notificationService.getNotifications().subscribe({
+    this.notificationService
+      .getNotifications()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: notifications => {
         this.notifications = notifications;
         this.loading = false;
-        this.notificationService.refreshUnreadCount().subscribe();
+        this.notificationService
+          .refreshUnreadCount()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe();
       },
       error: () => {
         this.loading = false;
@@ -53,7 +59,10 @@ export class NotificationsPageComponent implements OnInit {
 
     this.markingAll = true;
 
-    this.notificationService.markAllAsRead().subscribe({
+    this.notificationService
+      .markAllAsRead()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.notifications = this.notifications.map(notification => ({
           ...notification,
@@ -71,7 +80,10 @@ export class NotificationsPageComponent implements OnInit {
     const wasUnread = !notification.isRead;
 
     if (wasUnread) {
-      this.notificationService.markAsRead(notification.id).subscribe({
+      this.notificationService
+        .markAsRead(notification.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
         next: () => {
           this.notifications = this.notifications.map(item =>
             item.id === notification.id ? { ...item, isRead: true } : item
@@ -91,7 +103,10 @@ export class NotificationsPageComponent implements OnInit {
 
     const wasUnread = !notification.isRead;
 
-    this.notificationService.deleteNotification(notification.id).subscribe({
+    this.notificationService
+      .deleteNotification(notification.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.notifications = this.notifications.filter(item => item.id !== notification.id);
         this.notificationService.notifyUnreadDecreased(wasUnread);

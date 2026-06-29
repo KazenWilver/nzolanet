@@ -2,6 +2,11 @@
   <div class="profile-page__loading">
     <app-loading-spinner tamanho="lg" />
   </div>
+} @else if (profileNotFound) {
+  <div class="profile-page__error">
+    <p>Este utilizador não existe ou foi removido.</p>
+    <a routerLink="/feed" class="profile-page__retry">Voltar ao feed</a>
+  </div>
 } @else if (profileError) {
   <div class="profile-page__error">
     <p>Não foi possível carregar o perfil.</p>

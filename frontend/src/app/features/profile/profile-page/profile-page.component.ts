@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
@@ -22,6 +22,7 @@ type ProfileTab = 'publications' | 'likes';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     DatePipe,
     AvatarComponent,
     PublicationCardComponent,
@@ -47,6 +48,7 @@ export class ProfilePageComponent implements OnInit {
   loadingPublications = false;
   loadingLikes = false;
   profileError = false;
+  profileNotFound = false;
   contentLoadError = false;
   privateAccount = false;
   togglingFollow = false;
@@ -64,6 +66,9 @@ export class ProfilePageComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(user => {
         this.currentUserId = user?.id;
+        if (user && (this.profile?.id === user.id || this.lastProfileUserId === user.id)) {
+          this.syncOwnPublicationAuthors(user);
+        }
       });
 
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
@@ -105,6 +110,7 @@ export class ProfilePageComponent implements OnInit {
     const requestId = ++this.profileRequestId;
     this.loadingProfile = true;
     this.profileError = false;
+    this.profileNotFound = false;
     this.contentLoadError = false;
     this.privateAccount = false;
     this.publications = [];
@@ -135,12 +141,16 @@ export class ProfilePageComponent implements OnInit {
           this.privateAccount = true;
         }
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         if (requestId !== this.profileRequestId) {
           return;
         }
 
-        this.profileError = true;
+        if (error.status === 404) {
+          this.profileNotFound = true;
+        } else {
+          this.profileError = true;
+        }
       }
     });
   }
@@ -252,6 +262,22 @@ export class ProfilePageComponent implements OnInit {
 
   handleProfileSaved(user: User): void {
     this.profile = user;
+    this.syncOwnPublicationAuthors(user);
+  }
+
+  private syncOwnPublicationAuthors(user: User): void {
+    const patchAuthor = (publication: Publication): Publication =>
+      publication.authorId === user.id
+        ? {
+            ...publication,
+            authorUsername: user.username,
+            authorDisplayName: user.displayName,
+            authorPhotoUrl: user.profilePhotoUrl
+          }
+        : publication;
+
+    this.publications = this.publications.map(patchAuthor);
+    this.likedPublications = this.likedPublications.map(patchAuthor);
   }
 
   openFollowersModal(mode: 'followers' | 'following'): void {

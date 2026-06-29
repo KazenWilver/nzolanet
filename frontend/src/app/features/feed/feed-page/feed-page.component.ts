@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PublicationService } from '../../../core/services/publication.service';
 import { FeedTabService, type FeedTab } from '../../../core/services/feed-tab.service';
 import type { Publication } from '../../../core/models/publication.model';
+import type { User } from '../../../core/models/user.model';
 import { PublicationCardComponent } from '../../../shared/components/publication-card/publication-card.component';
 import { CreatePostComponent } from '../create-post/create-post.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -38,6 +39,15 @@ export class FeedPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id;
+
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        this.currentUserId = user?.id;
+        if (user) {
+          this.syncAuthorProfileOnPublications(user);
+        }
+      });
 
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const tab = params.get('tab');
@@ -187,5 +197,18 @@ export class FeedPageComponent implements OnInit {
       const element = document.getElementById(`publication-${this.focusPublicationId}`);
       element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
+  }
+
+  private syncAuthorProfileOnPublications(user: User): void {
+    this.publications = this.publications.map(publication =>
+      publication.authorId === user.id
+        ? {
+            ...publication,
+            authorUsername: user.username,
+            authorDisplayName: user.displayName,
+            authorPhotoUrl: user.profilePhotoUrl
+          }
+        : publication
+    );
   }
 }
