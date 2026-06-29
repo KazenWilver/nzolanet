@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -104,14 +105,22 @@ export class FeedPageComponent implements OnInit {
       ? this.publicationService.getFollowingFeed()
       : this.publicationService.getAll();
 
-    request$.subscribe({
+    request$
+      .pipe(
+        finalize(() => {
+          if (requestId === this.feedRequestId) {
+            this.loading = false;
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
       next: publications => {
         if (requestId !== this.feedRequestId) {
           return;
         }
 
         this.publications = this.sortByDate(publications);
-        this.loading = false;
 
         if (this.isFollowingTab) {
           this.feedTabService.clearFollowingStale();
@@ -124,7 +133,6 @@ export class FeedPageComponent implements OnInit {
           return;
         }
 
-        this.loading = false;
         this.error = true;
       }
     });

@@ -17,4 +17,5 @@ public interface IUserRepository
     Task<IReadOnlyList<string>> GetRolesAsync(Guid userId);
     Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query);
     Task<System.Collections.Generic.IEnumerable<User>> GetSuggestionsAsync(Guid currentUserId, int count);
+    Task<int> GetTotalCountAsync();
 }

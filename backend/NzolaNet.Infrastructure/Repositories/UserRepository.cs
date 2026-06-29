@@ -120,4 +120,9 @@ public class UserRepository : IUserRepository
             .Take(count)
             .ToListAsync();
     }
+
+    public Task<int> GetTotalCountAsync()
+    {
+        return _context.Users.CountAsync();
+    }
 }

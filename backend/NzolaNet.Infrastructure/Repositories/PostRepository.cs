@@ -31,9 +31,8 @@ public class PostRepository : IPostRepository
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Comments)
-            .Include(p => p.Likes)
             .OrderByDescending(p => p.CreatedAt)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -41,10 +40,9 @@ public class PostRepository : IPostRepository
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Comments)
-            .Include(p => p.Likes)
             .Where(p => followedUserIds.Contains(p.UserId))
             .OrderByDescending(p => p.CreatedAt)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -52,10 +50,9 @@ public class PostRepository : IPostRepository
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Comments)
-            .Include(p => p.Likes)
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -75,5 +72,10 @@ public class PostRepository : IPostRepository
     {
         _context.Posts.Remove(post);
         return await _context.SaveChangesAsync() > 0;
+    }
+
+    public Task<int> GetTotalCountAsync()
+    {
+        return _context.Posts.CountAsync();
     }
 }

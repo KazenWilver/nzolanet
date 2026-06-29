@@ -13,4 +13,7 @@ public interface ILikeRepository
     Task<bool> CreateAsync(Like like);
     Task<bool> DeleteAsync(Like like);
     Task<IEnumerable<Post>> GetLikedPostsByUserAsync(Guid userId);
+    Task<int> GetTotalCountAsync();
+    Task<Dictionary<Guid, int>> GetLikeCountsByPostIdsAsync(IEnumerable<Guid> postIds);
+    Task<HashSet<Guid>> GetLikedPostIdsForUserAsync(Guid userId, IEnumerable<Guid> postIds);
 }

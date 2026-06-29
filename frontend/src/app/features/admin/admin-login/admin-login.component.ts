@@ -42,7 +42,7 @@ export class AdminLoginComponent implements OnInit {
 
     this.http.post<{ token: string }>(`${environment.apiUrl}/admin/login`, {
       email: this.email,
-      senha: this.senha
+      password: this.senha
     }).subscribe({
       next: (resposta) => {
         localStorage.setItem('admin_token', resposta.token);

@@ -14,4 +14,5 @@ public interface IPostRepository
     Task<bool> CreateAsync(Post post);
     Task<bool> UpdateAsync(Post post);
     Task<bool> DeleteAsync(Post post);
+    Task<int> GetTotalCountAsync();
 }

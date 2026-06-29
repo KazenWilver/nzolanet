@@ -12,6 +12,7 @@ public class PostService : IPostService
     private readonly IUserRepository _userRepository;
     private readonly IFollowRepository _followRepository;
     private readonly ILikeRepository _likeRepository;
+    private readonly ICommentRepository _commentRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IStorageService _storageService;
 
@@ -20,6 +21,7 @@ public class PostService : IPostService
         IUserRepository userRepository,
         IFollowRepository followRepository,
         ILikeRepository likeRepository,
+        ICommentRepository commentRepository,
         INotificationRepository notificationRepository,
         IStorageService storageService)
     {
@@ -27,6 +29,7 @@ public class PostService : IPostService
         _userRepository = userRepository;
         _followRepository = followRepository;
         _likeRepository = likeRepository;
+        _commentRepository = commentRepository;
         _notificationRepository = notificationRepository;
         _storageService = storageService;
     }
@@ -113,6 +116,15 @@ public class PostService : IPostService
             post.Text = updateDto.Text;
         }
 
+        var hasText = !string.IsNullOrWhiteSpace(post.Text);
+        var hasImage = !string.IsNullOrEmpty(post.ImagePath);
+        var hasVideo = !string.IsNullOrEmpty(post.VideoPath);
+
+        if (!hasText && !hasImage && !hasVideo)
+        {
+            throw new ArgumentException("A publicação deve conter texto, imagem ou vídeo.");
+        }
+
         post.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _postRepository.UpdateAsync(post);
@@ -173,7 +185,7 @@ public class PostService : IPostService
             posts = posts.Where(p => !p.User.IsPrivate);
         }
 
-        return posts.Select(p => MapToDto(p, currentUserId));
+        return await MapPostsToDtosAsync(posts, currentUserId);
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId)
@@ -188,7 +200,7 @@ public class PostService : IPostService
 
         var posts = await _postRepository.GetFeedByFollowedUsersAsync(followedIds);
 
-        return posts.Select(p => MapToDto(p, userId));
+        return await MapPostsToDtosAsync(posts, userId);
     }
 
     public async Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
@@ -240,7 +252,7 @@ public class PostService : IPostService
         }
 
         var posts = await _postRepository.GetByUserIdAsync(targetUserId);
-        return posts.Select(p => MapToDto(p, currentUserId));
+        return await MapPostsToDtosAsync(posts, currentUserId);
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null)
@@ -266,7 +278,7 @@ public class PostService : IPostService
         }
 
         var likedPosts = await _likeRepository.GetLikedPostsByUserAsync(targetUserId);
-        var publications = new List<PublicationResponseDto>();
+        var visiblePosts = new List<Post>();
 
         foreach (var post in likedPosts)
         {
@@ -284,16 +296,48 @@ public class PostService : IPostService
                 }
             }
 
-            publications.Add(MapToDto(post, currentUserId));
+            visiblePosts.Add(post);
         }
 
-        return publications;
+        return await MapPostsToDtosAsync(visiblePosts, currentUserId);
     }
 
-    private static PublicationResponseDto MapToDto(Post post, Guid? currentUserId = null)
+    private async Task<IEnumerable<PublicationResponseDto>> MapPostsToDtosAsync(
+        IEnumerable<Post> posts,
+        Guid? currentUserId)
     {
-        bool? hasLiked = null;
+        var postList = posts.ToList();
+        if (postList.Count == 0)
+        {
+            return Array.Empty<PublicationResponseDto>();
+        }
+
+        var postIds = postList.Select(p => p.Id).ToList();
+        var likeCounts = await _likeRepository.GetLikeCountsByPostIdsAsync(postIds);
+        var commentCounts = await _commentRepository.GetCommentCountsByPostIdsAsync(postIds);
+        HashSet<Guid> likedPostIds = new();
+
         if (currentUserId.HasValue)
+        {
+            likedPostIds = await _likeRepository.GetLikedPostIdsForUserAsync(currentUserId.Value, postIds);
+        }
+
+        return postList.Select(post => MapToDto(
+            post,
+            currentUserId,
+            likeCounts.GetValueOrDefault(post.Id),
+            commentCounts.GetValueOrDefault(post.Id),
+            currentUserId.HasValue ? likedPostIds.Contains(post.Id) : null));
+    }
+
+    private static PublicationResponseDto MapToDto(
+        Post post,
+        Guid? currentUserId = null,
+        int? likesCount = null,
+        int? commentsCount = null,
+        bool? hasLiked = null)
+    {
+        if (!hasLiked.HasValue && currentUserId.HasValue)
         {
             hasLiked = post.Likes?.Any(l => l.UserId == currentUserId.Value) == true;
         }
@@ -310,8 +354,8 @@ public class PostService : IPostService
             AuthorUsername = post.User?.UserName ?? string.Empty,
             AuthorDisplayName = post.User?.DisplayName,
             AuthorPhotoUrl = post.User?.ProfilePhoto,
-            LikesCount = post.Likes?.Count ?? 0,
-            CommentsCount = post.Comments?.Count ?? 0,
+            LikesCount = likesCount ?? post.Likes?.Count ?? 0,
+            CommentsCount = commentsCount ?? post.Comments?.Count ?? 0,
             HasLiked = hasLiked
         };
     }

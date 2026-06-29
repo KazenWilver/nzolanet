@@ -14,4 +14,5 @@ public interface ICommentRepository
     Task<bool> CreateAsync(Comment comment);
     Task<bool> UpdateAsync(Comment comment);
     Task<bool> DeleteAsync(Comment comment);
+    Task<Dictionary<Guid, int>> GetCommentCountsByPostIdsAsync(IEnumerable<Guid> postIds);
 }

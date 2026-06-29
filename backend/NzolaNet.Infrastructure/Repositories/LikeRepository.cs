@@ -52,12 +52,45 @@ public class LikeRepository : ILikeRepository
             .Where(l => l.UserId == userId)
             .Include(l => l.Post)
                 .ThenInclude(p => p.User)
-            .Include(l => l.Post)
-                .ThenInclude(p => p.Likes)
-            .Include(l => l.Post)
-                .ThenInclude(p => p.Comments)
             .OrderByDescending(l => l.CreatedAt)
             .Select(l => l.Post)
+            .AsNoTracking()
             .ToListAsync();
+    }
+
+    public Task<int> GetTotalCountAsync()
+    {
+        return _context.Likes.CountAsync();
+    }
+
+    public async Task<Dictionary<Guid, int>> GetLikeCountsByPostIdsAsync(IEnumerable<Guid> postIds)
+    {
+        var ids = postIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new Dictionary<Guid, int>();
+        }
+
+        return await _context.Likes
+            .Where(l => ids.Contains(l.PostId))
+            .GroupBy(l => l.PostId)
+            .Select(g => new { PostId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.PostId, x => x.Count);
+    }
+
+    public async Task<HashSet<Guid>> GetLikedPostIdsForUserAsync(Guid userId, IEnumerable<Guid> postIds)
+    {
+        var ids = postIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new HashSet<Guid>();
+        }
+
+        var likedIds = await _context.Likes
+            .Where(l => l.UserId == userId && ids.Contains(l.PostId))
+            .Select(l => l.PostId)
+            .ToListAsync();
+
+        return likedIds.ToHashSet();
     }
 }
