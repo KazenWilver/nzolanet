@@ -43,6 +43,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         {
             entity.HasKey(c => c.Id);
             entity.Property(c => c.Text).IsRequired().HasMaxLength(1000);
+            entity.Property(c => c.ImagePath).HasMaxLength(500);
+            entity.Property(c => c.VideoPath).HasMaxLength(500);
 
             // Relação Comment -> User (1 para N)
             entity.HasOne(c => c.User)

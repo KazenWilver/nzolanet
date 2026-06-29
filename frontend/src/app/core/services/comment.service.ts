@@ -28,10 +28,16 @@ export class CommentService {
   }
 
   create(publicationId: string, dto: CreateCommentDto): Observable<Comment> {
+    const formData = new FormData();
+    if (dto.text?.trim()) {
+      formData.append('text', dto.text.trim());
+    }
+    return this.createWithMedia(publicationId, formData);
+  }
+
+  createWithMedia(publicationId: string, formData: FormData): Observable<Comment> {
     return this.http
-      .post<BackendCommentDto>(`${this.publicationsUrl}/${publicationId}/comments`, {
-        text: dto.text
-      })
+      .post<BackendCommentDto>(`${this.publicationsUrl}/${publicationId}/comments`, formData)
       .pipe(map(comment => this.mapComment(comment)));
   }
 
@@ -92,7 +98,9 @@ export class CommentService {
       authorId: dto.authorId,
       authorUsername: dto.authorUsername,
       authorDisplayName: dto.authorDisplayName,
-      authorPhotoUrl: resolveMediaUrl(dto.authorPhotoUrl)
+      authorPhotoUrl: resolveMediaUrl(dto.authorPhotoUrl),
+      imageUrl: resolveMediaUrl(dto.imageUrl),
+      videoUrl: resolveMediaUrl(dto.videoUrl)
     };
   }
 

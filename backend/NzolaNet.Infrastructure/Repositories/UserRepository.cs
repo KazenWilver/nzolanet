@@ -147,7 +147,10 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<System.Collections.Generic.IEnumerable<User>> GetSuggestionsAsync(Guid currentUserId, int count)
+    public async Task<System.Collections.Generic.IEnumerable<User>> GetSuggestionsAsync(
+        Guid currentUserId,
+        int count,
+        IEnumerable<Guid>? excludeExtraIds = null)
     {
         var excludedIds = await _context.Follows
             .Where(f => f.FollowerId == currentUserId)
@@ -156,7 +159,12 @@ public class UserRepository : IUserRepository
 
         excludedIds.Add(currentUserId);
 
-        var poolSize = Math.Clamp(count * 5, 15, 50);
+        if (excludeExtraIds != null)
+        {
+            excludedIds.AddRange(excludeExtraIds);
+        }
+
+        var poolSize = Math.Clamp(count * 10, 30, 100);
 
         var candidates = await _context.Users
             .Where(u => !excludedIds.Contains(u.Id))
@@ -180,9 +188,14 @@ public class UserRepository : IUserRepository
             return true;
         }
 
+        if (displayName.StartsWith("Alice ", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
         return displayName is "Alice Audit" or "Alice FixTest" or "Feed Alice"
-            || displayName.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase)
-            || displayName.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase);
+            || displayName.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase)
+            || displayName.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase);
     }
 
     private static readonly Regex AutomatedTestUsernamePattern = new(

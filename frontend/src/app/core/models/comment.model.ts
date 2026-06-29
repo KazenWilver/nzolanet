@@ -8,10 +8,12 @@ export interface Comment {
   authorUsername: string;
   authorDisplayName?: string;
   authorPhotoUrl?: string;
+  imageUrl?: string;
+  videoUrl?: string;
 }
 
 export interface CreateCommentDto {
-  text: string;
+  text?: string;
 }
 
 export interface UpdateCommentDto {
@@ -28,6 +30,8 @@ export interface BackendCommentDto {
   authorUsername: string;
   authorDisplayName?: string;
   authorPhotoUrl?: string;
+  imageUrl?: string;
+  videoUrl?: string;
 }
 
 /** @deprecated Usar Comment */

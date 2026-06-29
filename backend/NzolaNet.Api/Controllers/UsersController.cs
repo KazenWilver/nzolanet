@@ -30,11 +30,12 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpGet("suggestions")]
-    public async Task<IActionResult> GetSuggestions([FromQuery] int count = 3)
+    public async Task<IActionResult> GetSuggestions([FromQuery] int count = 3, [FromQuery] string? exclude = null)
     {
         var currentUserId = AuthClaimsHelper.GetUserId(User);
         var safeCount = Math.Clamp(count, 1, 10);
-        var suggestions = await _userService.GetSuggestionsAsync(currentUserId, safeCount);
+        var excludeIds = ParseGuidList(exclude);
+        var suggestions = await _userService.GetSuggestionsAsync(currentUserId, safeCount, excludeIds);
         return Ok(suggestions);
     }
 
@@ -227,5 +228,20 @@ public class UsersController : ControllerBase
     private bool IsCurrentUser(Guid id)
     {
         return AuthClaimsHelper.GetOptionalUserId(User) == id;
+    }
+
+    private static IEnumerable<Guid> ParseGuidList(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Array.Empty<Guid>();
+        }
+
+        return value
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(part => Guid.TryParse(part, out var id) ? id : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
     }
 }

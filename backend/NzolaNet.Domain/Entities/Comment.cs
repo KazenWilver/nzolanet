@@ -11,4 +11,6 @@ public class Comment : Baze
     public virtual Post Post { get; set; } = null!;
 
     public string Text { get; set; } = string.Empty;
+    public string? ImagePath { get; set; }
+    public string? VideoPath { get; set; }
 }

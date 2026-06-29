@@ -11,4 +11,6 @@ public class CommentResponseDto
     public string AuthorUsername { get; set; } = string.Empty;
     public string? AuthorDisplayName { get; set; }
     public string? AuthorPhotoUrl { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? VideoUrl { get; set; }
 }

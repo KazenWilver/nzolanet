@@ -162,6 +162,10 @@
   border: 1px solid vars.$color-border;
   margin-top: 8px;
 
+  &--clickable {
+    cursor: zoom-in;
+  }
+
   img,
   video {
     display: block;

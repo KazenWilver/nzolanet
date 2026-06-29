@@ -64,9 +64,12 @@ export class UserService {
       .pipe(map(users => users.map(user => this.mapUser(user))));
   }
 
-  getSuggestions(count = 3): Observable<User[]> {
+  getSuggestions(count = 3, excludeIds: string[] = []): Observable<User[]> {
+    const excludeQuery =
+      excludeIds.length > 0 ? `&exclude=${excludeIds.join(',')}` : '';
+
     return this.http
-      .get<BackendUserDto[]>(`${this.baseUrl}/suggestions?count=${count}`)
+      .get<BackendUserDto[]>(`${this.baseUrl}/suggestions?count=${count}${excludeQuery}`)
       .pipe(map(users => users.map(user => this.mapUser(user))));
   }
 

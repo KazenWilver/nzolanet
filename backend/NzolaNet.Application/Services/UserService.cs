@@ -400,9 +400,12 @@ public class UserService : IUserService
         return dtos;
     }
 
-    public async Task<IEnumerable<UserResponseDto>> GetSuggestionsAsync(Guid currentUserId, int count = 3)
+    public async Task<IEnumerable<UserResponseDto>> GetSuggestionsAsync(
+        Guid currentUserId,
+        int count = 3,
+        IEnumerable<Guid>? excludeIds = null)
     {
-        var users = await _userRepository.GetSuggestionsAsync(currentUserId, count);
+        var users = await _userRepository.GetSuggestionsAsync(currentUserId, count, excludeIds);
         var dtos = new List<UserResponseDto>();
         foreach (var user in users)
         {

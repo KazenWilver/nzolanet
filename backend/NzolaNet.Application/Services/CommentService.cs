@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Comments;
 using NzolaNet.Application.Helpers;
 using NzolaNet.Application.Interfaces;
@@ -14,6 +15,7 @@ public class CommentService : ICommentService
     private readonly IFollowRepository _followRepository;
     private readonly INotificationService _notificationService;
     private readonly INotificationRepository _notificationRepository;
+    private readonly IStorageService _storageService;
 
     public CommentService(
         ICommentRepository commentRepository,
@@ -21,7 +23,8 @@ public class CommentService : ICommentService
         IUserRepository userRepository,
         IFollowRepository followRepository,
         INotificationService notificationService,
-        INotificationRepository notificationRepository)
+        INotificationRepository notificationRepository,
+        IStorageService storageService)
     {
         _commentRepository = commentRepository;
         _postRepository = postRepository;
@@ -29,9 +32,20 @@ public class CommentService : ICommentService
         _followRepository = followRepository;
         _notificationService = notificationService;
         _notificationRepository = notificationRepository;
+        _storageService = storageService;
     }
 
-    public async Task<CommentResponseDto> CreateAsync(Guid userId, Guid publicationId, CreateCommentDto createDto)
+    public Task<CommentResponseDto> CreateAsync(Guid userId, Guid publicationId, CreateCommentDto createDto)
+    {
+        return CreateWithMediaAsync(userId, publicationId, createDto.Text, null, null);
+    }
+
+    public async Task<CommentResponseDto> CreateWithMediaAsync(
+        Guid userId,
+        Guid publicationId,
+        string? text,
+        IFormFile? image,
+        IFormFile? video)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -54,19 +68,48 @@ public class CommentService : ICommentService
             }
         }
 
-        var text = createDto.Text?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(text))
+        if (image != null && video != null)
         {
-            throw new ArgumentException("O comentário não pode estar vazio.");
+            throw new ArgumentException("Selecciona apenas imagem ou vídeo, não ambos.");
         }
 
-        ContentLimits.ValidateCommentText(text);
+        var trimmedText = text?.Trim() ?? string.Empty;
+        var hasMedia = image != null || video != null;
+
+        if (string.IsNullOrWhiteSpace(trimmedText) && !hasMedia)
+        {
+            throw new ArgumentException("O comentário deve ter texto ou media.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(trimmedText))
+        {
+            ContentLimits.ValidateCommentText(trimmedText);
+        }
+
+        string? imagePath = null;
+        string? videoPath = null;
+
+        if (image != null)
+        {
+            FileHelper.ValidateImageFile(image);
+            var fileName = $"{userId}_{DateTime.UtcNow:yyyyMMddHHmmss}{Path.GetExtension(image.FileName)}";
+            imagePath = await _storageService.SaveFileAsync(image, "uploads/comments", fileName);
+        }
+
+        if (video != null)
+        {
+            FileHelper.ValidateVideoFile(video);
+            var fileName = $"{userId}_{DateTime.UtcNow:yyyyMMddHHmmss}{Path.GetExtension(video.FileName)}";
+            videoPath = await _storageService.SaveFileAsync(video, "uploads/comments", fileName);
+        }
 
         var comment = new Comment
         {
             UserId = userId,
             PostId = publicationId,
-            Text = text,
+            Text = trimmedText,
+            ImagePath = imagePath,
+            VideoPath = videoPath,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -192,7 +235,9 @@ public class CommentService : ICommentService
             AuthorId = comment.UserId,
             AuthorUsername = comment.User?.UserName ?? string.Empty,
             AuthorDisplayName = comment.User?.DisplayName,
-            AuthorPhotoUrl = comment.User?.ProfilePhoto
+            AuthorPhotoUrl = comment.User?.ProfilePhoto,
+            ImageUrl = comment.ImagePath,
+            VideoUrl = comment.VideoPath
         };
     }
 

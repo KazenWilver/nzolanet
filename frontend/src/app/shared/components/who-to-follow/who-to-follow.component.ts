@@ -17,6 +17,9 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
 export class WhoToFollowComponent implements OnInit {
   @Input() count = 3;
 
+  private static readonly RECENT_SUGGESTIONS_KEY = 'nzolanet-recent-suggestions';
+  private static readonly MAX_RECENT_SUGGESTIONS = 30;
+
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -97,12 +100,15 @@ export class WhoToFollowComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
+    const excludeIds = this.getRecentSuggestionIds();
+
     this.userService
-      .getSuggestions(this.count)
+      .getSuggestions(this.count, excludeIds)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: users => {
         this.suggestions = users;
+        this.rememberSuggestionIds(users.map(user => user.id));
         this.loading = false;
       },
       error: () => {
@@ -119,7 +125,7 @@ export class WhoToFollowComponent implements OnInit {
     }
 
     this.userService
-      .getSuggestions(1)
+      .getSuggestions(1, this.getRecentSuggestionIds())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: users => {
@@ -127,8 +133,34 @@ export class WhoToFollowComponent implements OnInit {
         const replacement = users.find(user => !existingIds.has(user.id));
         if (replacement) {
           this.suggestions = [...this.suggestions, replacement];
+          this.rememberSuggestionIds([replacement.id]);
         }
       }
     });
+  }
+
+  private getRecentSuggestionIds(): string[] {
+    try {
+      const raw = sessionStorage.getItem(WhoToFollowComponent.RECENT_SUGGESTIONS_KEY);
+      if (!raw) {
+        return [];
+      }
+      const parsed = JSON.parse(raw) as string[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private rememberSuggestionIds(ids: string[]): void {
+    if (ids.length === 0) {
+      return;
+    }
+
+    const merged = [...ids, ...this.getRecentSuggestionIds()]
+      .filter((id, index, array) => array.indexOf(id) === index)
+      .slice(0, WhoToFollowComponent.MAX_RECENT_SUGGESTIONS);
+
+    sessionStorage.setItem(WhoToFollowComponent.RECENT_SUGGESTIONS_KEY, JSON.stringify(merged));
   }
 }

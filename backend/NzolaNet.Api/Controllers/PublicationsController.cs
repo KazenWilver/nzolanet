@@ -117,15 +117,15 @@ public class PublicationsController : ControllerBase
 
     [Authorize]
     [HttpPost("{publicationId}/comments")]
-    public async Task<IActionResult> CreateComment(Guid publicationId, [FromBody] CreateCommentDto createDto)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> CreateComment(
+        Guid publicationId,
+        [FromForm] string? text,
+        [FromForm] IFormFile? image,
+        [FromForm] IFormFile? video)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var userId = AuthClaimsHelper.GetUserId(User);
-        var comment = await _commentService.CreateAsync(userId, publicationId, createDto);
+        var comment = await _commentService.CreateWithMediaAsync(userId, publicationId, text, image, video);
         return CreatedAtAction(nameof(GetComments), new { publicationId }, comment);
     }
 

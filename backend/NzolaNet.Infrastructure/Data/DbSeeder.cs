@@ -91,7 +91,9 @@ public static class DbSeeder
             var isAutomatedTestUser =
                 testUserPattern.IsMatch(username) ||
                 user.DisplayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" ||
-                (user.DisplayName?.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase) ?? false);
+                (user.DisplayName?.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (user.DisplayName?.StartsWith("Alice ", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (user.DisplayName?.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase) ?? false);
 
             if (!isAutomatedTestUser)
             {

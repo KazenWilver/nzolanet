@@ -99,7 +99,7 @@
       }
 
       @if (publication.imageUrl) {
-        <div class="publication-card__media">
+        <div class="publication-card__media publication-card__media--clickable" (click)="handleMediaClick($event)">
           @if (imageLoadFailed) {
             <p class="publication-card__media-fallback" role="status">Imagem indisponível</p>
           } @else {
@@ -114,7 +114,7 @@
       }
 
       @if (publication.videoUrl) {
-        <div class="publication-card__media">
+        <div class="publication-card__media publication-card__media--clickable" (click)="handleMediaClick($event)">
           @if (videoLoadFailed) {
             <p class="publication-card__media-fallback" role="status">Vídeo indisponível</p>
           } @else {
@@ -134,8 +134,8 @@
     <button
       type="button"
       class="publication-card__action publication-card__action--comment"
-      [class.publication-card__action--active]="commentsOpen"
-      [attr.aria-expanded]="commentsOpen"
+      [class.publication-card__action--active]="threadModalOpen"
+      [attr.aria-expanded]="threadModalOpen"
       aria-label="Comentários"
       (click)="toggleComments()"
     >
@@ -174,9 +174,12 @@
     }
   </footer>
 
-  @if (commentsOpen) {
-    <app-comments-section
-      [publicationId]="publication.id"
+  @if (threadModalOpen) {
+    <app-publication-thread-modal
+      [publication]="publication"
+      [open]="threadModalOpen"
+      [mediaFocus]="threadMediaFocus"
+      (closed)="handleThreadClosed()"
       (countChange)="handleCommentsCountChange($event)"
     />
   }

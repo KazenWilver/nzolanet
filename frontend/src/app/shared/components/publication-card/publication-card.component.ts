@@ -10,7 +10,7 @@ import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { CommentsSectionComponent } from '../comments-section/comments-section.component';
+import { PublicationThreadModalComponent } from '../publication-thread-modal/publication-thread-modal.component';
 
 @Component({
   selector: 'app-publication-card',
@@ -23,7 +23,7 @@ import { CommentsSectionComponent } from '../comments-section/comments-section.c
     AvatarComponent,
     ConfirmDialogComponent,
     LoadingSpinnerComponent,
-    CommentsSectionComponent
+    PublicationThreadModalComponent
   ],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'
@@ -50,6 +50,8 @@ export class PublicationCardComponent implements OnChanges {
   deleteError = '';
   deleting = false;
   commentsOpen = false;
+  threadModalOpen = false;
+  threadMediaFocus = false;
   likePulsing = false;
   likingInProgress = false;
   imageLoadFailed = false;
@@ -57,7 +59,7 @@ export class PublicationCardComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
-      this.commentsOpen = true;
+      this.openThread(false);
     }
 
     if (changes['publication']) {
@@ -226,7 +228,24 @@ export class PublicationCardComponent implements OnChanges {
   }
 
   toggleComments(): void {
-    this.commentsOpen = !this.commentsOpen;
+    this.openThread(false);
+  }
+
+  openThread(mediaFocus: boolean): void {
+    this.threadMediaFocus = mediaFocus;
+    this.threadModalOpen = true;
+    this.commentsOpen = true;
+  }
+
+  handleThreadClosed(): void {
+    this.threadModalOpen = false;
+    this.threadMediaFocus = false;
+    this.commentsOpen = false;
+  }
+
+  handleMediaClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.openThread(true);
   }
 
   handleCommentsCountChange(count: number): void {
