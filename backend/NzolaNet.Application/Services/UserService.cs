@@ -276,12 +276,16 @@ public class UserService : IUserService
             }
         }
 
-        var followers = user.Followers.Where(f => f.IsApproved).Select(f => f.Follower);
+        var followerIds = user.Followers
+            .Where(f => f.IsApproved)
+            .Select(f => f.FollowerId);
+
         var dtos = new List<UserResponseDto>();
-        foreach (var f in followers)
+        foreach (var followerId in followerIds)
         {
-            dtos.Add(await GetUserResponseAsync(f.Id));
+            dtos.Add(await GetUserResponseAsync(followerId, currentUserId));
         }
+
         return dtos;
     }
 
@@ -307,12 +311,16 @@ public class UserService : IUserService
             }
         }
 
-        var following = user.Following.Where(f => f.IsApproved).Select(f => f.Followed);
+        var followedIds = user.Following
+            .Where(f => f.IsApproved)
+            .Select(f => f.FollowedId);
+
         var dtos = new List<UserResponseDto>();
-        foreach (var f in following)
+        foreach (var followedId in followedIds)
         {
-            dtos.Add(await GetUserResponseAsync(f.Id));
+            dtos.Add(await GetUserResponseAsync(followedId, currentUserId));
         }
+
         return dtos;
     }
 
