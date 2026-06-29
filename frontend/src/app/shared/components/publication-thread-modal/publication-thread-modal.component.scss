@@ -68,12 +68,48 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.thread-modal__media-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-height: min(80vh, 720px);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.thread-modal__media-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.08);
+  filter: blur(28px) brightness(0.45);
+  pointer-events: none;
+
+  &--image {
+    background-size: cover;
+    background-position: center;
+  }
 }
 
 .thread-modal__media {
+  position: relative;
+  z-index: 1;
   max-width: 100%;
-  max-height: 100%;
+  max-height: min(80vh, 720px);
   object-fit: contain;
+  border-radius: var(--border-radius-md);
+
+  &--video {
+    background-color: transparent;
+  }
 }
 
 .thread-modal__side-pane {

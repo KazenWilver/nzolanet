@@ -114,14 +114,20 @@
       }
 
       @if (publication.videoUrl) {
-        <div class="publication-card__media publication-card__media--clickable" (click)="handleMediaClick($event)">
+        <div
+          class="publication-card__media publication-card__media--clickable publication-card__media--video"
+          [class.publication-card__media--hidden]="threadModalOpen && threadMediaFocus"
+          (click)="handleMediaClick($event)"
+        >
           @if (videoLoadFailed) {
             <p class="publication-card__media-fallback" role="status">Vídeo indisponível</p>
           } @else {
             <video
+              #cardVideo
               [src]="publication.videoUrl"
               controls
               preload="metadata"
+              (click)="handleVideoClick($event)"
               (error)="handleVideoError()"
             ></video>
           }
@@ -179,6 +185,7 @@
       [publication]="publication"
       [open]="threadModalOpen"
       [mediaFocus]="threadMediaFocus"
+      [videoStartTime]="videoStartTime"
       (closed)="handleThreadClosed()"
       (countChange)="handleCommentsCountChange($event)"
     />

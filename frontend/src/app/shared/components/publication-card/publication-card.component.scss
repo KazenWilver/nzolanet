@@ -161,13 +161,23 @@
   overflow: hidden;
   border: 1px solid vars.$color-border;
   margin-top: 8px;
+  background-color: var(--color-media-bg);
 
   &--clickable {
     cursor: zoom-in;
   }
 
-  img,
-  video {
+  &--video {
+    height: min(56vw, 320px);
+    min-height: 180px;
+    position: relative;
+  }
+
+  &--hidden {
+    visibility: hidden;
+  }
+
+  img {
     display: block;
     width: 100%;
     max-height: 512px;
@@ -175,6 +185,10 @@
   }
 
   video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     background-color: var(--color-media-bg);
   }
 }

@@ -1,6 +1,7 @@
 import {
   Component,
   DestroyRef,
+  ElementRef,
   EventEmitter,
   HostListener,
   Input,
@@ -8,6 +9,7 @@ import {
   OnDestroy,
   Output,
   SimpleChanges,
+  ViewChild,
   inject
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -45,8 +47,11 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) publication!: Publication;
   @Input() open = false;
   @Input() mediaFocus = false;
+  @Input() videoStartTime = 0;
   @Output() closed = new EventEmitter<void>();
   @Output() countChange = new EventEmitter<number>();
+
+  @ViewChild('modalVideo') modalVideoRef?: ElementRef<HTMLVideoElement>;
 
   comments: Comment[] = [];
   loading = true;
@@ -67,9 +72,13 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
     if (changes['open']?.currentValue === true) {
       this.loadComments();
       document.body.style.overflow = 'hidden';
+      if (this.useMediaLayout && this.publication?.videoUrl) {
+        setTimeout(() => this.syncModalVideo(), 0);
+      }
     }
 
     if (changes['open']?.currentValue === false) {
+      this.pauseModalVideo();
       document.body.style.overflow = '';
       this.resetComposer();
     }
@@ -83,6 +92,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.pauseModalVideo();
     document.body.style.overflow = '';
     this.clearMediaPreview();
   }
@@ -184,7 +194,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: comment => {
-        this.comments = this.sortByCreatedAtAsc([...this.comments, comment]);
+        this.comments = this.sortByCreatedAtDesc([comment, ...this.comments]);
         this.countChange.emit(this.comments.length);
         this.resetComposer();
         this.submitting = false;
@@ -219,7 +229,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: comments => {
-        this.comments = this.sortByCreatedAtAsc(comments);
+        this.comments = this.sortByCreatedAtDesc(comments);
         this.loading = false;
         this.countChange.emit(this.comments.length);
       },
@@ -243,9 +253,36 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy {
     this.previewUrl = null;
   }
 
-  private sortByCreatedAtAsc(comments: Comment[]): Comment[] {
+  private sortByCreatedAtDesc(comments: Comment[]): Comment[] {
     return [...comments].sort(
-      (left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
     );
+  }
+
+  private syncModalVideo(): void {
+    const video = this.modalVideoRef?.nativeElement;
+    if (!video) {
+      return;
+    }
+
+    const startAt = this.videoStartTime;
+    const startPlayback = (): void => {
+      if (startAt > 0 && Number.isFinite(startAt)) {
+        video.currentTime = startAt;
+      }
+      void video.play().catch(() => {});
+    };
+
+    if (video.readyState >= 1) {
+      startPlayback();
+      return;
+    }
+
+    video.addEventListener('loadedmetadata', startPlayback, { once: true });
+  }
+
+  private pauseModalVideo(): void {
+    const video = this.modalVideoRef?.nativeElement;
+    video?.pause();
   }
 }

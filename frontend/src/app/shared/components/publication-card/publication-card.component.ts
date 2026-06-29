@@ -1,4 +1,4 @@
-import { Component, DestroyRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -52,10 +52,13 @@ export class PublicationCardComponent implements OnChanges {
   commentsOpen = false;
   threadModalOpen = false;
   threadMediaFocus = false;
+  videoStartTime = 0;
   likePulsing = false;
   likingInProgress = false;
   imageLoadFailed = false;
   videoLoadFailed = false;
+
+  @ViewChild('cardVideo') cardVideoRef?: ElementRef<HTMLVideoElement>;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['expandComments']?.currentValue === true) {
@@ -232,6 +235,7 @@ export class PublicationCardComponent implements OnChanges {
   }
 
   openThread(mediaFocus: boolean): void {
+    this.pauseCardVideo();
     this.threadMediaFocus = mediaFocus;
     this.threadModalOpen = true;
     this.commentsOpen = true;
@@ -241,10 +245,33 @@ export class PublicationCardComponent implements OnChanges {
     this.threadModalOpen = false;
     this.threadMediaFocus = false;
     this.commentsOpen = false;
+    this.videoStartTime = 0;
   }
 
   handleMediaClick(event: MouseEvent): void {
     event.stopPropagation();
+    this.captureVideoTime();
+    this.openThread(true);
+  }
+
+  handleVideoClick(event: MouseEvent): void {
+    const target = event.target as HTMLVideoElement;
+    if (target.tagName !== 'VIDEO') {
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    const controlsHeight = 44;
+    const clickedControls = event.clientY > rect.bottom - controlsHeight;
+
+    if (clickedControls) {
+      event.stopPropagation();
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.captureVideoTime();
     this.openThread(true);
   }
 
@@ -261,5 +288,20 @@ export class PublicationCardComponent implements OnChanges {
     if (!target.closest('.publication-card__menu-wrap')) {
       this.menuOpen = false;
     }
+  }
+
+  private captureVideoTime(): void {
+    const video = this.cardVideoRef?.nativeElement;
+    if (!video) {
+      this.videoStartTime = 0;
+      return;
+    }
+
+    this.videoStartTime = video.currentTime;
+    video.pause();
+  }
+
+  private pauseCardVideo(): void {
+    this.cardVideoRef?.nativeElement?.pause();
   }
 }

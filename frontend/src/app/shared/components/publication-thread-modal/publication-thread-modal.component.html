@@ -17,11 +17,34 @@
       @if (useMediaLayout) {
         <div class="thread-modal__split">
           <div class="thread-modal__media-pane">
-            @if (publication.imageUrl) {
-              <img [src]="publication.imageUrl" alt="Imagem da publicação" class="thread-modal__media" />
-            } @else if (publication.videoUrl) {
-              <video [src]="publication.videoUrl" controls class="thread-modal__media"></video>
-            }
+            <div class="thread-modal__media-stage">
+              @if (publication.imageUrl) {
+                <div
+                  class="thread-modal__media-bg thread-modal__media-bg--image"
+                  [style.background-image]="'url(' + publication.imageUrl + ')'"
+                  aria-hidden="true"
+                ></div>
+                <img [src]="publication.imageUrl" alt="Imagem da publicação" class="thread-modal__media" />
+              } @else if (publication.videoUrl) {
+                <video
+                  class="thread-modal__media-bg"
+                  [src]="publication.videoUrl"
+                  muted
+                  loop
+                  playsinline
+                  autoplay
+                  tabindex="-1"
+                  aria-hidden="true"
+                ></video>
+                <video
+                  #modalVideo
+                  [src]="publication.videoUrl"
+                  controls
+                  playsinline
+                  class="thread-modal__media thread-modal__media--video"
+                ></video>
+              }
+            </div>
           </div>
 
           <div class="thread-modal__side-pane">

@@ -69,7 +69,7 @@ export class CommentsSectionComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: comments => {
-        this.comments = this.sortByCreatedAtAsc(comments);
+        this.comments = this.sortByCreatedAtDesc(comments);
         this.loading = false;
         this.countChange.emit(this.comments.length);
       },
@@ -101,7 +101,7 @@ export class CommentsSectionComponent implements OnInit {
       authorPhotoUrl: this.currentUser.profilePhotoUrl
     };
 
-    this.comments = this.sortByCreatedAtAsc([...this.comments, optimisticComment]);
+    this.comments = this.sortByCreatedAtDesc([optimisticComment, ...this.comments]);
     this.newCommentText = '';
     this.countChange.emit(this.comments.length);
 
@@ -110,7 +110,7 @@ export class CommentsSectionComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
       next: comment => {
-        this.comments = this.sortByCreatedAtAsc(
+        this.comments = this.sortByCreatedAtDesc(
           this.comments.map(item => (item.id === tempId ? comment : item))
         );
         this.submitting = false;
@@ -203,9 +203,9 @@ export class CommentsSectionComponent implements OnInit {
     return comment.id;
   }
 
-  private sortByCreatedAtAsc(comments: Comment[]): Comment[] {
+  private sortByCreatedAtDesc(comments: Comment[]): Comment[] {
     return [...comments].sort(
-      (left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
     );
   }
 }
