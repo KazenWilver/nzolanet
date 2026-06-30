@@ -27,9 +27,10 @@
     @if (currentUser) {
       <div class="topbar__account">
         <button
+          #accountMenuTrigger
           type="button"
           class="topbar__account-trigger"
-          (click)="handleToggleAccountMenu()"
+          (click)="handleToggleAccountMenu(accountMenuTrigger)"
           [attr.aria-expanded]="accountMenuOpen"
           aria-haspopup="menu"
           [attr.aria-label]="'Menu de ' + currentUser.username"

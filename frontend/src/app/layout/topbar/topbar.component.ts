@@ -55,8 +55,8 @@ export class TopbarComponent {
     this.themeService.toggleTheme();
   }
 
-  handleToggleAccountMenu(): void {
-    this.accountMenu.toggle();
+  handleToggleAccountMenu(trigger: HTMLElement): void {
+    this.accountMenu.toggle(trigger);
   }
 
   private updateVisibility(url: string): void {

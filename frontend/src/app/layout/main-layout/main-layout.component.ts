@@ -1,4 +1,4 @@
-import { Component, DestroyRef, HostListener, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, HostListener, ViewChild, effect, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -11,6 +11,7 @@ import { PublishModalService } from '../../core/services/publish-modal.service';
 import { AccountMenuService } from '../../core/services/account-menu.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RouteTransitionService } from '../../core/services/route-transition.service';
+import { FocusTrapService } from '../../core/services/focus-trap.service';
 import type { User } from '../../core/models/user.model';
 
 @Component({
@@ -25,8 +26,11 @@ export class MainLayoutComponent {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly routeTransition = inject(RouteTransitionService);
+  private readonly focusTrap = inject(FocusTrapService);
   readonly publishModal = inject(PublishModalService);
   readonly accountMenu = inject(AccountMenuService);
+
+  @ViewChild('accountMenuNav') accountMenuNavRef?: ElementRef<HTMLElement>;
 
   currentUser: User | null = null;
   showMobileTopbar = false;
@@ -87,6 +91,12 @@ export class MainLayoutComponent {
 
         this.previousPath = currentPath;
       });
+
+    effect(() => {
+      if (this.accountMenu.isOpen()) {
+        requestAnimationFrame(() => this.handleAccountMenuOpened());
+      }
+    });
   }
 
   get profileRoute(): string {
@@ -105,11 +115,25 @@ export class MainLayoutComponent {
   }
 
   handleCloseAccountMenu(): void {
+    this.focusTrap.deactivate();
     this.accountMenu.close();
   }
 
   handleAccountMenuNavigate(): void {
+    this.focusTrap.deactivate();
     this.accountMenu.close();
+  }
+
+  handleAccountMenuOpened(): void {
+    requestAnimationFrame(() => {
+      const menu = this.accountMenuNavRef?.nativeElement;
+      if (!menu) {
+        return;
+      }
+
+      const firstItem = menu.querySelector<HTMLElement>('[role="menuitem"]');
+      this.focusTrap.activate(menu, firstItem ?? undefined);
+    });
   }
 
   private updateMobileTopbar(url: string): void {
@@ -120,7 +144,7 @@ export class MainLayoutComponent {
   @HostListener('document:keydown.escape')
   handleEscapeKey(): void {
     if (this.accountMenu.isOpen()) {
-      this.accountMenu.close();
+      this.handleCloseAccountMenu();
     }
   }
 }
