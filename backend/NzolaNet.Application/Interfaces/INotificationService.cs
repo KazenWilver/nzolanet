@@ -16,4 +16,5 @@ public interface INotificationService
     Task TryCreateFollowAcceptedNotificationAsync(Guid actorId, Guid recipientId);
     Task TryCreateFollowRejectedNotificationAsync(Guid actorId, Guid recipientId);
     Task CleanupFollowRequestNotificationsAsync(Guid recipientId, Guid actorId);
+    Task CleanupBazeNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId);
 }

@@ -55,4 +55,46 @@ public class JwtTokenService : IJwtTokenService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public Guid? TryGetUserIdFromToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return null;
+        }
+
+        try
+        {
+            var jwtSettings = _config.GetSection("JwtSettings");
+            var jwtKey = Environment.GetEnvironmentVariable("NZOLANET_JWT_KEY")
+                ?? jwtSettings["Key"]
+                ?? throw new InvalidOperationException("JWT key is not configured.");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+
+            var handler = new JwtSecurityTokenHandler();
+            var principal = handler.ValidateToken(
+                token,
+                new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(1)
+                },
+                out _);
+
+            var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

@@ -105,6 +105,7 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IMediaAccessService, MediaAccessService>();
 
 // 4.5. Configura a política de CORS para o frontend Angular
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
@@ -230,8 +231,7 @@ app.UseHttpsRedirection();
 // Habilita a política de CORS
 app.UseCors("AllowAngular");
 
-// Habilita o suporte a servir ficheiros estáticos (Uploads de Imagens) a partir de wwwroot
-app.UseStaticFiles();
+// Uploads servidos via UploadsController com autenticação e verificação de privacidade
 
 // Regra básica de pipeline: Autenticação ativa antes da Autorização
 app.UseAuthentication();

@@ -79,4 +79,11 @@ public class CommentRepository : ICommentRepository
             .Select(g => new { PostId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.PostId, x => x.Count);
     }
+
+    public async Task<Comment?> GetByMediaPathAsync(string mediaPath)
+    {
+        return await _context.Comments
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.ImagePath == mediaPath || c.VideoPath == mediaPath);
+    }
 }

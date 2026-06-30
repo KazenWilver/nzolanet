@@ -15,4 +15,5 @@ public interface ICommentRepository
     Task<bool> UpdateAsync(Comment comment);
     Task<bool> DeleteAsync(Comment comment);
     Task<Dictionary<Guid, int>> GetCommentCountsByPostIdsAsync(IEnumerable<Guid> postIds);
+    Task<Comment?> GetByMediaPathAsync(string mediaPath);
 }

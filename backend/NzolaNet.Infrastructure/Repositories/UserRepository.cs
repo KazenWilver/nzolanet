@@ -213,4 +213,18 @@ public class UserRepository : IUserRepository
     {
         return _context.Users.CountAsync();
     }
+
+    public async Task<User?> GetByProfilePhotoPathAsync(string profilePhotoPath)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.ProfilePhoto == profilePhotoPath);
+    }
+
+    public async Task<User?> GetByCoverPhotoPathAsync(string coverPhotoPath)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.CoverPhoto == coverPhotoPath);
+    }
 }

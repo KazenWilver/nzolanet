@@ -51,6 +51,37 @@ public class PostRepository : IPostRepository
         return (items, totalCount);
     }
 
+    public async Task<(IEnumerable<Post> Items, int TotalCount)> GetAllVisiblePagedAsync(
+        int page,
+        int pageSize,
+        Guid? currentUserId,
+        IReadOnlyCollection<Guid> followedUserIds)
+    {
+        var query = ApplyVisibilityFilter(
+            _context.Posts.Include(p => p.User),
+            currentUserId,
+            followedUserIds);
+
+        query = query.OrderByDescending(p => p.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
+    public async Task<Post?> GetByMediaPathAsync(string mediaPath)
+    {
+        return await _context.Posts
+            .Include(p => p.User)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.ImagePath == mediaPath || p.VideoPath == mediaPath);
+    }
+
     public async Task<IEnumerable<Post>> GetFeedByFollowedUsersAsync(IEnumerable<Guid> followedUserIds)
     {
         return await _context.Posts
@@ -139,5 +170,22 @@ public class PostRepository : IPostRepository
     public Task<int> GetTotalCountAsync()
     {
         return _context.Posts.CountAsync();
+    }
+
+    private static IQueryable<Post> ApplyVisibilityFilter(
+        IQueryable<Post> query,
+        Guid? currentUserId,
+        IReadOnlyCollection<Guid> followedUserIds)
+    {
+        if (!currentUserId.HasValue)
+        {
+            return query.Where(p => !p.User.IsPrivate);
+        }
+
+        var userId = currentUserId.Value;
+        return query.Where(p =>
+            p.UserId == userId ||
+            !p.User.IsPrivate ||
+            followedUserIds.Contains(p.UserId));
     }
 }

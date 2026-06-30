@@ -235,6 +235,28 @@ public class NotificationService : INotificationService
         }
     }
 
+    public async Task CleanupBazeNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            await _notificationRepository.DeleteBazeNotificationAsync(actorId, publicationId, recipientId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao remover notificação de baze entre {ActorId} e {RecipientId} na publicação {PublicationId}.",
+                actorId,
+                recipientId,
+                publicationId);
+        }
+    }
+
     private NotificationResponseDto MapToDto(Notification notification)
     {
         var publicationText = notification.Publication?.Text;

@@ -15,4 +15,5 @@ public interface INotificationRepository
     Task DeleteByCommentIdAsync(Guid commentId);
     Task<bool> ExistsFollowRequestNotificationAsync(Guid recipientId, Guid actorId);
     Task DeleteFollowRequestsAsync(Guid recipientId, Guid actorId);
+    Task DeleteBazeNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId);
 }

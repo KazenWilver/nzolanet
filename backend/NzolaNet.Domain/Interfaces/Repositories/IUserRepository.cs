@@ -28,4 +28,6 @@ public interface IUserRepository
         int count,
         IEnumerable<Guid>? excludeExtraIds = null);
     Task<int> GetTotalCountAsync();
+    Task<User?> GetByProfilePhotoPathAsync(string profilePhotoPath);
+    Task<User?> GetByCoverPhotoPathAsync(string coverPhotoPath);
 }

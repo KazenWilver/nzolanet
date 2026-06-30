@@ -8,4 +8,9 @@ public interface IJwtTokenService
     /// Generates a JWT for the given user including role claims.
     /// </summary>
     Task<string> GenerateTokenAsync(User user);
+
+    /// <summary>
+    /// Valida um token JWT e devolve o identificador do utilizador, se válido.
+    /// </summary>
+    Guid? TryGetUserIdFromToken(string token);
 }

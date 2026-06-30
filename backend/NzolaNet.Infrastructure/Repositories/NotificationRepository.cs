@@ -154,4 +154,23 @@ public class NotificationRepository : INotificationRepository
         _context.Notifications.RemoveRange(notifications);
         await _context.SaveChangesAsync();
     }
+
+    public async Task DeleteBazeNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId)
+    {
+        var notifications = await _context.Notifications
+            .Where(n =>
+                n.RecipientId == recipientId &&
+                n.ActorId == actorId &&
+                n.PublicationId == publicationId &&
+                n.Type == "baze")
+            .ToListAsync();
+
+        if (notifications.Count == 0)
+        {
+            return;
+        }
+
+        _context.Notifications.RemoveRange(notifications);
+        await _context.SaveChangesAsync();
+    }
 }

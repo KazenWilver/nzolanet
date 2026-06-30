@@ -76,6 +76,8 @@ public class LikeService : ILikeService
         {
             throw new ArgumentException("Não foi possível remover o baze.");
         }
+
+        await _notificationService.CleanupBazeNotificationAsync(userId, postId, post.UserId);
     }
 
     public async Task<bool> ToggleLikeAsync(Guid userId, Guid postId)

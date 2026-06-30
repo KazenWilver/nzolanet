@@ -193,16 +193,19 @@ public class PostService : IPostService
         int page,
         int pageSize)
     {
-        var (items, totalCount) = await _postRepository.GetAllPagedAsync(page, pageSize);
-        HashSet<Guid>? followedIds = null;
+        HashSet<Guid> followedIds = new();
 
         if (currentUserId.HasValue)
         {
             followedIds = (await _followRepository.GetFollowedUserIdsAsync(currentUserId.Value)).ToHashSet();
         }
 
-        var visiblePosts = FilterVisiblePosts(items, currentUserId, followedIds);
-        var dtos = (await MapPostsToDtosAsync(visiblePosts, currentUserId)).ToList();
+        var (items, totalCount) = await _postRepository.GetAllVisiblePagedAsync(
+            page,
+            pageSize,
+            currentUserId,
+            followedIds);
+        var dtos = (await MapPostsToDtosAsync(items, currentUserId)).ToList();
 
         return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
     }
