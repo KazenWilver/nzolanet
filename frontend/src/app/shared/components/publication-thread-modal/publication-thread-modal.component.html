@@ -92,7 +92,7 @@
         <a class="thread-modal__author" [routerLink]="['/profile', publication.authorId]">{{ authorName }}</a>
         <span class="thread-modal__handle">@{{ publication.authorUsername }}</span>
         <span class="thread-modal__dot">·</span>
-        <time class="thread-modal__time">{{ publication.createdAt | tempoAtras }}</time>
+        <time class="thread-modal__time">{{ publication.createdAt | tempoAtras : relativeTime.tick() }}</time>
       </div>
     </div>
 
@@ -229,7 +229,7 @@
               </a>
               <span class="thread-modal__handle">@{{ comment.authorUsername }}</span>
               <span class="thread-modal__dot">·</span>
-              <time class="thread-modal__time">{{ comment.createdAt | tempoAtras }}</time>
+              <time class="thread-modal__time">{{ comment.createdAt | tempoAtras : relativeTime.tick() }}</time>
             </div>
             @if (comment.text) {
               <p class="thread-modal__comment-text" [innerHTML]="comment.text | linkifyText"></p>

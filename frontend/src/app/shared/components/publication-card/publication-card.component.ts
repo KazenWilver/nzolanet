@@ -7,6 +7,7 @@ import { Router, RouterModule } from '@angular/router';
 import type { Publication } from '../../../core/models/publication.model';
 import { PublicationService } from '../../../core/services/publication.service';
 import { AnimationService } from '../../../core/services/animation.service';
+import { RelativeTimeService } from '../../../core/services/relative-time.service';
 import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
 import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
@@ -34,6 +35,7 @@ export class PublicationCardComponent implements OnChanges {
   private readonly animationService = inject(AnimationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  readonly relativeTime = inject(RelativeTimeService);
 
   @Input({ required: true }) publication!: Publication;
   @Input() currentUserId?: string;

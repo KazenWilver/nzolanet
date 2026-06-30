@@ -60,7 +60,7 @@
             <a class="comments-section__author" [routerLink]="['/profile', comment.authorId]">
               @{{ comment.authorUsername }}
             </a>
-            <span class="comments-section__time">· {{ comment.createdAt | tempoAtras }}</span>
+            <span class="comments-section__time">· {{ comment.createdAt | tempoAtras : relativeTime.tick() }}</span>
           </div>
 
           @if (editingCommentId === comment.id) {

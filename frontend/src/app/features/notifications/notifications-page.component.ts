@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { EnterAnimationDirective } from '../../shared/directives/enter-animation.directive';
 import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
+import { RelativeTimeService } from '../../core/services/relative-time.service';
 
 @Component({
   selector: 'app-notifications-page',
@@ -24,6 +25,7 @@ export class NotificationsPageComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  readonly relativeTime = inject(RelativeTimeService);
 
   notifications: AppNotification[] = [];
   loading = true;

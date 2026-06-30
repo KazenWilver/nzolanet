@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import type { Comment } from '../../../core/models/comment.model';
 import type { User } from '../../../core/models/user.model';
 import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
+import { RelativeTimeService } from '../../../core/services/relative-time.service';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 
@@ -29,6 +30,7 @@ export class CommentsSectionComponent implements OnInit {
   private readonly commentService = inject(CommentService);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  readonly relativeTime = inject(RelativeTimeService);
 
   @Input({ required: true }) publicationId!: string;
   @Output() countChange = new EventEmitter<number>();

@@ -25,6 +25,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PublicationService } from '../../../core/services/publication.service';
 import { ScrollLockService } from '../../../core/services/scroll-lock.service';
 import { FocusTrapService } from '../../../core/services/focus-trap.service';
+import { RelativeTimeService } from '../../../core/services/relative-time.service';
 import type { Comment } from '../../../core/models/comment.model';
 import type { Publication } from '../../../core/models/publication.model';
 import type { User } from '../../../core/models/user.model';
@@ -56,6 +57,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   private readonly scrollLock = inject(ScrollLockService);
   private readonly focusTrap = inject(FocusTrapService);
   private readonly destroyRef = inject(DestroyRef);
+  readonly relativeTime = inject(RelativeTimeService);
 
   @Input({ required: true }) publication!: Publication;
   @Input() open = false;

@@ -23,7 +23,7 @@
             {{ authorName }}
           </a>
           <span class="publication-card__handle">@{{ publication.authorUsername }}</span>
-          <span class="publication-card__time">· {{ publication.createdAt | tempoAtras }}</span>
+          <span class="publication-card__time">· {{ publication.createdAt | tempoAtras : relativeTime.tick() }}</span>
           @if (publication.updatedAt && publication.updatedAt !== publication.createdAt) {
             <span class="publication-card__edited">Editado</span>
           }

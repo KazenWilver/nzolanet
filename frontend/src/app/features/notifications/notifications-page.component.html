@@ -76,7 +76,7 @@
                   <p class="notifications-page__context">"{{ context }}"</p>
                 }
 
-                <time class="notifications-page__time">{{ notification.createdAt | tempoAtras }}</time>
+                <time class="notifications-page__time">{{ notification.createdAt | tempoAtras : relativeTime.tick() }}</time>
               </div>
             </div>
 
