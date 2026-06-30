@@ -24,6 +24,7 @@ import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PublicationService } from '../../../core/services/publication.service';
 import { ScrollLockService } from '../../../core/services/scroll-lock.service';
+import { FocusTrapService } from '../../../core/services/focus-trap.service';
 import type { Comment } from '../../../core/models/comment.model';
 import type { Publication } from '../../../core/models/publication.model';
 import type { User } from '../../../core/models/user.model';
@@ -53,6 +54,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   private readonly publicationService = inject(PublicationService);
   private readonly animationService = inject(AnimationService);
   private readonly scrollLock = inject(ScrollLockService);
+  private readonly focusTrap = inject(FocusTrapService);
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) publication!: Publication;
@@ -137,6 +139,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
 
     if (!this.embedded && changes['open']?.currentValue === false) {
       this.pauseModalVideo();
+      this.focusTrap.deactivate();
       this.scrollLock.unlock();
       this.resetComposer();
     }
@@ -159,6 +162,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   ngOnDestroy(): void {
     if (!this.embedded) {
       this.pauseModalVideo();
+      this.focusTrap.deactivate();
       this.scrollLock.unlock();
     }
     this.clearMediaPreview();
@@ -181,6 +185,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   }
 
   handleClose(): void {
+    this.focusTrap.deactivate();
     this.closed.emit();
   }
 
@@ -413,6 +418,8 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     const shell = this.threadShellRef?.nativeElement;
     if (overlay && shell) {
       this.animationService.modalEnter(overlay, shell);
+      const closeButton = shell.querySelector<HTMLElement>('.thread-modal__close');
+      this.focusTrap.activate(shell, closeButton ?? undefined);
     }
   }
 

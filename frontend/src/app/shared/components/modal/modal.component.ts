@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnimationService } from '../../../core/services/animation.service';
+import { FocusTrapService } from '../../../core/services/focus-trap.service';
 import { ScrollLockService } from '../../../core/services/scroll-lock.service';
 
 @Component({
@@ -159,6 +160,7 @@ import { ScrollLockService } from '../../../core/services/scroll-lock.service';
 export class ModalComponent implements OnChanges, AfterViewChecked, OnDestroy {
   private readonly animationService = inject(AnimationService);
   private readonly scrollLock = inject(ScrollLockService);
+  private readonly focusTrap = inject(FocusTrapService);
 
   @Input() open = false;
   @Input() title = '';
@@ -171,6 +173,10 @@ export class ModalComponent implements OnChanges, AfterViewChecked, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if ('open' in changes) {
+      if (!this.open) {
+        this.focusTrap.deactivate();
+      }
+
       this.updateBodyScrollLock(this.open);
       this.pendingAnimation = this.open;
     }
@@ -183,6 +189,8 @@ export class ModalComponent implements OnChanges, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.focusTrap.deactivate();
+
     if (this.open) {
       this.scrollLock.unlock();
     }
@@ -196,6 +204,7 @@ export class ModalComponent implements OnChanges, AfterViewChecked, OnDestroy {
   }
 
   handleClose(): void {
+    this.focusTrap.deactivate();
     this.closed.emit();
   }
 
@@ -210,6 +219,8 @@ export class ModalComponent implements OnChanges, AfterViewChecked, OnDestroy {
       const dialog = this.modalDialogRef?.nativeElement;
       if (overlay && dialog) {
         this.animationService.modalEnter(overlay, dialog);
+        const closeButton = dialog.querySelector<HTMLElement>('.modal__close');
+        this.focusTrap.activate(dialog, closeButton ?? undefined);
       }
     });
   }
