@@ -58,19 +58,29 @@
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-text-muted) 45%, transparent) transparent;
   border-right: var(--border-width) solid var(--color-border);
   background-color: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--color-text-muted) 40%, transparent);
+    border-radius: 999px;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
+  }
 
   @media (min-width: 501px) {
     width: var(--width-content);
