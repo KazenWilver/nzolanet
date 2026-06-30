@@ -13,12 +13,12 @@
 
 Desenvolvido pelo **Grupo LODA** · Cadeira de **Aplicações Web** · **ISPTEC**
 
-[Funcionalidades](#-funcionalidades) ·
-[Arquitetura](#-arquitetura) ·
-[Instalação](#-instalação-e-execução) ·
-[Testes](#-testes) ·
-[API](#-api-rest) ·
-[Equipa](#-equipa)
+[Funcionalidades](#funcionalidades) ·
+[Arquitetura](#arquitetura) ·
+[Instalação](#instalacao-e-execucao) ·
+[Testes](#testes) ·
+[API](#api-rest) ·
+[Equipa](#equipa)
 
 </div>
 
@@ -28,23 +28,25 @@ Desenvolvido pelo **Grupo LODA** · Cadeira de **Aplicações Web** · **ISPTEC*
 
 - [Sobre o projecto](#sobre-o-projecto)
 - [Destaques](#destaques)
-- [Stack tecnológica](#stack-tecnológica)
-- [Arquitetura](#-arquitetura)
-- [Design e experiência](#-design-e-experiência)
-- [Funcionalidades](#-funcionalidades)
-- [Fluxos principais](#-fluxos-principais)
-- [Layout responsivo](#-layout-responsivo)
-- [Segurança](#-segurança)
-- [Estrutura do repositório](#-estrutura-do-repositório)
-- [Base de dados](#-base-de-dados)
-- [API REST](#-api-rest)
-- [Instalação e execução](#-instalação-e-execução)
-- [Configuração](#-configuração)
-- [Testes](#-testes)
-- [Limitações conhecidas](#-limitações-conhecidas)
-- [Equipa](#-equipa)
+- [Stack tecnológica](#stack-tecnologica)
+- [Arquitetura](#arquitetura)
+- [Design e experiência](#design-e-experiencia)
+- [Funcionalidades](#funcionalidades)
+- [Fluxos principais](#fluxos-principais)
+- [Layout responsivo](#layout-responsivo)
+- [Segurança](#seguranca)
+- [Estrutura do repositório](#estrutura-do-repositorio)
+- [Base de dados](#base-de-dados)
+- [API REST](#api-rest)
+- [Instalação e execução](#instalacao-e-execucao)
+- [Configuração](#configuracao)
+- [Testes](#testes)
+- [Limitações conhecidas](#limitacoes-conhecidas)
+- [Equipa](#equipa)
 
 ---
+
+<a id="sobre-o-projecto"></a>
 
 ## Sobre o projecto
 
@@ -53,6 +55,8 @@ O **NzolaNet** é uma plataforma de rede social inspirada em experiências moder
 O objectivo é demonstrar boas práticas de engenharia de software: separação em camadas, API versionada e documentada, interface responsiva com acessibilidade, testes E2E automatizados e regras de negócio de privacidade semelhantes às de redes sociais reais.
 
 ---
+
+<a id="destaques"></a>
 
 ## Destaques
 
@@ -69,6 +73,8 @@ O objectivo é demonstrar boas práticas de engenharia de software: separação 
 | **Qualidade** | 21 testes E2E Playwright (desktop + mobile viewport) |
 
 ---
+
+<a id="stack-tecnologica"></a>
 
 ## Stack tecnológica
 
@@ -101,6 +107,8 @@ O objectivo é demonstrar boas práticas de engenharia de software: separação 
 | **wwwroot/uploads** | Armazenamento de ficheiros (servidos via API autenticada) |
 
 ---
+
+<a id="arquitetura"></a>
 
 ## Arquitetura
 
@@ -219,6 +227,8 @@ flowchart TB
 
 ---
 
+<a id="design-e-experiencia"></a>
+
 ## Design e experiência
 
 ### Tema visual — *Carbon Aurora & Glassmorphic Twilight*
@@ -247,6 +257,8 @@ flowchart TB
 | `EnterAnimationDirective` | Stagger de entrada nos cards do feed |
 
 ---
+
+<a id="funcionalidades"></a>
 
 ## Funcionalidades
 
@@ -310,6 +322,8 @@ flowchart TB
 - [x] Contraste alinhado a WCAG 2.1 AA no tema escuro
 
 ---
+
+<a id="fluxos-principais"></a>
 
 ## Fluxos principais
 
@@ -375,6 +389,8 @@ flowchart LR
 
 ---
 
+<a id="layout-responsivo"></a>
+
 ## Layout responsivo
 
 ```mermaid
@@ -403,6 +419,8 @@ flowchart TB
 
 ---
 
+<a id="seguranca"></a>
+
 ## Segurança
 
 | Medida | Implementação |
@@ -417,6 +435,8 @@ flowchart TB
 | **Path traversal** | Validação em paths de upload (`..` rejeitado) |
 
 ---
+
+<a id="estrutura-do-repositorio"></a>
 
 ## Estrutura do repositório
 
@@ -445,6 +465,8 @@ NzolaNet/
 
 ---
 
+<a id="base-de-dados"></a>
+
 ## Base de dados
 
 O esquema relacional inclui utilizadores (Identity), publicações, comentários, likes, seguimentos e notificações.
@@ -470,6 +492,8 @@ As **migrations** EF Core são aplicadas automaticamente no arranque da API.
 
 ---
 
+<a id="api-rest"></a>
+
 ## API REST
 
 Base URL em desenvolvimento: `http://localhost:5000`
@@ -488,6 +512,8 @@ Base URL em desenvolvimento: `http://localhost:5000`
 O frontend usa `environment.apiUrl: '/api'` com proxy em desenvolvimento (`proxy.conf.json`).
 
 ---
+
+<a id="instalacao-e-execucao"></a>
 
 ## Instalação e execução
 
@@ -566,6 +592,8 @@ O proxy encaminha `/api` e `/uploads` para a API em `:5000`.
 
 ---
 
+<a id="configuracao"></a>
+
 ## Configuração
 
 ### `appsettings.json` (backend)
@@ -587,6 +615,8 @@ O proxy encaminha `/api` e `/uploads` para a API em `:5000`.
 Ficheiros sensíveis ignorados pelo Git: `appsettings.Development.json`, `environment.ngrok.ts`, `*.env`.
 
 ---
+
+<a id="testes"></a>
 
 ## Testes
 
@@ -624,6 +654,8 @@ Os E2E usam `mock-backend.js`. Para validar integração completa, execute backe
 
 ---
 
+<a id="limitacoes-conhecidas"></a>
+
 ## Limitações conhecidas
 
 | Item | Estado |
@@ -634,6 +666,8 @@ Os E2E usam `mock-backend.js`. Para validar integração completa, execute backe
 | `extras/` | Materiais de referência locais — não versionados no GitHub |
 
 ---
+
+<a id="equipa"></a>
 
 ## Equipa
 
