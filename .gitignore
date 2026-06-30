@@ -101,12 +101,14 @@ uploads/
 coverage/
 *.tsbuildinfo
 
-# ---------- Build-pdf (mantemos os scripts e package.json, mas não o node_modules nem outputs grandes) ----------
-build-pdf/node_modules/
-# Mantemos os PDFs/HTMLs gerados pois ficam servidos pelo GitHub Pages
+# ---------- Playwright (artefactos de teste) ----------
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
 
-# ---------- Extras ----------
+# ---------- AI / IDE (configuração local, não versionar) ----------
+.claude/
+.cursor/
+
+# ---------- Extras (prompts, referências, clones de design, build local) ----------
 extras/
-
-# ------------ Cursor Rules ------------ #
-.cursor/rules/
