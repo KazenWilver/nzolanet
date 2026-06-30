@@ -367,10 +367,6 @@
   stroke: var(--color-accent-pink);
 }
 
-.publication-card__action--pulse .publication-card__action-icon {
-  animation: publication-baze-pulse 0.4s ease;
-}
-
 .publication-card__action--share:hover {
   color: var(--color-accent-blue);
 
@@ -389,18 +385,4 @@
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: var(--border-radius-full);
-}
-
-@keyframes publication-baze-pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  45% {
-    transform: scale(1.28);
-  }
-
-  100% {
-    transform: scale(1);
-  }
 }

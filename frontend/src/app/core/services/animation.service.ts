@@ -131,10 +131,6 @@ export class AnimationService {
     });
   }
 
-  pageEnter(element: Element): gsap.core.Tween | null {
-    return this.enter(element, 'fadeUp', 0);
-  }
-
   modalEnter(overlay: Element, dialog: Element): void {
     gsap.killTweensOf([overlay, dialog]);
 

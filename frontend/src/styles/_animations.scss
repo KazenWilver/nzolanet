@@ -64,8 +64,7 @@
     scroll-behavior: auto;
   }
 
-  .nz-animate-tab::after,
-  .publication-card__action--pulse .publication-card__action-icon {
+  .nz-animate-tab::after {
     animation: none !important;
   }
 }

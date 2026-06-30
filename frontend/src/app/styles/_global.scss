@@ -56,11 +56,3 @@ textarea {
     background-color: var(--nz-color-input-focus-bg);
   }
 }
-
-.layout-privado {
-  display: flex;
-  justify-content: center;
-  max-width: var(--width-layout-max);
-  margin: 0 auto;
-  min-height: 100vh;
-}
