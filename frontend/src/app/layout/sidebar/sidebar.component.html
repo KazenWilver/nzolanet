@@ -66,7 +66,7 @@
       </button>
     </nav>
 
-    <button type="button" class="sidebar__publish" (click)="handleOpenPublishModal()">
+    <button type="button" class="sidebar__publish" (click)="handleOpenPublishModal()" aria-label="Publicar nova publicação">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
       <span class="sidebar__publish-label">Publicar</span>
     </button>
@@ -87,16 +87,18 @@
   </div>
 
   <nav class="sidebar__mobile" aria-label="Navegação mobile">
-    <a class="sidebar__mobile-link" appPressScale routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)" aria-label="Início">
       <span class="sidebar__icon" data-icon="home" aria-hidden="true"></span>
+      <span class="sr-only">Início</span>
     </a>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')" aria-label="Pesquisar">
       <span class="sidebar__icon" data-icon="search" aria-hidden="true"></span>
+      <span class="sr-only">Pesquisar</span>
     </a>
     <button type="button" class="sidebar__mobile-publish" appPressScale (click)="handleOpenPublishModal()" aria-label="Publicar">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
     </button>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')" aria-label="Notificações">
       <span class="sidebar__icon-wrap">
         <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>
         @if (unreadCount > 0) {
@@ -107,12 +109,13 @@
       </span>
       <span class="sr-only">Notificações</span>
     </a>
-    <a class="sidebar__mobile-link" appPressScale [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)">
+    <a class="sidebar__mobile-link" appPressScale [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)" aria-label="Perfil">
       @if (currentUser) {
         <app-avatar [src]="currentUser.profilePhotoUrl" [username]="currentUser.username" size="xs" />
       } @else {
         <span class="sidebar__icon" data-icon="user" aria-hidden="true"></span>
       }
+      <span class="sr-only">Perfil</span>
     </a>
   </nav>
 </aside>

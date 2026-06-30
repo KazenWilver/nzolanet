@@ -118,13 +118,27 @@
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid vars.$color-border;
+}
+
+.search-page__result-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
   cursor: pointer;
+  border-radius: var(--border-radius-sm);
   transition: background-color 0.2s;
 
   &:hover,
   &:focus-visible {
     background-color: var(--color-bg-card-hover);
     outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$color-primary;
+    outline-offset: 2px;
   }
 }
 

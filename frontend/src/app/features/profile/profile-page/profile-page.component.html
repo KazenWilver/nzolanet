@@ -110,11 +110,15 @@
       </div>
     }
 
-    <nav class="profile-page__tabs" aria-label="Secções do perfil">
+    <nav class="profile-page__tabs" role="tablist" aria-label="Secções do perfil">
       <button
         type="button"
         class="profile-page__tab"
+        id="profile-tab-publications"
         [class.profile-page__tab--active]="activeTab === 'publications'"
+        [attr.aria-selected]="activeTab === 'publications'"
+        aria-controls="profile-panel"
+        role="tab"
         appPressScale
         (click)="setActiveTab('publications')"
       >
@@ -123,7 +127,11 @@
       <button
         type="button"
         class="profile-page__tab"
+        id="profile-tab-media"
         [class.profile-page__tab--active]="activeTab === 'media'"
+        [attr.aria-selected]="activeTab === 'media'"
+        aria-controls="profile-panel"
+        role="tab"
         appPressScale
         (click)="setActiveTab('media')"
       >
@@ -132,7 +140,11 @@
       <button
         type="button"
         class="profile-page__tab"
+        id="profile-tab-likes"
         [class.profile-page__tab--active]="activeTab === 'likes'"
+        [attr.aria-selected]="activeTab === 'likes'"
+        aria-controls="profile-panel"
+        role="tab"
         appPressScale
         (click)="setActiveTab('likes')"
       >
@@ -140,6 +152,17 @@
       </button>
     </nav>
 
+    <div
+      id="profile-panel"
+      role="tabpanel"
+      [attr.aria-labelledby]="
+        activeTab === 'likes'
+          ? 'profile-tab-likes'
+          : activeTab === 'media'
+            ? 'profile-tab-media'
+            : 'profile-tab-publications'
+      "
+    >
     @if (activeTab === 'likes') {
       @if (contentLoadError) {
         <div class="profile-page__error">
@@ -298,4 +321,5 @@
     [mode]="followersModalMode"
     (closed)="followersModalOpen = false"
   />
+  </div>
 }

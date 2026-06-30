@@ -50,26 +50,28 @@
       <ul class="search-page__results">
         @for (user of results; track trackById($index, user)) {
           <li class="search-page__result-item">
-            <article
-              class="search-page__result"
-              tabindex="0"
-              role="button"
-              [attr.aria-label]="'Ver perfil de ' + getDisplayName(user)"
-              (click)="navigateToProfile(user.id)"
-              (keydown.enter)="navigateToProfile(user.id)"
-            >
-              <app-avatar
-                [src]="user.profilePhotoUrl"
-                [username]="user.username"
-                size="md"
-              />
+            <article class="search-page__result">
+              <div
+                class="search-page__result-main"
+                tabindex="0"
+                role="link"
+                [attr.aria-label]="'Ver perfil de ' + getDisplayName(user)"
+                (click)="navigateToProfile(user.id)"
+                (keydown)="handleProfileKeydown(user.id, $event)"
+              >
+                <app-avatar
+                  [src]="user.profilePhotoUrl"
+                  [username]="user.username"
+                  size="md"
+                />
 
-              <div class="search-page__result-info">
-                <strong class="search-page__result-name">{{ getDisplayName(user) }}</strong>
-                <span class="search-page__result-username">@{{ user.username }}</span>
-                @if (user.bio) {
-                  <p class="search-page__result-bio">{{ user.bio }}</p>
-                }
+                <div class="search-page__result-info">
+                  <strong class="search-page__result-name">{{ getDisplayName(user) }}</strong>
+                  <span class="search-page__result-username">@{{ user.username }}</span>
+                  @if (user.bio) {
+                    <p class="search-page__result-bio">{{ user.bio }}</p>
+                  }
+                </div>
               </div>
 
               @if (currentUserId && user.id !== currentUserId) {

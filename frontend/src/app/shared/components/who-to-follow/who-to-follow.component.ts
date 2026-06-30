@@ -62,6 +62,13 @@ export class WhoToFollowComponent implements OnInit {
     void this.router.navigate(['/profile', userId]);
   }
 
+  handleProfileKeydown(userId: string, event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.navigateToProfile(userId);
+    }
+  }
+
   toggleFollow(user: User, event: MouseEvent): void {
     event.stopPropagation();
 

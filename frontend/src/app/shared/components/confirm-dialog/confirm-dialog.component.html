@@ -1,9 +1,19 @@
-<div class="dialogo-overlay" (click)="cancelar()">
-  <div class="dialogo" (click)="$event.stopPropagation()">
+<div class="dialogo-overlay" role="presentation" (click)="cancelar()">
+  <div
+    class="dialogo"
+    role="alertdialog"
+    aria-modal="true"
+    [attr.aria-label]="mensagem"
+    (click)="$event.stopPropagation()"
+  >
     <p class="dialogo__mensagem">{{ mensagem }}</p>
     <div class="dialogo__acoes">
-      <button class="dialogo__btn dialogo__btn--cancelar" (click)="cancelar()">Cancelar</button>
-      <button class="dialogo__btn dialogo__btn--confirmar" (click)="confirmar()">Confirmar</button>
+      <button type="button" class="dialogo__btn dialogo__btn--cancelar" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button type="button" class="dialogo__btn dialogo__btn--confirmar" (click)="confirmar()">
+        Confirmar
+      </button>
     </div>
   </div>
 </div>

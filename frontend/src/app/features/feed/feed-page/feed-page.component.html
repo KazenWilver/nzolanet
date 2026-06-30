@@ -2,12 +2,14 @@
   <div class="feed-page__sticky-top">
     <app-page-header title="Início" [showBack]="false" />
 
-    <nav class="feed-page__tabs" aria-label="Tipo de feed">
+    <nav class="feed-page__tabs" role="tablist" aria-label="Tipo de feed">
       <button
         type="button"
         class="feed-page__tab"
+        id="feed-tab-para-ti"
         [class.feed-page__tab--active]="activeTab === 'para-ti'"
         [attr.aria-selected]="activeTab === 'para-ti'"
+        aria-controls="feed-panel"
         role="tab"
         appPressScale
         (click)="setTab('para-ti')"
@@ -17,8 +19,10 @@
       <button
         type="button"
         class="feed-page__tab"
+        id="feed-tab-a-seguir"
         [class.feed-page__tab--active]="activeTab === 'a-seguir'"
         [attr.aria-selected]="activeTab === 'a-seguir'"
+        aria-controls="feed-panel"
         role="tab"
         appPressScale
         (click)="setTab('a-seguir')"
@@ -28,6 +32,7 @@
     </nav>
   </div>
 
+  <div id="feed-panel" role="tabpanel" [attr.aria-labelledby]="activeTab === 'a-seguir' ? 'feed-tab-a-seguir' : 'feed-tab-para-ti'">
   <app-create-post (postCriado)="handleCreated($event)" />
 
   @if (loading) {
@@ -93,4 +98,5 @@
       aria-hidden="true"
     ></div>
   }
+  </div>
 </div>

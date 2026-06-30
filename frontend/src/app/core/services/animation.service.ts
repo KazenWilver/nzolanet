@@ -274,7 +274,7 @@ export class AnimationService {
       this.confettiCanvas.id = 'nz-confetti-canvas';
       this.confettiCanvas.setAttribute('aria-hidden', 'true');
       this.confettiCanvas.style.cssText =
-        'position:fixed;inset:0;pointer-events:none;z-index:9999;width:100%;height:100%';
+        'position:fixed;inset:0;pointer-events:none;z-index:calc(var(--z-modal, 1200) - 1);width:100%;height:100%';
       document.body.appendChild(this.confettiCanvas);
       this.confettiContext = this.confettiCanvas.getContext('2d');
     }

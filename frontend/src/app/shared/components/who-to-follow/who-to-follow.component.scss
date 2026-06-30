@@ -33,18 +33,32 @@
 
 .who-to-follow__item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
   border-radius: var(--border-radius-md);
   padding: 4px;
+}
+
+.who-to-follow__main {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
   transition: background-color 0.15s ease;
 
   &:hover,
   &:focus-visible {
     background-color: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
     outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }
 

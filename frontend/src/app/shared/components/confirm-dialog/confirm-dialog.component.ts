@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, HostListener, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -11,6 +11,16 @@ export class ConfirmDialogComponent {
   @Output() confirmado = new EventEmitter<void>();
   @Output() cancelado = new EventEmitter<void>();
 
-  confirmar(): void { this.confirmado.emit(); }
-  cancelar(): void  { this.cancelado.emit(); }
+  @HostListener('document:keydown.escape')
+  handleEscape(): void {
+    this.cancelar();
+  }
+
+  confirmar(): void {
+    this.confirmado.emit();
+  }
+
+  cancelar(): void {
+    this.cancelado.emit();
+  }
 }

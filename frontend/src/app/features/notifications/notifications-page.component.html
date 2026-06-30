@@ -47,66 +47,74 @@
   <ul class="notifications-page__list">
     @for (notification of notifications; track trackById($index, notification)) {
       <li appEnterAnimation [enterIndex]="$index">
-        <button
-          type="button"
+        <article
           class="notifications-page__item"
           [class.notifications-page__item--unread]="!notification.isRead"
-          (click)="handleNotificationClick(notification)"
-          (keydown)="handleNotificationKeydown(notification, $event)"
         >
-          <app-avatar
-            [src]="notification.actorPhotoUrl"
-            [username]="notification.actorUsername"
-            size="md"
-          />
+          <div class="notifications-page__row">
+            <div
+              class="notifications-page__main"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Abrir notificação de ' + notification.actorUsername"
+              (click)="handleNotificationClick(notification)"
+              (keydown)="handleNotificationKeydown(notification, $event)"
+            >
+              <app-avatar
+                [src]="notification.actorPhotoUrl"
+                [username]="notification.actorUsername"
+                size="md"
+              />
 
-          <div class="notifications-page__content">
-            <p class="notifications-page__message">
-              <strong>@{{ notification.actorUsername }}</strong>
-              {{ getMessage(notification) }}
-            </p>
+              <div class="notifications-page__content">
+                <p class="notifications-page__message">
+                  <strong>@{{ notification.actorUsername }}</strong>
+                  {{ getMessage(notification) }}
+                </p>
 
-            @if (getContextText(notification); as context) {
-              <p class="notifications-page__context">"{{ context }}"</p>
-            }
+                @if (getContextText(notification); as context) {
+                  <p class="notifications-page__context">"{{ context }}"</p>
+                }
 
-            <time class="notifications-page__time">{{ notification.createdAt | tempoAtras }}</time>
-
-            @if (isFollowRequest(notification)) {
-              <div class="notifications-page__actions">
-                <button
-                  type="button"
-                  class="notifications-page__btn notifications-page__btn--approve"
-                  [disabled]="isProcessing(notification)"
-                  (click)="handleApproveRequest(notification, $event)"
-                >
-                  @if (isProcessing(notification)) {
-                    <app-loading-spinner tamanho="sm" />
-                  } @else {
-                    Aceitar
-                  }
-                </button>
-                <button
-                  type="button"
-                  class="notifications-page__btn notifications-page__btn--reject"
-                  [disabled]="isProcessing(notification)"
-                  (click)="handleRejectRequest(notification, $event)"
-                >
-                  Recusar
-                </button>
+                <time class="notifications-page__time">{{ notification.createdAt | tempoAtras }}</time>
               </div>
-            }
+            </div>
+
+            <button
+              type="button"
+              class="notifications-page__delete"
+              aria-label="Eliminar notificação"
+              (click)="handleDelete(notification, $event)"
+            >
+              ×
+            </button>
           </div>
 
-          <button
-            type="button"
-            class="notifications-page__delete"
-            aria-label="Eliminar notificação"
-            (click)="handleDelete(notification, $event)"
-          >
-            ×
-          </button>
-        </button>
+          @if (isFollowRequest(notification)) {
+            <div class="notifications-page__actions">
+              <button
+                type="button"
+                class="notifications-page__btn notifications-page__btn--approve"
+                [disabled]="isProcessing(notification)"
+                (click)="handleApproveRequest(notification, $event)"
+              >
+                @if (isProcessing(notification)) {
+                  <app-loading-spinner tamanho="sm" />
+                } @else {
+                  Aceitar
+                }
+              </button>
+              <button
+                type="button"
+                class="notifications-page__btn notifications-page__btn--reject"
+                [disabled]="isProcessing(notification)"
+                (click)="handleRejectRequest(notification, $event)"
+              >
+                Recusar
+              </button>
+            </div>
+          }
+        </article>
       </li>
     }
   </ul>

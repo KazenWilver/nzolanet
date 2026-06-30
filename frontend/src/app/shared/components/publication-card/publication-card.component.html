@@ -36,6 +36,8 @@
               class="publication-card__menu-btn"
               (click)="toggleMenu($event)"
               aria-label="Opções da publicação"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="menuOpen"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <circle cx="12" cy="5" r="1.5"></circle>
@@ -46,12 +48,13 @@
 
             @if (menuOpen) {
               <div class="publication-card__menu" role="menu">
-                <button type="button" class="publication-card__menu-item" (click)="startEdit()">
+                <button type="button" class="publication-card__menu-item" role="menuitem" (click)="startEdit()">
                   Editar
                 </button>
                 <button
                   type="button"
                   class="publication-card__menu-item publication-card__menu-item--danger"
+                  role="menuitem"
                   (click)="confirmDelete()"
                 >
                   Apagar
