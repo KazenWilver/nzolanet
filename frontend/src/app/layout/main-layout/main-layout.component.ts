@@ -136,6 +136,53 @@ export class MainLayoutComponent {
     });
   }
 
+  @HostListener('document:keydown', ['$event'])
+  handleAccountMenuKeydown(event: KeyboardEvent): void {
+    if (!this.accountMenu.isOpen()) {
+      return;
+    }
+
+    const menu = this.accountMenuNavRef?.nativeElement;
+    if (!menu) {
+      return;
+    }
+
+    const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]')).filter(
+      item => item.offsetParent !== null
+    );
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const activeIndex = items.findIndex(item => item === document.activeElement);
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const nextIndex = activeIndex < 0 ? 0 : (activeIndex + 1) % items.length;
+      items[nextIndex].focus();
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const nextIndex = activeIndex <= 0 ? items.length - 1 : activeIndex - 1;
+      items[nextIndex].focus();
+      return;
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      items[0].focus();
+      return;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      items[items.length - 1].focus();
+    }
+  }
+
   private updateMobileTopbar(url: string): void {
     const path = url.split('?')[0];
     this.showMobileTopbar = path === '/feed';
