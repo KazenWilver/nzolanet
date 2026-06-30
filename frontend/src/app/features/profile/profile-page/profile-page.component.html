@@ -63,7 +63,7 @@
         </div>
 
         <div class="profile-page__details">
-          <h1 class="profile-page__name">{{ displayName }}</h1>
+          <p class="profile-page__name" role="heading" aria-level="2">{{ displayName }}</p>
           <span class="profile-page__username">@{{ profile.username }}</span>
           @if (profile.bio) {
             <p class="profile-page__bio">{{ profile.bio }}</p>

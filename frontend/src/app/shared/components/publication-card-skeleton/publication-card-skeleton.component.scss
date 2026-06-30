@@ -73,3 +73,13 @@
   height: 28px;
   border-radius: var(--border-radius-full);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .publication-skeleton__avatar,
+  .publication-skeleton__line,
+  .publication-skeleton__media,
+  .publication-skeleton__pill {
+    animation: none;
+    background: var(--color-bg-hover);
+  }
+}

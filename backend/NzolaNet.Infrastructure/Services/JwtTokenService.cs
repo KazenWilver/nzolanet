@@ -23,7 +23,10 @@ public class JwtTokenService : IJwtTokenService
     public async Task<string> GenerateTokenAsync(User user)
     {
         var jwtSettings = _config.GetSection("JwtSettings");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
+        var jwtKey = Environment.GetEnvironmentVariable("NZOLANET_JWT_KEY")
+            ?? jwtSettings["Key"]
+            ?? throw new InvalidOperationException("JWT key is not configured.");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var roles = await _userManager.GetRolesAsync(user);

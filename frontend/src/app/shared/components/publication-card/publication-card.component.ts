@@ -56,9 +56,13 @@ export class PublicationCardComponent implements OnChanges {
   imageLoadFailed = false;
   videoLoadFailed = false;
   shareFeedback = '';
+  menuFixed = false;
+  menuTop = 0;
+  menuLeft = 0;
 
   @ViewChild('cardVideo') cardVideoRef?: ElementRef<HTMLVideoElement>;
   @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('menuButton') menuButtonRef?: ElementRef<HTMLButtonElement>;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['publication']) {
@@ -83,6 +87,14 @@ export class PublicationCardComponent implements OnChanges {
     return this.publication.authorDisplayName ?? this.publication.authorUsername;
   }
 
+  get deleteConfirmMessage(): string {
+    if (this.deleteError) {
+      return `${this.deleteError}\n\nTens a certeza que queres apagar esta publicação?`;
+    }
+
+    return 'Tens a certeza que queres apagar esta publicação?';
+  }
+
   handleAvatarClick(event: MouseEvent): void {
     event.stopPropagation();
     void this.router.navigate(['/profile', this.publication.authorId]);
@@ -99,6 +111,17 @@ export class PublicationCardComponent implements OnChanges {
   toggleMenu(event: MouseEvent): void {
     event.stopPropagation();
     this.menuOpen = !this.menuOpen;
+
+    if (this.menuOpen) {
+      this.positionMenu();
+    } else {
+      this.menuFixed = false;
+    }
+  }
+
+  handleCancelDelete(): void {
+    this.deleteDialogOpen = false;
+    this.deleteError = '';
   }
 
   startEdit(): void {
@@ -249,20 +272,8 @@ export class PublicationCardComponent implements OnChanges {
     this.navigateToPublication(false);
   }
 
-  handleBodyKeydown(event: KeyboardEvent): void {
-    if (this.editing) {
-      return;
-    }
-
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      this.navigateToPublication(false);
-    }
-  }
-
   handleMediaClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.captureVideoTime();
     this.navigateToPublication(true);
   }
 
@@ -283,7 +294,6 @@ export class PublicationCardComponent implements OnChanges {
 
     event.preventDefault();
     event.stopPropagation();
-    this.captureVideoTime();
     this.navigateToPublication(true);
   }
 
@@ -296,6 +306,11 @@ export class PublicationCardComponent implements OnChanges {
       setTimeout(() => {
         this.shareFeedback = '';
       }, 2500);
+    }).catch(() => {
+      this.shareFeedback = 'Não foi possível copiar a ligação';
+      setTimeout(() => {
+        this.shareFeedback = '';
+      }, 3000);
     });
   }
 
@@ -308,12 +323,34 @@ export class PublicationCardComponent implements OnChanges {
   }
 
   private navigateToPublication(mediaFocus: boolean): void {
+    const videoTime = mediaFocus ? this.getCapturedVideoTime() : 0;
+
     void this.router.navigate(['/publicacoes', this.publication.id], {
-      queryParams: mediaFocus ? { media: '1' } : undefined
+      queryParams: mediaFocus
+        ? {
+            media: '1',
+            ...(videoTime > 0 ? { t: Math.floor(videoTime) } : {})
+          }
+        : undefined
     });
   }
 
-  private captureVideoTime(): void {
-    this.cardVideoRef?.nativeElement?.pause();
+  private getCapturedVideoTime(): number {
+    const video = this.cardVideoRef?.nativeElement;
+    video?.pause();
+    return video?.currentTime ?? 0;
+  }
+
+  private positionMenu(): void {
+    const button = this.menuButtonRef?.nativeElement;
+    if (!button) {
+      return;
+    }
+
+    const rect = button.getBoundingClientRect();
+    const menuWidth = 150;
+    this.menuTop = rect.bottom + 4;
+    this.menuLeft = Math.max(8, rect.right - menuWidth);
+    this.menuFixed = true;
   }
 }

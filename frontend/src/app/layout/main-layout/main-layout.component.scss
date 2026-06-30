@@ -154,7 +154,7 @@
 
 .account-menu {
   position: fixed;
-  top: calc(52px + var(--spacing-sm));
+  top: calc(52px + env(safe-area-inset-top, 0px) + var(--spacing-sm));
   right: var(--spacing-md);
   z-index: 1;
   min-width: 180px;

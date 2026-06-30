@@ -32,6 +32,7 @@
         @if (isAuthor) {
           <div class="publication-card__menu-wrap">
             <button
+              #menuButton
               type="button"
               class="publication-card__menu-btn"
               (click)="toggleMenu($event)"
@@ -47,7 +48,13 @@
             </button>
 
             @if (menuOpen) {
-              <div class="publication-card__menu" role="menu">
+              <div
+                class="publication-card__menu"
+                [class.publication-card__menu--fixed]="menuFixed"
+                [style.top.px]="menuTop"
+                [style.left.px]="menuLeft"
+                role="menu"
+              >
                 <button type="button" class="publication-card__menu-item" role="menuitem" (click)="startEdit()">
                   Editar
                 </button>
@@ -69,10 +76,6 @@
         class="publication-card__body"
         [class.publication-card__body--clickable]="!editing"
         (click)="handleBodyClick($event)"
-        (keydown)="handleBodyKeydown($event)"
-        [attr.tabindex]="editing ? null : 0"
-        [attr.role]="editing ? null : 'button'"
-        [attr.aria-label]="editing ? null : 'Abrir publicação e respostas'"
       >
         @if (editing) {
           <div class="publication-card__edit">
@@ -216,12 +219,9 @@
 </article>
 
 @if (deleteDialogOpen) {
-  @if (deleteError) {
-    <p class="publication-card__delete-error" role="alert">{{ deleteError }}</p>
-  }
   <app-confirm-dialog
-    mensagem="Tens a certeza que queres apagar esta publicação?"
+    [mensagem]="deleteConfirmMessage"
     (confirmado)="deletePublication()"
-    (cancelado)="deleteDialogOpen = false"
+    (cancelado)="handleCancelDelete()"
   />
 }

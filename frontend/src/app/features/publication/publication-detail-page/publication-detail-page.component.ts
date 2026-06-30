@@ -37,7 +37,9 @@ export class PublicationDetailPageComponent implements OnInit {
   forbidden = false;
   loadError = false;
   mediaFocus = false;
+  videoStartTime = 0;
   currentUserId?: string;
+  private loadRequestId = 0;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -58,6 +60,9 @@ export class PublicationDetailPageComponent implements OnInit {
 
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.mediaFocus = params.get('media') === '1';
+      const timeParam = params.get('t');
+      const parsedTime = timeParam ? Number(timeParam) : 0;
+      this.videoStartTime = Number.isFinite(parsedTime) && parsedTime > 0 ? parsedTime : 0;
     });
   }
 
@@ -85,6 +90,8 @@ export class PublicationDetailPageComponent implements OnInit {
   }
 
   private loadPublication(id: string): void {
+    const requestId = ++this.loadRequestId;
+
     this.loading = true;
     this.notFound = false;
     this.forbidden = false;
@@ -95,15 +102,25 @@ export class PublicationDetailPageComponent implements OnInit {
       .getById(id)
       .pipe(
         finalize(() => {
-          this.loading = false;
+          if (requestId === this.loadRequestId) {
+            this.loading = false;
+          }
         }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: publication => {
+          if (requestId !== this.loadRequestId) {
+            return;
+          }
+
           this.publication = publication;
         },
         error: (error: HttpErrorResponse) => {
+          if (requestId !== this.loadRequestId) {
+            return;
+          }
+
           if (error.status === 404) {
             this.notFound = true;
             return;

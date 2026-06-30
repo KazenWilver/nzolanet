@@ -11,6 +11,7 @@ export class FocusTrapService {
   private previousFocus: HTMLElement | null = null;
   private container: HTMLElement | null = null;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
+  private documentKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   /**
    * Activa o trap de foco dentro do contentor e guarda o elemento activo.
@@ -23,6 +24,9 @@ export class FocusTrapService {
 
     this.keydownHandler = (event: KeyboardEvent) => this.handleKeydown(event);
     container.addEventListener('keydown', this.keydownHandler);
+
+    this.documentKeydownHandler = (event: KeyboardEvent) => this.handleDocumentKeydown(event);
+    document.addEventListener('keydown', this.documentKeydownHandler, true);
 
     requestAnimationFrame(() => {
       const target = initialFocus ?? this.getFocusableElements(container)[0];
@@ -38,8 +42,13 @@ export class FocusTrapService {
       this.container.removeEventListener('keydown', this.keydownHandler);
     }
 
+    if (this.documentKeydownHandler) {
+      document.removeEventListener('keydown', this.documentKeydownHandler, true);
+    }
+
     this.container = null;
     this.keydownHandler = null;
+    this.documentKeydownHandler = null;
 
     const restoreTarget = this.previousFocus;
     this.previousFocus = null;
@@ -49,6 +58,24 @@ export class FocusTrapService {
         restoreTarget.focus();
       });
     }
+  }
+
+  private handleDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab' || !this.container) {
+      return;
+    }
+
+    if (this.container.contains(document.activeElement)) {
+      return;
+    }
+
+    const focusable = this.getFocusableElements(this.container);
+    if (focusable.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    focusable[0].focus();
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -65,6 +92,12 @@ export class FocusTrapService {
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
     const active = document.activeElement;
+
+    if (!this.container.contains(active)) {
+      event.preventDefault();
+      first.focus();
+      return;
+    }
 
     if (event.shiftKey && active === first) {
       event.preventDefault();

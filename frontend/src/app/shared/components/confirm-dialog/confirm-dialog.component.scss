@@ -33,6 +33,7 @@
   color: vars.$color-text;
   line-height: 1.4;
   margin: 0;
+  white-space: pre-line;
 }
 
 .dialogo__acoes {
@@ -80,5 +81,11 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialogo {
+    animation: none;
   }
 }

@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, Output, EventEmitter, ViewChild, inject } from '@angular/core';
 import { FocusTrapService } from '../../../core/services/focus-trap.service';
+import { ScrollLockService } from '../../../core/services/scroll-lock.service';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -9,6 +10,7 @@ import { FocusTrapService } from '../../../core/services/focus-trap.service';
 })
 export class ConfirmDialogComponent implements OnInit, OnDestroy {
   private readonly focusTrap = inject(FocusTrapService);
+  private readonly scrollLock = inject(ScrollLockService);
 
   @Input() mensagem = 'Tens a certeza?';
   @Output() confirmado = new EventEmitter<void>();
@@ -17,6 +19,8 @@ export class ConfirmDialogComponent implements OnInit, OnDestroy {
   @ViewChild('dialogPanel') dialogPanelRef?: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
+    this.scrollLock.lock();
+
     requestAnimationFrame(() => {
       const panel = this.dialogPanelRef?.nativeElement;
       if (panel) {
@@ -28,6 +32,7 @@ export class ConfirmDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.focusTrap.deactivate();
+    this.scrollLock.unlock();
   }
 
   @HostListener('document:keydown.escape')
