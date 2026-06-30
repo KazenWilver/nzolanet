@@ -33,7 +33,12 @@ export class AnimationService {
       this.reducedMotion = media.matches;
       media.addEventListener('change', event => {
         this.reducedMotion = event.matches;
+        if (this.reducedMotion) {
+          this.stopConfetti();
+        }
       });
+
+      window.addEventListener('resize', this.handleConfettiResize, { passive: true });
     }
   }
 
@@ -215,6 +220,7 @@ export class AnimationService {
       return;
     }
 
+    gsap.killTweensOf(element);
     gsap.fromTo(
       element,
       { x: 0 },
@@ -225,7 +231,7 @@ export class AnimationService {
         yoyo: true,
         repeat: 5,
         onComplete: () => {
-          gsap.set(element, { x: 0 });
+          gsap.set(element, { clearProps: 'transform,x' });
         }
       }
     );
@@ -236,6 +242,7 @@ export class AnimationService {
       return;
     }
 
+    gsap.killTweensOf(element);
     gsap.fromTo(
       element,
       { opacity: 0, height: 0 },
@@ -243,7 +250,8 @@ export class AnimationService {
         opacity: 1,
         height: 'auto',
         duration: 0.34,
-        ease: 'power2.out'
+        ease: 'power2.out',
+        clearProps: 'height,opacity'
       }
     );
   }
@@ -339,4 +347,26 @@ export class AnimationService {
     context.clearRect(0, 0, canvas.width, canvas.height);
     this.confettiRafId = 0;
   }
+
+  private stopConfetti(): void {
+    if (this.confettiRafId) {
+      cancelAnimationFrame(this.confettiRafId);
+      this.confettiRafId = 0;
+    }
+
+    this.confettiParticles = [];
+
+    if (this.confettiCanvas && this.confettiContext) {
+      this.confettiContext.clearRect(0, 0, this.confettiCanvas.width, this.confettiCanvas.height);
+    }
+  }
+
+  private handleConfettiResize = (): void => {
+    if (!this.confettiCanvas || this.confettiParticles.length === 0) {
+      return;
+    }
+
+    this.confettiCanvas.width = window.innerWidth;
+    this.confettiCanvas.height = window.innerHeight;
+  };
 }

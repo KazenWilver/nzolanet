@@ -165,7 +165,6 @@
           type="button"
           class="publication-card__action publication-card__action--like"
           [class.publication-card__action--liked]="publication.hasLiked"
-          [class.publication-card__action--pulse]="likePulsing"
           [disabled]="likingInProgress"
           (click)="toggleLike($event)"
           [attr.aria-pressed]="publication.hasLiked"

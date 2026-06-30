@@ -50,7 +50,6 @@ export class PublicationCardComponent implements OnChanges {
   likeError = '';
   deleteError = '';
   deleting = false;
-  likePulsing = false;
   likingInProgress = false;
   imageLoadFailed = false;
   videoLoadFailed = false;
@@ -186,15 +185,11 @@ export class PublicationCardComponent implements OnChanges {
     this.likeError = '';
 
     if (!previousLiked) {
-      this.likePulsing = true;
       const likeButton = this.likeButtonRef?.nativeElement;
       if (likeButton) {
         this.animationService.likePop(likeButton);
         this.animationService.confettiBurst(likeButton);
       }
-      setTimeout(() => {
-        this.likePulsing = false;
-      }, 400);
     }
 
     const request$ = previousLiked

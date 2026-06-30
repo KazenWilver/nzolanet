@@ -92,8 +92,22 @@ export class RouteTransitionService {
     this.skipNextIn = true;
   }
 
+  /**
+   * O componente activo é injectado como irmão do router-outlet, não dentro dele.
+   */
   private getRouteHost(): Element | null {
-    return document.querySelector('.main-layout__content > *');
+    const content = document.querySelector('.main-layout__content');
+    if (!content) {
+      return null;
+    }
+
+    for (const child of content.children) {
+      if (child.tagName.toLowerCase() !== 'router-outlet') {
+        return child;
+      }
+    }
+
+    return null;
   }
 
   private resetScroll(): void {

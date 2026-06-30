@@ -26,14 +26,12 @@
       </button>
     </div>
   } @else if (publication) {
-    <div appEnterAnimation enterVariant="fadeIn">
-      <app-publication-thread-modal
+    <app-publication-thread-modal
       [publication]="publication"
       [open]="true"
       [embedded]="true"
       [mediaFocus]="mediaFocus"
       (publicationChange)="handlePublicationChange($event)"
     />
-    </div>
   }
 </div>

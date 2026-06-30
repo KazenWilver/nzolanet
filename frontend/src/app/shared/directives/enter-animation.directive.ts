@@ -24,9 +24,10 @@ export class EnterAnimationDirective implements AfterViewInit, OnDestroy {
   @Input() skipEnter = false;
 
   private tween: gsap.core.Tween | null = null;
+  private rafId = 0;
 
   ngAfterViewInit(): void {
-    if (this.skipEnter) {
+    if (this.skipEnter || !this.animationService.isEnabled) {
       return;
     }
 
@@ -37,7 +38,13 @@ export class EnterAnimationDirective implements AfterViewInit, OnDestroy {
 
     const staggerDelay = Math.min(index * 0.045, 0.36);
 
-    requestAnimationFrame(() => {
+    this.rafId = requestAnimationFrame(() => {
+      this.rafId = 0;
+
+      if (!this.elementRef.nativeElement.isConnected) {
+        return;
+      }
+
       this.tween = this.animationService.enter(
         this.elementRef.nativeElement,
         this.enterVariant,
@@ -47,6 +54,10 @@ export class EnterAnimationDirective implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+    }
+
     const element = this.elementRef.nativeElement;
     this.tween?.kill();
     gsap.killTweensOf(element);

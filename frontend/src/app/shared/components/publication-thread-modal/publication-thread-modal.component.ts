@@ -67,6 +67,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   @ViewChild('modalVideo') modalVideoRef?: ElementRef<HTMLVideoElement>;
   @ViewChild('threadOverlay') threadOverlayRef?: ElementRef<HTMLElement>;
   @ViewChild('threadShell') threadShellRef?: ElementRef<HTMLElement>;
+  @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
 
   comments: Comment[] = [];
   loading = true;
@@ -80,7 +81,6 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   submitting = false;
   submitError = '';
   likingInProgress = false;
-  likePulsing = false;
   likeError = '';
 
   private commentsLoadedForId?: string;
@@ -205,10 +205,11 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     this.publicationChange.emit(this.publication);
 
     if (!previousLiked) {
-      this.likePulsing = true;
-      setTimeout(() => {
-        this.likePulsing = false;
-      }, 400);
+      const likeButton = this.likeButtonRef?.nativeElement;
+      if (likeButton) {
+        this.animationService.likePop(likeButton);
+        this.animationService.confettiBurst(likeButton);
+      }
     }
 
     const request$ = previousLiked

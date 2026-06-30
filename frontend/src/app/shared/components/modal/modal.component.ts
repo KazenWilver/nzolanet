@@ -6,6 +6,7 @@ import {
   HostListener,
   Input,
   OnChanges,
+  OnDestroy,
   Output,
   SimpleChanges,
   ViewChild,
@@ -155,7 +156,7 @@ import { ScrollLockService } from '../../../core/services/scroll-lock.service';
     }
   `
 })
-export class ModalComponent implements OnChanges, AfterViewChecked {
+export class ModalComponent implements OnChanges, AfterViewChecked, OnDestroy {
   private readonly animationService = inject(AnimationService);
   private readonly scrollLock = inject(ScrollLockService);
 
@@ -178,6 +179,12 @@ export class ModalComponent implements OnChanges, AfterViewChecked {
   ngAfterViewChecked(): void {
     if (this.pendingAnimation && this.modalOverlayRef && this.modalDialogRef) {
       this.runOpenAnimation();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.open) {
+      this.scrollLock.unlock();
     }
   }
 

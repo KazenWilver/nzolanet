@@ -111,10 +111,10 @@
     <div class="thread-modal__stats">
       <span><strong>{{ publication.commentsCount }}</strong> Respostas</span>
       <button
+        #likeButton
         type="button"
         class="thread-modal__like-btn"
         [class.thread-modal__like-btn--active]="publication.hasLiked"
-        [class.thread-modal__like-btn--pulse]="likePulsing"
         [disabled]="likingInProgress"
         (click)="toggleLike()"
         [attr.aria-pressed]="publication.hasLiked"
