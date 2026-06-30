@@ -14,8 +14,16 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'desktop-chromium',
+      testMatch: /nzolanet\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'mobile-chromium',
+      testMatch: /nzolanet\.mobile\.spec\.ts/,
+      use: {
+        ...devices['Pixel 7'],
+      },
     },
   ],
 });

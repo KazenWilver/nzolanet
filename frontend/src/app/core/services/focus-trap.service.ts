@@ -3,6 +3,13 @@ import { Injectable } from '@angular/core';
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+interface TrapLayer {
+  container: HTMLElement;
+  previousFocus: HTMLElement | null;
+  keydownHandler: (event: KeyboardEvent) => void;
+  documentKeydownHandler: (event: KeyboardEvent) => void;
+}
+
 /**
  * Gere focus trap e restore para overlays modais e diálogos.
  */
@@ -12,14 +19,24 @@ export class FocusTrapService {
   private container: HTMLElement | null = null;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
   private documentKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
+  private readonly stack: TrapLayer[] = [];
 
   /**
    * Activa o trap de foco dentro do contentor e guarda o elemento activo.
    */
   activate(container: HTMLElement, initialFocus?: HTMLElement): void {
-    this.deactivate();
+    if (this.container && this.keydownHandler && this.documentKeydownHandler) {
+      this.stack.push({
+        container: this.container,
+        previousFocus: this.previousFocus,
+        keydownHandler: this.keydownHandler,
+        documentKeydownHandler: this.documentKeydownHandler
+      });
+      this.detachListeners();
+    } else {
+      this.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
 
-    this.previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.container = container;
 
     this.keydownHandler = (event: KeyboardEvent) => this.handleKeydown(event);
@@ -38,12 +55,17 @@ export class FocusTrapService {
    * Desactiva o trap e restaura o foco ao elemento anterior.
    */
   deactivate(): void {
-    if (this.container && this.keydownHandler) {
-      this.container.removeEventListener('keydown', this.keydownHandler);
-    }
+    this.detachListeners();
 
-    if (this.documentKeydownHandler) {
-      document.removeEventListener('keydown', this.documentKeydownHandler, true);
+    if (this.stack.length > 0) {
+      const layer = this.stack.pop()!;
+      this.container = layer.container;
+      this.previousFocus = layer.previousFocus;
+      this.keydownHandler = layer.keydownHandler;
+      this.documentKeydownHandler = layer.documentKeydownHandler;
+      layer.container.addEventListener('keydown', layer.keydownHandler);
+      document.addEventListener('keydown', layer.documentKeydownHandler, true);
+      return;
     }
 
     this.container = null;
@@ -57,6 +79,16 @@ export class FocusTrapService {
       requestAnimationFrame(() => {
         restoreTarget.focus();
       });
+    }
+  }
+
+  private detachListeners(): void {
+    if (this.container && this.keydownHandler) {
+      this.container.removeEventListener('keydown', this.keydownHandler);
+    }
+
+    if (this.documentKeydownHandler) {
+      document.removeEventListener('keydown', this.documentKeydownHandler, true);
     }
   }
 

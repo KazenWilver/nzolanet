@@ -3,6 +3,7 @@
 .search-page {
   background-color: vars.$color-background;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .search-page__input-wrap {
@@ -40,6 +41,10 @@
     background-color: vars.$color-background;
     border-color: vars.$color-primary;
     box-shadow: 0 0 0 1px vars.$color-primary;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 1rem;
   }
 }
 

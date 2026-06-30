@@ -4,6 +4,7 @@
   width: 100%;
   max-width: var(--width-layout-max);
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   margin: 0 auto;
   background-color: var(--color-bg-primary);
@@ -28,6 +29,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   padding: var(--spacing-sm) var(--spacing-md);
   border-right: var(--border-width) solid var(--color-border);
@@ -56,6 +58,7 @@
   flex: 1 1 var(--width-content);
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -123,6 +126,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   padding: var(--spacing-md) var(--spacing-lg);
 

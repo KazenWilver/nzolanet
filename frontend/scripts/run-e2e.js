@@ -49,14 +49,26 @@ function waitPort(port, timeout = 60000) {
     console.log('√ Frontend Angular está pronto!');
 
     console.log('3. Executando testes E2E do Playwright...');
-    const tests = spawn('npx', ['playwright', 'test'], {
+    const tests = spawn('npx', ['playwright', 'install', 'chromium'], {
       stdio: 'inherit',
       shell: true
     });
 
-    tests.on('exit', (code) => {
-      console.log(`\nTestes finalizados com código de saída: ${code}`);
-      cleanup(code);
+    tests.on('exit', (installCode) => {
+      if (installCode !== 0) {
+        cleanup(installCode ?? 1);
+        return;
+      }
+
+      const playwright = spawn('npx', ['playwright', 'test'], {
+        stdio: 'inherit',
+        shell: true
+      });
+
+      playwright.on('exit', (code) => {
+        console.log(`\nTestes finalizados com código de saída: ${code}`);
+        cleanup(code ?? 1);
+      });
     });
 
   } catch (err) {
