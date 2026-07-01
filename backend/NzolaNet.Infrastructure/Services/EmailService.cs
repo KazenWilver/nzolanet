@@ -36,4 +36,33 @@ public class EmailService : IEmailService
 
         return Task.CompletedTask;
     }
+
+    public Task SendPasswordResetEmailAsync(string recipientEmail, string resetLink)
+    {
+        if (string.IsNullOrWhiteSpace(recipientEmail))
+        {
+            return Task.CompletedTask;
+        }
+
+        var subject = "Recuperar palavra-passe — NzolaNet";
+        var body =
+            "Olá,\n\n" +
+            "Recebemos um pedido para redefinir a tua palavra-passe no NzolaNet.\n\n" +
+            $"Abre este link no navegador (válido por tempo limitado):\n{resetLink}\n\n" +
+            "Se não fizeste este pedido, ignora este email.\n\n" +
+            "— Equipa NzolaNet";
+
+        _logger.LogWarning(
+            "Recuperação de palavra-passe para {Email}. Link: {ResetLink}",
+            recipientEmail,
+            resetLink);
+
+        _logger.LogInformation(
+            "Email enviado para {Email}. Assunto: {Subject}. Corpo: {Body}",
+            recipientEmail,
+            subject,
+            body);
+
+        return Task.CompletedTask;
+    }
 }

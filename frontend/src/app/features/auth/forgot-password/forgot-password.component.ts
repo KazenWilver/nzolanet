@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-forgot-password',
@@ -16,16 +17,23 @@ export class ForgotPasswordComponent {
   email = '';
   aEnviar = false;
   enviado = false;
+  devResetLink = '';
 
   constructor(private authService: AuthService) {}
 
   enviar(): void {
     if (!this.email.trim()) return;
     this.aEnviar = true;
-    this.authService.recuperarSenha({ email: this.email }).subscribe({
-      next: () => { this.enviado = true; this.aEnviar = false; },
+    this.devResetLink = '';
+    this.authService.forgotPassword(this.email.trim()).subscribe({
+      next: response => {
+        this.enviado = true;
+        this.aEnviar = false;
+        if (!environment.production && response.devResetLink) {
+          this.devResetLink = response.devResetLink;
+        }
+      },
       error: () => {
-        // Mostra sempre sucesso por segurança — não revelar se o email existe no sistema
         this.enviado = true;
         this.aEnviar = false;
       }

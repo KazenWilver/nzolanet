@@ -7,8 +7,10 @@ import type {
   AuthResponse,
   BackendAuthResponseDto,
   ForgotPasswordDto,
+  ForgotPasswordResponse,
   LoginDto as AuthLoginDto,
-  RegisterDto
+  RegisterDto,
+  ResetPasswordDto
 } from '../models/auth.model';
 import {
   mapBackendUser,
@@ -70,9 +72,18 @@ export class AuthService {
       );
   }
 
-  forgotPassword(email: string): Observable<{ message: string }> {
-    const dto: ForgotPasswordDto = { email };
-    return this.http.post<{ message: string }>(`${this.baseUrl}/forgot-password`, dto);
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    const dto: ForgotPasswordDto = { email }
+    return this.http.post<ForgotPasswordResponse>(`${this.baseUrl}/forgot-password`, dto)
+  }
+
+  resetPassword(dto: ResetPasswordDto): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/reset-password`, {
+      email: dto.email,
+      token: dto.token,
+      newPassword: dto.newPassword,
+      confirmNewPassword: dto.confirmNewPassword
+    })
   }
 
   changePassword(
@@ -168,7 +179,7 @@ export class AuthService {
   }
 
   /** @deprecated Usar forgotPassword */
-  recuperarSenha(dados: RecuperarSenhaDto): Observable<{ message: string }> {
+  recuperarSenha(dados: RecuperarSenhaDto): Observable<ForgotPasswordResponse> {
     return this.forgotPassword(dados.email);
   }
 
