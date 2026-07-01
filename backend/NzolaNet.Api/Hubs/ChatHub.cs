@@ -48,7 +48,13 @@ public class ChatHub : Hub
         await EnsureParticipantAsync(userId, parsedId);
 
         var username = Context.User?.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value ?? string.Empty;
-        await _chatRealtimeNotifier.NotifyTypingAsync(parsedId, userId, username, true);
+        await Clients.OthersInGroup(GetGroupName(parsedId)).SendAsync("TypingChanged", new
+        {
+            ConversationId = parsedId.ToString(),
+            UserId = userId.ToString(),
+            Username = username,
+            IsTyping = true
+        });
     }
 
     public async Task NotifyStoppedTyping(string conversationId)
@@ -58,7 +64,13 @@ public class ChatHub : Hub
         await EnsureParticipantAsync(userId, parsedId);
 
         var username = Context.User?.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value ?? string.Empty;
-        await _chatRealtimeNotifier.NotifyTypingAsync(parsedId, userId, username, false);
+        await Clients.OthersInGroup(GetGroupName(parsedId)).SendAsync("TypingChanged", new
+        {
+            ConversationId = parsedId.ToString(),
+            UserId = userId.ToString(),
+            Username = username,
+            IsTyping = false
+        });
     }
 
     private async Task EnsureParticipantAsync(Guid userId, Guid conversationId)

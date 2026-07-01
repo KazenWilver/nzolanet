@@ -13,6 +13,12 @@ export interface ChatTypingEvent {
   isTyping: boolean
 }
 
+export interface ChatReadReceiptEvent {
+  conversationId: string
+  readerUserId: string
+  readAt: string
+}
+
 interface BackendMessageBroadcast {
   id: string
   conversationId: string
@@ -21,7 +27,9 @@ interface BackendMessageBroadcast {
   senderDisplayName?: string
   senderPhotoUrl?: string
   text: string
+  imageUrl?: string
   createdAt: string
+  isRead?: boolean
 }
 
 @Injectable({ providedIn: 'root' })
@@ -34,10 +42,12 @@ export class ChatRealtimeService {
   private readonly connectedSubject = new BehaviorSubject(false)
   private readonly messageSubject = new Subject<ChatMessage>()
   private readonly typingSubject = new Subject<ChatTypingEvent>()
+  private readonly readReceiptSubject = new Subject<ChatReadReceiptEvent>()
 
   readonly connected$ = this.connectedSubject.asObservable()
   readonly message$ = this.messageSubject.asObservable()
   readonly typing$ = this.typingSubject.asObservable()
+  readonly readReceipt$ = this.readReceiptSubject.asObservable()
 
   async connect(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -99,7 +109,6 @@ export class ChatRealtimeService {
       await this.connect()
       await this.joinConversation(conversationId)
     } catch {
-      // REST continua funcional mesmo sem tempo real
       this.connectedSubject.next(false)
     }
   }
@@ -145,16 +154,29 @@ export class ChatRealtimeService {
       .build()
 
     this.connection.on('MessageReceived', (payload: BackendMessageBroadcast) => {
-      const currentUserId = this.authService.getCurrentUser()?.id
+      const currentUserId = this.authService.getCurrentUser()?.id?.toLowerCase()
       const message = mapChatMessage({
         ...payload,
-        isMine: currentUserId === payload.senderId
+        isMine: currentUserId === payload.senderId?.toLowerCase(),
+        isRead: payload.isRead ?? false
       })
       this.messageSubject.next(message)
     })
 
     this.connection.on('TypingChanged', (payload: ChatTypingEvent) => {
-      this.typingSubject.next(payload)
+      this.typingSubject.next({
+        ...payload,
+        conversationId: String(payload.conversationId),
+        userId: String(payload.userId)
+      })
+    })
+
+    this.connection.on('ReadReceiptUpdated', (payload: ChatReadReceiptEvent) => {
+      this.readReceiptSubject.next({
+        conversationId: String(payload.conversationId),
+        readerUserId: String(payload.readerUserId),
+        readAt: payload.readAt
+      })
     })
 
     this.connection.onreconnected(async () => {

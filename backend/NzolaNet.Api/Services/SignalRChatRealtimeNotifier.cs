@@ -25,12 +25,26 @@ public class SignalRChatRealtimeNotifier : IChatRealtimeNotifier
             message.SenderDisplayName,
             message.SenderPhotoUrl,
             message.Text,
-            message.CreatedAt
+            message.ImageUrl,
+            message.CreatedAt,
+            message.IsRead
         };
 
         await _hubContext.Clients
             .Group(ChatHub.GetGroupName(conversationId))
             .SendAsync("MessageReceived", payload);
+    }
+
+    public async Task NotifyReadReceiptAsync(Guid conversationId, Guid readerUserId, DateTime readAt)
+    {
+        await _hubContext.Clients
+            .Group(ChatHub.GetGroupName(conversationId))
+            .SendAsync("ReadReceiptUpdated", new
+            {
+                ConversationId = conversationId,
+                ReaderUserId = readerUserId,
+                ReadAt = readAt
+            });
     }
 
     public async Task NotifyTypingAsync(Guid conversationId, Guid userId, string username, bool isTyping)

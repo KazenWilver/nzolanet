@@ -9,5 +9,7 @@ public interface IChatRealtimeNotifier
 {
     Task NotifyMessageAsync(Guid conversationId, MessageResponseDto message, Guid senderUserId);
 
+    Task NotifyReadReceiptAsync(Guid conversationId, Guid readerUserId, DateTime readAt);
+
     Task NotifyTypingAsync(Guid conversationId, Guid userId, string username, bool isTyping);
 }
