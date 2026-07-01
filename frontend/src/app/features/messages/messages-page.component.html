@@ -58,7 +58,7 @@
               >
                 <app-avatar
                   [src]="conversation.otherPhotoUrl"
-                  [username]="conversation.otherUsername"
+                  [username]="conversation.otherUsername ?? conversation.title ?? 'grupo'"
                   size="md"
                 />
                 <span class="messages-page__list-body">
@@ -113,24 +113,32 @@
           </button>
           <app-avatar
             [src]="activeConversation.otherPhotoUrl"
-            [username]="activeConversation.otherUsername"
+            [username]="activeConversation.otherUsername ?? activeConversation.title ?? 'grupo'"
             size="sm"
           />
           <div class="messages-page__thread-meta">
             <strong>{{ getConversationDisplayName(activeConversation) }}</strong>
-            <span>@{{ activeConversation.otherUsername }}</span>
+            <span>
+              @if (activeConversation.isGroup) {
+                {{ activeConversation.participantCount }} participantes
+              } @else {
+                @{{ activeConversation.otherUsername }}
+              }
+            </span>
           </div>
-          <a
-            class="messages-page__icon-btn"
-            [routerLink]="['/profile', activeConversation.otherUserId]"
-            aria-label="Ver perfil"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <circle cx="5" cy="12" r="1.75"></circle>
-              <circle cx="12" cy="12" r="1.75"></circle>
-              <circle cx="19" cy="12" r="1.75"></circle>
-            </svg>
-          </a>
+          @if (!activeConversation.isGroup && activeConversation.otherUserId) {
+            <a
+              class="messages-page__icon-btn"
+              [routerLink]="['/profile', activeConversation.otherUserId]"
+              aria-label="Ver perfil"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="5" cy="12" r="1.75"></circle>
+                <circle cx="12" cy="12" r="1.75"></circle>
+                <circle cx="19" cy="12" r="1.75"></circle>
+              </svg>
+            </a>
+          }
         </header>
 
         @if (loadingMessages) {
@@ -145,21 +153,39 @@
             </button>
           </div>
         } @else {
-          <div #messagesScroll class="messages-page__messages" role="log" aria-live="polite" aria-relevant="additions">
+          <div
+            #messagesScroll
+            class="messages-page__messages"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+            (scroll)="handleMessagesScroll()"
+          >
+            @if (loadingOlderMessages) {
+              <div class="messages-page__loading-older">A carregar mensagens anteriores…</div>
+            }
             <div class="messages-page__intro">
               <app-avatar
                 [src]="activeConversation.otherPhotoUrl"
-                [username]="activeConversation.otherUsername"
+                [username]="activeConversation.otherUsername ?? activeConversation.title ?? 'grupo'"
                 size="xl"
               />
               <h3>{{ getConversationDisplayName(activeConversation) }}</h3>
-              <p>@{{ activeConversation.otherUsername }}</p>
-              <a
-                class="messages-page__intro-btn"
-                [routerLink]="['/profile', activeConversation.otherUserId]"
-              >
-                Ver perfil
-              </a>
+              <p>
+                @if (activeConversation.isGroup) {
+                  {{ activeConversation.participantCount }} participantes
+                } @else {
+                  @{{ activeConversation.otherUsername }}
+                }
+              </p>
+              @if (!activeConversation.isGroup && activeConversation.otherUserId) {
+                <a
+                  class="messages-page__intro-btn"
+                  [routerLink]="['/profile', activeConversation.otherUserId]"
+                >
+                  Ver perfil
+                </a>
+              }
             </div>
 
             @for (group of messageDayGroups; track trackDayGroup($index, group)) {
@@ -171,6 +197,9 @@
                 <article
                   class="messages-page__bubble-wrap"
                   [class.messages-page__bubble-wrap--mine]="message.isMine"
+                  (touchstart)="handleMessageTouchStart(message.id)"
+                  (touchend)="handleMessageTouchEnd()"
+                  (touchcancel)="handleMessageTouchEnd()"
                 >
                   <div class="messages-page__bubble-actions">
                     <button
@@ -184,12 +213,25 @@
                     <button
                       type="button"
                       class="messages-page__bubble-action"
-                      aria-label="Reagir"
-                      (click)="handleOpenReactionPicker(message.id, $event)"
+                      aria-label="Mais ações"
+                      (click)="handleOpenActionsMenu(message.id, $event)"
                     >
-                      ☺
+                      ⋯
                     </button>
                   </div>
+
+                  @if (actionMenuMessageId === message.id) {
+                    <div class="messages-page__message-actions-menu">
+                      <button type="button" (click)="handleReplyToMessage(message)">Responder</button>
+                      <button type="button" (click)="handleOpenReactionPicker(message.id, $event)">Reagir</button>
+                      @if (message.isMine && !message.isDeletedForEveryone && canEditForEveryone(message)) {
+                        <button type="button" (click)="handleEditMessage(message)">Editar</button>
+                        <button type="button" (click)="handleDeleteMessage(message, 'everyone')">Apagar para todos</button>
+                      }
+                      <button type="button" (click)="handleDeleteMessage(message, 'self')">Apagar para mim</button>
+                      <button type="button" (click)="handleOpenForwardModal(message)">Encaminhar</button>
+                    </div>
+                  }
 
                   @if (reactionPickerMessageId === message.id) {
                     <div class="messages-page__reaction-picker">
@@ -230,8 +272,16 @@
                           loading="lazy"
                         />
                       }
-                      @if (message.text) {
+                      @if (message.isDeletedForEveryone) {
+                        <p class="messages-page__deleted-text">Mensagem apagada</p>
+                      } @else if (message.text) {
                         <p>{{ message.text }}</p>
+                      }
+                      @if (!message.isDeletedForEveryone && message.isEdited) {
+                        <span class="messages-page__edited-label">(editada)</span>
+                      }
+                      @if (message.forwardedFromMessageId) {
+                        <span class="messages-page__forwarded-label">Encaminhada</span>
                       }
                       <footer class="messages-page__bubble-meta">
                         <time [dateTime]="message.createdAt">
@@ -295,6 +345,21 @@
                 class="messages-page__reply-banner-close"
                 aria-label="Cancelar resposta"
                 (click)="handleCancelReply()"
+              >
+                ×
+              </button>
+            </div>
+          }
+          @if (editingMessage) {
+            <div class="messages-page__reply-banner messages-page__reply-banner--edit">
+              <div class="messages-page__reply-banner-body">
+                <span class="messages-page__reply-banner-label">A editar mensagem</span>
+              </div>
+              <button
+                type="button"
+                class="messages-page__reply-banner-close"
+                aria-label="Cancelar edição"
+                (click)="handleCancelEdit()"
               >
                 ×
               </button>
@@ -405,6 +470,14 @@
               aria-label="Escrever mensagem"
               (keydown)="handleComposerKeydown($event)"
             ></textarea>
+            <input
+              type="url"
+              class="messages-page__remote-url-input"
+              [(ngModel)]="remoteImageUrl"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="URL de GIF/Imagem (opcional)"
+              aria-label="URL externa de GIF ou imagem"
+            />
             <button
               type="submit"
               class="messages-page__send-btn"
@@ -427,4 +500,41 @@
     (closed)="handleCloseNewConversation()"
     (conversationCreated)="handleConversationCreated($event)"
   />
+}
+
+@if (forwardingMessage) {
+  <div class="messages-page__forward-overlay" (click)="handleCloseForwardModal()">
+    <div class="messages-page__forward-modal" (click)="$event.stopPropagation()">
+      <h3>Encaminhar mensagem</h3>
+      <p>Seleciona conversas de destino</p>
+      <div class="messages-page__forward-list">
+        @for (conversation of conversations; track trackConversation($index, conversation)) {
+          @if (activeConversation?.id !== conversation.id) {
+            <label class="messages-page__forward-item">
+              <input
+                type="checkbox"
+                [checked]="forwardingIds.has(conversation.id)"
+                (change)="handleToggleForwardConversation(conversation.id)"
+              />
+              <span>{{ getConversationDisplayName(conversation) }}</span>
+            </label>
+          }
+        }
+      </div>
+      @if (forwardError) {
+        <p class="messages-page__send-error">{{ forwardError }}</p>
+      }
+      <div class="messages-page__forward-actions">
+        <button type="button" class="messages-page__pill-btn" (click)="handleCloseForwardModal()">Cancelar</button>
+        <button
+          type="button"
+          class="messages-page__pill-btn"
+          [disabled]="forwarding || forwardingIds.size === 0"
+          (click)="handleConfirmForward()"
+        >
+          {{ forwarding ? 'A encaminhar…' : 'Encaminhar' }}
+        </button>
+      </div>
+    </div>
+  </div>
 }

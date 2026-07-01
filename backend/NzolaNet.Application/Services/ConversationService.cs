@@ -11,6 +11,7 @@ public class ConversationService : IConversationService
 {
     private const int MaxMessageLength = 2000;
     private const int MaxMessagesPageSize = 100;
+    private const int MessageEditDeleteWindowMinutesValue = 15;
 
     private readonly IConversationRepository _conversationRepository;
     private readonly IMessageReactionRepository _messageReactionRepository;
@@ -34,6 +35,8 @@ public class ConversationService : IConversationService
         _storageService = storageService;
         _notificationService = notificationService;
     }
+
+    public int MessageEditDeleteWindowMinutes => MessageEditDeleteWindowMinutesValue;
 
     public async Task<IEnumerable<ConversationListItemDto>> GetConversationsAsync(Guid userId)
     {
@@ -69,6 +72,37 @@ public class ConversationService : IConversationService
         return await MapConversationAsync(conversation, userId);
     }
 
+    public async Task<ConversationListItemDto> CreateGroupConversationAsync(Guid userId, CreateGroupConversationDto dto)
+    {
+        var title = dto.Title?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException("O título do grupo é obrigatório.");
+        }
+
+        var participantIds = (dto.ParticipantIds ?? Array.Empty<Guid>())
+            .Where(id => id != Guid.Empty && id != userId)
+            .Distinct()
+            .ToList();
+
+        if (participantIds.Count == 0)
+        {
+            throw new ArgumentException("Seleciona pelo menos um participante.");
+        }
+
+        foreach (var participantId in participantIds)
+        {
+            var participant = await _userRepository.GetByIdAsync(participantId);
+            if (participant == null)
+            {
+                throw new ArgumentException("Um dos participantes não foi encontrado.");
+            }
+        }
+
+        var conversation = await _conversationRepository.CreateGroupConversationAsync(userId, title, participantIds);
+        return await MapConversationAsync(conversation, userId);
+    }
+
     public async Task<IEnumerable<MessageResponseDto>> GetMessagesAsync(
         Guid userId,
         Guid conversationId,
@@ -78,7 +112,7 @@ public class ConversationService : IConversationService
         await EnsureParticipantAsync(userId, conversationId);
 
         var safeLimit = Math.Clamp(limit, 1, MaxMessagesPageSize);
-        var messages = (await _conversationRepository.GetMessagesAsync(conversationId, safeLimit, before)).ToList();
+        var messages = (await _conversationRepository.GetMessagesAsync(conversationId, userId, safeLimit, before)).ToList();
         var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
         var reactions = await _messageReactionRepository.GetByMessageIdsAsync(messages.Select(m => m.Id));
         var reactionMap = BuildReactionSummaries(reactions, userId);
@@ -96,15 +130,18 @@ public class ConversationService : IConversationService
         string? text,
         IFormFile? image = null,
         IFormFile? video = null,
-        Guid? replyToMessageId = null)
+        Guid? replyToMessageId = null,
+        string? remoteImageUrl = null)
     {
         await EnsureParticipantAsync(userId, conversationId);
 
         var trimmed = text?.Trim() ?? string.Empty;
         var hasImage = image is { Length: > 0 };
         var hasVideo = video is { Length: > 0 };
+        var normalizedRemoteImageUrl = NormalizeRemoteImageUrl(remoteImageUrl);
+        var hasRemoteImage = !string.IsNullOrWhiteSpace(normalizedRemoteImageUrl);
 
-        if (string.IsNullOrWhiteSpace(trimmed) && !hasImage && !hasVideo)
+        if (string.IsNullOrWhiteSpace(trimmed) && !hasImage && !hasVideo && !hasRemoteImage)
         {
             throw new ArgumentException("A mensagem não pode estar vazia.");
         }
@@ -114,9 +151,10 @@ public class ConversationService : IConversationService
             throw new ArgumentException($"A mensagem não pode exceder {MaxMessageLength} caracteres.");
         }
 
-        if (hasImage && hasVideo)
+        var mediaCount = (hasImage ? 1 : 0) + (hasVideo ? 1 : 0) + (hasRemoteImage ? 1 : 0);
+        if (mediaCount > 1)
         {
-            throw new ArgumentException("Envia apenas uma imagem ou um vídeo por mensagem.");
+            throw new ArgumentException("Envia apenas uma imagem, um vídeo ou um URL de imagem por mensagem.");
         }
 
         if (hasImage)
@@ -144,7 +182,8 @@ public class ConversationService : IConversationService
             SenderId = userId,
             Text = trimmed,
             ReplyToMessageId = replyToMessageId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            RemoteImageUrl = normalizedRemoteImageUrl
         };
 
         if (hasImage)
@@ -171,6 +210,175 @@ public class ConversationService : IConversationService
                 conversationId,
                 recipientId,
                 preview);
+        }
+
+        return response;
+    }
+
+    public async Task<MessageResponseDto> EditMessageAsync(
+        Guid userId,
+        Guid conversationId,
+        Guid messageId,
+        string text)
+    {
+        await EnsureParticipantAsync(userId, conversationId);
+
+        var message = await _conversationRepository.GetMessageByIdAsync(messageId, conversationId);
+        if (message == null)
+        {
+            throw new ArgumentException("Mensagem não encontrada.");
+        }
+
+        if (message.SenderId != userId)
+        {
+            throw new UnauthorizedAccessException("Só o remetente pode editar a mensagem.");
+        }
+
+        if (message.IsDeletedForEveryone)
+        {
+            throw new ArgumentException("Não é possível editar uma mensagem apagada para todos.");
+        }
+
+        if (!CanEditOrDeleteForEveryone(message.CreatedAt))
+        {
+            throw new ArgumentException($"Só podes editar mensagens até {MessageEditDeleteWindowMinutesValue} minutos após o envio.");
+        }
+
+        var trimmed = text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            throw new ArgumentException("A mensagem não pode estar vazia.");
+        }
+
+        if (trimmed.Length > MaxMessageLength)
+        {
+            throw new ArgumentException($"A mensagem não pode exceder {MaxMessageLength} caracteres.");
+        }
+
+        message.Text = trimmed;
+        message.EditedAt = DateTime.UtcNow;
+        await _conversationRepository.UpdateMessageAsync(message);
+
+        var reloaded = await _conversationRepository.GetMessageByIdAsync(messageId, conversationId)
+            ?? message;
+        var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
+        var reactions = await _messageReactionRepository.GetByMessageIdsAsync(new[] { messageId });
+        var mappedReactions = BuildReactionSummaries(reactions, userId).GetValueOrDefault(messageId)
+            ?? Array.Empty<MessageReactionSummaryDto>();
+
+        return MapMessage(reloaded, userId, otherLastRead, mappedReactions);
+    }
+
+    public async Task DeleteMessageAsync(
+        Guid userId,
+        Guid conversationId,
+        Guid messageId,
+        string scope)
+    {
+        await EnsureParticipantAsync(userId, conversationId);
+
+        var normalizedScope = scope.Trim().ToLowerInvariant();
+        if (normalizedScope is not ("self" or "everyone"))
+        {
+            throw new ArgumentException("Escopo inválido. Usa 'self' ou 'everyone'.");
+        }
+
+        var message = await _conversationRepository.GetMessageByIdAsync(messageId, conversationId);
+        if (message == null)
+        {
+            throw new ArgumentException("Mensagem não encontrada.");
+        }
+
+        if (normalizedScope == "self")
+        {
+            await _conversationRepository.HideMessageForUserAsync(messageId, userId);
+            return;
+        }
+
+        if (message.SenderId != userId)
+        {
+            throw new UnauthorizedAccessException("Só o remetente pode apagar para todos.");
+        }
+
+        if (!CanEditOrDeleteForEveryone(message.CreatedAt))
+        {
+            throw new ArgumentException($"Só podes apagar para todos até {MessageEditDeleteWindowMinutesValue} minutos após o envio.");
+        }
+
+        message.IsDeletedForEveryone = true;
+        message.DeletedForEveryoneAt = DateTime.UtcNow;
+        message.Text = string.Empty;
+        message.ImagePath = null;
+        message.VideoPath = null;
+        message.RemoteImageUrl = null;
+        await _conversationRepository.UpdateMessageAsync(message);
+    }
+
+    public async Task<IReadOnlyList<MessageResponseDto>> ForwardMessageAsync(
+        Guid userId,
+        Guid sourceConversationId,
+        Guid messageId,
+        IReadOnlyList<Guid> targetConversationIds)
+    {
+        await EnsureParticipantAsync(userId, sourceConversationId);
+
+        var sourceMessage = await _conversationRepository.GetMessageByIdAsync(messageId, sourceConversationId);
+        if (sourceMessage == null)
+        {
+            throw new ArgumentException("Mensagem de origem não encontrada.");
+        }
+
+        var targetIds = targetConversationIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (targetIds.Count == 0)
+        {
+            throw new ArgumentException("Seleciona pelo menos uma conversa de destino.");
+        }
+
+        foreach (var targetId in targetIds)
+        {
+            if (!await _conversationRepository.IsParticipantAsync(targetId, userId))
+            {
+                throw new UnauthorizedAccessException("Não participas numa das conversas de destino.");
+            }
+        }
+
+        var now = DateTime.UtcNow;
+        var messages = targetIds.Select(targetId => new Message
+        {
+            ConversationId = targetId,
+            SenderId = userId,
+            Text = sourceMessage.Text,
+            ImagePath = sourceMessage.ImagePath,
+            VideoPath = sourceMessage.VideoPath,
+            RemoteImageUrl = sourceMessage.RemoteImageUrl,
+            ReplyToMessageId = null,
+            ForwardedFromMessageId = sourceMessage.Id,
+            CreatedAt = now
+        }).ToList();
+
+        var savedMessages = await _conversationRepository.AddMessagesAsync(messages);
+        var response = new List<MessageResponseDto>(savedMessages.Count);
+
+        foreach (var savedMessage in savedMessages)
+        {
+            var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(savedMessage.ConversationId, userId);
+            var mapped = MapMessage(savedMessage, userId, otherLastRead, Array.Empty<MessageReactionSummaryDto>());
+            response.Add(mapped);
+
+            var recipients = await _conversationRepository.GetOtherParticipantIdsAsync(savedMessage.ConversationId, userId);
+            var preview = FormatMessagePreview(savedMessage);
+            foreach (var recipientId in recipients)
+            {
+                await _notificationService.TryCreateMessageNotificationAsync(
+                    userId,
+                    savedMessage.ConversationId,
+                    recipientId,
+                    preview);
+            }
         }
 
         return response;
@@ -265,13 +473,27 @@ public class ConversationService : IConversationService
 
     private async Task<ConversationListItemDto> MapConversationAsync(Conversation conversation, Guid userId)
     {
+        var lastMessage = await _conversationRepository.GetLastMessageAsync(conversation.Id);
+        var participantCount = await _conversationRepository.GetParticipantsCountAsync(conversation.Id);
+        var unreadCount = await _conversationRepository.GetUnreadCountForConversationAsync(conversation.Id, userId);
+
+        if (conversation.IsGroup)
+        {
+            return new ConversationListItemDto
+            {
+                Id = conversation.Id,
+                Title = conversation.Title,
+                IsGroup = true,
+                ParticipantCount = participantCount,
+                LastMessageText = FormatMessagePreview(lastMessage),
+                LastMessageAt = lastMessage?.CreatedAt,
+                UnreadCount = unreadCount
+            };
+        }
+
         var otherParticipant = conversation.Participants.FirstOrDefault(p => p.UserId != userId)
             ?? throw new InvalidOperationException("Conversa inválida.");
-
         var otherUser = otherParticipant.User;
-        var lastMessage = await _conversationRepository.GetLastMessageAsync(conversation.Id);
-
-        var unreadCount = await _conversationRepository.GetUnreadCountForConversationAsync(conversation.Id, userId);
 
         return new ConversationListItemDto
         {
@@ -280,6 +502,8 @@ public class ConversationService : IConversationService
             OtherUsername = otherUser.UserName ?? string.Empty,
             OtherDisplayName = otherUser.DisplayName,
             OtherPhotoUrl = otherUser.ProfilePhoto,
+            IsGroup = false,
+            ParticipantCount = participantCount,
             LastMessageText = FormatMessagePreview(lastMessage),
             LastMessageAt = lastMessage?.CreatedAt,
             UnreadCount = unreadCount
@@ -306,9 +530,13 @@ public class ConversationService : IConversationService
             SenderDisplayName = message.Sender.DisplayName,
             SenderPhotoUrl = message.Sender.ProfilePhoto,
             Text = message.Text,
-            ImageUrl = message.ImagePath,
+            ImageUrl = message.RemoteImageUrl ?? message.ImagePath,
             VideoUrl = message.VideoPath,
-            IsGif = IsGifPath(message.ImagePath),
+            RemoteImageUrl = message.RemoteImageUrl,
+            ForwardedFromMessageId = message.ForwardedFromMessageId,
+            IsEdited = message.EditedAt.HasValue,
+            IsDeletedForEveryone = message.IsDeletedForEveryone,
+            IsGif = IsGifPath(message.RemoteImageUrl ?? message.ImagePath),
             ReplyTo = message.ReplyTo == null ? null : MapReplyPreview(message.ReplyTo),
             Reactions = reactions ?? Array.Empty<MessageReactionSummaryDto>(),
             CreatedAt = message.CreatedAt,
@@ -326,9 +554,9 @@ public class ConversationService : IConversationService
             SenderUsername = message.Sender.UserName ?? string.Empty,
             SenderDisplayName = message.Sender.DisplayName,
             Text = message.Text,
-            ImageUrl = message.ImagePath,
+            ImageUrl = message.RemoteImageUrl ?? message.ImagePath,
             VideoUrl = message.VideoPath,
-            IsGif = IsGifPath(message.ImagePath)
+            IsGif = IsGifPath(message.RemoteImageUrl ?? message.ImagePath)
         };
     }
 
@@ -365,14 +593,20 @@ public class ConversationService : IConversationService
             return null;
         }
 
+        if (message.IsDeletedForEveryone)
+        {
+            return "Mensagem apagada";
+        }
+
         if (!string.IsNullOrWhiteSpace(message.VideoPath) && string.IsNullOrWhiteSpace(message.Text))
         {
             return "Vídeo";
         }
 
-        if (!string.IsNullOrWhiteSpace(message.ImagePath) && string.IsNullOrWhiteSpace(message.Text))
+        var imagePath = message.RemoteImageUrl ?? message.ImagePath;
+        if (!string.IsNullOrWhiteSpace(imagePath) && string.IsNullOrWhiteSpace(message.Text))
         {
-            return IsGifPath(message.ImagePath) ? "GIF" : "Imagem";
+            return IsGifPath(imagePath) ? "GIF" : "Imagem";
         }
 
         if (message.ReplyToMessageId.HasValue && string.IsNullOrWhiteSpace(message.Text))
@@ -381,5 +615,28 @@ public class ConversationService : IConversationService
         }
 
         return message.Text;
+    }
+
+    private static string? NormalizeRemoteImageUrl(string? remoteImageUrl)
+    {
+        var value = remoteImageUrl?.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new ArgumentException("O URL da imagem remota deve usar http ou https.");
+        }
+
+        return uri.ToString();
+    }
+
+    private static bool CanEditOrDeleteForEveryone(DateTime createdAt)
+    {
+        var deadline = createdAt.AddMinutes(MessageEditDeleteWindowMinutesValue);
+        return DateTime.UtcNow <= deadline;
     }
 }

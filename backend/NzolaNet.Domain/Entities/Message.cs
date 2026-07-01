@@ -15,6 +15,11 @@ public class Message
     public string? VideoPath { get; set; }
     public Guid? ReplyToMessageId { get; set; }
     public virtual Message? ReplyTo { get; set; }
+    public Guid? ForwardedFromMessageId { get; set; }
+    public string? RemoteImageUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? EditedAt { get; set; }
     public bool IsDeleted { get; set; }
+    public bool IsDeletedForEveryone { get; set; }
+    public DateTime? DeletedForEveryoneAt { get; set; }
 }

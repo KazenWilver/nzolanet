@@ -18,6 +18,10 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   imports: [CommonModule, FormsModule, AvatarComponent, ModalComponent, LoadingSpinnerComponent],
   template: `
     <app-modal [open]="true" title="Nova conversa" (closed)="handleClose()">
+      <div class="new-conversation__tabs">
+        <button type="button" [class.active]="mode === 'direct'" (click)="handleToggleMode('direct')">Direta</button>
+        <button type="button" [class.active]="mode === 'group'" (click)="handleToggleMode('group')">Grupo</button>
+      </div>
       <label class="new-conversation__search" aria-label="Pesquisar utilizadores">
         <span aria-hidden="true">🔍</span>
         <input
@@ -28,6 +32,18 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
           class="new-conversation__search-input"
         />
       </label>
+
+      @if (mode === 'group') {
+        <label class="new-conversation__search" aria-label="Título do grupo">
+          <span aria-hidden="true">📝</span>
+          <input
+            type="text"
+            [(ngModel)]="groupTitle"
+            placeholder="Título do grupo"
+            class="new-conversation__search-input"
+          />
+        </label>
+      }
 
       @if (loading) {
         <div class="new-conversation__loading">
@@ -47,7 +63,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
                 type="button"
                 class="new-conversation__item"
                 [disabled]="startingUserId === user.id"
-                (click)="handleStartConversation(user)"
+                (click)="mode === 'direct' ? handleStartConversation(user) : handleToggleGroupParticipant(user.id)"
               >
                 <app-avatar [src]="user.profilePhotoUrl" [username]="user.username" size="md" />
                 <span class="new-conversation__meta">
@@ -56,15 +72,47 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
                 </span>
                 @if (startingUserId === user.id) {
                   <span class="new-conversation__starting">A abrir…</span>
+                } @else if (mode === 'group') {
+                  <span class="new-conversation__starting">
+                    {{ selectedGroupParticipantIds.has(user.id) ? 'Selecionado' : 'Selecionar' }}
+                  </span>
                 }
               </button>
             </li>
           }
         </ul>
       }
+
+      @if (mode === 'group') {
+        <div class="new-conversation__group-actions">
+          <button type="button" class="new-conversation__create-btn" (click)="handleCreateGroupConversation()">
+            Criar grupo
+          </button>
+        </div>
+      }
     </app-modal>
   `,
   styles: `
+    .new-conversation__tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .new-conversation__tabs button {
+      border: 1px solid var(--color-border);
+      border-radius: 9999px;
+      background: transparent;
+      color: var(--color-text-primary);
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .new-conversation__tabs button.active {
+      background: var(--color-accent-blue-bg);
+      border-color: var(--color-accent);
+    }
+
     .new-conversation__search {
       display: flex;
       align-items: center;
@@ -156,6 +204,22 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
       color: var(--color-text-secondary);
       white-space: nowrap;
     }
+
+    .new-conversation__group-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    .new-conversation__create-btn {
+      border: none;
+      border-radius: 9999px;
+      min-height: 40px;
+      padding: 0 16px;
+      cursor: pointer;
+      background: var(--color-text-primary);
+      color: var(--color-bg-primary);
+    }
   `
 })
 export class NewConversationModalComponent {
@@ -168,6 +232,8 @@ export class NewConversationModalComponent {
   @Output() conversationCreated = new EventEmitter<string>()
 
   searchQuery = ''
+  mode: 'direct' | 'group' = 'direct'
+  groupTitle = ''
   results: User[] = []
   loading = false
   errorMessage = ''
@@ -210,6 +276,44 @@ export class NewConversationModalComponent {
     }
 
     this.searchSubject.next(query)
+  }
+
+  handleToggleMode(mode: 'direct' | 'group'): void {
+    this.mode = mode
+    this.errorMessage = ''
+  }
+
+  selectedGroupParticipantIds = new Set<string>()
+
+  handleToggleGroupParticipant(userId: string): void {
+    if (this.selectedGroupParticipantIds.has(userId)) {
+      this.selectedGroupParticipantIds.delete(userId)
+      return
+    }
+
+    this.selectedGroupParticipantIds.add(userId)
+  }
+
+  handleCreateGroupConversation(): void {
+    const title = this.groupTitle.trim()
+    const participantIds = Array.from(this.selectedGroupParticipantIds)
+    if (!title || participantIds.length === 0) {
+      this.errorMessage = 'Define um título e escolhe participantes.'
+      return
+    }
+
+    this.errorMessage = ''
+    this.conversationService
+      .createGroupConversation({ title, participantIds })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: conversation => {
+          this.conversationCreated.emit(conversation.id)
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage = error.error?.message ?? 'Não foi possível criar o grupo.'
+        }
+      })
   }
 
   handleStartConversation(user: User): void {

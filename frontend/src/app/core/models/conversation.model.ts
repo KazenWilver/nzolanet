@@ -19,10 +19,13 @@ export interface BackendMessageReactionSummaryDto {
 
 export interface BackendConversationListItemDto {
   id: string
-  otherUserId: string
-  otherUsername: string
+  otherUserId?: string
+  otherUsername?: string
   otherDisplayName?: string
   otherPhotoUrl?: string
+  title?: string
+  isGroup?: boolean
+  participantCount?: number
   lastMessageText?: string
   lastMessageAt?: string
   unreadCount: number
@@ -38,6 +41,10 @@ export interface BackendMessageDto {
   text: string
   imageUrl?: string
   videoUrl?: string
+  remoteImageUrl?: string
+  forwardedFromMessageId?: string
+  isEdited?: boolean
+  isDeletedForEveryone?: boolean
   isGif: boolean
   replyTo?: BackendMessageReplyPreviewDto
   reactions: BackendMessageReactionSummaryDto[]
@@ -65,10 +72,13 @@ export interface MessageReactionSummary {
 
 export interface ConversationListItem {
   id: string
-  otherUserId: string
-  otherUsername: string
+  otherUserId?: string
+  otherUsername?: string
   otherDisplayName?: string
   otherPhotoUrl?: string
+  title?: string
+  isGroup: boolean
+  participantCount: number
   lastMessageText?: string
   lastMessageAt?: string
   unreadCount: number
@@ -84,6 +94,10 @@ export interface ChatMessage {
   text: string
   imageUrl?: string
   videoUrl?: string
+  remoteImageUrl?: string
+  forwardedFromMessageId?: string
+  isEdited: boolean
+  isDeletedForEveryone: boolean
   isGif: boolean
   replyTo?: MessageReplyPreview
   reactions: MessageReactionSummary[]
@@ -120,6 +134,9 @@ export const mapConversationListItem = (dto: BackendConversationListItemDto): Co
   otherUsername: dto.otherUsername,
   otherDisplayName: dto.otherDisplayName,
   otherPhotoUrl: resolveMediaUrl(dto.otherPhotoUrl),
+  title: dto.title,
+  isGroup: dto.isGroup ?? false,
+  participantCount: dto.participantCount ?? (dto.isGroup ? 0 : 2),
   lastMessageText: dto.lastMessageText,
   lastMessageAt: dto.lastMessageAt,
   unreadCount: dto.unreadCount
@@ -135,6 +152,10 @@ export const mapChatMessage = (dto: BackendMessageDto): ChatMessage => ({
   text: dto.text,
   imageUrl: resolveMediaUrl(dto.imageUrl),
   videoUrl: resolveMediaUrl(dto.videoUrl),
+  remoteImageUrl: dto.remoteImageUrl,
+  forwardedFromMessageId: dto.forwardedFromMessageId,
+  isEdited: dto.isEdited ?? false,
+  isDeletedForEveryone: dto.isDeletedForEveryone ?? false,
   isGif: dto.isGif ?? false,
   replyTo: dto.replyTo ? mapReplyPreview(dto.replyTo) : undefined,
   reactions: mapReactions(dto.reactions),

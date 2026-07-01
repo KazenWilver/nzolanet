@@ -27,6 +27,10 @@ public class SignalRChatRealtimeNotifier : IChatRealtimeNotifier
             message.Text,
             message.ImageUrl,
             message.VideoUrl,
+            message.RemoteImageUrl,
+            message.ForwardedFromMessageId,
+            message.IsEdited,
+            message.IsDeletedForEveryone,
             message.IsGif,
             message.ReplyTo,
             message.Reactions,
@@ -76,6 +80,31 @@ public class SignalRChatRealtimeNotifier : IChatRealtimeNotifier
                 ConversationId = conversationId.ToString(),
                 MessageId = messageId.ToString(),
                 Reactions = reactions
+            });
+    }
+
+    public async Task NotifyMessageDeletedAsync(Guid conversationId, Guid messageId, string scope, Guid actorUserId)
+    {
+        await _hubContext.Clients
+            .Group(ChatHub.GetGroupName(conversationId))
+            .SendAsync("MessageDeleted", new
+            {
+                ConversationId = conversationId.ToString(),
+                MessageId = messageId.ToString(),
+                Scope = scope,
+                ActorUserId = actorUserId.ToString()
+            });
+    }
+
+    public async Task NotifyMessageEditedAsync(Guid conversationId, MessageResponseDto message, Guid actorUserId)
+    {
+        await _hubContext.Clients
+            .Group(ChatHub.GetGroupName(conversationId))
+            .SendAsync("MessageEdited", new
+            {
+                ConversationId = conversationId.ToString(),
+                ActorUserId = actorUserId.ToString(),
+                Message = message
             });
     }
 }

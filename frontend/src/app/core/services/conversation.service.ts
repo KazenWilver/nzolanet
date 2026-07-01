@@ -20,6 +20,12 @@ export interface SendMediaOptions {
   image?: File
   video?: File
   replyToMessageId?: string
+  remoteImageUrl?: string
+}
+
+export interface CreateGroupConversationPayload {
+  title: string
+  participantIds: string[]
 }
 
 @Injectable({ providedIn: 'root' })
@@ -64,6 +70,12 @@ export class ConversationService {
       .pipe(map(mapConversationListItem))
   }
 
+  createGroupConversation(payload: CreateGroupConversationPayload): Observable<ConversationListItem> {
+    return this.http
+      .post<BackendConversationListItemDto>(`${this.baseUrl}/group`, payload)
+      .pipe(map(mapConversationListItem))
+  }
+
   getMessages(conversationId: string, limit = 50, before?: string): Observable<ChatMessage[]> {
     const params: Record<string, string> = { limit: String(limit) }
     if (before) {
@@ -75,13 +87,43 @@ export class ConversationService {
       .pipe(map(messages => messages.map(mapChatMessage)))
   }
 
-  sendMessage(conversationId: string, text: string, replyToMessageId?: string): Observable<ChatMessage> {
+  sendMessage(
+    conversationId: string,
+    text: string,
+    replyToMessageId?: string,
+    remoteImageUrl?: string
+  ): Observable<ChatMessage> {
     return this.http
       .post<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages`, {
         text,
-        replyToMessageId: replyToMessageId ?? null
+        replyToMessageId: replyToMessageId ?? null,
+        remoteImageUrl: remoteImageUrl?.trim() || null
       })
       .pipe(map(mapChatMessage))
+  }
+
+  editMessage(conversationId: string, messageId: string, text: string): Observable<ChatMessage> {
+    return this.http
+      .patch<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages/${messageId}`, { text })
+      .pipe(map(mapChatMessage))
+  }
+
+  deleteMessage(conversationId: string, messageId: string, scope: 'self' | 'everyone'): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${conversationId}/messages/${messageId}`, {
+      params: { scope }
+    })
+  }
+
+  forwardMessage(
+    conversationId: string,
+    messageId: string,
+    targetConversationIds: string[]
+  ): Observable<ChatMessage[]> {
+    return this.http
+      .post<BackendMessageDto[]>(`${this.baseUrl}/${conversationId}/messages/${messageId}/forward`, {
+        targetConversationIds
+      })
+      .pipe(map(messages => messages.map(mapChatMessage)))
   }
 
   sendMessageWithMedia(conversationId: string, options: SendMediaOptions): Observable<ChatMessage> {
@@ -91,6 +133,9 @@ export class ConversationService {
     }
     if (options.replyToMessageId) {
       formData.append('replyToMessageId', options.replyToMessageId)
+    }
+    if (options.remoteImageUrl?.trim()) {
+      formData.append('remoteImageUrl', options.remoteImageUrl.trim())
     }
     if (options.image) {
       formData.append('image', options.image)

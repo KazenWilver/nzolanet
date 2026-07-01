@@ -57,6 +57,21 @@ public class ConversationsController : ControllerBase
         }
     }
 
+    [HttpPost("group")]
+    public async Task<IActionResult> CreateGroup([FromBody] CreateGroupConversationDto dto)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var conversation = await _conversationService.CreateGroupConversationAsync(userId, dto);
+            return Ok(conversation);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("{id:guid}/messages")]
     public async Task<IActionResult> GetMessages(
         Guid id,
@@ -85,7 +100,8 @@ public class ConversationsController : ControllerBase
                 userId,
                 id,
                 dto.Text,
-                replyToMessageId: dto.ReplyToMessageId);
+                replyToMessageId: dto.ReplyToMessageId,
+                remoteImageUrl: dto.RemoteImageUrl);
             await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
             return Ok(message);
         }
@@ -105,6 +121,7 @@ public class ConversationsController : ControllerBase
         Guid id,
         [FromForm] string? text,
         [FromForm] Guid? replyToMessageId,
+        [FromForm] string? remoteImageUrl,
         [FromForm] IFormFile? image,
         [FromForm] IFormFile? video)
     {
@@ -117,7 +134,8 @@ public class ConversationsController : ControllerBase
                 text,
                 image,
                 video,
-                replyToMessageId);
+                replyToMessageId,
+                remoteImageUrl);
             await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
             return Ok(message);
         }
@@ -143,6 +161,83 @@ public class ConversationsController : ControllerBase
             var reactions = await _conversationService.ToggleReactionAsync(userId, id, messageId, dto.Emoji);
             await _chatRealtimeNotifier.NotifyReactionChangedAsync(id, messageId, reactions);
             return Ok(new { reactions });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
+    [HttpPatch("{id:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> EditMessage(Guid id, Guid messageId, [FromBody] EditMessageDto dto)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var message = await _conversationService.EditMessageAsync(userId, id, messageId, dto.Text);
+            await _chatRealtimeNotifier.NotifyMessageEditedAsync(id, message, userId);
+            return Ok(message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
+    [HttpDelete("{id:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> DeleteMessage(
+        Guid id,
+        Guid messageId,
+        [FromQuery] string? scope,
+        [FromBody] DeleteMessageDto? dto = null)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var deleteScope = scope ?? dto?.Scope ?? "self";
+            await _conversationService.DeleteMessageAsync(userId, id, messageId, deleteScope);
+            if (string.Equals(deleteScope, "everyone", StringComparison.OrdinalIgnoreCase))
+            {
+                await _chatRealtimeNotifier.NotifyMessageDeletedAsync(id, messageId, deleteScope, userId);
+            }
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
+    [HttpPost("{id:guid}/messages/{messageId:guid}/forward")]
+    public async Task<IActionResult> ForwardMessage(Guid id, Guid messageId, [FromBody] ForwardMessageDto dto)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var forwarded = await _conversationService.ForwardMessageAsync(
+                userId,
+                id,
+                messageId,
+                dto.TargetConversationIds);
+
+            foreach (var message in forwarded)
+            {
+                await _chatRealtimeNotifier.NotifyMessageAsync(message.ConversationId, message, userId);
+            }
+
+            return Ok(forwarded);
         }
         catch (ArgumentException ex)
         {

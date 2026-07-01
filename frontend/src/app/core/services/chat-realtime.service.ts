@@ -35,11 +35,28 @@ interface BackendMessageBroadcast {
   text: string
   imageUrl?: string
   videoUrl?: string
+  remoteImageUrl?: string
+  forwardedFromMessageId?: string
+  isEdited?: boolean
+  isDeletedForEveryone?: boolean
   isGif?: boolean
   replyTo?: ChatMessage['replyTo']
   reactions?: MessageReactionSummary[]
   createdAt: string
   isRead?: boolean
+}
+
+export interface ChatMessageDeletedEvent {
+  conversationId: string
+  messageId: string
+  scope: string
+  actorUserId: string
+}
+
+export interface ChatMessageEditedEvent {
+  conversationId: string
+  actorUserId: string
+  message: ChatMessage
 }
 
 @Injectable({ providedIn: 'root' })
@@ -54,12 +71,16 @@ export class ChatRealtimeService {
   private readonly typingSubject = new Subject<ChatTypingEvent>()
   private readonly readReceiptSubject = new Subject<ChatReadReceiptEvent>()
   private readonly reactionChangedSubject = new Subject<ChatReactionChangedEvent>()
+  private readonly messageDeletedSubject = new Subject<ChatMessageDeletedEvent>()
+  private readonly messageEditedSubject = new Subject<ChatMessageEditedEvent>()
 
   readonly connected$ = this.connectedSubject.asObservable()
   readonly message$ = this.messageSubject.asObservable()
   readonly typing$ = this.typingSubject.asObservable()
   readonly readReceipt$ = this.readReceiptSubject.asObservable()
   readonly reactionChanged$ = this.reactionChangedSubject.asObservable()
+  readonly messageDeleted$ = this.messageDeletedSubject.asObservable()
+  readonly messageEdited$ = this.messageEditedSubject.asObservable()
 
   async connect(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -202,6 +223,30 @@ export class ChatRealtimeService {
           count: reaction.count,
           reactedByMe: reaction.reactedByMe
         }))
+      })
+    })
+
+    this.connection.on('MessageDeleted', (payload: ChatMessageDeletedEvent) => {
+      this.messageDeletedSubject.next({
+        conversationId: String(payload.conversationId),
+        messageId: String(payload.messageId),
+        scope: String(payload.scope),
+        actorUserId: String(payload.actorUserId)
+      })
+    })
+
+    this.connection.on('MessageEdited', (payload: { conversationId: string; actorUserId: string; message: BackendMessageBroadcast }) => {
+      const currentUserId = this.authService.getCurrentUser()?.id?.toLowerCase()
+      this.messageEditedSubject.next({
+        conversationId: String(payload.conversationId),
+        actorUserId: String(payload.actorUserId),
+        message: mapChatMessage({
+          ...payload.message,
+          isGif: payload.message.isGif ?? false,
+          reactions: payload.message.reactions ?? [],
+          isMine: currentUserId === payload.message.senderId?.toLowerCase(),
+          isRead: payload.message.isRead ?? false
+        })
       })
     })
 

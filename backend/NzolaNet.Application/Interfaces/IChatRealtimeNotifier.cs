@@ -17,4 +17,8 @@ public interface IChatRealtimeNotifier
         Guid conversationId,
         Guid messageId,
         IReadOnlyList<MessageReactionSummaryDto> reactions);
+
+    Task NotifyMessageDeletedAsync(Guid conversationId, Guid messageId, string scope, Guid actorUserId);
+
+    Task NotifyMessageEditedAsync(Guid conversationId, MessageResponseDto message, Guid actorUserId);
 }

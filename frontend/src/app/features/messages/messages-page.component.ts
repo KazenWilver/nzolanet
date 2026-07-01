@@ -70,12 +70,22 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   pendingImagePreview = ''
   pendingVideo: File | null = null
   pendingVideoPreview = ''
+  remoteImageUrl = ''
   replyingTo: ChatMessage | null = null
+  editingMessage: ChatMessage | null = null
   composerEmojiOpen = false
   reactionPickerMessageId: string | null = null
+  actionMenuMessageId: string | null = null
+  forwardingMessage: ChatMessage | null = null
+  forwardingIds = new Set<string>()
+  forwarding = false
+  forwardError = ''
+  loadingOlderMessages = false
+  hasMoreMessages = true
 
   private typingTimeoutId?: ReturnType<typeof setTimeout>
   private typingClearTimeoutId?: ReturnType<typeof setTimeout>
+  private longPressTimeoutId?: ReturnType<typeof setTimeout>
   private pollingSubscription?: Subscription
 
   readonly messageForm = this.formBuilder.nonNullable.group({
@@ -84,7 +94,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   get canSendMessage(): boolean {
     const hasText = this.messageForm.controls.text.value.trim().length > 0
-    return (hasText || !!this.pendingImage || !!this.pendingVideo) && !this.sendingMessage
+    const hasRemoteImage = this.remoteImageUrl.trim().length > 0
+    return (hasText || !!this.pendingImage || !!this.pendingVideo || hasRemoteImage) && !this.sendingMessage
   }
 
   ngOnInit(): void {
@@ -124,7 +135,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
     return this.conversations.filter(conversation => {
       const displayName = this.getConversationDisplayName(conversation).toLowerCase()
-      return displayName.includes(query) || conversation.otherUsername.toLowerCase().includes(query)
+      const username = conversation.otherUsername?.toLowerCase() ?? ''
+      return displayName.includes(query) || username.includes(query)
     })
   }
 
@@ -182,7 +194,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     const text = this.messageForm.controls.text.value.trim()
-    if (!text && !this.pendingImage && !this.pendingVideo) {
+    const remoteImageUrl = this.remoteImageUrl.trim()
+    if (!text && !this.pendingImage && !this.pendingVideo && !remoteImageUrl) {
       return
     }
 
@@ -192,14 +205,22 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
     const replyToMessageId = this.replyingTo?.id
     const hasMedia = !!this.pendingImage || !!this.pendingVideo
-    const request$ = hasMedia
+    const request$ = this.editingMessage
+      ? this.conversationService.editMessage(this.activeConversation.id, this.editingMessage.id, text)
+      : hasMedia
       ? this.conversationService.sendMessageWithMedia(this.activeConversation.id, {
           text,
           image: this.pendingImage ?? undefined,
           video: this.pendingVideo ?? undefined,
-          replyToMessageId
+          replyToMessageId,
+          remoteImageUrl: remoteImageUrl || undefined
         })
-      : this.conversationService.sendMessage(this.activeConversation.id, text, replyToMessageId)
+      : this.conversationService.sendMessage(
+          this.activeConversation.id,
+          text,
+          replyToMessageId,
+          remoteImageUrl || undefined
+        )
 
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -207,8 +228,10 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         next: message => {
           this.clearPendingMedia()
           this.replyingTo = null
+          this.editingMessage = null
+          this.remoteImageUrl = ''
           this.composerEmojiOpen = false
-          this.appendMessageIfMissing(message)
+          this.upsertMessage(message)
           this.messageForm.reset()
           this.sendingMessage = false
           this.updateConversationPreview(message)
@@ -224,6 +247,102 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   handleReplyToMessage(message: ChatMessage): void {
     this.replyingTo = message
     this.reactionPickerMessageId = null
+    this.actionMenuMessageId = null
+  }
+
+  handleEditMessage(message: ChatMessage): void {
+    if (!message.isMine) {
+      return
+    }
+
+    this.editingMessage = message
+    this.replyingTo = null
+    this.messageForm.controls.text.setValue(message.text ?? '')
+    this.actionMenuMessageId = null
+  }
+
+  handleCancelEdit(): void {
+    this.editingMessage = null
+    this.messageForm.controls.text.setValue('')
+  }
+
+  handleDeleteMessage(message: ChatMessage, scope: 'self' | 'everyone'): void {
+    if (!this.activeConversation) {
+      return
+    }
+
+    this.conversationService
+      .deleteMessage(this.activeConversation.id, message.id, scope)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.actionMenuMessageId = null
+          if (scope === 'self') {
+            this.messages = this.messages.filter(existing => existing.id !== message.id)
+            return
+          }
+
+          this.messages = this.messages.map(existing =>
+            existing.id === message.id
+              ? {
+                  ...existing,
+                  text: '',
+                  imageUrl: undefined,
+                  videoUrl: undefined,
+                  remoteImageUrl: undefined,
+                  isDeletedForEveryone: true
+                }
+              : existing
+          )
+        }
+      })
+  }
+
+  handleOpenForwardModal(message: ChatMessage): void {
+    this.forwardingMessage = message
+    this.forwardingIds = new Set<string>()
+    this.forwarding = false
+    this.forwardError = ''
+    this.actionMenuMessageId = null
+  }
+
+  handleToggleForwardConversation(conversationId: string): void {
+    if (this.forwardingIds.has(conversationId)) {
+      this.forwardingIds.delete(conversationId)
+      return
+    }
+
+    this.forwardingIds.add(conversationId)
+  }
+
+  handleCloseForwardModal(): void {
+    this.forwardingMessage = null
+    this.forwardingIds = new Set<string>()
+    this.forwarding = false
+    this.forwardError = ''
+  }
+
+  handleConfirmForward(): void {
+    if (!this.activeConversation || !this.forwardingMessage || this.forwarding || this.forwardingIds.size === 0) {
+      return
+    }
+
+    this.forwarding = true
+    this.forwardError = ''
+    this.conversationService
+      .forwardMessage(this.activeConversation.id, this.forwardingMessage.id, Array.from(this.forwardingIds))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.forwarding = false
+          this.handleCloseForwardModal()
+          this.loadConversations()
+        },
+        error: (error: HttpErrorResponse) => {
+          this.forwarding = false
+          this.forwardError = error.error?.message ?? 'Não foi possível encaminhar a mensagem.'
+        }
+      })
   }
 
   handleCancelReply(): void {
@@ -234,6 +353,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     event.stopPropagation()
     this.reactionPickerMessageId = this.reactionPickerMessageId === messageId ? null : messageId
     this.composerEmojiOpen = false
+    this.actionMenuMessageId = null
   }
 
   handleReactionSelected(message: ChatMessage, emoji: string): void {
@@ -351,22 +471,98 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.openConversation(this.activeConversation)
   }
 
+  handleOpenActionsMenu(messageId: string, event?: MouseEvent): void {
+    event?.stopPropagation()
+    this.actionMenuMessageId = this.actionMenuMessageId === messageId ? null : messageId
+    this.reactionPickerMessageId = null
+  }
+
+  handleMessageTouchStart(messageId: string): void {
+    this.longPressTimeoutId = setTimeout(() => {
+      this.actionMenuMessageId = messageId
+    }, 500)
+  }
+
+  handleMessageTouchEnd(): void {
+    if (!this.longPressTimeoutId) {
+      return
+    }
+
+    clearTimeout(this.longPressTimeoutId)
+    this.longPressTimeoutId = undefined
+  }
+
+  handleMessagesScroll(): void {
+    const element = this.messagesScroll?.nativeElement
+    if (!element || !this.activeConversation || this.loadingOlderMessages || !this.hasMoreMessages) {
+      return
+    }
+
+    if (element.scrollTop > 90) {
+      return
+    }
+
+    const firstMessage = this.messages[0]
+    if (!firstMessage) {
+      return
+    }
+
+    const previousHeight = element.scrollHeight
+    this.loadingOlderMessages = true
+    this.conversationService
+      .getMessages(this.activeConversation.id, 50, firstMessage.createdAt)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: olderMessages => {
+          this.loadingOlderMessages = false
+          this.hasMoreMessages = olderMessages.length >= 50
+          const unseen = olderMessages.filter(
+            incoming => !this.messages.some(existing => existing.id === incoming.id)
+          )
+          this.messages = [...unseen, ...this.messages]
+
+          requestAnimationFrame(() => {
+            const nextElement = this.messagesScroll?.nativeElement
+            if (!nextElement) {
+              return
+            }
+
+            const heightDelta = nextElement.scrollHeight - previousHeight
+            nextElement.scrollTop = nextElement.scrollTop + heightDelta
+          })
+        },
+        error: () => {
+          this.loadingOlderMessages = false
+        }
+      })
+  }
+
   getConversationDisplayName(conversation: ConversationListItem): string {
-    return conversation.otherDisplayName ?? conversation.otherUsername
+    if (conversation.isGroup) {
+      return conversation.title ?? 'Grupo'
+    }
+
+    return conversation.otherDisplayName ?? conversation.otherUsername ?? 'Conversa'
   }
 
   getPreviewText(conversation: ConversationListItem): string {
     if (!conversation.lastMessageText) {
       return 'Iniciar conversa'
     }
-
-    const currentUserId = this.authService.getCurrentUser()?.id
     const isOwnPreview = conversation.lastMessageText.startsWith('Tu:')
     if (isOwnPreview) {
       return conversation.lastMessageText
     }
 
     return conversation.lastMessageText
+  }
+
+  canEditForEveryone(message: ChatMessage): boolean {
+    if (!message.isMine || message.isDeletedForEveryone) {
+      return false
+    }
+
+    return Date.now() - new Date(message.createdAt).getTime() <= 15 * 60 * 1000
   }
 
   trackConversation(_index: number, conversation: ConversationListItem): string {
@@ -397,7 +593,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           return
         }
 
-        this.appendMessageIfMissing(message)
+        this.upsertMessage(message)
         this.scrollMessagesToBottom()
 
         if (!message.isMine) {
@@ -413,8 +609,15 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         }
 
         const readerId = event.readerUserId.toLowerCase()
-        const otherId = this.activeConversation.otherUserId.toLowerCase()
-        if (readerId !== otherId) {
+        if (!this.activeConversation.isGroup) {
+          const otherId = this.activeConversation.otherUserId?.toLowerCase()
+          if (!otherId || readerId !== otherId) {
+            return
+          }
+        }
+
+        const currentUserId = this.authService.getCurrentUser()?.id?.toLowerCase()
+        if (readerId === currentUserId) {
           return
         }
 
@@ -431,10 +634,21 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         }
 
         const currentUserId = this.authService.getCurrentUser()?.id?.toLowerCase()
-        const otherUserId = this.activeConversation.otherUserId.toLowerCase()
         const eventUserId = event.userId.toLowerCase()
 
-        if (!eventUserId || eventUserId === currentUserId || eventUserId !== otherUserId) {
+        if (!eventUserId || eventUserId === currentUserId) {
+          return
+        }
+
+        if (!this.activeConversation.isGroup) {
+          const otherUserId = this.activeConversation.otherUserId?.toLowerCase()
+          if (!otherUserId || eventUserId !== otherUserId) {
+            return
+          }
+        }
+
+        if (!event.isTyping && this.activeConversation.isGroup) {
+          this.typingLabel = ''
           return
         }
 
@@ -462,6 +676,37 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         this.messages = this.messages.map(existing =>
           existing.id === event.messageId ? { ...existing, reactions: event.reactions } : existing
         )
+      })
+
+    this.chatRealtime.messageDeleted$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+          return
+        }
+
+        this.messages = this.messages.map(existing =>
+          existing.id === event.messageId
+            ? {
+                ...existing,
+                text: '',
+                imageUrl: undefined,
+                videoUrl: undefined,
+                remoteImageUrl: undefined,
+                isDeletedForEveryone: true
+              }
+            : existing
+        )
+      })
+
+    this.chatRealtime.messageEdited$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+          return
+        }
+
+        this.upsertMessage(event.message)
       })
   }
 
@@ -532,8 +777,11 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.sendError = ''
     this.typingLabel = ''
     this.replyingTo = null
+    this.editingMessage = null
     this.reactionPickerMessageId = null
+    this.actionMenuMessageId = null
     this.composerEmojiOpen = false
+    this.hasMoreMessages = true
 
     void this.chatRealtime.setActiveConversation(conversation.id)
 
@@ -543,6 +791,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: messages => {
           this.messages = messages
+          this.hasMoreMessages = messages.length >= 50
           this.loadingMessages = false
           this.messagesError = false
           this.scrollMessagesToBottom()
@@ -567,13 +816,15 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private appendMessageIfMissing(message: ChatMessage): void {
-    if (this.messages.some(existing => existing.id === message.id)) {
+  private upsertMessage(message: ChatMessage): void {
+    const existingIndex = this.messages.findIndex(existing => existing.id === message.id)
+    if (existingIndex === -1) {
+      this.messages = [...this.messages, message]
+      this.updateConversationPreview(message)
       return
     }
 
-    this.messages = [...this.messages, message]
-    this.updateConversationPreview(message)
+    this.messages = this.messages.map(existing => (existing.id === message.id ? { ...existing, ...message } : existing))
   }
 
   private updateConversationPreview(message: ChatMessage): void {

@@ -22,6 +22,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Message> Messages { get; set; } = null!;
     public DbSet<MessageReaction> MessageReactions { get; set; } = null!;
     public DbSet<Repost> Reposts { get; set; } = null!;
+    public DbSet<Bookmark> Bookmarks { get; set; } = null!;
+    public DbSet<MessageUserHide> MessageUserHides { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -152,6 +154,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         builder.Entity<Conversation>(entity =>
         {
             entity.HasKey(c => c.Id);
+            entity.Property(c => c.Title).HasMaxLength(100);
+            entity.Property(c => c.IsGroup).HasDefaultValue(false);
             entity.Property(c => c.CreatedAt).IsRequired();
             entity.Property(c => c.UpdatedAt).IsRequired();
         });
@@ -180,6 +184,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.Property(m => m.Text).IsRequired().HasMaxLength(2000);
             entity.Property(m => m.ImagePath).HasMaxLength(500);
             entity.Property(m => m.VideoPath).HasMaxLength(500);
+            entity.Property(m => m.RemoteImageUrl).HasMaxLength(1000);
 
             entity.HasOne(m => m.Conversation)
                   .WithMany(c => c.Messages)
@@ -216,6 +221,42 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
             entity.HasIndex(r => new { r.MessageId, r.UserId }).IsUnique();
             entity.HasIndex(r => r.MessageId);
+        });
+
+        builder.Entity<MessageUserHide>(entity =>
+        {
+            entity.HasKey(h => h.Id);
+
+            entity.HasOne(h => h.Message)
+                  .WithMany()
+                  .HasForeignKey(h => h.MessageId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(h => h.User)
+                  .WithMany()
+                  .HasForeignKey(h => h.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(h => new { h.MessageId, h.UserId }).IsUnique();
+            entity.HasIndex(h => h.UserId);
+        });
+
+        builder.Entity<Bookmark>(entity =>
+        {
+            entity.HasKey(bookmark => bookmark.Id);
+
+            entity.HasOne(bookmark => bookmark.User)
+                  .WithMany()
+                  .HasForeignKey(bookmark => bookmark.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(bookmark => bookmark.Post)
+                  .WithMany()
+                  .HasForeignKey(bookmark => bookmark.PostId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(bookmark => new { bookmark.UserId, bookmark.PostId }).IsUnique();
+            entity.HasIndex(bookmark => bookmark.PostId);
         });
     }
 }

@@ -67,6 +67,45 @@ public class ConversationRepository : IConversationRepository
             ?? conversation;
     }
 
+    public async Task<Conversation> CreateGroupConversationAsync(
+        Guid creatorUserId,
+        string title,
+        IReadOnlyCollection<Guid> participantIds)
+    {
+        var distinctParticipants = participantIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (!distinctParticipants.Contains(creatorUserId))
+        {
+            distinctParticipants.Add(creatorUserId);
+        }
+
+        var now = DateTime.UtcNow;
+        var conversation = new Conversation
+        {
+            Title = title,
+            IsGroup = true,
+            CreatedAt = now,
+            UpdatedAt = now,
+            Participants = distinctParticipants.Select(participantId => new ConversationParticipant
+            {
+                UserId = participantId,
+                JoinedAt = now
+            }).ToList()
+        };
+
+        _context.Conversations.Add(conversation);
+        await _context.SaveChangesAsync();
+
+        return await _context.Conversations
+            .AsNoTracking()
+            .Include(c => c.Participants)
+                .ThenInclude(p => p.User)
+            .FirstAsync(c => c.Id == conversation.Id);
+    }
+
     public async Task<Message> AddMessageAsync(Message message)
     {
         _context.Messages.Add(message);
@@ -86,8 +125,52 @@ public class ConversationRepository : IConversationRepository
             .FirstAsync(m => m.Id == message.Id);
     }
 
+    public async Task<IReadOnlyList<Message>> AddMessagesAsync(IEnumerable<Message> messages)
+    {
+        var messageList = messages.ToList();
+        if (messageList.Count == 0)
+        {
+            return Array.Empty<Message>();
+        }
+
+        _context.Messages.AddRange(messageList);
+
+        var latestByConversation = messageList
+            .GroupBy(message => message.ConversationId)
+            .Select(group => new
+            {
+                ConversationId = group.Key,
+                UpdatedAt = group.Max(message => message.CreatedAt)
+            })
+            .ToList();
+
+        var conversationIds = latestByConversation.Select(item => item.ConversationId).ToList();
+        var conversations = await _context.Conversations
+            .Where(conversation => conversationIds.Contains(conversation.Id))
+            .ToListAsync();
+
+        foreach (var conversation in conversations)
+        {
+            var entry = latestByConversation.First(item => item.ConversationId == conversation.Id);
+            conversation.UpdatedAt = entry.UpdatedAt;
+        }
+
+        await _context.SaveChangesAsync();
+
+        var createdIds = messageList.Select(message => message.Id).ToList();
+        return await _context.Messages
+            .AsNoTracking()
+            .Include(m => m.Sender)
+            .Include(m => m.ReplyTo!)
+                .ThenInclude(r => r.Sender)
+            .Where(message => createdIds.Contains(message.Id))
+            .OrderBy(message => message.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Message>> GetMessagesAsync(
         Guid conversationId,
+        Guid? viewerUserId = null,
         int limit = 50,
         DateTime? before = null)
     {
@@ -97,6 +180,16 @@ public class ConversationRepository : IConversationRepository
             .Include(m => m.ReplyTo!)
                 .ThenInclude(r => r.Sender)
             .Where(m => m.ConversationId == conversationId && !m.IsDeleted);
+
+        if (viewerUserId.HasValue)
+        {
+            var hiddenMessageIds = _context.MessageUserHides
+                .AsNoTracking()
+                .Where(hide => hide.UserId == viewerUserId.Value)
+                .Select(hide => hide.MessageId);
+
+            query = query.Where(message => !hiddenMessageIds.Contains(message.Id));
+        }
 
         if (before.HasValue)
         {
@@ -230,5 +323,47 @@ public class ConversationRepository : IConversationRepository
             .Where(p => p.ConversationId == conversationId && p.UserId != userId)
             .Select(p => p.UserId)
             .ToListAsync();
+    }
+
+    public Task<int> GetParticipantsCountAsync(Guid conversationId)
+    {
+        return _context.ConversationParticipants.CountAsync(participant => participant.ConversationId == conversationId);
+    }
+
+    public Task<bool> IsParticipantAsync(Guid conversationId, Guid userId)
+    {
+        return _context.ConversationParticipants.AnyAsync(participant =>
+            participant.ConversationId == conversationId &&
+            participant.UserId == userId);
+    }
+
+    public Task<bool> IsMessageHiddenForUserAsync(Guid messageId, Guid userId)
+    {
+        return _context.MessageUserHides.AnyAsync(hide =>
+            hide.MessageId == messageId &&
+            hide.UserId == userId);
+    }
+
+    public async Task HideMessageForUserAsync(Guid messageId, Guid userId)
+    {
+        if (await IsMessageHiddenForUserAsync(messageId, userId))
+        {
+            return;
+        }
+
+        _context.MessageUserHides.Add(new MessageUserHide
+        {
+            MessageId = messageId,
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateMessageAsync(Message message)
+    {
+        _context.Messages.Update(message);
+        await _context.SaveChangesAsync();
     }
 }
