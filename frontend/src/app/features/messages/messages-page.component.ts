@@ -354,28 +354,17 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          this.sendError = ''
           if (scope === 'self') {
             this.messages = this.messages.filter(existing => existing.id !== message.id)
             return
           }
 
-          this.messages = this.messages.map(existing =>
-            existing.id === message.id
-              ? {
-                  ...existing,
-                  text: '',
-                  imageUrl: undefined,
-                  videoUrl: undefined,
-                  audioUrl: undefined,
-                  documentUrl: undefined,
-                  documentFileName: undefined,
-                  remoteImageUrl: undefined,
-                  isDeletedForEveryone: true
-                }
-              : existing
-          )
+          this.applyDeletedForEveryoneState(message.id)
         },
-        error: () => undefined
+        error: (error: HttpErrorResponse) => {
+          this.sendError = error.error?.message ?? 'Não foi possível apagar a mensagem.'
+        }
       })
   }
 
@@ -1088,18 +1077,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           return
         }
 
-        this.messages = this.messages.map(existing =>
-          existing.id === event.messageId
-            ? {
-                ...existing,
-                text: '',
-                imageUrl: undefined,
-                videoUrl: undefined,
-                remoteImageUrl: undefined,
-                isDeletedForEveryone: true
-              }
-            : existing
-        )
+        this.applyDeletedForEveryoneState(event.messageId)
       })
 
     this.chatRealtime.messageEdited$
@@ -1432,6 +1410,24 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
     const normalized = /[zZ]|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`
     return Date.parse(normalized)
+  }
+
+  private applyDeletedForEveryoneState(messageId: string): void {
+    this.messages = this.messages.map(existing =>
+      existing.id === messageId
+        ? {
+            ...existing,
+            text: '',
+            imageUrl: undefined,
+            videoUrl: undefined,
+            audioUrl: undefined,
+            documentUrl: undefined,
+            documentFileName: undefined,
+            remoteImageUrl: undefined,
+            isDeletedForEveryone: true
+          }
+        : existing
+    )
   }
 
   private clearPendingMedia(): void {

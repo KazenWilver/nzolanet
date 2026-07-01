@@ -153,9 +153,12 @@ export class ConversationService {
   }
 
   deleteMessage(conversationId: string, messageId: string, scope: 'self' | 'everyone'): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${conversationId}/messages/${messageId}`, {
-      params: { scope }
-    })
+    return this.http
+      .delete(`${this.baseUrl}/${conversationId}/messages/${messageId}`, {
+        params: { scope },
+        responseType: 'text'
+      })
+      .pipe(map(() => undefined))
   }
 
   forwardMessage(
@@ -223,7 +226,9 @@ export class ConversationService {
   }
 
   deleteGroup(conversationId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${conversationId}/group`)
+    return this.http
+      .delete(`${this.baseUrl}/${conversationId}/group`, { responseType: 'text' })
+      .pipe(map(() => undefined))
   }
 
   getUnreadCount(): Observable<UnreadMessagesCountResponse> {

@@ -472,47 +472,6 @@
               </button>
             </div>
           }
-          @if (hasPendingMedia) {
-            <div class="messages-page__pending-overlay" role="dialog" aria-modal="true" aria-label="Pré-visualização do anexo">
-              <div class="messages-page__pending-card">
-                <div class="messages-page__pending-preview">
-                  @if (pendingImagePreview) {
-                    <img [src]="pendingImagePreview" alt="Pré-visualização da imagem" class="messages-page__pending-media" />
-                  }
-                  @if (pendingVideoPreview) {
-                    <video [src]="pendingVideoPreview" controls class="messages-page__pending-media"></video>
-                  }
-                  @if (pendingDocument) {
-                    <div class="messages-page__pending-doc-card">
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                      </svg>
-                      <span>{{ pendingDocumentName }}</span>
-                    </div>
-                  }
-                  @if (pendingAudioPreview) {
-                    <audio [src]="pendingAudioPreview" controls class="messages-page__pending-audio-full"></audio>
-                  }
-                </div>
-                <textarea
-                  formControlName="text"
-                  class="messages-page__pending-caption"
-                  rows="2"
-                  placeholder="Adiciona uma legenda (opcional)…"
-                  aria-label="Legenda da mensagem"
-                ></textarea>
-                <div class="messages-page__pending-actions">
-                  <button type="button" class="messages-page__pill-btn messages-page__pill-btn--ghost" (click)="handleRemovePendingMedia()">
-                    Cancelar
-                  </button>
-                  <button type="button" class="messages-page__pill-btn" [disabled]="!canSendMessage" (click)="handleSendMessage()">
-                    Enviar
-                  </button>
-                </div>
-              </div>
-            </div>
-          }
           @if (isRecording) {
             <div class="messages-page__recording-banner" role="status">
               <span class="messages-page__recording-dot" aria-hidden="true"></span>
@@ -785,4 +744,52 @@
     (confirmado)="handleConfirmDelete()"
     (cancelado)="handleCancelDelete()"
   />
+}
+
+@if (hasPendingMedia) {
+  <div
+    class="messages-page__pending-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Pré-visualização do anexo"
+    (click)="handleRemovePendingMedia()"
+  >
+    <div class="messages-page__pending-card" [formGroup]="messageForm" (click)="$event.stopPropagation()">
+      <div class="messages-page__pending-preview">
+        @if (pendingImagePreview) {
+          <img [src]="pendingImagePreview" alt="Pré-visualização da imagem" class="messages-page__pending-media" />
+        }
+        @if (pendingVideoPreview) {
+          <video [src]="pendingVideoPreview" controls class="messages-page__pending-media"></video>
+        }
+        @if (pendingDocument) {
+          <div class="messages-page__pending-doc-card">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>{{ pendingDocumentName }}</span>
+          </div>
+        }
+        @if (pendingAudioPreview) {
+          <audio [src]="pendingAudioPreview" controls class="messages-page__pending-audio-full"></audio>
+        }
+      </div>
+      <textarea
+        formControlName="text"
+        class="messages-page__pending-caption"
+        rows="2"
+        placeholder="Adiciona uma legenda (opcional)…"
+        aria-label="Legenda da mensagem"
+      ></textarea>
+      <div class="messages-page__pending-actions">
+        <button type="button" class="messages-page__pill-btn messages-page__pill-btn--ghost" (click)="handleRemovePendingMedia()">
+          Cancelar
+        </button>
+        <button type="button" class="messages-page__pill-btn" [disabled]="!canSendMessage" (click)="handleSendMessage()">
+          Enviar
+        </button>
+      </div>
+    </div>
+  </div>
 }

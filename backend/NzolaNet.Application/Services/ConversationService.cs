@@ -909,7 +909,14 @@ public class ConversationService : IConversationService
 
     private static bool CanEditOrDeleteForEveryone(DateTime createdAt)
     {
-        var deadline = createdAt.AddMinutes(MessageEditDeleteWindowMinutesValue);
+        var createdUtc = createdAt.Kind switch
+        {
+            DateTimeKind.Utc => createdAt,
+            DateTimeKind.Local => createdAt.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(createdAt, DateTimeKind.Utc)
+        };
+
+        var deadline = createdUtc.AddMinutes(MessageEditDeleteWindowMinutesValue);
         return DateTime.UtcNow <= deadline;
     }
 }
