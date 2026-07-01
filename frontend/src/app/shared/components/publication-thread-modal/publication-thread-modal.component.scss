@@ -45,9 +45,97 @@
   max-height: none;
 }
 
+.thread-modal--media {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  background-color: rgba(0, 0, 0, 0.58);
+  backdrop-filter: none;
+}
+
 .thread-modal--media .thread-modal__shell {
-  max-width: min(1100px, 96vw);
-  max-height: 92vh;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  max-height: 100vh;
+  max-height: 100dvh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.thread-modal--media .thread-modal__split {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.thread-modal--media .thread-modal__media-pane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  background: transparent;
+  padding: clamp(12px, 2vw, 24px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.thread-modal__media-close {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--border-radius-full);
+  background: rgba(15, 20, 25, 0.75);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(39, 44, 48, 0.9);
+  }
+}
+
+.thread-modal--media .thread-modal__media-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.thread-modal--media .thread-modal__media {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.thread-modal--media .thread-modal__side-pane {
+  flex: 0 0 min(400px, 42vw);
+  max-width: none;
+  width: min(400px, 42vw);
+  background: var(--color-bg-primary);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.35);
 }
 
 .thread-modal__header {
@@ -481,7 +569,11 @@
 @media (max-width: 768px) {
   .thread-modal {
     padding: 0;
-    align-items: flex-end;
+    align-items: stretch;
+  }
+
+  .thread-modal--media {
+    align-items: stretch;
   }
 
   .thread-modal__shell,
@@ -491,14 +583,20 @@
     border-bottom-right-radius: 0;
   }
 
+  .thread-modal--media .thread-modal__shell {
+    height: 100dvh;
+  }
+
   .thread-modal--media .thread-modal__split,
   .thread-modal__shell--embedded .thread-modal__split {
     flex-direction: column;
   }
 
-  .thread-modal__media-pane,
+  .thread-modal--media .thread-modal__media-pane,
   .thread-modal__shell--embedded .thread-modal__media-pane {
-    max-height: 40vh;
+    flex: 1;
+    min-height: 0;
+    max-height: none;
   }
 
   .thread-modal__side-pane,
