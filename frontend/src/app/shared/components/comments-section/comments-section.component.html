@@ -90,7 +90,27 @@
               </div>
             </div>
           } @else {
-            <p class="comments-section__text">{{ comment.text }}</p>
+            @if (comment.imageUrl) {
+              <button
+                type="button"
+                class="comments-section__media-trigger"
+                aria-label="Abrir imagem do comentário"
+                (click)="handleOpenMediaLightbox(comment.imageUrl!, 'image')"
+              >
+                <img [src]="comment.imageUrl" alt="Imagem no comentário" loading="lazy" />
+              </button>
+            }
+            @if (comment.videoUrl) {
+              <button
+                type="button"
+                class="comments-section__media-trigger"
+                aria-label="Abrir vídeo do comentário"
+                (click)="handleOpenMediaLightbox(comment.videoUrl!, 'video')"
+              >
+                <video [src]="comment.videoUrl" muted preload="metadata"></video>
+              </button>
+            }
+            <p class="comments-section__text" [innerHTML]="comment.text | linkifyText"></p>
 
             @if (canEdit(comment) || canDelete(comment) || canReport(comment)) {
               <div class="comments-section__actions">
@@ -132,5 +152,18 @@
       [targetId]="reportingCommentId"
       (closed)="reportingCommentId = null"
     />
+  }
+
+  @if (lightboxMedia) {
+    <div class="comments-section__lightbox" role="dialog" aria-modal="true" (click)="handleCloseMediaLightbox()">
+      <div class="comments-section__lightbox-content" (click)="$event.stopPropagation()">
+        <button type="button" class="comments-section__lightbox-close" aria-label="Fechar" (click)="handleCloseMediaLightbox()">×</button>
+        @if (lightboxMedia.type === 'video') {
+          <video [src]="lightboxMedia.url" controls autoplay class="comments-section__lightbox-media"></video>
+        } @else {
+          <img [src]="lightboxMedia.url" alt="Media do comentário" class="comments-section__lightbox-media" />
+        }
+      </div>
+    </div>
   }
 </section>

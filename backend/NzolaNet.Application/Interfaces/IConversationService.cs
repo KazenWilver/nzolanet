@@ -21,7 +21,9 @@ public interface IConversationService
         Microsoft.AspNetCore.Http.IFormFile? image = null,
         Microsoft.AspNetCore.Http.IFormFile? video = null,
         Guid? replyToMessageId = null,
-        string? remoteImageUrl = null);
+        string? remoteImageUrl = null,
+        Microsoft.AspNetCore.Http.IFormFile? document = null,
+        Microsoft.AspNetCore.Http.IFormFile? audio = null);
     Task<MessageResponseDto> EditMessageAsync(
         Guid userId,
         Guid conversationId,

@@ -13,6 +13,9 @@ public class Message
     public string Text { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
     public string? VideoPath { get; set; }
+    public string? AudioPath { get; set; }
+    public string? DocumentPath { get; set; }
+    public string? DocumentFileName { get; set; }
     public Guid? ReplyToMessageId { get; set; }
     public virtual Message? ReplyTo { get; set; }
     public Guid? ForwardedFromMessageId { get; set; }

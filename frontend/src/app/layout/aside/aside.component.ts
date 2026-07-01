@@ -22,7 +22,8 @@ export class AsideComponent implements OnInit {
   private readonly animationService = inject(AnimationService);
 
   searchQuery = '';
-  trendingHashtags: string[] = [];
+  trendingHashtags: { tag: string; count: number }[] = [];
+  trendsError = false;
 
   ngOnInit(): void {
     this.syncFromUrl(this.router.url);
@@ -40,13 +41,18 @@ export class AsideComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: hashtags => {
-          this.trendingHashtags = hashtags;
+          this.trendingHashtags = hashtags ?? [];
+          this.trendsError = false;
           requestAnimationFrame(() => {
             const items = document.querySelectorAll('.aside__trends li');
             if (items.length > 0) {
               this.animationService.staggerEnter(Array.from(items), 'fadeUp', 0.05);
             }
           });
+        },
+        error: () => {
+          this.trendingHashtags = [];
+          this.trendsError = true;
         }
       });
   }

@@ -25,16 +25,20 @@ export class AuthWelcomeComponent implements OnInit {
 
       const logo = root.querySelector('.auth-welcome__logo')
       const title = root.querySelector('.auth-welcome__title')
+      const tagline = root.querySelector('.auth-welcome__tagline')
       const subtitle = root.querySelector('.auth-welcome__subtitle')
 
       if (logo) {
         this.animationService.enter(logo, 'scaleIn')
       }
       if (title) {
-        this.animationService.enter(title, 'fadeUp', 0.12)
+        this.animationService.enter(title, 'fadeUp', 0.1)
+      }
+      if (tagline) {
+        this.animationService.enter(tagline, 'fadeUp', 0.18)
       }
       if (subtitle) {
-        this.animationService.enter(subtitle, 'fadeUp', 0.22)
+        this.animationService.enter(subtitle, 'fadeUp', 0.26)
       }
     })
 

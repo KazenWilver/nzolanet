@@ -25,6 +25,11 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
+    public Task<bool> ExistsAsync(Guid id)
+    {
+        return _context.Users.AsNoTracking().AnyAsync(u => u.Id == id);
+    }
+
     public async Task<User?> GetByUsernameAsync(string username)
     {
         return await _context.Users

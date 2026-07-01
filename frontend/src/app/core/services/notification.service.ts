@@ -35,7 +35,7 @@ export class NotificationService {
 
         this.refreshUnreadCount().subscribe();
 
-        this.pollingSubscription = interval(30000)
+        this.pollingSubscription = interval(5000)
           .pipe(switchMap(() => this.fetchUnreadCount()))
           .subscribe(count => this.unreadCountSubject.next(count));
       });
@@ -105,6 +105,11 @@ export class NotificationService {
     if (current > 0) {
       this.unreadCountSubject.next(current - 1);
     }
+  }
+
+  incrementUnreadCount(count = 1): void {
+    const current = this.unreadCountSubject.getValue();
+    this.unreadCountSubject.next(current + count);
   }
 
   private mapNotification(dto: BackendNotificationDto): AppNotification {

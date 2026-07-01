@@ -188,7 +188,9 @@ public class ConversationsController : ControllerBase
         [FromForm] Guid? replyToMessageId,
         [FromForm] string? remoteImageUrl,
         [FromForm] IFormFile? image,
-        [FromForm] IFormFile? video)
+        [FromForm] IFormFile? video,
+        [FromForm] IFormFile? document,
+        [FromForm] IFormFile? audio)
     {
         try
         {
@@ -200,7 +202,9 @@ public class ConversationsController : ControllerBase
                 image,
                 video,
                 replyToMessageId,
-                remoteImageUrl);
+                remoteImageUrl,
+                document,
+                audio);
             await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
             return Ok(message);
         }

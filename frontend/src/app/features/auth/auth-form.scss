@@ -28,29 +28,6 @@
   line-height: var(--line-height-relaxed);
 }
 
-.auth-form__brand {
-  display: none;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-
-  @media (max-width: 768px) {
-    display: inline-flex;
-  }
-}
-
-.auth-form__brand-icon {
-  width: 40px;
-  height: 40px;
-}
-
-.auth-form__brand-name {
-  font-family: var(--font-family-extended);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-heavy);
-  color: var(--color-text-primary);
-}
-
 .auth-form__error {
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
@@ -95,9 +72,9 @@
 
 .auth-form__input {
   width: 100%;
-  padding: 12px 14px;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  padding: 14px 16px;
+  border: var(--border-width) solid #e5e7eb;
+  border-radius: 12px;
   background-color: var(--color-bg-input);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
@@ -195,10 +172,10 @@
   justify-content: center;
   gap: var(--spacing-sm);
   width: 100%;
-  min-height: 48px;
-  padding: 12px 20px;
+  min-height: 52px;
+  padding: 14px 20px;
   border: none;
-  border-radius: var(--border-radius-full);
+  border-radius: 12px;
   background-color: var(--color-accent);
   color: var(--color-text-inverse);
   font-size: var(--font-size-base);

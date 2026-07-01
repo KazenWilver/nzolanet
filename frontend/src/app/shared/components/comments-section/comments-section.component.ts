@@ -13,6 +13,7 @@ import { AvatarComponent } from '../avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { MentionAutocompleteDirective } from '../../directives/mention-autocomplete.directive';
 import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
+import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
 import { TPipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
@@ -27,6 +28,7 @@ import { TPipe } from '../../../core/i18n/translate.pipe';
     LoadingSpinnerComponent,
     MentionAutocompleteDirective,
     ReportDialogComponent,
+    LinkifyTextPipe,
     TPipe
   ],
   templateUrl: './comments-section.component.html',
@@ -54,6 +56,7 @@ export class CommentsSectionComponent implements OnInit {
   savingEditId: string | null = null;
   deletingId: string | null = null;
   reportingCommentId: string | null = null;
+  lightboxMedia: { url: string; type: 'image' | 'video' } | null = null;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -213,6 +216,14 @@ export class CommentsSectionComponent implements OnInit {
 
   openReportDialog(commentId: string): void {
     this.reportingCommentId = commentId;
+  }
+
+  handleOpenMediaLightbox(url: string, type: 'image' | 'video'): void {
+    this.lightboxMedia = { url, type };
+  }
+
+  handleCloseMediaLightbox(): void {
+    this.lightboxMedia = null;
   }
 
   getAuthorName(comment: Comment): string {

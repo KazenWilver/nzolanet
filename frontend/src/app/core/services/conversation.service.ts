@@ -26,6 +26,8 @@ export interface SendMediaOptions {
   text?: string
   image?: File
   video?: File
+  document?: File
+  audio?: File
   replyToMessageId?: string
   remoteImageUrl?: string
 }
@@ -59,7 +61,7 @@ export class ConversationService {
 
         this.refreshUnreadCount().subscribe()
 
-        this.pollingSubscription = interval(15000)
+        this.pollingSubscription = interval(5000)
           .pipe(switchMap(() => this.fetchUnreadCount()))
           .subscribe(count => this.unreadCountSubject.next(count))
       })
@@ -187,6 +189,12 @@ export class ConversationService {
     if (options.video) {
       formData.append('video', options.video)
     }
+    if (options.document) {
+      formData.append('document', options.document)
+    }
+    if (options.audio) {
+      formData.append('audio', options.audio)
+    }
 
     return this.http
       .post<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages/media`, formData)
@@ -229,6 +237,11 @@ export class ConversationService {
   decrementUnreadLocally(count = 1): void {
     const current = this.unreadCountSubject.getValue()
     this.unreadCountSubject.next(Math.max(0, current - count))
+  }
+
+  incrementUnreadLocally(count = 1): void {
+    const current = this.unreadCountSubject.getValue()
+    this.unreadCountSubject.next(current + count)
   }
 
   private fetchUnreadCount(): Observable<number> {

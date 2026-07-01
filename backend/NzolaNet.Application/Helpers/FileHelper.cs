@@ -81,6 +81,59 @@ public static class FileHelper
         ValidateVideoSignature(file);
     }
 
+    private static readonly HashSet<string> AllowedDocumentExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".txt", ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".csv", ".rtf"
+    };
+
+    private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".webm", ".ogg", ".mp3", ".m4a", ".wav"
+    };
+
+    public const long MaxDocumentBytes = 25 * 1024 * 1024;
+    public const long MaxAudioBytes = 15 * 1024 * 1024;
+
+    public static void ValidateDocumentFile(Microsoft.AspNetCore.Http.IFormFile file)
+    {
+        var extension = Path.GetExtension(file.FileName);
+        if (!AllowedDocumentExtensions.Contains(extension))
+        {
+            throw new ArgumentException(
+                "Extensão de documento inválida. Permitidos: .txt, .pdf, .doc, .docx, .ppt, .pptx e similares.");
+        }
+
+        if (file.Length > MaxDocumentBytes)
+        {
+            throw new ArgumentException("O documento não pode exceder 25 MB.");
+        }
+
+        if (file.Length == 0)
+        {
+            throw new ArgumentException("O documento está vazio.");
+        }
+    }
+
+    public static void ValidateAudioFile(Microsoft.AspNetCore.Http.IFormFile file)
+    {
+        var extension = Path.GetExtension(file.FileName);
+        if (!AllowedAudioExtensions.Contains(extension))
+        {
+            throw new ArgumentException(
+                "Extensão de áudio inválida. Permitidos: .webm, .ogg, .mp3, .m4a, .wav.");
+        }
+
+        if (file.Length > MaxAudioBytes)
+        {
+            throw new ArgumentException("O áudio não pode exceder 15 MB.");
+        }
+
+        if (file.Length == 0)
+        {
+            throw new ArgumentException("O áudio está vazio.");
+        }
+    }
+
     public static string BuildPublicationFileName(Guid publicationId, string originalFileName)
     {
         var extension = Path.GetExtension(originalFileName);

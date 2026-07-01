@@ -11,6 +11,9 @@ public class MessageResponseDto
     public string Text { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
     public string? VideoUrl { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? DocumentUrl { get; set; }
+    public string? DocumentFileName { get; set; }
     public string? RemoteImageUrl { get; set; }
     public Guid? ForwardedFromMessageId { get; set; }
     public bool IsEdited { get; set; }

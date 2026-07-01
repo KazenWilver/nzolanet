@@ -1,31 +1,44 @@
 .auth-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  min-height: 280px;
+  gap: 0.75rem;
   text-align: center;
-  padding: 1.5rem 0;
+  padding: 2rem 1.5rem;
+  background: #6366f1;
+  color: #ffffff;
 }
 
 .auth-welcome__logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.25);
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.22));
 }
 
 .auth-welcome__title {
   margin: 0;
   font-family: var(--font-family-extended);
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(2rem, 6vw, 2.75rem);
   font-weight: var(--font-weight-heavy);
-  color: var(--color-text-primary);
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.auth-welcome__tagline {
+  margin: 0;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .auth-welcome__subtitle {
-  margin: 0;
+  margin: 0.75rem 0 0;
   font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.78);
 }

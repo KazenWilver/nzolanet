@@ -398,9 +398,9 @@ public class PostService : IPostService
         return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
     }
 
-    public async Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 5)
+    public async Task<IReadOnlyList<TrendingHashtagDto>> GetTrendingHashtagsAsync(int limit = 5)
     {
-        var safeLimit = Math.Clamp(limit, 1, 5);
+        var safeLimit = Math.Clamp(limit, 1, 10);
         var postTexts = await _postRepository.GetRecentPostTextsAsync(300);
         var hashtagRegex = new System.Text.RegularExpressions.Regex(
             @"#([A-Za-z0-9_\u00C0-\u024F]+)",
@@ -425,7 +425,11 @@ public class PostService : IPostService
             .OrderByDescending(entry => entry.Value)
             .ThenBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase)
             .Take(safeLimit)
-            .Select(entry => entry.Key)
+            .Select(entry => new TrendingHashtagDto
+            {
+                Tag = entry.Key,
+                Count = entry.Value
+            })
             .ToList();
     }
 

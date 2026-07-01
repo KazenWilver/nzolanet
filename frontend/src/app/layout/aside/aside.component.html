@@ -15,16 +15,24 @@
 
   <section class="aside__section">
     <header class="aside__section-header">Tendências</header>
-    @if (trendingHashtags.length === 0) {
-      <p class="aside__empty">{{ 'notifications.empty' | t }}</p>
+    @if (trendsError) {
+      <p class="aside__empty">Não foi possível carregar tendências.</p>
+    } @else if (trendingHashtags.length === 0) {
+      <p class="aside__empty">Sem tendências por agora.</p>
     } @else {
-      <ul class="aside__trends">
-        @for (tag of trendingHashtags; track tag) {
-          <li>
-            <a [routerLink]="['/search']" [queryParams]="{ q: '#' + tag }">#{{ tag }}</a>
+      <ol class="aside__trends">
+        @for (item of trendingHashtags; track item.tag; let i = $index) {
+          <li class="aside__trend-item">
+            <a [routerLink]="['/search']" [queryParams]="{ q: '#' + item.tag }" class="aside__trend-link">
+              <span class="aside__trend-rank">{{ i + 1 }}.</span>
+              <span class="aside__trend-body">
+                <span class="aside__trend-tag">#{{ item.tag }}</span>
+                <span class="aside__trend-count">{{ item.count }} publicações</span>
+              </span>
+            </a>
           </li>
         }
-      </ul>
+      </ol>
     }
   </section>
 

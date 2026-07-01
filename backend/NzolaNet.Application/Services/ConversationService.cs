@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Conversations;
 using NzolaNet.Application.Helpers;
@@ -152,8 +153,7 @@ public class ConversationService : IConversationService
 
         foreach (var participantId in newParticipantIds)
         {
-            var participant = await _userRepository.GetByIdAsync(participantId);
-            if (participant == null)
+            if (!await _userRepository.ExistsAsync(participantId))
             {
                 throw new ArgumentException("Um dos participantes não foi encontrado.");
             }
@@ -242,17 +242,21 @@ public class ConversationService : IConversationService
         IFormFile? image = null,
         IFormFile? video = null,
         Guid? replyToMessageId = null,
-        string? remoteImageUrl = null)
+        string? remoteImageUrl = null,
+        IFormFile? document = null,
+        IFormFile? audio = null)
     {
         await EnsureParticipantAsync(userId, conversationId);
 
         var trimmed = text?.Trim() ?? string.Empty;
         var hasImage = image is { Length: > 0 };
         var hasVideo = video is { Length: > 0 };
+        var hasDocument = document is { Length: > 0 };
+        var hasAudio = audio is { Length: > 0 };
         var normalizedRemoteImageUrl = NormalizeRemoteImageUrl(remoteImageUrl);
         var hasRemoteImage = !string.IsNullOrWhiteSpace(normalizedRemoteImageUrl);
 
-        if (string.IsNullOrWhiteSpace(trimmed) && !hasImage && !hasVideo && !hasRemoteImage)
+        if (string.IsNullOrWhiteSpace(trimmed) && !hasImage && !hasVideo && !hasRemoteImage && !hasDocument && !hasAudio)
         {
             throw new ArgumentException("A mensagem não pode estar vazia.");
         }
@@ -262,10 +266,11 @@ public class ConversationService : IConversationService
             throw new ArgumentException($"A mensagem não pode exceder {MaxMessageLength} caracteres.");
         }
 
-        var mediaCount = (hasImage ? 1 : 0) + (hasVideo ? 1 : 0) + (hasRemoteImage ? 1 : 0);
+        var mediaCount = (hasImage ? 1 : 0) + (hasVideo ? 1 : 0) + (hasRemoteImage ? 1 : 0) +
+                         (hasDocument ? 1 : 0) + (hasAudio ? 1 : 0);
         if (mediaCount > 1)
         {
-            throw new ArgumentException("Envia apenas uma imagem, um vídeo ou um URL de imagem por mensagem.");
+            throw new ArgumentException("Envia apenas um ficheiro por mensagem.");
         }
 
         if (hasImage)
@@ -276,6 +281,16 @@ public class ConversationService : IConversationService
         if (hasVideo)
         {
             FileHelper.ValidateVideoFile(video!);
+        }
+
+        if (hasDocument)
+        {
+            FileHelper.ValidateDocumentFile(document!);
+        }
+
+        if (hasAudio)
+        {
+            FileHelper.ValidateAudioFile(audio!);
         }
 
         if (replyToMessageId.HasValue)
@@ -305,6 +320,17 @@ public class ConversationService : IConversationService
         if (hasVideo)
         {
             message.VideoPath = await _storageService.SaveFileAsync(video!, "messages");
+        }
+
+        if (hasDocument)
+        {
+            message.DocumentPath = await _storageService.SaveFileAsync(document!, "messages");
+            message.DocumentFileName = Path.GetFileName(document!.FileName);
+        }
+
+        if (hasAudio)
+        {
+            message.AudioPath = await _storageService.SaveFileAsync(audio!, "messages");
         }
 
         var saved = await _conversationRepository.AddMessageAsync(message);
@@ -423,6 +449,9 @@ public class ConversationService : IConversationService
         message.Text = string.Empty;
         message.ImagePath = null;
         message.VideoPath = null;
+        message.AudioPath = null;
+        message.DocumentPath = null;
+        message.DocumentFileName = null;
         message.RemoteImageUrl = null;
         await _conversationRepository.UpdateMessageAsync(message);
     }
@@ -697,6 +726,9 @@ public class ConversationService : IConversationService
             Text = message.Text,
             ImageUrl = message.RemoteImageUrl ?? message.ImagePath,
             VideoUrl = message.VideoPath,
+            AudioUrl = message.AudioPath,
+            DocumentUrl = message.DocumentPath,
+            DocumentFileName = message.DocumentFileName,
             RemoteImageUrl = message.RemoteImageUrl,
             ForwardedFromMessageId = message.ForwardedFromMessageId,
             IsEdited = message.EditedAt.HasValue,
@@ -773,6 +805,16 @@ public class ConversationService : IConversationService
         if (!string.IsNullOrWhiteSpace(message.VideoPath) && string.IsNullOrWhiteSpace(message.Text))
         {
             return "Vídeo";
+        }
+
+        if (!string.IsNullOrWhiteSpace(message.AudioPath) && string.IsNullOrWhiteSpace(message.Text))
+        {
+            return "Áudio";
+        }
+
+        if (!string.IsNullOrWhiteSpace(message.DocumentPath) && string.IsNullOrWhiteSpace(message.Text))
+        {
+            return string.IsNullOrWhiteSpace(message.DocumentFileName) ? "Documento" : message.DocumentFileName;
         }
 
         var imagePath = message.RemoteImageUrl ?? message.ImagePath;

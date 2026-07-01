@@ -9,6 +9,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { PublishModalService } from '../../core/services/publish-modal.service';
 import { ConversationService } from '../../core/services/conversation.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ChatRealtimeService } from '../../core/services/chat-realtime.service';
 import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
 import { TPipe } from '../../core/i18n/translate.pipe';
 
@@ -62,8 +63,9 @@ export class SidebarComponent {
   private readonly authService = inject(AuthService);
   readonly themeService = inject(ThemeService);
   private readonly publishModal = inject(PublishModalService);
-  private readonly notificationService = inject(NotificationService);
   private readonly conversationService = inject(ConversationService);
+  private readonly chatRealtime = inject(ChatRealtimeService);
+  private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -101,6 +103,23 @@ export class SidebarComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(count => {
         this.unreadMessagesCount = count;
+      });
+
+    void this.chatRealtime.connect().catch(() => undefined);
+
+    this.chatRealtime.message$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(message => {
+        if (message.isMine) {
+          return;
+        }
+
+        if (this.chatRealtime.getActiveConversationId() === message.conversationId) {
+          return;
+        }
+
+        this.conversationService.incrementUnreadLocally(1);
+        this.notificationService.incrementUnreadCount(1);
       });
   }
 

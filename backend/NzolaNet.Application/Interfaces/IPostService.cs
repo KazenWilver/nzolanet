@@ -27,5 +27,5 @@ public interface IPostService
         Guid? currentUserId,
         int page,
         int pageSize);
-    Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 5);
+    Task<IReadOnlyList<TrendingHashtagDto>> GetTrendingHashtagsAsync(int limit = 5);
 }

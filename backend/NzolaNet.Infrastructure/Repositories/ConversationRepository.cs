@@ -369,27 +369,33 @@ public class ConversationRepository : IConversationRepository
 
     public async Task<bool> AddParticipantsAsync(Guid conversationId, IReadOnlyCollection<Guid> participantIds)
     {
-        var conversation = await _context.Conversations
-            .Include(c => c.Participants)
-            .FirstOrDefaultAsync(c => c.Id == conversationId);
+        var isGroup = await _context.Conversations
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == conversationId && c.IsGroup);
 
-        if (conversation == null || !conversation.IsGroup)
+        if (!isGroup)
         {
             return false;
         }
 
-        var existingIds = conversation.Participants.Select(p => p.UserId).ToHashSet();
+        var existingIds = await _context.ConversationParticipants
+            .AsNoTracking()
+            .Where(p => p.ConversationId == conversationId)
+            .Select(p => p.UserId)
+            .ToListAsync();
+
+        var existingSet = existingIds.ToHashSet();
         var now = DateTime.UtcNow;
         var added = false;
 
         foreach (var participantId in participantIds.Distinct())
         {
-            if (participantId == Guid.Empty || existingIds.Contains(participantId))
+            if (participantId == Guid.Empty || existingSet.Contains(participantId))
             {
                 continue;
             }
 
-            conversation.Participants.Add(new ConversationParticipant
+            _context.ConversationParticipants.Add(new ConversationParticipant
             {
                 ConversationId = conversationId,
                 UserId = participantId,
@@ -403,7 +409,10 @@ public class ConversationRepository : IConversationRepository
             return false;
         }
 
-        conversation.UpdatedAt = now;
+        await _context.Conversations
+            .Where(c => c.Id == conversationId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(c => c.UpdatedAt, now));
+
         await _context.SaveChangesAsync();
         return true;
     }
@@ -458,6 +467,10 @@ public class ConversationRepository : IConversationRepository
             .AsNoTracking()
             .Include(m => m.Conversation)
                 .ThenInclude(c => c.Participants)
-            .FirstOrDefaultAsync(m => m.ImagePath == mediaPath || m.VideoPath == mediaPath);
+            .FirstOrDefaultAsync(m =>
+                m.ImagePath == mediaPath ||
+                m.VideoPath == mediaPath ||
+                m.DocumentPath == mediaPath ||
+                m.AudioPath == mediaPath);
     }
 }

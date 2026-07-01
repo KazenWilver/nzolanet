@@ -3,7 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
+import { EMPTY, interval } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { PublicationService } from '../../../core/services/publication.service';
@@ -122,6 +123,28 @@ export class ProfilePageComponent implements OnInit {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.showIncomingFollowRequest = params.get('pedido') === '1';
     });
+
+    interval(8000)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(() => {
+          if (!this.profile || this.loadingProfile) {
+            return EMPTY;
+          }
+          return this.userService.getProfile(this.profile.id);
+        })
+      )
+      .subscribe(updated => {
+        if (!this.profile || this.profile.id !== updated.id) {
+          return;
+        }
+
+        this.profile = {
+          ...this.profile,
+          followersCount: updated.followersCount ?? this.profile.followersCount,
+          followingCount: updated.followingCount ?? this.profile.followingCount
+        };
+      });
   }
 
   get isOwnProfile(): boolean {

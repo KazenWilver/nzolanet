@@ -44,8 +44,16 @@
 
 .aside__section {
   border-radius: var(--border-radius-lg);
-  background-color: var(--color-bg-widget);
+  background-color: #ffffff;
+  border: 1px solid rgba(15, 20, 25, 0.06);
+  box-shadow: 0 1px 3px rgba(15, 20, 25, 0.04);
   overflow: hidden;
+}
+
+body.dark-theme .aside__section {
+  background-color: var(--color-bg-widget);
+  border-color: var(--color-border);
+  box-shadow: none;
 }
 
 .aside__section-header {
@@ -64,16 +72,51 @@
 .aside__trends {
   list-style: none;
   margin: 0;
-  padding: 8px 0;
+  padding: 4px 0 8px;
+}
 
-  li a {
-    display: block;
-    padding: 10px 16px;
-    color: var(--color-text-primary);
-    text-decoration: none;
+.aside__trend-item {
+  margin: 0;
+}
 
-    &:hover {
-      background: var(--color-bg-hover);
-    }
+.aside__trend-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--transition-base);
+
+  &:hover {
+    background: var(--color-bg-hover);
   }
+}
+
+.aside__trend-rank {
+  flex-shrink: 0;
+  min-width: 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.aside__trend-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.aside__trend-tag {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.35;
+}
+
+.aside__trend-count {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
 }

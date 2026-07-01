@@ -19,6 +19,7 @@ import { NewConversationModalComponent } from './new-conversation-modal/new-conv
 import { GroupInfoModalComponent } from './group-info-modal/group-info-modal.component'
 import { ChatEmojiPickerComponent } from './chat-emoji-picker/chat-emoji-picker.component'
 import { MentionAutocompleteDirective } from '../../shared/directives/mention-autocomplete.directive'
+import { LinkifyTextPipe } from '../../shared/pipes/linkify-text.pipe'
 import { TPipe } from '../../core/i18n/translate.pipe'
 import { LocaleService } from '../../core/i18n/locale.service'
 
@@ -44,6 +45,7 @@ export interface MessageDayGroup {
     GroupInfoModalComponent,
     ChatEmojiPickerComponent,
     MentionAutocompleteDirective,
+    LinkifyTextPipe,
     TPipe
   ],
   templateUrl: './messages-page.component.html',
@@ -83,6 +85,13 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   pendingImagePreview = ''
   pendingVideo: File | null = null
   pendingVideoPreview = ''
+  pendingDocument: File | null = null
+  pendingDocumentName = ''
+  pendingAudio: File | null = null
+  pendingAudioPreview = ''
+  composerAttachOpen = false
+  isRecording = false
+  recordingSeconds = 0
   replyingTo: ChatMessage | null = null
   editingMessage: ChatMessage | null = null
   composerEmojiOpen = false
@@ -93,9 +102,16 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   forwarding = false
   forwardError = ''
   forwardCaption = ''
-  lightboxMedia: { url: string; type: 'image' | 'video'; isGif?: boolean } | null = null
+  lightboxMedia: { url: string; type: 'image' | 'video' | 'audio'; isGif?: boolean; fileName?: string } | null = null
   loadingOlderMessages = false
   hasMoreMessages = true
+
+  private mediaRecorder: MediaRecorder | null = null
+  private recordingStream: MediaStream | null = null
+  private recordingIntervalId?: ReturnType<typeof setInterval>
+  private audioChunks: Blob[] = []
+  private readonly audioPlayers = new Map<string, HTMLAudioElement>()
+  playingAudioId: string | null = null
 
   private typingTimeoutId?: ReturnType<typeof setTimeout>
   private typingClearTimeoutId?: ReturnType<typeof setTimeout>
@@ -108,7 +124,24 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   get canSendMessage(): boolean {
     const hasText = this.messageForm.controls.text.value.trim().length > 0
-    return (hasText || !!this.pendingImage || !!this.pendingVideo) && !this.sendingMessage
+    return (
+      (hasText ||
+        !!this.pendingImage ||
+        !!this.pendingVideo ||
+        !!this.pendingDocument ||
+        !!this.pendingAudio) &&
+      !this.sendingMessage &&
+      !this.isRecording
+    )
+  }
+
+  get hasPendingMedia(): boolean {
+    return !!(
+      this.pendingImagePreview ||
+      this.pendingVideoPreview ||
+      this.pendingDocument ||
+      this.pendingAudioPreview
+    )
   }
 
   ngOnInit(): void {
@@ -136,6 +169,11 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pollingSubscription?.unsubscribe()
+    this.handleCancelRecording()
+    this.audioPlayers.forEach(player => {
+      player.pause()
+    })
+    this.audioPlayers.clear()
     this.clearPendingMedia()
     void this.chatRealtime.setActiveConversation(null)
   }
@@ -207,7 +245,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     const text = this.messageForm.controls.text.value.trim()
-    if (!text && !this.pendingImage && !this.pendingVideo) {
+    if (!text && !this.pendingImage && !this.pendingVideo && !this.pendingDocument && !this.pendingAudio) {
       return
     }
 
@@ -216,7 +254,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     void this.chatRealtime.notifyStoppedTyping(this.activeConversation.id)
 
     const replyToMessageId = this.replyingTo?.id
-    const hasMedia = !!this.pendingImage || !!this.pendingVideo
+    const hasMedia =
+      !!this.pendingImage || !!this.pendingVideo || !!this.pendingDocument || !!this.pendingAudio
     const request$ = this.editingMessage
       ? this.conversationService.editMessage(this.activeConversation.id, this.editingMessage.id, text)
       : hasMedia
@@ -224,6 +263,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           text,
           image: this.pendingImage ?? undefined,
           video: this.pendingVideo ?? undefined,
+          document: this.pendingDocument ?? undefined,
+          audio: this.pendingAudio ?? undefined,
           replyToMessageId
         })
       : this.conversationService.sendMessage(
@@ -299,6 +340,9 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
                   text: '',
                   imageUrl: undefined,
                   videoUrl: undefined,
+                  audioUrl: undefined,
+                  documentUrl: undefined,
+                  documentFileName: undefined,
                   remoteImageUrl: undefined,
                   isDeletedForEveryone: true
                 }
@@ -450,6 +494,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.clearPendingMedia()
     this.pendingImage = file
     this.pendingImagePreview = URL.createObjectURL(file)
+    this.composerAttachOpen = false
   }
 
   handleGifSelected(event: Event): void {
@@ -468,6 +513,97 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.clearPendingMedia()
     this.pendingVideo = file
     this.pendingVideoPreview = URL.createObjectURL(file)
+    this.composerAttachOpen = false
+  }
+
+  handleDocumentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+
+    if (!file) {
+      return
+    }
+
+    this.clearPendingMedia()
+    this.pendingDocument = file
+    this.pendingDocumentName = file.name
+    this.composerAttachOpen = false
+  }
+
+  handleToggleAttachMenu(): void {
+    this.composerAttachOpen = !this.composerAttachOpen
+  }
+
+  handleCloseAttachMenu(): void {
+    this.composerAttachOpen = false
+  }
+
+  async handleStartRecording(): Promise<void> {
+    if (this.isRecording || !navigator.mediaDevices?.getUserMedia) {
+      return
+    }
+
+    try {
+      this.recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      this.audioChunks = []
+      this.mediaRecorder = new MediaRecorder(this.recordingStream)
+      this.mediaRecorder.ondataavailable = event => {
+        if (event.data.size > 0) {
+          this.audioChunks.push(event.data)
+        }
+      }
+      this.mediaRecorder.onstop = () => {
+        const blob = new Blob(this.audioChunks, { type: 'audio/webm' })
+        this.clearPendingMedia()
+        this.pendingAudio = new File([blob], `audio-${Date.now()}.webm`, { type: 'audio/webm' })
+        this.pendingAudioPreview = URL.createObjectURL(blob)
+        this.stopRecordingTracks()
+      }
+      this.mediaRecorder.start()
+      this.isRecording = true
+      this.recordingSeconds = 0
+      this.composerAttachOpen = false
+      this.recordingIntervalId = setInterval(() => {
+        this.recordingSeconds += 1
+      }, 1000)
+    } catch {
+      this.sendError = 'Não foi possível aceder ao microfone.'
+    }
+  }
+
+  handleStopRecording(): void {
+    if (!this.isRecording || !this.mediaRecorder) {
+      return
+    }
+
+    this.mediaRecorder.stop()
+    this.isRecording = false
+    if (this.recordingIntervalId) {
+      clearInterval(this.recordingIntervalId)
+      this.recordingIntervalId = undefined
+    }
+  }
+
+  handleCancelRecording(): void {
+    if (this.mediaRecorder && this.isRecording) {
+      this.mediaRecorder.onstop = null
+      this.mediaRecorder.stop()
+    }
+
+    this.isRecording = false
+    this.audioChunks = []
+    if (this.recordingIntervalId) {
+      clearInterval(this.recordingIntervalId)
+      this.recordingIntervalId = undefined
+    }
+    this.stopRecordingTracks()
+  }
+
+  private stopRecordingTracks(): void {
+    this.recordingStream?.getTracks().forEach(track => track.stop())
+    this.recordingStream = null
+    this.mediaRecorder = null
   }
 
   handleRemovePendingMedia(): void {
@@ -590,8 +726,13 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.activeConversation = detail
   }
 
-  handleOpenMediaLightbox(url: string, type: 'image' | 'video', isGif = false): void {
-    this.lightboxMedia = { url, type, isGif }
+  handleOpenMediaLightbox(
+    url: string,
+    type: 'image' | 'video' | 'audio',
+    isGif = false,
+    fileName?: string
+  ): void {
+    this.lightboxMedia = { url, type, isGif, fileName }
     requestAnimationFrame(() => {
       const overlay = document.querySelector('.messages-page__lightbox-overlay')
       const content = document.querySelector('.messages-page__lightbox-content')
@@ -599,6 +740,46 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         this.animationService.mediaLightboxEnter(overlay, content)
       }
     })
+  }
+
+  handleOpenDocument(url: string): void {
+    if (!url) {
+      return
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  handleToggleAudioPlayback(messageId: string, url: string): void {
+    if (this.playingAudioId && this.playingAudioId !== messageId) {
+      const current = this.audioPlayers.get(this.playingAudioId)
+      current?.pause()
+    }
+
+    let audio = this.audioPlayers.get(messageId)
+    if (!audio) {
+      audio = new Audio(url)
+      audio.addEventListener('ended', () => {
+        if (this.playingAudioId === messageId) {
+          this.playingAudioId = null
+        }
+      })
+      this.audioPlayers.set(messageId, audio)
+    }
+
+    if (this.playingAudioId === messageId && !audio.paused) {
+      audio.pause()
+      this.playingAudioId = null
+      return
+    }
+
+    void audio.play().then(() => {
+      this.playingAudioId = messageId
+    }).catch(() => undefined)
+  }
+
+  isAudioPlaying(messageId: string): boolean {
+    return this.playingAudioId === messageId
   }
 
   handleCloseMediaLightbox(): void {
@@ -1131,10 +1312,17 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     if (this.pendingVideoPreview) {
       URL.revokeObjectURL(this.pendingVideoPreview)
     }
+    if (this.pendingAudioPreview) {
+      URL.revokeObjectURL(this.pendingAudioPreview)
+    }
     this.pendingImage = null
     this.pendingImagePreview = ''
     this.pendingVideo = null
     this.pendingVideoPreview = ''
+    this.pendingDocument = null
+    this.pendingDocumentName = ''
+    this.pendingAudio = null
+    this.pendingAudioPreview = ''
   }
 
   private setupPushNotifications(): void {

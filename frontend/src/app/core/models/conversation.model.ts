@@ -58,6 +58,9 @@ export interface BackendMessageDto {
   text: string
   imageUrl?: string
   videoUrl?: string
+  audioUrl?: string
+  documentUrl?: string
+  documentFileName?: string
   remoteImageUrl?: string
   forwardedFromMessageId?: string
   isEdited?: boolean
@@ -127,6 +130,9 @@ export interface ChatMessage {
   text: string
   imageUrl?: string
   videoUrl?: string
+  audioUrl?: string
+  documentUrl?: string
+  documentFileName?: string
   remoteImageUrl?: string
   forwardedFromMessageId?: string
   isEdited: boolean
@@ -200,6 +206,9 @@ export const mapChatMessage = (dto: BackendMessageDto): ChatMessage => ({
   text: dto.text,
   imageUrl: resolveMediaUrl(dto.imageUrl),
   videoUrl: resolveMediaUrl(dto.videoUrl),
+  audioUrl: resolveMediaUrl(dto.audioUrl),
+  documentUrl: resolveMediaUrl(dto.documentUrl),
+  documentFileName: dto.documentFileName,
   remoteImageUrl: dto.remoteImageUrl,
   forwardedFromMessageId: dto.forwardedFromMessageId,
   isEdited: dto.isEdited ?? false,

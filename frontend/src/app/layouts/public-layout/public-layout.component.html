@@ -1,9 +1,29 @@
 <div class="layout-publico">
-  <div class="layout-publico__backdrop" aria-hidden="true"></div>
-
   <section class="layout-publico__formulario">
-    <div class="layout-publico__cartao">
-      <router-outlet />
+    <div class="layout-publico__form-inner">
+      <a routerLink="/login" class="layout-publico__brand" aria-label="NzolaNet">
+        <img
+          src="/nzolanet-logo-96.png"
+          width="96"
+          height="96"
+          alt="NzolaNet"
+          class="layout-publico__brand-icon"
+        />
+      </a>
+      <div class="layout-publico__cartao">
+        <router-outlet />
+      </div>
     </div>
   </section>
+
+  <aside class="layout-publico__hero" aria-hidden="true">
+    <img src="/login-register-hero.png" alt="" class="layout-publico__hero-bg" />
+    <div class="layout-publico__hero-overlay"></div>
+    <div class="layout-publico__hero-copy">
+      <h2 class="layout-publico__hero-title">Conecta-te com a tua comunidade</h2>
+      <p class="layout-publico__hero-text">
+        Partilha momentos, segue pessoas e conversa em tempo real no NzolaNet.
+      </p>
+    </div>
+  </aside>
 </div>

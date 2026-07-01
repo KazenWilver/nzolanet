@@ -8,6 +8,11 @@ import type { BackendUserDto } from '../models/auth.model';
 import { mapBackendUser, type User } from '../models/user.model';
 import type { BackendPaginatedPublicationsDto, Publication } from '../models/publication.model';
 
+export interface TrendingHashtag {
+  tag: string;
+  count: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SearchService {
   private readonly baseUrl = `${environment.apiUrl}/users`;
@@ -64,8 +69,8 @@ export class SearchService {
       }))));
   }
 
-  getTrendingHashtags(limit = 5): Observable<string[]> {
-    return this.http.get<string[]>(`${this.publicationsBaseUrl}/trending-hashtags?limit=${limit}`);
+  getTrendingHashtags(limit = 5): Observable<TrendingHashtag[]> {
+    return this.http.get<TrendingHashtag[]>(`${this.publicationsBaseUrl}/trending-hashtags?limit=${limit}`);
   }
 
   private mapUser(dto: BackendUserDto): User {

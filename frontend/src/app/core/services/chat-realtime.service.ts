@@ -184,6 +184,10 @@ export class ChatRealtimeService {
     return this.connection?.state === signalR.HubConnectionState.Connected
   }
 
+  getActiveConversationId(): string | null {
+    return this.activeConversationId
+  }
+
   private async startConnection(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connecting) {
       return

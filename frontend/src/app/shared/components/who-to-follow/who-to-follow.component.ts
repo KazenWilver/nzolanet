@@ -121,8 +121,7 @@ export class WhoToFollowComponent implements OnInit {
     action: 'follow' | 'unfollow',
     isPrivate: boolean
   ): void {
-    this.suggestions = this.suggestions
-      .map(item => {
+    this.suggestions = this.suggestions.map(item => {
         if (item.id !== userId) {
           return item;
         }
@@ -136,8 +135,7 @@ export class WhoToFollowComponent implements OnInit {
         }
 
         return { ...item, isFollowing: true, isPending: false };
-      })
-      .filter(item => !item.isFollowing && !item.isPending);
+      });
   }
 
   private loadSuggestions(): void {
