@@ -271,6 +271,12 @@ public class ConversationService : IConversationService
     {
         await EnsureParticipantAsync(userId, conversationId);
 
+        var conversation = await _conversationRepository.GetByIdForUserAsync(conversationId, userId);
+        if (conversation == null)
+        {
+            throw new UnauthorizedAccessException("Conversa não encontrada.");
+        }
+
         var trimmed = text?.Trim() ?? string.Empty;
         var hasImage = image is { Length: > 0 };
         var hasVideo = video is { Length: > 0 };
@@ -364,7 +370,9 @@ public class ConversationService : IConversationService
 
         var preview = FormatMessagePreview(reloaded);
         var recipients = await _conversationRepository.GetOtherParticipantIdsAsync(conversationId, userId);
-        var mentionedRecipientIds = await ResolveMentionedRecipientIdsAsync(trimmed, userId);
+        var mentionedRecipientIds = conversation.IsGroup
+            ? await ResolveMentionedRecipientIdsAsync(trimmed, userId)
+            : new HashSet<Guid>();
         foreach (var notificationRecipientId in recipients)
         {
             if (mentionedRecipientIds.Contains(notificationRecipientId))

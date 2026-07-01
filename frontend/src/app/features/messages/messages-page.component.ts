@@ -72,6 +72,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   private static readonly MAX_COMPOSER_LINES = 8
   private static readonly MESSAGE_EDIT_DELETE_WINDOW_MS = 15 * 60 * 1000
+  private static readonly MAX_COLLAPSED_MESSAGE_LINES = 12
+  private static readonly MAX_COLLAPSED_MESSAGE_CHARS = 480
 
   conversations: ConversationListItem[] = []
   messages: ChatMessage[] = []
@@ -102,6 +104,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   replyingTo: ChatMessage | null = null
   editingMessage: ChatMessage | null = null
   composerEmojiOpen = false
+  pendingMediaEmojiOpen = false
+  expandedMessageIds = new Set<string>()
   reactionPickerMessageId: string | null = null
   actionMenuMessageId: string | null = null
   forwardingMessage: ChatMessage | null = null
@@ -300,6 +304,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           this.replyingTo = null
           this.editingMessage = null
           this.composerEmojiOpen = false
+          this.pendingMediaEmojiOpen = false
           this.upsertMessage(message)
           this.messageForm.reset()
           this.sendingMessage = false
@@ -499,7 +504,44 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   handleToggleComposerEmoji(): void {
     this.composerEmojiOpen = !this.composerEmojiOpen
+    this.pendingMediaEmojiOpen = false
     this.reactionPickerMessageId = null
+  }
+
+  handlePendingMediaEmojiSelected(emoji: string): void {
+    const control = this.messageForm.controls.text
+    control.setValue(`${control.value}${emoji}`)
+    this.pendingMediaEmojiOpen = false
+  }
+
+  handleTogglePendingMediaEmoji(): void {
+    this.pendingMediaEmojiOpen = !this.pendingMediaEmojiOpen
+    this.composerEmojiOpen = false
+  }
+
+  isMessageExpandable(message: ChatMessage): boolean {
+    const text = message.text?.trim()
+    if (!text) {
+      return false
+    }
+
+    const lineCount = text.split('\n').length
+    return text.length > MessagesPageComponent.MAX_COLLAPSED_MESSAGE_CHARS
+      || lineCount > MessagesPageComponent.MAX_COLLAPSED_MESSAGE_LINES
+  }
+
+  isMessageExpanded(messageId: string): boolean {
+    return this.expandedMessageIds.has(messageId)
+  }
+
+  handleToggleMessageExpanded(messageId: string): void {
+    const next = new Set(this.expandedMessageIds)
+    if (next.has(messageId)) {
+      next.delete(messageId)
+    } else {
+      next.add(messageId)
+    }
+    this.expandedMessageIds = next
   }
 
   getReplyPreviewLabel(reply: MessageReplyPreview | ChatMessage): string {
@@ -1448,6 +1490,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.pendingDocumentName = ''
     this.pendingAudio = null
     this.pendingAudioPreview = ''
+    this.pendingMediaEmojiOpen = false
   }
 
   private setupPushNotifications(): void {

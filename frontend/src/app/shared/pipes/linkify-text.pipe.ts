@@ -11,7 +11,7 @@ import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 export class LinkifyTextPipe implements PipeTransform {
   private readonly sanitizer = inject(DomSanitizer);
 
-  transform(value: string | null | undefined): SafeHtml {
+  transform(value: string | null | undefined, linkifyMentions = true): SafeHtml {
     if (!value) {
       return '';
     }
@@ -21,10 +21,12 @@ export class LinkifyTextPipe implements PipeTransform {
       /(https?:\/\/[^\s<]+)/g,
       '<a href="$1" target="_blank" rel="noopener noreferrer" class="linkify__url">$1</a>'
     );
-    const withMentions = withLinks.replace(
-      /(^|[\s(])@([A-Za-z0-9_.-]+)/g,
-      '$1<a href="/profile/by-username/$2" class="linkify__mention">@$2</a>'
-    );
+    const withMentions = linkifyMentions
+      ? withLinks.replace(
+          /(^|[\s(])@([A-Za-z0-9_.-]+)/g,
+          '$1<a href="/profile/by-username/$2" class="linkify__mention">@$2</a>'
+        )
+      : withLinks;
     const withHashtags = withMentions.replace(
       /(^|[\s(])#([A-Za-z0-9_\u00C0-\u024F]+)/g,
       '$1<a href="/search?q=%23$2" class="linkify__hashtag">#$2</a>'

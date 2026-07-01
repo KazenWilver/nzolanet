@@ -2,6 +2,7 @@ import {
   Directive,
   ElementRef,
   HostListener,
+  Input,
   NgZone,
   OnDestroy,
   Renderer2,
@@ -25,6 +26,9 @@ interface MentionQuery {
   standalone: true
 })
 export class MentionAutocompleteDirective implements OnDestroy {
+  /** Quando false, desactiva menções (ex.: conversas 1 a 1). */
+  @Input() mentionAutocompleteEnabled = true
+
   private readonly host = inject(ElementRef<HTMLTextAreaElement>)
   private readonly renderer = inject(Renderer2)
   private readonly searchService = inject(SearchService)
@@ -63,6 +67,11 @@ export class MentionAutocompleteDirective implements OnDestroy {
 
   @HostListener('input')
   handleInput(): void {
+    if (!this.mentionAutocompleteEnabled) {
+      this.closeDropdown()
+      return
+    }
+
     const mentionQuery = this.getMentionQuery()
     if (!mentionQuery) {
       this.closeDropdown()
@@ -76,7 +85,7 @@ export class MentionAutocompleteDirective implements OnDestroy {
 
   @HostListener('keydown', ['$event'])
   handleKeydown(event: KeyboardEvent): void {
-    if (!this.dropdownElement) {
+    if (!this.mentionAutocompleteEnabled || !this.dropdownElement) {
       return
     }
 

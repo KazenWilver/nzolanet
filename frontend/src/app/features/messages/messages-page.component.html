@@ -381,7 +381,20 @@
                       @if (message.isDeletedForEveryone) {
                         <p class="messages-page__deleted-text">Mensagem apagada</p>
                       } @else if (message.text) {
-                        <p class="messages-page__bubble-text" [innerHTML]="message.text | linkifyText"></p>
+                        <p
+                          class="messages-page__bubble-text"
+                          [class.messages-page__bubble-text--collapsed]="isMessageExpandable(message) && !isMessageExpanded(message.id)"
+                          [innerHTML]="message.text | linkifyText:activeConversation.isGroup"
+                        ></p>
+                        @if (isMessageExpandable(message)) {
+                          <button
+                            type="button"
+                            class="messages-page__read-more"
+                            (click)="handleToggleMessageExpanded(message.id)"
+                          >
+                            {{ isMessageExpanded(message.id) ? 'Ler menos' : 'Ler mais' }}
+                          </button>
+                        }
                       }
                       @if (!message.isDeletedForEveryone && message.isEdited) {
                         <span class="messages-page__edited-label">(editada)</span>
@@ -619,6 +632,7 @@
               formControlName="text"
               class="messages-page__composer-input"
               appMentionAutocomplete
+              [mentionAutocompleteEnabled]="activeConversation.isGroup"
               rows="1"
               [placeholder]="'chat.writeMessage' | t"
               [attr.aria-label]="'chat.writeMessage' | t"
@@ -775,13 +789,35 @@
           <audio [src]="pendingAudioPreview" controls class="messages-page__pending-audio-full"></audio>
         }
       </div>
-      <textarea
-        formControlName="text"
-        class="messages-page__pending-caption"
-        rows="2"
-        placeholder="Adiciona uma legenda (opcional)…"
-        aria-label="Legenda da mensagem"
-      ></textarea>
+      <div class="messages-page__pending-caption-row">
+        <textarea
+          formControlName="text"
+          class="messages-page__pending-caption"
+          rows="2"
+          placeholder="Adiciona uma legenda (opcional)…"
+          aria-label="Legenda da mensagem"
+        ></textarea>
+        <div class="messages-page__emoji-anchor">
+          <button
+            type="button"
+            class="messages-page__image-btn"
+            aria-label="Inserir emoji na legenda"
+            [attr.aria-expanded]="pendingMediaEmojiOpen"
+            (click)="handleTogglePendingMediaEmoji()"
+          >
+            ☺
+          </button>
+          @if (pendingMediaEmojiOpen) {
+            <div class="messages-page__composer-emoji-picker messages-page__composer-emoji-picker--pending">
+              <app-chat-emoji-picker
+                mode="composer"
+                (emojiSelected)="handlePendingMediaEmojiSelected($event)"
+                (closed)="pendingMediaEmojiOpen = false"
+              />
+            </div>
+          }
+        </div>
+      </div>
       <div class="messages-page__pending-actions">
         <button type="button" class="messages-page__pill-btn messages-page__pill-btn--ghost" (click)="handleRemovePendingMedia()">
           Cancelar

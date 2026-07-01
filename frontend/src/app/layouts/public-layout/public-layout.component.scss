@@ -27,6 +27,39 @@
   padding-bottom: calc(clamp(1.25rem, 3vw, 2rem) + env(safe-area-inset-bottom, 0px));
   background: #ffffff;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #8b5cf6 rgba(243, 244, 246, 0.85);
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin: 6px 0;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #f9fafb 0%, #eef2ff 45%, #f3f4f6 100%);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background:
+      linear-gradient(180deg, #7c3aed 0%, #6366f1 45%, #3b82f6 100%) padding-box,
+      linear-gradient(180deg, #a78bfa 0%, #6366f1 50%, #60a5fa 100%) border-box;
+    background-size: 100% 200%;
+    animation: layout-publico-scrollbar-flow 3s ease-in-out infinite;
+  }
+}
+
+@keyframes layout-publico-scrollbar-flow {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 0% 100%;
+  }
 }
 
 .layout-publico__form-inner {

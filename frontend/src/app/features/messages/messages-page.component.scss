@@ -464,6 +464,7 @@
   display: flex;
   max-width: 100%;
   width: fit-content;
+  align-items: flex-start;
 
   &--mine {
     align-self: flex-end;
@@ -507,6 +508,11 @@
       text-underline-offset: 2px;
       text-shadow: 0 1px 3px rgba(15, 14, 23, 0.45);
     }
+
+    .messages-page__read-more {
+      color: rgba(255, 255, 255, 0.92);
+      text-decoration-color: rgba(255, 255, 255, 0.65);
+    }
   }
 
   &--theirs {
@@ -526,6 +532,14 @@
 
     time {
       color: #4b5563;
+    }
+
+    .messages-page__read-more {
+      color: var(--color-accent);
+    }
+
+    :deep(.messages-page__bubble-text a.linkify__mention) {
+      color: #4f46e5;
     }
   }
 
@@ -550,6 +564,9 @@
 }
 
 .messages-page__bubble-content {
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
   padding: 10px 14px;
   border-radius: 18px;
 
@@ -750,6 +767,9 @@
 
 .messages-page__media-trigger {
   display: block;
+  width: fit-content;
+  max-width: 100%;
+  line-height: 0;
   padding: 0;
   border: none;
   background: transparent;
@@ -802,23 +822,30 @@
   }
 }
 
-.messages-page__bubble--mine .messages-page__bubble-text :deep(.linkify__mention) {
-  color: #fef08a !important;
-  -webkit-text-fill-color: #fef08a !important;
-  font-weight: 800;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.75);
-  text-underline-offset: 2px;
-  text-shadow: 0 1px 3px rgba(15, 14, 23, 0.45);
+.messages-page__bubble-text--collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 12;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.messages-page__bubble--theirs .messages-page__bubble-text :deep(.linkify__mention) {
-  color: #4f46e5;
+.messages-page__read-more {
+  display: inline-block;
+  margin: 2px 0 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .messages-page__video-wrap {
   position: relative;
   display: block;
+  width: fit-content;
   max-width: min(100%, 320px);
   margin-bottom: 6px;
   border-radius: 12px;
@@ -1047,9 +1074,22 @@
   margin: 1.5rem;
 }
 
-.messages-page__pending-caption {
-  width: 100%;
+.messages-page__composer-emoji-picker--pending {
+  right: 0;
+  left: auto;
+}
+
+.messages-page__pending-caption-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
   margin-bottom: 12px;
+}
+
+.messages-page__pending-caption {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
