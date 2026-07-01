@@ -4,12 +4,17 @@
       <header class="messages-page__inbox-header">
         <h1 class="messages-page__inbox-title">Chat</h1>
         <div class="messages-page__inbox-actions">
-          <a class="messages-page__icon-btn" routerLink="/search" aria-label="Nova conversa">
+          <button
+            type="button"
+            class="messages-page__icon-btn"
+            aria-label="Nova conversa"
+            (click)="handleOpenNewConversation()"
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M12 20h9"></path>
               <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
             </svg>
-          </a>
+          </button>
         </div>
       </header>
 
@@ -89,7 +94,10 @@
           </div>
           <h2>Iniciar conversa</h2>
           <p>Escolhe uma conversa existente ou começa uma nova a partir de um perfil.</p>
-          <a routerLink="/search" class="messages-page__welcome-btn">Nova conversa</a>
+          <a routerLink="/search" class="messages-page__welcome-btn">Procurar utilizadores</a>
+          <button type="button" class="messages-page__welcome-btn messages-page__welcome-btn--secondary" (click)="handleOpenNewConversation()">
+            Nova conversa
+          </button>
         </div>
       } @else {
         <header class="messages-page__thread-header">
@@ -135,7 +143,6 @@
             <button type="button" class="messages-page__pill-btn" (click)="handleRetryMessages()">
               Tentar novamente
             </button>
-
           </div>
         } @else {
           <div #messagesScroll class="messages-page__messages" role="log" aria-live="polite" aria-relevant="additions">
@@ -220,3 +227,10 @@
     </section>
   </div>
 </div>
+
+@if (newConversationOpen) {
+  <app-new-conversation-modal
+    (closed)="handleCloseNewConversation()"
+    (conversationCreated)="handleConversationCreated($event)"
+  />
+}

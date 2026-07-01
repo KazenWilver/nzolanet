@@ -13,6 +13,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe'
 import { RelativeTimeService } from '../../core/services/relative-time.service'
+import { NewConversationModalComponent } from './new-conversation-modal/new-conversation-modal.component'
 
 export interface MessageDayGroup {
   key: string
@@ -31,7 +32,8 @@ export interface MessageDayGroup {
     DatePipe,
     AvatarComponent,
     LoadingSpinnerComponent,
-    TimeAgoPipe
+    TimeAgoPipe,
+    NewConversationModalComponent
   ],
   templateUrl: './messages-page.component.html',
   styleUrl: './messages-page.component.scss'
@@ -61,6 +63,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   searchQuery = ''
   typingLabel = ''
   realtimeConnected = false
+  newConversationOpen = false
 
   private typingTimeoutId?: ReturnType<typeof setTimeout>
   private typingClearTimeoutId?: ReturnType<typeof setTimeout>
@@ -199,6 +202,21 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   handleBackToList(): void {
     void this.router.navigate(['/messages'])
   }
+
+  handleOpenNewConversation(): void {
+    this.newConversationOpen = true
+  }
+
+  handleCloseNewConversation(): void {
+    this.newConversationOpen = false
+  }
+
+  handleConversationCreated(conversationId: string): void {
+    this.newConversationOpen = false
+    void this.router.navigate(['/messages', conversationId])
+    this.loadConversations()
+  }
+
   handleRetryMessages(): void {
     if (!this.activeConversation) {
       return
@@ -206,7 +224,6 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
     this.openConversation(this.activeConversation)
   }
-
 
   getConversationDisplayName(conversation: ConversationListItem): string {
     return conversation.otherDisplayName ?? conversation.otherUsername

@@ -173,42 +173,6 @@
   background: var(--color-bg-primary);
 }
 
-.messages-page__welcome {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 24px;
-  text-align: center;
-  color: var(--color-text-secondary);
-
-  h2 {
-    margin: 16px 0 8px;
-    color: var(--color-text-primary);
-    font-size: 1.9rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-  }
-
-  p {
-    margin: 0 0 24px;
-    max-width: 360px;
-    line-height: 1.5;
-  }
-}
-
-.messages-page__welcome-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: var(--border-radius-full);
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
-}
-
 .messages-page__welcome-btn,
 .messages-page__pill-btn,
 .messages-page__intro-btn {
@@ -228,6 +192,49 @@
   &:hover {
     opacity: 0.92;
   }
+}
+
+.messages-page__welcome-btn--secondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.messages-page__welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  gap: 12px;
+
+  h2 {
+    margin: 16px 0 0;
+    color: var(--color-text-primary);
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0;
+    max-width: 360px;
+    line-height: 1.5;
+  }
+}
+
+.messages-page__welcome-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--border-radius-full);
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .messages-page__thread-header {
