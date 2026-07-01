@@ -94,6 +94,8 @@ public class ConversationRepository : IConversationRepository
         var query = _context.Messages
             .AsNoTracking()
             .Include(m => m.Sender)
+            .Include(m => m.ReplyTo!)
+                .ThenInclude(r => r.Sender)
             .Where(m => m.ConversationId == conversationId && !m.IsDeleted);
 
         if (before.HasValue)
@@ -117,6 +119,19 @@ public class ConversationRepository : IConversationRepository
             .Where(m => m.ConversationId == conversationId && !m.IsDeleted)
             .OrderByDescending(m => m.CreatedAt)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<Message?> GetMessageByIdAsync(Guid messageId, Guid conversationId)
+    {
+        return await _context.Messages
+            .AsNoTracking()
+            .Include(m => m.Sender)
+            .Include(m => m.ReplyTo!)
+                .ThenInclude(r => r.Sender)
+            .FirstOrDefaultAsync(m =>
+                m.Id == messageId &&
+                m.ConversationId == conversationId &&
+                !m.IsDeleted);
     }
 
     public async Task<bool> MarkAsReadAsync(Guid conversationId, Guid userId, DateTime readAt)

@@ -113,6 +113,7 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IMessageReactionRepository, MessageReactionRepository>();
 builder.Services.AddScoped<IRepostRepository, RepostRepository>();
 
 builder.Services.AddScoped<IStorageService, StorageService>();

@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Conversation> Conversations { get; set; } = null!;
     public DbSet<ConversationParticipant> ConversationParticipants { get; set; } = null!;
     public DbSet<Message> Messages { get; set; } = null!;
+    public DbSet<MessageReaction> MessageReactions { get; set; } = null!;
     public DbSet<Repost> Reposts { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -178,6 +179,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.HasKey(m => m.Id);
             entity.Property(m => m.Text).IsRequired().HasMaxLength(2000);
             entity.Property(m => m.ImagePath).HasMaxLength(500);
+            entity.Property(m => m.VideoPath).HasMaxLength(500);
 
             entity.HasOne(m => m.Conversation)
                   .WithMany(c => c.Messages)
@@ -189,7 +191,31 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                   .HasForeignKey(m => m.SenderId)
                   .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(m => m.ReplyTo)
+                  .WithMany()
+                  .HasForeignKey(m => m.ReplyToMessageId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasIndex(m => new { m.ConversationId, m.CreatedAt });
+        });
+
+        builder.Entity<MessageReaction>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.Property(r => r.Emoji).IsRequired().HasMaxLength(32);
+
+            entity.HasOne(r => r.Message)
+                  .WithMany()
+                  .HasForeignKey(r => r.MessageId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.User)
+                  .WithMany()
+                  .HasForeignKey(r => r.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(r => new { r.MessageId, r.UserId }).IsUnique();
+            entity.HasIndex(r => r.MessageId);
         });
     }
 }

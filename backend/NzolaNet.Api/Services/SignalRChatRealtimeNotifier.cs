@@ -26,6 +26,10 @@ public class SignalRChatRealtimeNotifier : IChatRealtimeNotifier
             message.SenderPhotoUrl,
             message.Text,
             message.ImageUrl,
+            message.VideoUrl,
+            message.IsGif,
+            message.ReplyTo,
+            message.Reactions,
             message.CreatedAt,
             message.IsRead
         };
@@ -53,10 +57,25 @@ public class SignalRChatRealtimeNotifier : IChatRealtimeNotifier
             .Group(ChatHub.GetGroupName(conversationId))
             .SendAsync("TypingChanged", new
             {
-                ConversationId = conversationId,
-                UserId = userId,
+                ConversationId = conversationId.ToString(),
+                UserId = userId.ToString(),
                 Username = username,
                 IsTyping = isTyping
+            });
+    }
+
+    public async Task NotifyReactionChangedAsync(
+        Guid conversationId,
+        Guid messageId,
+        IReadOnlyList<MessageReactionSummaryDto> reactions)
+    {
+        await _hubContext.Clients
+            .Group(ChatHub.GetGroupName(conversationId))
+            .SendAsync("MessageReactionChanged", new
+            {
+                ConversationId = conversationId.ToString(),
+                MessageId = messageId.ToString(),
+                Reactions = reactions
             });
     }
 }

@@ -81,7 +81,11 @@ public class ConversationsController : ControllerBase
         try
         {
             var userId = AuthClaimsHelper.GetUserId(User);
-            var message = await _conversationService.SendMessageAsync(userId, id, dto.Text);
+            var message = await _conversationService.SendMessageAsync(
+                userId,
+                id,
+                dto.Text,
+                replyToMessageId: dto.ReplyToMessageId);
             await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
             return Ok(message);
         }
@@ -100,14 +104,45 @@ public class ConversationsController : ControllerBase
     public async Task<IActionResult> SendMessageWithMedia(
         Guid id,
         [FromForm] string? text,
-        [FromForm] IFormFile? image)
+        [FromForm] Guid? replyToMessageId,
+        [FromForm] IFormFile? image,
+        [FromForm] IFormFile? video)
     {
         try
         {
             var userId = AuthClaimsHelper.GetUserId(User);
-            var message = await _conversationService.SendMessageAsync(userId, id, text, image);
+            var message = await _conversationService.SendMessageAsync(
+                userId,
+                id,
+                text,
+                image,
+                video,
+                replyToMessageId);
             await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
             return Ok(message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
+    [HttpPost("{id:guid}/messages/{messageId:guid}/reactions")]
+    public async Task<IActionResult> ToggleReaction(
+        Guid id,
+        Guid messageId,
+        [FromBody] ToggleMessageReactionDto dto)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var reactions = await _conversationService.ToggleReactionAsync(userId, id, messageId, dto.Emoji);
+            await _chatRealtimeNotifier.NotifyReactionChangedAsync(id, messageId, reactions);
+            return Ok(new { reactions });
         }
         catch (ArgumentException ex)
         {

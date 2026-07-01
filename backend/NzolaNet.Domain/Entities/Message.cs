@@ -12,6 +12,9 @@ public class Message
     public virtual User Sender { get; set; } = null!;
     public string Text { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
+    public string? VideoPath { get; set; }
+    public Guid? ReplyToMessageId { get; set; }
+    public virtual Message? ReplyTo { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; }
 }
