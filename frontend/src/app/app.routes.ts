@@ -61,6 +61,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/search/search-page.component').then(m => m.SearchPageComponent)
       },
+      {
+        path: 'bookmarks',
+        loadComponent: () =>
+          import('./features/bookmarks/bookmarks-page.component').then(m => m.BookmarksPageComponent)
+      },
+      {
+        path: 'profile/by-username/:username',
+        loadComponent: () =>
+          import('./features/profile/profile-by-username-redirect.component').then(m => m.ProfileByUsernameRedirectComponent)
+      },
       { path: 'pesquisar', redirectTo: 'search', pathMatch: 'full' },
       { path: 'perfil/me', redirectTo: 'profile/me', pathMatch: 'full' },
       {

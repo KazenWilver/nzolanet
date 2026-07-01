@@ -12,11 +12,16 @@ public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly IPostService _postService;
+    private readonly IBookmarkService _bookmarkService;
 
-    public UsersController(IUserService userService, IPostService postService)
+    public UsersController(
+        IUserService userService,
+        IPostService postService,
+        IBookmarkService bookmarkService)
     {
         _userService = userService;
         _postService = postService;
+        _bookmarkService = bookmarkService;
     }
 
     [HttpGet("search")]
@@ -46,6 +51,18 @@ public class UsersController : ControllerBase
         return Ok(profile);
     }
 
+    [HttpGet("by-username/{username}")]
+    public async Task<IActionResult> GetByUsername(string username)
+    {
+        var user = await _userService.GetByUsernameAsync(username, AuthClaimsHelper.GetOptionalUserId(User));
+        if (user == null)
+        {
+            return NotFound(new { message = "Utilizador não encontrado." });
+        }
+
+        return Ok(user);
+    }
+
     [HttpGet("{id}/liked-publications")]
     public async Task<IActionResult> GetLikedPublications(Guid id)
     {
@@ -60,6 +77,17 @@ public class UsersController : ControllerBase
         {
             return ForbiddenResultHelper.Create(ex.Message);
         }
+    }
+
+    [Authorize]
+    [HttpGet("me/bookmarks")]
+    public async Task<IActionResult> GetMyBookmarks([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = AuthClaimsHelper.GetUserId(User);
+        var safePage = Math.Max(page, 1);
+        var safePageSize = Math.Clamp(pageSize, 1, 50);
+        var bookmarks = await _bookmarkService.GetMyBookmarksAsync(userId, safePage, safePageSize);
+        return Ok(bookmarks);
     }
 
     [Authorize]

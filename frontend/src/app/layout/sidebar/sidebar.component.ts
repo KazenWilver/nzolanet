@@ -71,7 +71,8 @@ export class SidebarComponent {
     { type: 'link', id: 'feed', label: 'Feed', route: '/feed', exact: true, icon: 'home' },
     { type: 'link', id: 'search', label: 'Pesquisar', route: '/search', icon: 'search' },
     { type: 'notifications', id: 'notifications', label: 'Notificações', route: '/notifications', icon: 'bell' },
-    { type: 'messages', id: 'messages', label: 'Mensagens', route: '/messages', icon: 'mail' }
+    { type: 'messages', id: 'messages', label: 'Mensagens', route: '/messages', icon: 'mail' },
+    { type: 'link', id: 'bookmarks', label: 'Guardados', route: '/bookmarks', icon: 'bookmark' }
   ];
 
   readonly secondaryNavItems: SidebarItem[] = [

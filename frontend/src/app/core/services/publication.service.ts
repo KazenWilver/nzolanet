@@ -106,6 +106,24 @@ export class PublicationService {
     );
   }
 
+  bookmark(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/bookmark`, {})
+  }
+
+  removeBookmark(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/bookmark`)
+  }
+
+  getMyBookmarks(page = 1, pageSize = this.defaultPageSize): Observable<PaginatedPublications> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize)
+
+    return this.http
+      .get<BackendPaginatedPublicationsDto>(`${environment.apiUrl}/users/me/bookmarks`, { params })
+      .pipe(map(response => this.mapPaginated(response)))
+  }
+
   private mapPaginated(dto: BackendPaginatedPublicationsDto): PaginatedPublications {
     return {
       items: dto.items.map(item => this.mapPublication(item)),
@@ -131,8 +149,10 @@ export class PublicationService {
       likesCount: dto.likesCount ?? 0,
       commentsCount: dto.commentsCount ?? 0,
       repostsCount: dto.repostsCount ?? 0,
+      bookmarksCount: dto.bookmarksCount ?? 0,
       hasLiked: dto.hasLiked ?? false,
-      hasReposted: dto.hasReposted ?? false
+      hasReposted: dto.hasReposted ?? false,
+      hasBookmarked: dto.hasBookmarked ?? false
     };
   }
 }

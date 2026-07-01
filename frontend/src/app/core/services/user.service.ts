@@ -20,6 +20,12 @@ export class UserService {
       .pipe(map(user => this.mapUser(user)));
   }
 
+  getProfileByUsername(username: string): Observable<User> {
+    return this.http
+      .get<BackendUserDto>(`${this.baseUrl}/by-username/${encodeURIComponent(username)}`)
+      .pipe(map(user => this.mapUser(user)));
+  }
+
   updateProfile(userId: string, dto: UpdateProfileDto): Observable<User> {
     return this.http
       .put<BackendUserDto>(`${this.baseUrl}/${userId}`, {

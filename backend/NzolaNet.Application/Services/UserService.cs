@@ -426,6 +426,17 @@ public class UserService : IUserService
         return dtos;
     }
 
+    public async Task<UserResponseDto?> GetByUsernameAsync(string username, Guid? currentUserId = null)
+    {
+        var user = await _userRepository.GetByUsernameAsync(username);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return await GetUserResponseAsync(user.Id, currentUserId);
+    }
+
     public async Task<IEnumerable<UserResponseDto>> GetSuggestionsAsync(
         Guid currentUserId,
         int count = 3,

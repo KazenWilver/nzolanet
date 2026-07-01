@@ -56,7 +56,9 @@ export class PublicationCardComponent implements OnChanges {
   deleting = false;
   likingInProgress = false
   repostingInProgress = false
+  bookmarkingInProgress = false
   repostError = '';
+  bookmarkError = ''
   imageLoadFailed = false;
   videoLoadFailed = false;
   shareFeedback = '';
@@ -340,6 +342,47 @@ export class PublicationCardComponent implements OnChanges {
           this.repostingInProgress = false
           setTimeout(() => {
             this.repostError = ''
+          }, 4000)
+        }
+      })
+  }
+
+  toggleBookmark(event: MouseEvent): void {
+    event.stopPropagation()
+    if (this.bookmarkingInProgress) {
+      return
+    }
+
+    const previousBookmarked = this.publication.hasBookmarked ?? false
+    const previousCount = this.publication.bookmarksCount ?? 0
+    this.publication = {
+      ...this.publication,
+      hasBookmarked: !previousBookmarked,
+      bookmarksCount: previousBookmarked ? Math.max(0, previousCount - 1) : previousCount + 1
+    }
+    this.bookmarkError = ''
+
+    const request$ = previousBookmarked
+      ? this.publicationService.removeBookmark(this.publication.id)
+      : this.publicationService.bookmark(this.publication.id)
+
+    this.bookmarkingInProgress = true
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.bookmarkingInProgress = false
+        },
+        error: () => {
+          this.publication = {
+            ...this.publication,
+            hasBookmarked: previousBookmarked,
+            bookmarksCount: previousCount
+          }
+          this.bookmarkError = 'Não foi possível guardar.'
+          this.bookmarkingInProgress = false
+          setTimeout(() => {
+            this.bookmarkError = ''
           }, 4000)
         }
       })

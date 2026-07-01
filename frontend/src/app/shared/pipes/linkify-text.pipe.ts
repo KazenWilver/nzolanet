@@ -23,7 +23,7 @@ export class LinkifyTextPipe implements PipeTransform {
     );
     const withMentions = withLinks.replace(
       /(^|[\s(])@([A-Za-z0-9_]+)/g,
-      '$1<a href="/search?q=%40$2" class="linkify__mention">@$2</a>'
+      '$1<a href="/profile/by-username/$2" class="linkify__mention">@$2</a>'
     );
     const withHashtags = withMentions.replace(
       /(^|[\s(])#([A-Za-z0-9_\u00C0-\u024F]+)/g,
