@@ -1,0 +1,50 @@
+<div #overlay class="report-dialog__overlay" (click)="handleClose()">
+  <section #dialog class="report-dialog" (click)="$event.stopPropagation()">
+    <header class="report-dialog__header">
+      <h2>{{ 'report.title' | t }}</h2>
+      <button type="button" (click)="handleClose()" [attr.aria-label]="'common.close' | t">×</button>
+    </header>
+
+    <p class="report-dialog__description">{{ 'report.description' | t }}</p>
+
+    <label class="report-dialog__field">
+      <span>{{ 'report.reason' | t }}</span>
+      <select [(ngModel)]="selectedReason" name="reportReason">
+        @for (reason of reasons; track reason) {
+          <option [value]="reason">{{ ('report.reasons.' + reason) | t }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="report-dialog__field">
+      <span>{{ 'report.details' | t }} ({{ 'common.optional' | t }})</span>
+      <textarea
+        rows="4"
+        maxlength="600"
+        [(ngModel)]="details"
+        name="reportDetails"
+        [placeholder]="'report.detailsPlaceholder' | t"
+      ></textarea>
+    </label>
+
+    @if (errorMessage) {
+      <p class="report-dialog__error" role="alert">{{ errorMessage }}</p>
+    }
+    @if (successMessage) {
+      <p class="report-dialog__success" role="status">{{ successMessage }}</p>
+    }
+
+    <footer class="report-dialog__actions">
+      <button type="button" class="report-dialog__btn report-dialog__btn--ghost" (click)="handleClose()">
+        {{ 'common.cancel' | t }}
+      </button>
+      <button type="button" class="report-dialog__btn report-dialog__btn--primary" (click)="handleSubmit()" [disabled]="submitting">
+        @if (submitting) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          {{ 'report.submit' | t }}
+        }
+      </button>
+    </footer>
+  </section>
+</div>

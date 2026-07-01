@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Repost> Reposts { get; set; } = null!;
     public DbSet<Bookmark> Bookmarks { get; set; } = null!;
     public DbSet<MessageUserHide> MessageUserHides { get; set; } = null!;
+    public DbSet<ContentReport> ContentReports { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -257,6 +258,23 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
             entity.HasIndex(bookmark => new { bookmark.UserId, bookmark.PostId }).IsUnique();
             entity.HasIndex(bookmark => bookmark.PostId);
+        });
+
+        builder.Entity<ContentReport>(entity =>
+        {
+            entity.HasKey(report => report.Id);
+            entity.Property(report => report.TargetType).IsRequired().HasMaxLength(20);
+            entity.Property(report => report.Reason).IsRequired().HasMaxLength(80);
+            entity.Property(report => report.Details).HasMaxLength(600);
+            entity.Property(report => report.CreatedAt).IsRequired();
+
+            entity.HasOne(report => report.Reporter)
+                  .WithMany()
+                  .HasForeignKey(report => report.ReporterId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(report => new { report.ReporterId, report.TargetType, report.TargetId }).IsUnique();
+            entity.HasIndex(report => new { report.TargetType, report.TargetId });
         });
     }
 }

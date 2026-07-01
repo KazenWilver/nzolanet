@@ -116,6 +116,7 @@ builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageReactionRepository, MessageReactionRepository>();
 builder.Services.AddScoped<IRepostRepository, RepostRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
+builder.Services.AddScoped<IContentReportRepository, ContentReportRepository>();
 
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -132,6 +133,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IMediaAccessService, MediaAccessService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IChatRealtimeNotifier, SignalRChatRealtimeNotifier>();
 

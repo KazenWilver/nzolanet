@@ -29,32 +29,32 @@
           }
         </div>
 
-        @if (isAuthor) {
-          <div class="publication-card__menu-wrap">
-            <button
-              #menuButton
-              type="button"
-              class="publication-card__menu-btn"
-              (click)="toggleMenu($event)"
-              aria-label="Opções da publicação"
-              aria-haspopup="menu"
-              [attr.aria-expanded]="menuOpen"
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <circle cx="12" cy="5" r="1.5"></circle>
-                <circle cx="12" cy="12" r="1.5"></circle>
-                <circle cx="12" cy="19" r="1.5"></circle>
-              </svg>
-            </button>
+        <div class="publication-card__menu-wrap">
+          <button
+            #menuButton
+            type="button"
+            class="publication-card__menu-btn"
+            (click)="toggleMenu($event)"
+            aria-label="Opções da publicação"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuOpen"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="12" cy="5" r="1.5"></circle>
+              <circle cx="12" cy="12" r="1.5"></circle>
+              <circle cx="12" cy="19" r="1.5"></circle>
+            </svg>
+          </button>
 
-            @if (menuOpen) {
-              <div
-                class="publication-card__menu"
-                [class.publication-card__menu--fixed]="menuFixed"
-                [style.top.px]="menuTop"
-                [style.left.px]="menuLeft"
-                role="menu"
-              >
+          @if (menuOpen) {
+            <div
+              class="publication-card__menu"
+              [class.publication-card__menu--fixed]="menuFixed"
+              [style.top.px]="menuTop"
+              [style.left.px]="menuLeft"
+              role="menu"
+            >
+              @if (isAuthor) {
                 <button type="button" class="publication-card__menu-item" role="menuitem" (click)="startEdit()">
                   Editar
                 </button>
@@ -66,10 +66,19 @@
                 >
                   Apagar
                 </button>
-              </div>
-            }
-          </div>
-        }
+              } @else {
+                <button
+                  type="button"
+                  class="publication-card__menu-item publication-card__menu-item--danger"
+                  role="menuitem"
+                  (click)="openReportDialog()"
+                >
+                  {{ 'report.button' | t }}
+                </button>
+              }
+            </div>
+          }
+        </div>
       </div>
 
       <div
@@ -268,5 +277,13 @@
     [mensagem]="deleteConfirmMessage"
     (confirmado)="deletePublication()"
     (cancelado)="handleCancelDelete()"
+  />
+}
+
+@if (reportDialogOpen) {
+  <app-report-dialog
+    targetType="publication"
+    [targetId]="publication.id"
+    (closed)="reportDialogOpen = false"
   />
 }

@@ -14,6 +14,8 @@ import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
+import { TPipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-publication-card',
@@ -26,7 +28,9 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
     LinkifyTextPipe,
     AvatarComponent,
     ConfirmDialogComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    ReportDialogComponent,
+    TPipe
   ],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss'
@@ -65,6 +69,7 @@ export class PublicationCardComponent implements OnChanges {
   menuFixed = false;
   menuTop = 0;
   menuLeft = 0;
+  reportDialogOpen = false;
 
   @ViewChild('cardVideo') cardVideoRef?: ElementRef<HTMLVideoElement>;
   @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
@@ -174,6 +179,11 @@ export class PublicationCardComponent implements OnChanges {
   confirmDelete(): void {
     this.menuOpen = false;
     this.deleteDialogOpen = true;
+  }
+
+  openReportDialog(): void {
+    this.menuOpen = false;
+    this.reportDialogOpen = true;
   }
 
   deletePublication(): void {

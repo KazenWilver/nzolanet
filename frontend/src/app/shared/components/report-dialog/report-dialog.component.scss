@@ -1,0 +1,110 @@
+.report-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  background: rgba(15, 23, 42, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.report-dialog {
+  width: min(460px, 100%);
+  border-radius: 18px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-muted);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-dialog__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.report-dialog__header button {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.report-dialog__description {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+}
+
+.report-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-dialog__field span {
+  font-size: 0.86rem;
+  color: var(--color-text-secondary);
+}
+
+.report-dialog__field select,
+.report-dialog__field textarea {
+  border: 1px solid var(--color-border-muted);
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.report-dialog__error {
+  color: #ef4444;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.report-dialog__success {
+  color: #10b981;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.report-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.report-dialog__btn {
+  border-radius: 999px;
+  border: 1px solid var(--color-border-muted);
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 110px;
+}
+
+.report-dialog__btn--ghost {
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+.report-dialog__btn--primary {
+  border: none;
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.report-dialog__btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

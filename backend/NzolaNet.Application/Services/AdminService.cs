@@ -14,6 +14,7 @@ public class AdminService : IAdminService
     private readonly IPostRepository _postRepository;
     private readonly ICommentRepository _commentRepository;
     private readonly ILikeRepository _likeRepository;
+    private readonly IContentReportRepository _contentReportRepository;
 
     public AdminService(
         IAuthService authService,
@@ -21,7 +22,8 @@ public class AdminService : IAdminService
         ICommentService commentService,
         IPostRepository postRepository,
         ICommentRepository commentRepository,
-        ILikeRepository likeRepository)
+        ILikeRepository likeRepository,
+        IContentReportRepository contentReportRepository)
     {
         _authService = authService;
         _userRepository = userRepository;
@@ -29,6 +31,7 @@ public class AdminService : IAdminService
         _postRepository = postRepository;
         _commentRepository = commentRepository;
         _likeRepository = likeRepository;
+        _contentReportRepository = contentReportRepository;
     }
 
     public async Task<AuthResponseDto> LoginAsync(AdminLoginDto loginDto)
@@ -64,7 +67,7 @@ public class AdminService : IAdminService
             TotalUtilizadores = await _userRepository.GetTotalCountAsync(),
             TotalPublicacoes = await _postRepository.GetTotalCountAsync(),
             TotalComentarios = await _commentRepository.GetTotalCountAsync(),
-            TotalComentariosDenunciados = 0,
+            TotalComentariosDenunciados = await _contentReportRepository.GetTotalReportedCommentsAsync(),
             TotalBazes = await _likeRepository.GetTotalCountAsync()
         };
     }

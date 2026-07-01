@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Comments;
 using NzolaNet.Application.DTOs.Publications;
+using NzolaNet.Application.DTOs.Reports;
 using NzolaNet.Application.Interfaces;
 
 namespace NzolaNet.Api.Controllers;
@@ -16,19 +17,22 @@ public class PublicationsController : ControllerBase
     private readonly ICommentService _commentService;
     private readonly IRepostService _repostService;
     private readonly IBookmarkService _bookmarkService;
+    private readonly IReportService _reportService;
 
     public PublicationsController(
         IPostService postService,
         ILikeService likeService,
         ICommentService commentService,
         IRepostService repostService,
-        IBookmarkService bookmarkService)
+        IBookmarkService bookmarkService,
+        IReportService reportService)
     {
         _postService = postService;
         _likeService = likeService;
         _commentService = commentService;
         _repostService = repostService;
         _bookmarkService = bookmarkService;
+        _reportService = reportService;
     }
 
     [HttpGet]
@@ -245,5 +249,31 @@ public class PublicationsController : ControllerBase
         var userId = AuthClaimsHelper.GetUserId(User);
         await _bookmarkService.ToggleBookmarkAsync(userId, id, bookmark: false);
         return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("{id}/report")]
+    public async Task<IActionResult> Report(Guid id, [FromBody] ReportContentDto reportDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = AuthClaimsHelper.GetUserId(User);
+
+        try
+        {
+            await _reportService.ReportPostAsync(userId, id, reportDto.Reason, reportDto.Details);
+            return Ok(new { message = "Denúncia enviada com sucesso." });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 }
