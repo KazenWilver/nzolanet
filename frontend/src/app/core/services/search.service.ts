@@ -64,7 +64,7 @@ export class SearchService {
       }))));
   }
 
-  getTrendingHashtags(limit = 10): Observable<string[]> {
+  getTrendingHashtags(limit = 5): Observable<string[]> {
     return this.http.get<string[]>(`${this.publicationsBaseUrl}/trending-hashtags?limit=${limit}`);
   }
 

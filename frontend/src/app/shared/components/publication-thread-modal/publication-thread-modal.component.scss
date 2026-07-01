@@ -602,15 +602,23 @@
   .thread-modal__side-pane,
   .thread-modal__shell--embedded .thread-modal__side-pane {
     max-width: none;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
     border-left: none;
     border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
   }
 
-  .thread-modal__shell--embedded .thread-modal__reply {
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
-    background: var(--color-bg-primary);
-    border-top: 1px solid var(--color-border);
+  .thread-modal--media .thread-modal__stack,
+  .thread-modal__stack {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .thread-modal__reply {
+    flex-shrink: 0;
   }
 }

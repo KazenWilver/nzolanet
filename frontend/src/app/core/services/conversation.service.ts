@@ -5,15 +5,22 @@ import { catchError, distinctUntilChanged, map, switchMap, tap } from 'rxjs/oper
 import { environment } from '../../../environments/environment'
 import { AuthService } from './auth.service'
 import type {
+  BackendConversationDetailDto,
   BackendConversationListItemDto,
   BackendMessageDto,
   BackendMessageReactionSummaryDto,
   ChatMessage,
+  ConversationDetail,
   ConversationListItem,
   MessageReactionSummary,
   UnreadMessagesCountResponse
 } from '../models/conversation.model'
-import { mapChatMessage, mapConversationListItem } from '../models/conversation.model'
+import { mapChatMessage, mapConversationDetail, mapConversationListItem } from '../models/conversation.model'
+
+export interface UpdateGroupPayload {
+  title?: string
+  description?: string
+}
 
 export interface SendMediaOptions {
   text?: string
@@ -74,6 +81,41 @@ export class ConversationService {
     return this.http
       .post<BackendConversationListItemDto>(`${this.baseUrl}/group`, payload)
       .pipe(map(mapConversationListItem))
+  }
+
+  getConversation(conversationId: string): Observable<ConversationDetail> {
+    return this.http
+      .get<BackendConversationDetailDto>(`${this.baseUrl}/${conversationId}`)
+      .pipe(map(mapConversationDetail))
+  }
+
+  addGroupParticipants(conversationId: string, participantIds: string[]): Observable<ConversationDetail> {
+    return this.http
+      .post<BackendConversationDetailDto>(`${this.baseUrl}/${conversationId}/participants`, {
+        participantIds
+      })
+      .pipe(map(mapConversationDetail))
+  }
+
+  updateGroup(
+    conversationId: string,
+    payload: UpdateGroupPayload,
+    image?: File
+  ): Observable<ConversationDetail> {
+    const formData = new FormData()
+    if (payload.title?.trim()) {
+      formData.append('title', payload.title.trim())
+    }
+    if (payload.description !== undefined) {
+      formData.append('description', payload.description.trim())
+    }
+    if (image) {
+      formData.append('image', image)
+    }
+
+    return this.http
+      .patch<BackendConversationDetailDto>(`${this.baseUrl}/${conversationId}/group`, formData)
+      .pipe(map(mapConversationDetail))
   }
 
   getMessages(conversationId: string, limit = 50, before?: string): Observable<ChatMessage[]> {

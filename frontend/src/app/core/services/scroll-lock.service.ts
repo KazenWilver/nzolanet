@@ -41,13 +41,33 @@ export class ScrollLockService {
       return;
     }
 
+    this.restoreScroll();
+  }
+
+  /** Repõe o scroll mesmo quando o contador de locks ficou dessincronizado. */
+  forceUnlock(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.lockCount = 0;
+    this.restoreScroll();
+  }
+
+  private restoreScroll(): void {
     if (this.scrollContainer) {
       this.scrollContainer.style.overflow = this.previousOverflow;
       this.scrollContainer = null;
       this.previousOverflow = '';
+    } else {
+      const center = document.querySelector<HTMLElement>('.main-layout__center');
+      if (center) {
+        center.style.overflow = '';
+      }
     }
 
     document.body.style.overflow = '';
     document.body.style.touchAction = '';
+    document.documentElement.style.overflow = '';
   }
 }

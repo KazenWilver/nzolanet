@@ -9,12 +9,13 @@ import { ConversationService } from '../../core/services/conversation.service'
 import { ChatRealtimeService } from '../../core/services/chat-realtime.service'
 import { AuthService } from '../../core/services/auth.service'
 import { AnimationService } from '../../core/services/animation.service'
-import type { ChatMessage, ConversationListItem, MessageReplyPreview } from '../../core/models/conversation.model'
+import type { ChatMessage, ConversationDetail, ConversationListItem, MessageReplyPreview } from '../../core/models/conversation.model'
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe'
 import { RelativeTimeService } from '../../core/services/relative-time.service'
 import { NewConversationModalComponent } from './new-conversation-modal/new-conversation-modal.component'
+import { GroupInfoModalComponent } from './group-info-modal/group-info-modal.component'
 import { ChatEmojiPickerComponent } from './chat-emoji-picker/chat-emoji-picker.component'
 import { MentionAutocompleteDirective } from '../../shared/directives/mention-autocomplete.directive'
 import { TPipe } from '../../core/i18n/translate.pipe'
@@ -39,6 +40,7 @@ export interface MessageDayGroup {
     LoadingSpinnerComponent,
     TimeAgoPipe,
     NewConversationModalComponent,
+    GroupInfoModalComponent,
     ChatEmojiPickerComponent,
     MentionAutocompleteDirective,
     TPipe
@@ -74,11 +76,11 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   typingLabel = ''
   realtimeConnected = false
   newConversationOpen = false
+  groupInfoOpen = false
   pendingImage: File | null = null
   pendingImagePreview = ''
   pendingVideo: File | null = null
   pendingVideoPreview = ''
-  remoteImageUrl = ''
   replyingTo: ChatMessage | null = null
   editingMessage: ChatMessage | null = null
   composerEmojiOpen = false
@@ -102,8 +104,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   get canSendMessage(): boolean {
     const hasText = this.messageForm.controls.text.value.trim().length > 0
-    const hasRemoteImage = this.remoteImageUrl.trim().length > 0
-    return (hasText || !!this.pendingImage || !!this.pendingVideo || hasRemoteImage) && !this.sendingMessage
+    return (hasText || !!this.pendingImage || !!this.pendingVideo) && !this.sendingMessage
   }
 
   ngOnInit(): void {
@@ -202,8 +203,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     const text = this.messageForm.controls.text.value.trim()
-    const remoteImageUrl = this.remoteImageUrl.trim()
-    if (!text && !this.pendingImage && !this.pendingVideo && !remoteImageUrl) {
+    if (!text && !this.pendingImage && !this.pendingVideo) {
       return
     }
 
@@ -220,14 +220,12 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           text,
           image: this.pendingImage ?? undefined,
           video: this.pendingVideo ?? undefined,
-          replyToMessageId,
-          remoteImageUrl: remoteImageUrl || undefined
+          replyToMessageId
         })
       : this.conversationService.sendMessage(
           this.activeConversation.id,
           text,
-          replyToMessageId,
-          remoteImageUrl || undefined
+          replyToMessageId
         )
 
     request$
@@ -237,7 +235,6 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           this.clearPendingMedia()
           this.replyingTo = null
           this.editingMessage = null
-          this.remoteImageUrl = ''
           this.composerEmojiOpen = false
           this.upsertMessage(message)
           this.messageForm.reset()
@@ -564,6 +561,32 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       })
   }
 
+  handleOpenGroupInfo(): void {
+    if (!this.activeConversation?.isGroup) {
+      return
+    }
+
+    this.groupInfoOpen = true
+  }
+
+  handleCloseGroupInfo(): void {
+    this.groupInfoOpen = false
+  }
+
+  handleGroupInfoUpdated(detail: ConversationDetail): void {
+    this.applyConversationUpdate(detail)
+    this.activeConversation = detail
+    this.groupInfoOpen = false
+  }
+
+  getConversationAvatar(conversation: ConversationListItem): string | undefined {
+    if (conversation.isGroup) {
+      return conversation.imageUrl
+    }
+
+    return conversation.otherPhotoUrl
+  }
+
   getConversationDisplayName(conversation: ConversationListItem): string {
     if (conversation.isGroup) {
       return conversation.title ?? 'Grupo'
@@ -784,12 +807,33 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       return
     }
 
-    if (this.loadingConversations) {
+    this.conversationService
+      .getConversation(conversationId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: detail => {
+          this.applyConversationUpdate(detail)
+          void this.openConversation(detail)
+        },
+        error: () => {
+          if (!this.loadingConversations) {
+            this.activeConversation = null
+            this.messages = []
+          }
+        }
+      })
+  }
+
+  private applyConversationUpdate(conversation: ConversationListItem): void {
+    const existingIndex = this.conversations.findIndex(item => item.id === conversation.id)
+    if (existingIndex === -1) {
+      this.conversations = [conversation, ...this.conversations]
       return
     }
 
-    this.activeConversation = null
-    this.messages = []
+    this.conversations = this.conversations.map(item =>
+      item.id === conversation.id ? { ...item, ...conversation } : item
+    )
   }
 
   private openConversation(conversation: ConversationListItem): void {

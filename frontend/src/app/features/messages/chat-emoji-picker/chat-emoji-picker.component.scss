@@ -1,25 +1,29 @@
 .chat-emoji-picker {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 4px;
-  padding: 8px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  padding: 10px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-bg-modal);
   box-shadow: var(--shadow-lg);
-  max-width: 220px;
+  width: min(280px, 92vw);
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .chat-emoji-picker__item {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border: none;
   border-radius: 8px;
   background: transparent;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
+  line-height: 1;
   cursor: pointer;
 
   &:hover {

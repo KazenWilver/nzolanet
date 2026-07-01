@@ -165,7 +165,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     if (!this.embedded) {
       this.pauseModalVideo();
       this.focusTrap.deactivate();
-      this.scrollLock.unlock();
+      this.scrollLock.forceUnlock();
     }
     this.clearMediaPreview();
   }
@@ -188,6 +188,9 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
 
   handleClose(): void {
     this.focusTrap.deactivate();
+    if (!this.embedded) {
+      this.scrollLock.forceUnlock();
+    }
     this.closed.emit();
   }
 
@@ -433,16 +436,9 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
 
   private syncCommentsCount(): void {
     const nextCount = this.comments.length;
-    if (this.publication.commentsCount === nextCount) {
-      this.countChange.emit(nextCount);
-      return;
+    if (this.publication.commentsCount !== nextCount) {
+      this.publication.commentsCount = nextCount;
     }
-
-    this.publication = {
-      ...this.publication,
-      commentsCount: nextCount
-    };
-    this.publicationChange.emit(this.publication);
     this.countChange.emit(nextCount);
   }
 }

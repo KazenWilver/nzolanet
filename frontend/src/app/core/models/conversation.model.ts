@@ -24,11 +24,24 @@ export interface BackendConversationListItemDto {
   otherDisplayName?: string
   otherPhotoUrl?: string
   title?: string
+  description?: string
+  imageUrl?: string
   isGroup?: boolean
   participantCount?: number
   lastMessageText?: string
   lastMessageAt?: string
   unreadCount: number
+}
+
+export interface BackendConversationParticipantDto {
+  userId: string
+  username: string
+  displayName?: string
+  photoUrl?: string
+}
+
+export interface BackendConversationDetailDto extends BackendConversationListItemDto {
+  participants: BackendConversationParticipantDto[]
 }
 
 export interface BackendMessageDto {
@@ -70,6 +83,13 @@ export interface MessageReactionSummary {
   reactedByMe: boolean
 }
 
+export interface ConversationParticipant {
+  userId: string
+  username: string
+  displayName?: string
+  photoUrl?: string
+}
+
 export interface ConversationListItem {
   id: string
   otherUserId?: string
@@ -77,11 +97,17 @@ export interface ConversationListItem {
   otherDisplayName?: string
   otherPhotoUrl?: string
   title?: string
+  description?: string
+  imageUrl?: string
   isGroup: boolean
   participantCount: number
   lastMessageText?: string
   lastMessageAt?: string
   unreadCount: number
+}
+
+export interface ConversationDetail extends ConversationListItem {
+  participants: ConversationParticipant[]
 }
 
 export interface ChatMessage {
@@ -135,11 +161,23 @@ export const mapConversationListItem = (dto: BackendConversationListItemDto): Co
   otherDisplayName: dto.otherDisplayName,
   otherPhotoUrl: resolveMediaUrl(dto.otherPhotoUrl),
   title: dto.title,
+  description: dto.description,
+  imageUrl: resolveMediaUrl(dto.imageUrl),
   isGroup: dto.isGroup ?? false,
   participantCount: dto.participantCount ?? (dto.isGroup ? 0 : 2),
   lastMessageText: dto.lastMessageText,
   lastMessageAt: dto.lastMessageAt,
   unreadCount: dto.unreadCount
+})
+
+export const mapConversationDetail = (dto: BackendConversationDetailDto): ConversationDetail => ({
+  ...mapConversationListItem(dto),
+  participants: (dto.participants ?? []).map(participant => ({
+    userId: participant.userId,
+    username: participant.username,
+    displayName: participant.displayName,
+    photoUrl: resolveMediaUrl(participant.photoUrl)
+  }))
 })
 
 export const mapChatMessage = (dto: BackendMessageDto): ChatMessage => ({

@@ -22,9 +22,6 @@ export class WhoToFollowComponent implements OnInit {
   @Input() count = 3;
   @Input() variant: WhoToFollowVariant = 'sidebar';
 
-  private static readonly RECENT_SUGGESTIONS_KEY = 'nzolanet-recent-suggestions';
-  private static readonly MAX_RECENT_SUGGESTIONS = 30;
-
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly animationService = inject(AnimationService);
@@ -59,8 +56,7 @@ export class WhoToFollowComponent implements OnInit {
       return true;
     }
 
-    const minCount = this.isFeedVariant ? 2 : 1;
-    return this.suggestions.length >= minCount;
+    return this.suggestions.length >= 1;
   }
 
   getDisplayName(user: User): string {
@@ -125,31 +121,31 @@ export class WhoToFollowComponent implements OnInit {
     action: 'follow' | 'unfollow',
     isPrivate: boolean
   ): void {
-    this.suggestions = this.suggestions.map(item => {
-      if (item.id !== userId) {
-        return item;
-      }
+    this.suggestions = this.suggestions
+      .map(item => {
+        if (item.id !== userId) {
+          return item;
+        }
 
-      if (action === 'unfollow') {
-        return { ...item, isFollowing: false, isPending: false };
-      }
+        if (action === 'unfollow') {
+          return { ...item, isFollowing: false, isPending: false };
+        }
 
-      if (isPrivate) {
-        return { ...item, isFollowing: false, isPending: true };
-      }
+        if (isPrivate) {
+          return { ...item, isFollowing: false, isPending: true };
+        }
 
-      return { ...item, isFollowing: true, isPending: false };
-    });
+        return { ...item, isFollowing: true, isPending: false };
+      })
+      .filter(item => !item.isFollowing && !item.isPending);
   }
 
   private loadSuggestions(): void {
     this.loading = true;
     this.error = false;
 
-    const excludeIds = this.getRecentSuggestionIds();
-
     this.userService
-      .getSuggestions(this.count, excludeIds)
+      .getSuggestions(this.count)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: users => {
@@ -160,7 +156,6 @@ export class WhoToFollowComponent implements OnInit {
               !user.isPending
           );
           this.suggestions = filtered;
-          this.rememberSuggestionIds(filtered.map(user => user.id));
           this.loading = false;
           requestAnimationFrame(() => this.animateList());
         },
@@ -184,30 +179,5 @@ export class WhoToFollowComponent implements OnInit {
     if (items.length) {
       this.animationService.staggerEnter(items, 'fadeUp', 0.06);
     }
-  }
-
-  private getRecentSuggestionIds(): string[] {
-    try {
-      const raw = sessionStorage.getItem(WhoToFollowComponent.RECENT_SUGGESTIONS_KEY);
-      if (!raw) {
-        return [];
-      }
-      const parsed = JSON.parse(raw) as string[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private rememberSuggestionIds(ids: string[]): void {
-    if (ids.length === 0) {
-      return;
-    }
-
-    const merged = [...ids, ...this.getRecentSuggestionIds()]
-      .filter((id, index, array) => array.indexOf(id) === index)
-      .slice(0, WhoToFollowComponent.MAX_RECENT_SUGGESTIONS);
-
-    sessionStorage.setItem(WhoToFollowComponent.RECENT_SUGGESTIONS_KEY, JSON.stringify(merged));
   }
 }

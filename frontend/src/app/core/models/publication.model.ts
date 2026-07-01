@@ -16,6 +16,7 @@ export interface Publication {
   hasLiked?: boolean;
   hasReposted?: boolean;
   hasBookmarked?: boolean;
+  quotedPublication?: Publication;
 }
 
 export interface UpdatePublicationDto {
@@ -40,6 +41,7 @@ export interface BackendPublicationDto {
   hasLiked?: boolean;
   hasReposted?: boolean;
   hasBookmarked?: boolean;
+  quotedPublication?: BackendPublicationDto;
 }
 
 export interface PaginatedPublications {

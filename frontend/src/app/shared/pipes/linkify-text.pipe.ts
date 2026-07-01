@@ -22,7 +22,7 @@ export class LinkifyTextPipe implements PipeTransform {
       '<a href="$1" target="_blank" rel="noopener noreferrer" class="linkify__url">$1</a>'
     );
     const withMentions = withLinks.replace(
-      /(^|[\s(])@([A-Za-z0-9_]+)/g,
+      /(^|[\s(])@([A-Za-z0-9_.-]+)/g,
       '$1<a href="/profile/by-username/$2" class="linkify__mention">@$2</a>'
     );
     const withHashtags = withMentions.replace(

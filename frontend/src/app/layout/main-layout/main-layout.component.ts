@@ -14,6 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RouteTransitionService } from '../../core/services/route-transition.service';
 import { FocusTrapService } from '../../core/services/focus-trap.service';
 import { PublicationMediaOverlayService } from '../../core/services/publication-media-overlay.service';
+import { ScrollLockService } from '../../core/services/scroll-lock.service';
 import type { User } from '../../core/models/user.model';
 import type { Publication } from '../../core/models/publication.model';
 
@@ -41,6 +42,7 @@ export class MainLayoutComponent {
   readonly publishModal = inject(PublishModalService);
   readonly accountMenu = inject(AccountMenuService);
   readonly mediaOverlay = inject(PublicationMediaOverlayService);
+  private readonly scrollLock = inject(ScrollLockService);
 
   @ViewChild('accountMenuNav') accountMenuNavRef?: ElementRef<HTMLElement>;
 
@@ -130,6 +132,7 @@ export class MainLayoutComponent {
   }
 
   handleCloseMediaOverlay(): void {
+    this.scrollLock.forceUnlock();
     this.mediaOverlay.close();
   }
 

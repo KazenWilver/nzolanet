@@ -36,7 +36,7 @@ export class AsideComponent implements OnInit {
       .subscribe(url => this.syncFromUrl(url));
 
     this.searchService
-      .getTrendingHashtags(10)
+      .getTrendingHashtags(5)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: hashtags => {

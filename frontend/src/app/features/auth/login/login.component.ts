@@ -8,6 +8,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { HttpErrorResponse } from '@angular/common/http';
 import { TPipe } from '../../../core/i18n/translate.pipe';
 import { LocaleService } from '../../../core/i18n/locale.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -39,6 +40,7 @@ export class LoginComponent implements OnInit {
   showForgotPassword = false;
   errorMessage = '';
   forgotSuccessMessage = '';
+  devResetLink = '';
   sessionExpiredMessage = '';
 
   ngOnInit(): void {
@@ -81,6 +83,7 @@ export class LoginComponent implements OnInit {
   handleForgotPassword(): void {
     this.forgotForm.markAllAsTouched();
     this.forgotSuccessMessage = '';
+    this.devResetLink = '';
 
     if (this.forgotForm.invalid) {
       return;
@@ -93,10 +96,13 @@ export class LoginComponent implements OnInit {
       .forgotPassword(email)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: response => {
           this.isForgotLoading = false;
           this.forgotSuccessMessage =
             this.localeService.translate('auth.recoverSent');
+          if (!environment.production && response.devResetLink) {
+            this.devResetLink = response.devResetLink;
+          }
         },
         error: () => {
           this.isForgotLoading = false;
@@ -110,6 +116,7 @@ export class LoginComponent implements OnInit {
     this.showForgotPassword = true;
     this.errorMessage = '';
     this.forgotSuccessMessage = '';
+    this.devResetLink = '';
     const email = this.loginForm.controls.email.value;
     if (email) {
       this.forgotForm.controls.email.setValue(email);
@@ -119,6 +126,7 @@ export class LoginComponent implements OnInit {
   handleBackToLogin(): void {
     this.showForgotPassword = false;
     this.forgotSuccessMessage = '';
+    this.devResetLink = '';
     this.forgotForm.reset();
   }
 

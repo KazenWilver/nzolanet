@@ -158,6 +158,10 @@ export class NotificationsPageComponent implements OnInit {
         return 'recusou o teu pedido de seguimento';
       case 'message':
         return this.localeService.translate('notifications.sentMessage');
+      case 'mention':
+        return 'mencionou-te numa publicação';
+      case 'group_added':
+        return 'adicionou-te a um grupo';
       default:
         return '';
     }
@@ -240,6 +244,11 @@ export class NotificationsPageComponent implements OnInit {
     }
 
     if (notification.type === 'message' && notification.conversationId) {
+      void this.router.navigate(['/messages', notification.conversationId]);
+      return;
+    }
+
+    if (notification.type === 'group_added' && notification.conversationId) {
       void this.router.navigate(['/messages', notification.conversationId]);
       return;
     }

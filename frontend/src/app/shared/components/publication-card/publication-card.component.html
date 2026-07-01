@@ -138,7 +138,7 @@
             </div>
           }
 
-      @if (publication.videoUrl) {
+          @if (publication.videoUrl) {
         <div
           class="publication-card__media publication-card__media--clickable publication-card__media--video"
           (click)="handleMediaClick($event)"
@@ -156,6 +156,24 @@
                 ></video>
               }
             </div>
+          }
+
+          @if (publication.quotedPublication; as quoted) {
+            <article class="publication-card__quoted" aria-label="Publicação citada">
+              <div class="publication-card__quoted-header">
+                <strong>{{ quoted.authorDisplayName ?? quoted.authorUsername }}</strong>
+                <span>@{{ quoted.authorUsername }}</span>
+              </div>
+              @if (quoted.text) {
+                <p class="publication-card__quoted-text" [innerHTML]="quoted.text | linkifyText"></p>
+              }
+              @if (quoted.imageUrl) {
+                <img [src]="quoted.imageUrl" alt="" class="publication-card__quoted-media" loading="lazy" />
+              }
+              @if (quoted.videoUrl) {
+                <video [src]="quoted.videoUrl" class="publication-card__quoted-media" controls preload="metadata"></video>
+              }
+            </article>
           }
         }
       </div>
@@ -285,5 +303,13 @@
     targetType="publication"
     [targetId]="publication.id"
     (closed)="reportDialogOpen = false"
+  />
+}
+
+@if (repostDialogOpen) {
+  <app-repost-dialog
+    [publication]="publication"
+    (closed)="handleRepostDialogClose()"
+    (confirmed)="handleRepostConfirm($event)"
   />
 }

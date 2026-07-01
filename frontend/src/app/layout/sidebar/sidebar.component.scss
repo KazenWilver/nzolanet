@@ -380,7 +380,9 @@
     z-index: var(--z-mobile-nav, 1000);
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-evenly;
+    gap: 2px;
+    padding-inline: var(--spacing-xs);
     min-height: var(--height-mobile-nav);
     padding: var(--spacing-sm) var(--spacing-md);
     padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 0px));
@@ -395,8 +397,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--border-radius-full);
     color: var(--color-text-primary);
     text-decoration: none;

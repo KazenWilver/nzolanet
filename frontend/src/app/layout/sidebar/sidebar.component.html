@@ -151,9 +151,24 @@
       <span class="sidebar__icon" data-icon="search" aria-hidden="true"></span>
       <span class="sr-only">Pesquisar</span>
     </a>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/messages" [class.sidebar__mobile-link--active]="isActive('/messages')" aria-label="Mensagens">
+      <span class="sidebar__icon-wrap">
+        <span class="sidebar__icon" data-icon="mail" aria-hidden="true"></span>
+        @if (unreadMessagesCount > 0) {
+          <span class="sidebar__badge" aria-label="{{ unreadMessagesCount }} mensagens por ler">
+            {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
+          </span>
+        }
+      </span>
+      <span class="sr-only">Mensagens</span>
+    </a>
     <button type="button" class="sidebar__mobile-publish" appPressScale (click)="handleOpenPublishModal()" aria-label="Publicar">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
     </button>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/bookmarks" [class.sidebar__mobile-link--active]="isActive('/bookmarks')" aria-label="Guardados">
+      <span class="sidebar__icon" data-icon="bookmark" aria-hidden="true"></span>
+      <span class="sr-only">Guardados</span>
+    </a>
     <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')" aria-label="Notificações">
       <span class="sidebar__icon-wrap">
         <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>

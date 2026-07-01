@@ -74,7 +74,14 @@ export class AuthService {
 
   forgotPassword(email: string): Observable<ForgotPasswordResponse> {
     const dto: ForgotPasswordDto = { email }
-    return this.http.post<ForgotPasswordResponse>(`${this.baseUrl}/forgot-password`, dto)
+    return this.http
+      .post<{ message: string; devResetLink?: string }>(`${this.baseUrl}/forgot-password`, dto)
+      .pipe(
+        map(response => ({
+          message: response.message,
+          devResetLink: response.devResetLink
+        }))
+      )
   }
 
   resetPassword(dto: ResetPasswordDto): Observable<{ message: string }> {

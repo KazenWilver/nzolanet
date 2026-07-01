@@ -1,0 +1,141 @@
+<app-modal [open]="true" title="Informações do grupo" (closed)="handleClose()">
+  @if (loading) {
+    <div class="group-info__loading">
+      <app-loading-spinner tamanho="md" />
+    </div>
+  } @else if (errorMessage) {
+    <p class="group-info__error" role="alert">{{ errorMessage }}</p>
+  } @else if (detail) {
+    <section class="group-info__profile">
+      <label class="group-info__photo" aria-label="Alterar fotografia do grupo">
+        <input type="file" accept="image/*" hidden (change)="handlePhotoSelected($event)" />
+        @if (groupPhotoUrl) {
+          <img [src]="groupPhotoUrl" alt="" class="group-info__photo-image" />
+        } @else {
+          <span class="group-info__photo-placeholder">{{ (detail.title ?? 'G').charAt(0) }}</span>
+        }
+        <span class="group-info__photo-edit">Alterar foto</span>
+      </label>
+
+      @if (pendingPhoto) {
+        <div class="group-info__photo-actions" role="group" aria-label="Confirmar fotografia">
+          <button
+            type="button"
+            class="group-info__photo-btn group-info__photo-btn--confirm"
+            [disabled]="photoUploading"
+            (click)="handleConfirmPhoto()"
+          >
+            @if (photoUploading) {
+              <app-loading-spinner tamanho="sm" />
+            } @else {
+              Confirmar foto
+            }
+          </button>
+          <button
+            type="button"
+            class="group-info__photo-btn group-info__photo-btn--cancel"
+            [disabled]="photoUploading"
+            (click)="handleCancelPhoto()"
+          >
+            Cancelar
+          </button>
+        </div>
+      }
+
+      @if (photoError) {
+        <p class="group-info__error" role="alert">{{ photoError }}</p>
+      }
+
+      <label class="group-info__field">
+        <span>Nome do grupo</span>
+        <input type="text" [(ngModel)]="editTitle" maxlength="100" />
+      </label>
+
+      <label class="group-info__field">
+        <span>Descrição</span>
+        <textarea
+          rows="3"
+          maxlength="500"
+          [(ngModel)]="editDescription"
+          placeholder="Descreve o grupo (opcional)"
+        ></textarea>
+      </label>
+
+      @if (saveError) {
+        <p class="group-info__error" role="alert">{{ saveError }}</p>
+      }
+
+      <button
+        type="button"
+        class="group-info__save-btn"
+        [disabled]="saving"
+        (click)="handleSaveGroupInfo()"
+      >
+        @if (saving) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          Guardar alterações
+        }
+      </button>
+    </section>
+
+    <section class="group-info__members" aria-label="Participantes">
+      <h3>Participantes ({{ detail.participants.length }})</h3>
+      <ul class="group-info__member-list" role="list">
+        @for (participant of detail.participants; track trackParticipant($index, participant)) {
+          <li class="group-info__member-item">
+            <app-avatar [src]="participant.photoUrl" [username]="participant.username" size="sm" />
+            <span class="group-info__member-meta">
+              <strong>{{ getParticipantName(participant) }}</strong>
+              <span>@{{ participant.username }}</span>
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="group-info__add" aria-label="Adicionar membros">
+      <h3>Adicionar membros</h3>
+      <label class="group-info__search">
+        <input
+          type="search"
+          [(ngModel)]="addMemberQuery"
+          (ngModelChange)="handleAddMemberSearchChange()"
+          placeholder="Pesquisar por nome ou @utilizador"
+        />
+      </label>
+
+      @if (addMemberLoading) {
+        <div class="group-info__loading group-info__loading--compact">
+          <app-loading-spinner tamanho="sm" />
+        </div>
+      } @else if (addMemberError) {
+        <p class="group-info__error" role="alert">{{ addMemberError }}</p>
+      } @else if (addMemberQuery.trim().length >= 2 && addMemberResults.length === 0) {
+        <p class="group-info__hint">Nenhum utilizador encontrado.</p>
+      } @else {
+        <ul class="group-info__member-list" role="list">
+          @for (user of addMemberResults; track trackUser($index, user)) {
+            <li>
+              <button
+                type="button"
+                class="group-info__add-btn"
+                [disabled]="addingMemberId === user.id"
+                (click)="handleAddMember(user)"
+              >
+                <app-avatar [src]="user.profilePhotoUrl" [username]="user.username" size="sm" />
+                <span class="group-info__member-meta">
+                  <strong>{{ user.displayName ?? user.username }}</strong>
+                  <span>@{{ user.username }}</span>
+                </span>
+                <span class="group-info__add-label">
+                  {{ addingMemberId === user.id ? 'A adicionar…' : 'Adicionar' }}
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</app-modal>

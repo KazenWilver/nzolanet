@@ -244,6 +244,41 @@
   background-color: var(--color-surface-secondary);
 }
 
+.publication-card__quoted {
+  margin-top: var(--spacing-sm);
+  border: 1px solid var(--color-border-muted);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publication-card__quoted-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  font-size: var(--font-size-sm);
+}
+
+.publication-card__quoted-header span {
+  color: var(--color-text-secondary);
+}
+
+.publication-card__quoted-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.publication-card__quoted-media {
+  width: 100%;
+  border-radius: 12px;
+  max-height: 240px;
+  object-fit: cover;
+}
+
 .publication-card__delete-error {
   margin: var(--spacing-sm) 0;
   color: var(--color-danger);

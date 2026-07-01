@@ -100,10 +100,28 @@ export class PublicationService {
   }
 
   toggleRepost(id: string): Observable<{ hasReposted: boolean; repostsCount: number }> {
-    return this.http.post<{ hasReposted: boolean; repostsCount: number }>(
-      `${this.baseUrl}/${id}/repost`,
-      {}
-    );
+    return this.repost(id)
+  }
+
+  repost(
+    id: string,
+    text = ''
+  ): Observable<{ hasReposted: boolean; repostsCount: number; quotedPublication?: Publication }> {
+    return this.http
+      .post<{
+        hasReposted: boolean
+        repostsCount: number
+        quotedPublication?: BackendPublicationDto
+      }>(`${this.baseUrl}/${id}/repost`, { text: text || null })
+      .pipe(
+        map(response => ({
+          hasReposted: response.hasReposted,
+          repostsCount: response.repostsCount,
+          quotedPublication: response.quotedPublication
+            ? this.mapPublication(response.quotedPublication)
+            : undefined
+        }))
+      )
   }
 
   bookmark(id: string): Observable<void> {
@@ -152,7 +170,10 @@ export class PublicationService {
       bookmarksCount: dto.bookmarksCount ?? 0,
       hasLiked: dto.hasLiked ?? false,
       hasReposted: dto.hasReposted ?? false,
-      hasBookmarked: dto.hasBookmarked ?? false
+      hasBookmarked: dto.hasBookmarked ?? false,
+      quotedPublication: dto.quotedPublication
+        ? this.mapPublication(dto.quotedPublication)
+        : undefined
     };
   }
 }

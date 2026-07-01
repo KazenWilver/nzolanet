@@ -15,6 +15,7 @@ import { AvatarComponent } from '../avatar/avatar.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
+import { RepostDialogComponent } from '../repost-dialog/repost-dialog.component';
 import { TPipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
@@ -30,6 +31,7 @@ import { TPipe } from '../../../core/i18n/translate.pipe';
     ConfirmDialogComponent,
     LoadingSpinnerComponent,
     ReportDialogComponent,
+    RepostDialogComponent,
     TPipe
   ],
   templateUrl: './publication-card.component.html',
@@ -70,6 +72,7 @@ export class PublicationCardComponent implements OnChanges {
   menuTop = 0;
   menuLeft = 0;
   reportDialogOpen = false;
+  repostDialogOpen = false;
 
   @ViewChild('cardVideo') cardVideoRef?: ElementRef<HTMLVideoElement>;
   @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
@@ -318,20 +321,26 @@ export class PublicationCardComponent implements OnChanges {
     if (this.repostingInProgress) {
       return
     }
+    this.repostError = ''
+    this.repostDialogOpen = true
+  }
+
+  handleRepostDialogClose(): void {
+    this.repostDialogOpen = false
+  }
+
+  handleRepostConfirm(quoteText: string): void {
+    if (this.repostingInProgress) {
+      return
+    }
 
     const previousReposted = this.publication.hasReposted ?? false
     const previousCount = this.publication.repostsCount ?? 0
-
-    this.publication = {
-      ...this.publication,
-      hasReposted: !previousReposted,
-      repostsCount: previousReposted ? Math.max(0, previousCount - 1) : previousCount + 1
-    }
+    this.repostingInProgress = true
     this.repostError = ''
 
-    this.repostingInProgress = true
     this.publicationService
-      .toggleRepost(this.publication.id)
+      .repost(this.publication.id, quoteText)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => {
@@ -341,6 +350,10 @@ export class PublicationCardComponent implements OnChanges {
             repostsCount: result.repostsCount
           }
           this.repostingInProgress = false
+          this.repostDialogOpen = false
+          if (result.quotedPublication) {
+            this.updated.emit(result.quotedPublication)
+          }
         },
         error: () => {
           this.publication = {
@@ -350,6 +363,7 @@ export class PublicationCardComponent implements OnChanges {
           }
           this.repostError = 'Não foi possível repartilhar.'
           this.repostingInProgress = false
+          this.repostDialogOpen = false
           setTimeout(() => {
             this.repostError = ''
           }, 4000)

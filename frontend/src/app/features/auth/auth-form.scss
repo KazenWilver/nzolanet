@@ -28,6 +28,29 @@
   line-height: var(--line-height-relaxed);
 }
 
+.auth-form__brand {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+
+  @media (max-width: 768px) {
+    display: inline-flex;
+  }
+}
+
+.auth-form__brand-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.auth-form__brand-name {
+  font-family: var(--font-family-extended);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-text-primary);
+}
+
 .auth-form__error {
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
