@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
 
 .followers-modal__loading {
   display: flex;
@@ -135,17 +136,11 @@
 }
 
 .followers-modal__retry {
-  background-color: vars.$color-primary;
   color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 14px;
   border-radius: 9999px;
   padding: 8px 20px;
-  border: none;
   cursor: pointer;
-  transition: background-color var(--transition-base);
-
-  &:hover {
-    background-color: vars.$color-primary-hover;
-  }
+  @include mixins.brand-gradient-button;
 }

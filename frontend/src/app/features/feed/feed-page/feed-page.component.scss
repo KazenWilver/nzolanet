@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
 
 .feed-page {
   background-color: vars.$color-background;
@@ -76,7 +77,7 @@
       width: 56px;
       height: 4px;
       border-radius: var(--border-radius-full);
-      background-color: var(--color-accent);
+      @include mixins.brand-gradient-indicator;
       transform: translateX(-50%);
       transition: transform 0.2s ease, width 0.2s ease;
     }
@@ -114,19 +115,14 @@
 }
 
 .feed-page__retry {
-  background-color: vars.$color-primary;
   color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 14px;
   border-radius: 9999px;
   padding: 8px 24px;
-  border: none;
   cursor: pointer;
-  transition: background-color var(--transition-base), transform var(--transition-fast);
-
-  &:hover {
-    background-color: vars.$color-primary-hover;
-  }
+  transition: transform var(--transition-fast);
+  @include mixins.brand-gradient-button;
 
   &:focus-visible {
     outline: 2px solid var(--color-accent);

@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
 
 .profile-page {
   background-color: vars.$color-background;
@@ -12,7 +13,7 @@
 
 .profile-page__cover {
   height: 200px;
-  background-color: var(--color-bg-cover);
+  background: var(--gradient-brand);
   overflow: hidden;
   position: relative;
 
@@ -225,7 +226,7 @@
       width: 56px;
       height: 4px;
       border-radius: 9999px;
-      background-color: var(--color-accent);
+      @include mixins.brand-gradient-indicator;
       transition: width var(--transition-base), transform var(--transition-base);
     }
   }
@@ -270,19 +271,13 @@
 }
 
 .profile-page__retry {
-  background-color: vars.$color-primary;
   color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 14px;
   border-radius: 9999px;
   padding: 8px 24px;
-  border: none;
   cursor: pointer;
-  transition: background-color var(--transition-base);
-
-  &:hover {
-    background-color: vars.$color-primary-hover;
-  }
+  @include mixins.brand-gradient-button;
 
   &:focus-visible {
     outline: 2px solid var(--color-accent);

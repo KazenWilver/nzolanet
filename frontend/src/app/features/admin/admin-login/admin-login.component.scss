@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
 
 .admin-login {
   background-color: vars.$color-bg-canvas;
@@ -125,27 +126,15 @@
 }
 
 .admin-login__btn {
-  background-color: vars.$color-primary;
   color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 15px;
   border-radius: 9999px;
   padding: 12px 24px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
   width: 100%;
   margin-top: 8px;
   box-sizing: border-box;
-
-  &:hover:not(:disabled) {
-    background-color: vars.$color-primary-hover;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  @include mixins.brand-gradient-button;
 }
 
 .admin-login__footer {

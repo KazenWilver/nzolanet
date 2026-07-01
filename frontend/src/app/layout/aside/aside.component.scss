@@ -98,8 +98,11 @@ body.dark-theme .aside__section {
   min-width: 1.5rem;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #94a3b8;
   line-height: 1.35;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .aside__trend-body {

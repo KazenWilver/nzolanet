@@ -1,5 +1,5 @@
 @use '../../../styles/variables' as vars;
-@use '../../../../styles/mixins' as mixins;
+@use '../../../styles/mixins' as mixins;
 
 .thread-modal {
   position: fixed;
@@ -495,9 +495,9 @@
   padding: 8px 18px;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
-  background-color: var(--color-accent);
   color: var(--color-text-inverse);
   cursor: pointer;
+  @include mixins.brand-gradient-button;
 
   &:disabled {
     opacity: 0.5;

@@ -1,4 +1,5 @@
 @use '../../styles/variables' as vars;
+@use '../../styles/mixins' as mixins;
 
 .notifications-page {
   background-color: var(--color-bg-primary);
@@ -26,14 +27,14 @@
   border: none;
   border-radius: var(--border-radius-full);
   background: transparent;
-  color: var(--color-accent);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: background-color var(--transition-base);
+  @include mixins.brand-gradient-text;
 
   &:hover:not(:disabled) {
-    background-color: var(--color-bg-hover);
+    background: var(--gradient-brand-subtle);
   }
 
   &:disabled {
@@ -62,17 +63,10 @@
 
 .notifications-page__retry {
   padding: var(--spacing-sm) var(--spacing-xl);
-  border: none;
   border-radius: var(--border-radius-full);
-  background-color: var(--color-accent);
-  color: var(--color-text-inverse);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: background-color var(--transition-base);
-
-  &:hover {
-    background-color: var(--color-accent-hover);
-  }
+  @include mixins.brand-gradient-button;
 }
 
 .notifications-page__list {
@@ -197,12 +191,7 @@
   }
 
   &--approve {
-    background-color: var(--color-accent);
-    color: var(--color-text-inverse);
-
-    &:hover:not(:disabled) {
-      background-color: var(--color-accent-hover);
-    }
+    @include mixins.brand-gradient-button;
   }
 
   &--reject {

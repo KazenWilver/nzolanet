@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .report-dialog__overlay {
   position: fixed;
   inset: 0;
@@ -108,8 +110,8 @@
 
 .report-dialog__btn--primary {
   border: none;
-  background: var(--color-accent);
   color: #fff;
+  @include mixins.brand-gradient-button;
 }
 
 .report-dialog__btn:disabled {

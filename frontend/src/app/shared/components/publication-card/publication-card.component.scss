@@ -1,5 +1,5 @@
-@use '../../../../styles/mixins' as mixins;
 @use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
 
 .publication-card {
   display: block;
@@ -329,11 +329,11 @@
 }
 
 .publication-card__btn-primary {
-  background-color: vars.$color-primary;
   color: var(--color-text-inverse);
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  @include mixins.brand-gradient-button;
 
   &:disabled {
     opacity: 0.5;

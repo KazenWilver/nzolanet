@@ -95,3 +95,50 @@
     @content;
   }
 }
+
+@mixin brand-gradient-bg {
+  background: var(--gradient-brand);
+}
+
+@mixin brand-gradient-indicator {
+  background: var(--gradient-brand);
+  border-radius: var(--border-radius-full);
+}
+
+@mixin brand-gradient-button {
+  @include brand-gradient-bg;
+  color: var(--color-text-on-accent);
+  border: none;
+  transition:
+    filter var(--transition-base),
+    opacity var(--transition-base),
+    background var(--transition-base);
+
+  &:hover:not(:disabled) {
+    background: var(--gradient-brand-hover);
+    filter: brightness(1.04);
+  }
+
+  &:active:not(:disabled) {
+    filter: brightness(0.96);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+@mixin brand-gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@mixin brand-gradient-icon {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

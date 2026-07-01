@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .sidebar {
   position: relative;
 }
@@ -70,10 +72,12 @@
   }
 
   &--active {
-    color: var(--color-accent);
+    .sidebar__label {
+      @include mixins.brand-gradient-text;
+    }
 
     .sidebar__icon {
-      color: var(--color-accent);
+      background: var(--gradient-brand);
     }
   }
 
@@ -194,18 +198,11 @@
   margin-top: var(--spacing-md);
   min-height: 52px;
   padding: 0 24px;
-  border: none;
   border-radius: var(--border-radius-full);
-  background-color: var(--color-accent);
-  color: var(--color-text-inverse);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: filter var(--transition-base);
-
-  &:hover {
-    filter: brightness(0.92);
-  }
+  @include mixins.brand-gradient-button;
 
   @media (max-width: 988px) {
     width: 52px;
@@ -421,12 +418,12 @@
     }
 
     &--active {
-      color: var(--color-accent);
+      @include mixins.brand-gradient-text;
     }
   }
 
   .sidebar__mobile-publish {
-    background-color: var(--color-accent);
+    @include mixins.brand-gradient-button;
     color: var(--color-text-inverse);
   }
 }

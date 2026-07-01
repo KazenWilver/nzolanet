@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .repost-dialog__overlay {
   position: fixed;
   inset: 0;
@@ -115,8 +117,8 @@
 
 .repost-dialog__btn--primary {
   border: none;
-  background: var(--color-accent);
   color: #fff;
+  @include mixins.brand-gradient-button;
 }
 
 .repost-dialog__btn:disabled {

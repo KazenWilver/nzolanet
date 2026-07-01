@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .group-info__loading {
   display: flex;
   justify-content: center;
@@ -46,7 +48,7 @@
 .group-info__photo-placeholder {
   display: grid;
   place-items: center;
-  background: var(--color-accent);
+  background: var(--gradient-brand);
   color: #fff;
   font-size: 2rem;
   font-weight: 700;

@@ -1,0 +1,3 @@
+// Re-exporta mixins do design system para componentes que importam de app/styles/
+@forward '../../styles/mixins';
+@use '../../styles/mixins' as *;

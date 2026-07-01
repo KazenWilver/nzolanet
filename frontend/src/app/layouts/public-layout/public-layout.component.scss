@@ -56,7 +56,7 @@
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: #6366f1;
+  background: var(--gradient-brand);
 
   @media (min-width: 900px) {
     display: block;
@@ -76,8 +76,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 14, 23, 0.15) 0%, rgba(15, 14, 23, 0.45) 55%, rgba(15, 14, 23, 0.72) 100%),
-    rgba(99, 102, 241, 0.18);
+    linear-gradient(180deg, rgba(15, 14, 23, 0.12) 0%, rgba(15, 14, 23, 0.42) 55%, rgba(15, 14, 23, 0.72) 100%),
+    linear-gradient(135deg, rgba(124, 58, 237, 0.35) 0%, rgba(99, 102, 241, 0.2) 45%, rgba(59, 130, 246, 0.28) 100%);
 }
 
 .layout-publico__hero-copy {
@@ -122,6 +122,16 @@ body.dark-theme .layout-publico__cartao {
 }
 
 @media (max-width: 899px) {
+  .layout-publico {
+    background: linear-gradient(
+      180deg,
+      #7c3aed 0%,
+      #6366f1 140px,
+      #f8f9ff 320px,
+      #ffffff 100%
+    );
+  }
+
   .layout-publico__formulario {
     min-height: 100vh;
     align-items: center;

@@ -71,6 +71,20 @@
   --color-text-on-accent: #ffffff;
   --color-text-link: #06B6D4;
 
+  // Marca — degradê do logótipo (violeta → índigo → azul)
+  --color-brand-violet: #7C3AED;
+  --color-brand-indigo: #6366F1;
+  --color-brand-blue: #3B82F6;
+  --gradient-brand: linear-gradient(135deg, #7C3AED 0%, #6366F1 45%, #3B82F6 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #6D28D9 0%, #4F46E5 45%, #2563EB 100%);
+  --gradient-brand-vertical: linear-gradient(180deg, #7C3AED 0%, #6366F1 50%, #3B82F6 100%);
+  --gradient-brand-subtle: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.14) 0%,
+    rgba(99, 102, 241, 0.1) 45%,
+    rgba(59, 130, 246, 0.14) 100%
+  );
+
   --color-accent: #6366F1;
   --color-accent-hover: #4F46E5;
   --color-accent-blue: #6366F1;
@@ -89,7 +103,7 @@
   --color-border-muted: #E5E7EB;
   --color-border-light: #cfd9de;
   --color-surface-secondary: #F3F4F6;
-  --chat-bubble-mine: #6366F1;
+  --chat-bubble-mine: linear-gradient(135deg, #7C3AED 0%, #6366F1 45%, #3B82F6 100%);
   --chat-bubble-theirs: #F3F4F6;
   --color-link: #06B6D4;
   --color-line-reply: #cfd9de;
@@ -259,7 +273,7 @@ body.dark-theme {
   --color-border-muted: #374151;
   --color-border-light: #333639;
   --color-surface-secondary: #1A1926;
-  --chat-bubble-mine: #6366F1;
+  --chat-bubble-mine: linear-gradient(135deg, #7C3AED 0%, #6366F1 45%, #3B82F6 100%);
   --chat-bubble-theirs: #2A2938;
   --color-link: #06B6D4;
   --color-success: #10B981;

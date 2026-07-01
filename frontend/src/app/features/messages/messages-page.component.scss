@@ -1,4 +1,6 @@
-﻿:host {
+﻿@use '../../../styles/mixins' as mixins;
+
+:host {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -176,7 +178,7 @@
   width: 10px;
   height: 10px;
   border-radius: var(--border-radius-full);
-  background: var(--color-accent);
+  background: var(--gradient-brand);
 }
 
 .messages-page__stage {
@@ -1208,16 +1210,10 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: none;
   border-radius: var(--border-radius-full);
-  background: var(--color-accent);
   color: var(--color-text-on-accent, #ffffff);
   cursor: pointer;
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  @include mixins.brand-gradient-button;
 }
 
 .messages-page__loading,

@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .topbar {
   display: none;
 }
@@ -136,7 +138,7 @@
         width: 56px;
         height: 4px;
         border-radius: var(--border-radius-full);
-        background-color: var(--color-accent);
+        @include mixins.brand-gradient-indicator;
         transform: translateX(-50%);
         transition: transform 0.2s ease, width 0.2s ease;
       }

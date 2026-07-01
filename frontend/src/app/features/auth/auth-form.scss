@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -174,23 +176,11 @@
   width: 100%;
   min-height: 52px;
   padding: 14px 20px;
-  border: none;
   border-radius: 12px;
-  background-color: var(--color-accent);
-  color: var(--color-text-inverse);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: filter var(--transition-base), opacity var(--transition-base);
-
-  &:hover:not(:disabled) {
-    filter: brightness(0.92);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  @include mixins.brand-gradient-button;
 }
 
 .auth-form__footer {
