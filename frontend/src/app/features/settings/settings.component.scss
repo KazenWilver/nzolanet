@@ -346,3 +346,33 @@
     color: var(--color-text-inverse);
   }
 }
+
+.settings__language-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.settings__language-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid vars.$color-border;
+  background: transparent;
+  color: vars.$color-text;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-bg-hover);
+  }
+
+  &--active {
+    border-color: vars.$color-primary;
+    background: rgba(29, 155, 240, 0.1);
+  }
+}

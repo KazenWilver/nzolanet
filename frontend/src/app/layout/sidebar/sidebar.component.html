@@ -21,7 +21,7 @@
                 </span>
               }
             </span>
-            <span class="sidebar__label">{{ item.label }}</span>
+            <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
           </a>
         } @else if (isMessagesItem(item)) {
           <a
@@ -37,7 +37,7 @@
                 </span>
               }
             </span>
-            <span class="sidebar__label">{{ item.label }}</span>
+            <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
           </a>
         } @else {
           <a
@@ -46,7 +46,7 @@
             [routerLink]="item.route"
           >
             <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
-            <span class="sidebar__label">{{ item.label }}</span>
+            <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
           </a>
         }
       }
@@ -57,7 +57,7 @@
         [routerLink]="profileRoute"
       >
         <span class="sidebar__icon" data-icon="user" aria-hidden="true"></span>
-        <span class="sidebar__label">Perfil</span>
+        <span class="sidebar__label">{{ 'nav.profile' | t }}</span>
       </a>
 
       @for (item of secondaryNavItems; track item.id) {
@@ -67,7 +67,7 @@
           [routerLink]="item.route"
         >
           <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
-          <span class="sidebar__label">{{ item.label }}</span>
+          <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
         </a>
       }
 
@@ -75,16 +75,16 @@
         type="button"
         class="sidebar__link sidebar__link--theme"
         (click)="handleToggleTheme()"
-        [attr.aria-label]="themeService.isDarkMode() ? 'Activar modo claro' : 'Activar modo escuro'"
+        [attr.aria-label]="themeService.isDarkMode() ? ('nav.themeLight' | t) : ('nav.themeDark' | t)"
       >
         <span class="sidebar__icon" [attr.data-icon]="themeService.isDarkMode() ? 'sun' : 'moon'" aria-hidden="true"></span>
-        <span class="sidebar__label">{{ themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro' }}</span>
+        <span class="sidebar__label">{{ themeService.isDarkMode() ? ('nav.themeLight' | t) : ('nav.themeDark' | t) }}</span>
       </button>
     </nav>
 
     <button type="button" class="sidebar__publish" (click)="handleOpenPublishModal()" aria-label="Publicar nova publicação">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
-      <span class="sidebar__publish-label">Publicar</span>
+      <span class="sidebar__publish-label">{{ 'nav.publish' | t }}</span>
     </button>
 
     @if (currentUser) {
@@ -128,13 +128,13 @@
               </div>
             </div>
             <a class="sidebar__account-menu-item" [routerLink]="profileRoute" role="menuitem" (click)="accountMenuOpen = false">
-              Ver perfil
+              {{ 'nav.profile' | t }}
             </a>
             <a class="sidebar__account-menu-item" routerLink="/settings" role="menuitem" (click)="accountMenuOpen = false">
-              Definições
+              {{ 'nav.settings' | t }}
             </a>
             <button type="button" class="sidebar__account-menu-item sidebar__account-menu-item--danger" role="menuitem" (click)="handleLogout()">
-              Terminar sessão
+              {{ 'common.logout' | t }}
             </button>
           </nav>
         }

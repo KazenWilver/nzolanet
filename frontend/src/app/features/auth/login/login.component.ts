@@ -6,17 +6,20 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { HttpErrorResponse } from '@angular/common/http';
+import { TPipe } from '../../../core/i18n/translate.pipe';
+import { LocaleService } from '../../../core/i18n/locale.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LoadingSpinnerComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LoadingSpinnerComponent, TPipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly localeService = inject(LocaleService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -41,7 +44,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.sessionExpiredMessage = params.get('sessionExpired') === '1'
-        ? 'A tua sessão expirou. Inicia sessão novamente.'
+        ? this.localeService.translate('auth.sessionExpired')
         : '';
     });
   }
@@ -69,8 +72,8 @@ export class LoginComponent implements OnInit {
           this.isLoading = false;
           this.errorMessage =
             error.status === 401
-              ? 'Credenciais inválidas. Verifica o email e a palavra-passe.'
-              : 'Não foi possível entrar. Tenta novamente.';
+              ? this.localeService.translate('auth.invalidCredentials')
+              : this.localeService.translate('auth.loginFailed');
         }
       });
   }
@@ -93,12 +96,12 @@ export class LoginComponent implements OnInit {
         next: () => {
           this.isForgotLoading = false;
           this.forgotSuccessMessage =
-            'Se o email existir, receberás instruções para recuperar a palavra-passe.';
+            this.localeService.translate('auth.recoverSent');
         },
         error: () => {
           this.isForgotLoading = false;
           this.forgotSuccessMessage =
-            'Se o email existir, receberás instruções para recuperar a palavra-passe.';
+            this.localeService.translate('auth.recoverSent');
         }
       });
   }
@@ -135,10 +138,10 @@ export class LoginComponent implements OnInit {
       return '';
     }
     if (control.errors['required']) {
-      return 'O email é obrigatório.';
+      return this.localeService.translate('auth.emailRequired');
     }
     if (control.errors['email']) {
-      return 'Introduz um email válido.';
+      return this.localeService.translate('auth.emailInvalid');
     }
     return '';
   }
@@ -149,10 +152,10 @@ export class LoginComponent implements OnInit {
       return '';
     }
     if (control.errors['required']) {
-      return 'A palavra-passe é obrigatória.';
+      return this.localeService.translate('auth.passwordRequired');
     }
     if (control.errors['minlength']) {
-      return 'Mínimo de 6 caracteres.';
+      return this.localeService.translate('auth.passwordMin');
     }
     return '';
   }

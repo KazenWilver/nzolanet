@@ -10,11 +10,13 @@ import { PublishModalService } from '../../core/services/publish-modal.service';
 import { ConversationService } from '../../core/services/conversation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
+import { TPipe } from '../../core/i18n/translate.pipe';
 
 interface SidebarLinkItem {
   type: 'link';
   id: string;
   label: string;
+  labelKey?: string;
   route: string;
   exact?: boolean;
   icon: string;
@@ -24,6 +26,7 @@ interface SidebarPlaceholderItem {
   type: 'placeholder';
   id: string;
   label: string;
+  labelKey?: string;
   route: string;
   icon: string;
 }
@@ -32,6 +35,7 @@ interface SidebarNotificationsItem {
   type: 'notifications';
   id: string;
   label: string;
+  labelKey?: string;
   route: string;
   icon: string;
 }
@@ -40,6 +44,7 @@ interface SidebarMessagesItem {
   type: 'messages';
   id: string;
   label: string;
+  labelKey?: string;
   route: string;
   icon: string;
 }
@@ -49,7 +54,7 @@ type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem | SidebarNotificatio
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, AvatarComponent, PressScaleDirective],
+  imports: [CommonModule, RouterModule, AvatarComponent, PressScaleDirective, TPipe],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -68,15 +73,15 @@ export class SidebarComponent {
   accountMenuOpen = false;
 
   readonly primaryNavItems: SidebarItem[] = [
-    { type: 'link', id: 'feed', label: 'Feed', route: '/feed', exact: true, icon: 'home' },
-    { type: 'link', id: 'search', label: 'Pesquisar', route: '/search', icon: 'search' },
-    { type: 'notifications', id: 'notifications', label: 'Notificações', route: '/notifications', icon: 'bell' },
-    { type: 'messages', id: 'messages', label: 'Mensagens', route: '/messages', icon: 'mail' },
-    { type: 'link', id: 'bookmarks', label: 'Guardados', route: '/bookmarks', icon: 'bookmark' }
+    { type: 'link', id: 'feed', label: 'Feed', labelKey: 'nav.feed', route: '/feed', exact: true, icon: 'home' },
+    { type: 'link', id: 'search', label: 'Pesquisar', labelKey: 'nav.search', route: '/search', icon: 'search' },
+    { type: 'notifications', id: 'notifications', label: 'Notificações', labelKey: 'nav.notifications', route: '/notifications', icon: 'bell' },
+    { type: 'messages', id: 'messages', label: 'Mensagens', labelKey: 'nav.messages', route: '/messages', icon: 'mail' },
+    { type: 'link', id: 'bookmarks', label: 'Guardados', labelKey: 'nav.bookmarks', route: '/bookmarks', icon: 'bookmark' }
   ];
 
   readonly secondaryNavItems: SidebarItem[] = [
-    { type: 'link', id: 'settings', label: 'Definições', route: '/settings', icon: 'settings' }
+    { type: 'link', id: 'settings', label: 'Definições', labelKey: 'nav.settings', route: '/settings', icon: 'settings' }
   ];
 
   constructor() {

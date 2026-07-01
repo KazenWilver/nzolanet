@@ -1,6 +1,6 @@
 <section class="settings">
   <header class="settings__header">
-    <h1 class="settings__title">Definições</h1>
+    <h1 class="settings__title">{{ 'settings.title' | t }}</h1>
   </header>
 
   <nav class="settings__nav" aria-label="Secções de definições">
@@ -11,7 +11,7 @@
         [class.settings__nav-item--active]="activeSection === section.id"
         (click)="setSection(section.id)"
       >
-        {{ section.label }}
+        {{ ('settings.' + section.id) | t }}
       </button>
     }
   </nav>
@@ -25,7 +25,7 @@
           [class.settings__sidebar-item--active]="activeSection === section.id"
           (click)="setSection(section.id)"
         >
-          {{ section.label }}
+          {{ ('settings.' + section.id) | t }}
         </button>
       }
     </aside>
@@ -33,7 +33,7 @@
     <div class="settings__content">
       @if (activeSection === 'account' && user) {
         <section class="settings__panel" aria-labelledby="settings-account-title">
-          <h2 id="settings-account-title" class="settings__panel-title">Conta</h2>
+          <h2 id="settings-account-title" class="settings__panel-title">{{ 'settings.account' | t }}</h2>
 
           <label class="settings__field" for="settings-display-name">
             <span class="settings__label">Nome de exibição</span>
@@ -78,7 +78,7 @@
             <p class="settings__message settings__message--error" role="alert">{{ accountError }}</p>
           }
           @if (accountSuccess) {
-            <p class="settings__message settings__message--success" role="status">Alterações guardadas.</p>
+            <p class="settings__message settings__message--success" role="status">{{ 'settings.savedSuccess' | t }}</p>
           }
 
           <button
@@ -90,7 +90,7 @@
             @if (savingAccount) {
               <app-loading-spinner tamanho="sm" />
             } @else {
-              Guardar alterações
+              {{ 'settings.saveChanges' | t }}
             }
           </button>
 
@@ -106,13 +106,13 @@
 
       @if (activeSection === 'privacy' && user) {
         <section class="settings__panel" aria-labelledby="settings-privacy-title">
-          <h2 id="settings-privacy-title" class="settings__panel-title">Privacidade</h2>
+          <h2 id="settings-privacy-title" class="settings__panel-title">{{ 'settings.privacy' | t }}</h2>
 
           <div class="settings__toggle-row">
             <div class="settings__toggle-copy">
-              <h3 class="settings__toggle-title">Conta Privada</h3>
+              <h3 class="settings__toggle-title">{{ 'settings.privacyPrivate' | t }}</h3>
               <p class="settings__toggle-description">
-                Quando activado, apenas os teus seguidores podem ver as tuas publicações.
+                {{ 'settings.privacyDescription' | t }}
               </p>
               @if (privacyError) {
                 <p class="settings__message settings__message--error" role="alert">{{ privacyError }}</p>
@@ -137,10 +137,10 @@
 
       @if (activeSection === 'password') {
         <section class="settings__panel" aria-labelledby="settings-password-title">
-          <h2 id="settings-password-title" class="settings__panel-title">Palavra-passe</h2>
+          <h2 id="settings-password-title" class="settings__panel-title">{{ 'settings.password' | t }}</h2>
 
           <label class="settings__field" for="settings-current-password">
-            <span class="settings__label">Palavra-passe actual</span>
+            <span class="settings__label">{{ 'settings.currentPassword' | t }}</span>
             <input
               id="settings-current-password"
               name="currentPassword"
@@ -151,7 +151,7 @@
           </label>
 
           <label class="settings__field" for="settings-new-password">
-            <span class="settings__label">Nova palavra-passe</span>
+            <span class="settings__label">{{ 'settings.newPassword' | t }}</span>
             <input
               id="settings-new-password"
               name="newPassword"
@@ -163,7 +163,7 @@
           </label>
 
           <label class="settings__field" for="settings-confirm-password">
-            <span class="settings__label">Confirmar nova palavra-passe</span>
+            <span class="settings__label">{{ 'settings.confirmPassword' | t }}</span>
             <input
               id="settings-confirm-password"
               name="confirmNewPassword"
@@ -179,7 +179,7 @@
           }
           @if (passwordSuccess) {
             <p class="settings__message settings__message--success" role="status">
-              Palavra-passe alterada com sucesso.
+              {{ 'settings.passwordChanged' | t }}
             </p>
           }
 
@@ -192,9 +192,30 @@
             @if (savingPassword) {
               <app-loading-spinner tamanho="sm" />
             } @else {
-              Alterar palavra-passe
+              {{ 'settings.changePassword' | t }}
             }
           </button>
+        </section>
+      }
+
+      @if (activeSection === 'language') {
+        <section class="settings__panel" aria-labelledby="settings-language-title">
+          <h2 id="settings-language-title" class="settings__panel-title">{{ 'settings.language' | t }}</h2>
+          <p class="settings__hint">{{ 'settings.languageDescription' | t }}</p>
+          <div class="settings__language-list">
+            @for (locale of localeService.supportedLocales; track locale.code) {
+              <button
+                type="button"
+                class="settings__language-item"
+                [class.settings__language-item--active]="localeService.currentLocale() === locale.code"
+                [disabled]="updatingLocale"
+                (click)="setLocale(locale.code)"
+              >
+                <span>{{ locale.flag }}</span>
+                <span>{{ locale.nativeLabel }}</span>
+              </button>
+            }
+          </div>
         </section>
       }
     </div>

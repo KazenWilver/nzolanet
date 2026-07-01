@@ -12,11 +12,13 @@ import { EnterAnimationDirective } from '../../shared/directives/enter-animation
 import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
 import { RelativeTimeService } from '../../core/services/relative-time.service';
+import { TPipe } from '../../core/i18n/translate.pipe';
+import { LocaleService } from '../../core/i18n/locale.service';
 
 @Component({
   selector: 'app-notifications-page',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, TimeAgoPipe, EnterAnimationDirective, PressScaleDirective],
+  imports: [CommonModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, TimeAgoPipe, EnterAnimationDirective, PressScaleDirective, TPipe],
   templateUrl: './notifications-page.component.html',
   styleUrl: './notifications-page.component.scss'
 })
@@ -25,6 +27,7 @@ export class NotificationsPageComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly localeService = inject(LocaleService);
   readonly relativeTime = inject(RelativeTimeService);
 
   notifications: AppNotification[] = [];
@@ -142,11 +145,11 @@ export class NotificationsPageComponent implements OnInit {
   getMessage(notification: AppNotification): string {
     switch (notification.type) {
       case 'baze':
-        return 'deu baze na tua publicação';
+        return this.localeService.translate('notifications.liked');
       case 'comment':
-        return 'comentou na tua publicação';
+        return this.localeService.translate('notifications.commented');
       case 'follow':
-        return 'começou a seguir-te';
+        return this.localeService.translate('notifications.followed');
       case 'follow_request':
         return 'pediu para te seguir';
       case 'follow_accepted':
@@ -154,7 +157,7 @@ export class NotificationsPageComponent implements OnInit {
       case 'follow_rejected':
         return 'recusou o teu pedido de seguimento';
       case 'message':
-        return 'enviou-te uma mensagem';
+        return this.localeService.translate('notifications.sentMessage');
       default:
         return '';
     }

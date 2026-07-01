@@ -1,5 +1,5 @@
 <section class="notifications-page">
-  <app-page-header title="Notificações" [showBack]="true" />
+  <app-page-header [title]="'notifications.title' | t" [showBack]="true" />
 
   @if (notifications.length > 0) {
     <div class="notifications-page__toolbar">
@@ -13,7 +13,7 @@
         @if (markingAll) {
           <app-loading-spinner tamanho="sm" />
         } @else {
-          Marcar todas como lidas
+          {{ 'notifications.markAllRead' | t }}
         }
       </button>
     </div>
@@ -27,9 +27,9 @@
 
   @if (error) {
     <div class="notifications-page__error">
-      <p>Não foi possível carregar as notificações. Tenta novamente.</p>
+      <p>{{ 'notifications.loadError' | t }}</p>
       <button type="button" class="notifications-page__retry" (click)="loadNotifications()">
-        Tentar novamente
+        {{ 'notifications.retry' | t }}
       </button>
     </div>
   }
@@ -40,7 +40,7 @@
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
       </svg>
-      <p>Ainda não tens notificações.</p>
+      <p>{{ 'notifications.empty' | t }}</p>
     </div>
   }
 
@@ -101,7 +101,7 @@
                 @if (isProcessing(notification)) {
                   <app-loading-spinner tamanho="sm" />
                 } @else {
-                  Aceitar
+                  {{ 'notifications.followRequestApprove' | t }}
                 }
               </button>
               <button
@@ -110,7 +110,7 @@
                 [disabled]="isProcessing(notification)"
                 (click)="handleRejectRequest(notification, $event)"
               >
-                Recusar
+                {{ 'notifications.followRequestReject' | t }}
               </button>
             </div>
           }

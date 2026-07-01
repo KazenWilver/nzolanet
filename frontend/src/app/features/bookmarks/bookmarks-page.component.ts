@@ -7,31 +7,35 @@ import type { Publication } from '../../core/models/publication.model'
 import { PublicationCardComponent } from '../../shared/components/publication-card/publication-card.component'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component'
+import { EnterAnimationDirective } from '../../shared/directives/enter-animation.directive'
+import { TPipe } from '../../core/i18n/translate.pipe'
 
 @Component({
   selector: 'app-bookmarks-page',
   standalone: true,
-  imports: [CommonModule, PublicationCardComponent, LoadingSpinnerComponent, PageHeaderComponent],
+  imports: [CommonModule, PublicationCardComponent, LoadingSpinnerComponent, PageHeaderComponent, EnterAnimationDirective, TPipe],
   template: `
     <section class="bookmarks-page">
-      <app-page-header title="Guardados" [showBack]="true" />
+      <app-page-header [title]="'nav.bookmarks' | t" [showBack]="true" />
 
       @if (loading) {
         <div class="bookmarks-page__loading">
           <app-loading-spinner tamanho="md" />
         </div>
       } @else if (error) {
-        <p class="bookmarks-page__state">Não foi possível carregar os guardados.</p>
+        <p class="bookmarks-page__state">{{ 'errors.generic' | t }}</p>
       } @else if (items.length === 0) {
-        <p class="bookmarks-page__state">Ainda não guardaste nenhuma publicação.</p>
+        <p class="bookmarks-page__state">{{ 'notifications.empty' | t }}</p>
       } @else {
         <div class="bookmarks-page__list">
           @for (item of items; track item.id) {
-            <app-publication-card
-              [publication]="item"
-              [currentUserId]="currentUserId"
-              (deleted)="handleRemoved($event)"
-            />
+            <div appEnterAnimation [enterIndex]="$index">
+              <app-publication-card
+                [publication]="item"
+                [currentUserId]="currentUserId"
+                (deleted)="handleRemoved($event)"
+              />
+            </div>
           }
         </div>
       }
