@@ -138,10 +138,7 @@ public class ConversationService : IConversationService
             ?? throw new InvalidOperationException("Conversa inválida.");
 
         var otherUser = otherParticipant.User;
-        var lastMessage = conversation.Messages
-            .Where(m => !m.IsDeleted)
-            .OrderByDescending(m => m.CreatedAt)
-            .FirstOrDefault();
+        var lastMessage = await _conversationRepository.GetLastMessageAsync(conversation.Id);
 
         var unreadCount = await _conversationRepository.GetUnreadCountForConversationAsync(conversation.Id, userId);
 

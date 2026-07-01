@@ -21,40 +21,44 @@ public class ChatHub : Hub
         _chatRealtimeNotifier = chatRealtimeNotifier;
     }
 
-    public async Task JoinConversation(Guid conversationId)
+    public async Task JoinConversation(string conversationId)
     {
+        var parsedId = ParseConversationId(conversationId);
         var userId = AuthClaimsHelper.GetUserId(Context.User!);
-        var conversation = await _conversationRepository.GetByIdForUserAsync(conversationId, userId);
+        var conversation = await _conversationRepository.GetByIdForUserAsync(parsedId, userId);
 
         if (conversation == null)
         {
             throw new HubException("Conversa não encontrada.");
         }
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, GetGroupName(conversationId));
+        await Groups.AddToGroupAsync(Context.ConnectionId, GetGroupName(parsedId));
     }
 
-    public async Task LeaveConversation(Guid conversationId)
+    public async Task LeaveConversation(string conversationId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, GetGroupName(conversationId));
+        var parsedId = ParseConversationId(conversationId);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, GetGroupName(parsedId));
     }
 
-    public async Task NotifyTyping(Guid conversationId)
+    public async Task NotifyTyping(string conversationId)
     {
+        var parsedId = ParseConversationId(conversationId);
         var userId = AuthClaimsHelper.GetUserId(Context.User!);
-        await EnsureParticipantAsync(userId, conversationId);
+        await EnsureParticipantAsync(userId, parsedId);
 
         var username = Context.User?.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value ?? string.Empty;
-        await _chatRealtimeNotifier.NotifyTypingAsync(conversationId, userId, username, true);
+        await _chatRealtimeNotifier.NotifyTypingAsync(parsedId, userId, username, true);
     }
 
-    public async Task NotifyStoppedTyping(Guid conversationId)
+    public async Task NotifyStoppedTyping(string conversationId)
     {
+        var parsedId = ParseConversationId(conversationId);
         var userId = AuthClaimsHelper.GetUserId(Context.User!);
-        await EnsureParticipantAsync(userId, conversationId);
+        await EnsureParticipantAsync(userId, parsedId);
 
         var username = Context.User?.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value ?? string.Empty;
-        await _chatRealtimeNotifier.NotifyTypingAsync(conversationId, userId, username, false);
+        await _chatRealtimeNotifier.NotifyTypingAsync(parsedId, userId, username, false);
     }
 
     private async Task EnsureParticipantAsync(Guid userId, Guid conversationId)
@@ -64,6 +68,16 @@ public class ChatHub : Hub
         {
             throw new HubException("Conversa não encontrada.");
         }
+    }
+
+    private static Guid ParseConversationId(string conversationId)
+    {
+        if (!Guid.TryParse(conversationId, out var parsedId))
+        {
+            throw new HubException("Identificador de conversa inválido.");
+        }
+
+        return parsedId;
     }
 
     internal static string GetGroupName(Guid conversationId) => $"conversation:{conversationId}";

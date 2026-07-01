@@ -30,6 +30,7 @@ export class ChatRealtimeService {
 
   private connection?: signalR.HubConnection
   private activeConversationId: string | null = null
+  private connectPromise: Promise<void> | null = null
   private readonly connectedSubject = new BehaviorSubject(false)
   private readonly messageSubject = new Subject<ChatMessage>()
   private readonly typingSubject = new Subject<ChatTypingEvent>()
@@ -43,8 +44,8 @@ export class ChatRealtimeService {
       return
     }
 
-    if (this.connection?.state === signalR.HubConnectionState.Connecting) {
-      return
+    if (this.connectPromise) {
+      return this.connectPromise
     }
 
     const token = this.authService.getToken()
@@ -52,11 +53,95 @@ export class ChatRealtimeService {
       return
     }
 
+    this.connectPromise = this.startConnection()
+    try {
+      await this.connectPromise
+    } finally {
+      this.connectPromise = null
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (!this.connection) {
+      return
+    }
+
+    if (this.activeConversationId) {
+      await this.leaveConversation(this.activeConversationId)
+    }
+
+    try {
+      await this.connection.stop()
+    } catch {
+      // Ignorar falhas ao fechar ligação
+    }
+
+    this.connection = undefined
+    this.connectedSubject.next(false)
+  }
+
+  async setActiveConversation(conversationId: string | null): Promise<void> {
+    if (this.activeConversationId === conversationId) {
+      return
+    }
+
+    if (this.activeConversationId) {
+      await this.leaveConversation(this.activeConversationId)
+    }
+
+    this.activeConversationId = conversationId
+
+    if (!conversationId) {
+      return
+    }
+
+    try {
+      await this.connect()
+      await this.joinConversation(conversationId)
+    } catch {
+      // REST continua funcional mesmo sem tempo real
+      this.connectedSubject.next(false)
+    }
+  }
+
+  async notifyTyping(conversationId: string): Promise<void> {
+    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+      return
+    }
+
+    try {
+      await this.connection.invoke('NotifyTyping', conversationId)
+    } catch {
+      // Ignorar falhas pontuais de typing
+    }
+  }
+
+  async notifyStoppedTyping(conversationId: string): Promise<void> {
+    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+      return
+    }
+
+    try {
+      await this.connection.invoke('NotifyStoppedTyping', conversationId)
+    } catch {
+      // Ignorar falhas pontuais de typing
+    }
+  }
+
+  isConnected(): boolean {
+    return this.connection?.state === signalR.HubConnectionState.Connected
+  }
+
+  private async startConnection(): Promise<void> {
+    if (this.connection?.state === signalR.HubConnectionState.Connecting) {
+      return
+    }
+
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(environment.chatHubUrl, {
         accessTokenFactory: () => this.authService.getToken() ?? ''
       })
-      .withAutomaticReconnect()
+      .withAutomaticReconnect([0, 2000, 5000, 10000])
       .build()
 
     this.connection.on('MessageReceived', (payload: BackendMessageBroadcast) => {
@@ -91,59 +176,6 @@ export class ChatRealtimeService {
     }
   }
 
-  async disconnect(): Promise<void> {
-    if (!this.connection) {
-      return
-    }
-
-    if (this.activeConversationId) {
-      await this.leaveConversation(this.activeConversationId)
-    }
-
-    await this.connection.stop()
-    this.connection = undefined
-    this.connectedSubject.next(false)
-  }
-
-  async setActiveConversation(conversationId: string | null): Promise<void> {
-    if (this.activeConversationId === conversationId) {
-      return
-    }
-
-    if (this.activeConversationId) {
-      await this.leaveConversation(this.activeConversationId)
-    }
-
-    this.activeConversationId = conversationId
-
-    if (!conversationId) {
-      return
-    }
-
-    await this.connect()
-    await this.joinConversation(conversationId)
-  }
-
-  async notifyTyping(conversationId: string): Promise<void> {
-    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
-      return
-    }
-
-    await this.connection.invoke('NotifyTyping', conversationId)
-  }
-
-  async notifyStoppedTyping(conversationId: string): Promise<void> {
-    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
-      return
-    }
-
-    await this.connection.invoke('NotifyStoppedTyping', conversationId)
-  }
-
-  isConnected(): boolean {
-    return this.connection?.state === signalR.HubConnectionState.Connected
-  }
-
   private async joinConversation(conversationId: string): Promise<void> {
     if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
       return
@@ -157,6 +189,10 @@ export class ChatRealtimeService {
       return
     }
 
-    await this.connection.invoke('LeaveConversation', conversationId)
+    try {
+      await this.connection.invoke('LeaveConversation', conversationId)
+    } catch {
+      // Ignorar ao sair
+    }
   }
 }

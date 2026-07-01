@@ -13,6 +13,7 @@ public interface IConversationRepository
         Guid conversationId,
         int limit = 50,
         DateTime? before = null);
+    Task<Message?> GetLastMessageAsync(Guid conversationId);
     Task<bool> MarkAsReadAsync(Guid conversationId, Guid userId, DateTime readAt);
     Task<int> GetUnreadCountAsync(Guid userId);
     Task<int> GetUnreadCountForConversationAsync(Guid conversationId, Guid userId);

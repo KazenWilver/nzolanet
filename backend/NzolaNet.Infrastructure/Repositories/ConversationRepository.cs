@@ -20,7 +20,6 @@ public class ConversationRepository : IConversationRepository
             .AsNoTracking()
             .Include(c => c.Participants)
                 .ThenInclude(p => p.User)
-            .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
             .Where(c => c.Participants.Any(p => p.UserId == userId))
             .OrderByDescending(c => c.UpdatedAt)
             .ToListAsync();
@@ -109,6 +108,15 @@ public class ConversationRepository : IConversationRepository
 
         messages.Reverse();
         return messages;
+    }
+
+    public async Task<Message?> GetLastMessageAsync(Guid conversationId)
+    {
+        return await _context.Messages
+            .AsNoTracking()
+            .Where(m => m.ConversationId == conversationId && !m.IsDeleted)
+            .OrderByDescending(m => m.CreatedAt)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<bool> MarkAsReadAsync(Guid conversationId, Guid userId, DateTime readAt)

@@ -71,7 +71,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   })
 
   ngOnInit(): void {
-    void this.chatRealtime.connect()
+    void this.chatRealtime.connect().catch(() => undefined)
     this.loadConversations()
     this.setupRealtimeListeners()
     this.setupFallbackPolling()
@@ -199,6 +199,14 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   handleBackToList(): void {
     void this.router.navigate(['/messages'])
   }
+  handleRetryMessages(): void {
+    if (!this.activeConversation) {
+      return
+    }
+
+    this.openConversation(this.activeConversation)
+  }
+
 
   getConversationDisplayName(conversation: ConversationListItem): string {
     return conversation.otherDisplayName ?? conversation.otherUsername
@@ -335,7 +343,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.messages = []
   }
 
-  private async openConversation(conversation: ConversationListItem): Promise<void> {
+  private openConversation(conversation: ConversationListItem): void {
     if (this.activeConversation?.id === conversation.id && !this.loadingMessages) {
       return
     }
@@ -347,7 +355,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.sendError = ''
     this.typingLabel = ''
 
-    await this.chatRealtime.setActiveConversation(conversation.id)
+    void this.chatRealtime.setActiveConversation(conversation.id)
 
     this.conversationService
       .getMessages(conversation.id)
@@ -356,6 +364,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         next: messages => {
           this.messages = messages
           this.loadingMessages = false
+          this.messagesError = false
           this.scrollMessagesToBottom()
         },
         error: () => {

@@ -132,6 +132,10 @@
         } @else if (messagesError) {
           <div class="messages-page__state messages-page__state--thread">
             <p>Não foi possível carregar as mensagens.</p>
+            <button type="button" class="messages-page__pill-btn" (click)="handleRetryMessages()">
+              Tentar novamente
+            </button>
+
           </div>
         } @else {
           <div #messagesScroll class="messages-page__messages" role="log" aria-live="polite" aria-relevant="additions">
