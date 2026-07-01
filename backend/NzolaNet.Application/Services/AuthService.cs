@@ -8,6 +8,7 @@ using NzolaNet.Application.DTOs.Auth;
 using NzolaNet.Application.DTOs.Users;
 using NzolaNet.Application.Exceptions;
 using NzolaNet.Application.Interfaces;
+using NzolaNet.Application.Services.Fimbu;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
 
@@ -23,6 +24,7 @@ public class AuthService : IAuthService
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
     private readonly IWebHostEnvironment _environment;
+    private readonly IFimbuMoodService _fimbuMoodService;
 
     public AuthService(
         IUserRepository userRepository,
@@ -32,7 +34,8 @@ public class AuthService : IAuthService
         UserManager<User> userManager,
         IEmailService emailService,
         IConfiguration configuration,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment,
+        IFimbuMoodService fimbuMoodService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
@@ -42,6 +45,7 @@ public class AuthService : IAuthService
         _emailService = emailService;
         _configuration = configuration;
         _environment = environment;
+        _fimbuMoodService = fimbuMoodService;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
@@ -72,6 +76,8 @@ public class AuthService : IAuthService
 
         await _userRepository.AddToRoleAsync(user, "User");
 
+        _fimbuMoodService.AssignSessionTrait(user.Id);
+
         var token = await _tokenService.GenerateTokenAsync(user);
         var userResponse = await _userService.GetUserResponseAsync(user.Id, user.Id);
 
@@ -95,6 +101,8 @@ public class AuthService : IAuthService
         {
             throw new InvalidCredentialsException();
         }
+
+        _fimbuMoodService.AssignSessionTrait(user.Id);
 
         var token = await _tokenService.GenerateTokenAsync(user);
         var userResponse = await _userService.GetUserResponseAsync(user.Id, user.Id);

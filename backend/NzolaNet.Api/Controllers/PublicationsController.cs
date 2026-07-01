@@ -211,6 +211,7 @@ public class PublicationsController : ControllerBase
     [Authorize]
     [HttpPost("{publicationId}/comments")]
     [Consumes("multipart/form-data")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> CreateComment(
         Guid publicationId,
         [FromForm] string? text,

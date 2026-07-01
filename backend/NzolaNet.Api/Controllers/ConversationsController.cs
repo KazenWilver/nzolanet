@@ -111,6 +111,7 @@ public class ConversationsController : ControllerBase
 
     [HttpPatch("{id:guid}/group")]
     [Consumes("multipart/form-data")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> UpdateGroup(
         Guid id,
         [FromForm] string? title,
@@ -201,6 +202,7 @@ public class ConversationsController : ControllerBase
 
     [HttpPost("{id:guid}/messages/media")]
     [Consumes("multipart/form-data")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> SendMessageWithMedia(
         Guid id,
         [FromForm] string? text,

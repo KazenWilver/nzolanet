@@ -79,6 +79,7 @@ export class SidebarComponent {
     { type: 'link', id: 'search', label: 'Pesquisar', labelKey: 'nav.search', route: '/search', icon: 'search' },
     { type: 'notifications', id: 'notifications', label: 'Notificações', labelKey: 'nav.notifications', route: '/notifications', icon: 'bell' },
     { type: 'messages', id: 'messages', label: 'Mensagens', labelKey: 'nav.messages', route: '/messages', icon: 'mail' },
+    { type: 'link', id: 'fimbu', label: 'Fimbu', labelKey: 'nav.fimbu', route: '/fimbu', icon: 'sparkles' },
     { type: 'link', id: 'bookmarks', label: 'Guardados', labelKey: 'nav.bookmarks', route: '/bookmarks', icon: 'bookmark' }
   ];
 

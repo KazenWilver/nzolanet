@@ -93,6 +93,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/messages/messages-page.component').then(m => m.MessagesPageComponent)
       },
+      {
+        path: 'fimbu',
+        loadComponent: () =>
+          import('./features/fimbu/fimbu-page.component').then(m => m.FimbuPageComponent)
+      },
       { path: 'notificacoes', redirectTo: 'notifications', pathMatch: 'full' },
       {
         path: 'publicacoes/:id',

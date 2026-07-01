@@ -7,6 +7,7 @@ const ptPT: LocaleMessages = {
     search: 'Pesquisar',
     notifications: 'Notificações',
     messages: 'Mensagens',
+    fimbu: 'Fimbu',
     bookmarks: 'Guardados',
     profile: 'Perfil',
     settings: 'Definições',
@@ -68,6 +69,20 @@ const ptPT: LocaleMessages = {
     sent: 'Enviada',
     read: 'Lida',
     deleted: 'Mensagem apagada'
+  },
+  fimbu: {
+    title: 'Fimbu',
+    subtitle: 'IA angolana sem filtro — humor imprevisível',
+    statusOnline: 'Sempre na pilha',
+    welcomeTitle: 'Ey, cota! Sou a Fimbu',
+    welcomeBody: 'Pergunta o que quiseres — estudos, vida, código, conversa fiada. Eu respondo à minha maneira, com calão angolano.',
+    writeMessage: 'Manda mensagem pra Fimbu…',
+    sendMessage: 'Enviar mensagem',
+    typing: 'Fimbu tá a pensar…',
+    clearChat: 'Limpar conversa',
+    loadFailed: 'Não foi possível carregar a conversa.',
+    sendFailed: 'A Fimbu não conseguiu responder agora. Tenta outra vez.',
+    retry: 'Tentar novamente'
   },
   notifications: {
     title: 'Notificações',

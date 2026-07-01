@@ -105,6 +105,7 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}/photo")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> UploadPhoto(Guid id, IFormFile photo)
     {
         if (!IsCurrentUser(id))
@@ -123,6 +124,7 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}/cover")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> UploadCoverPhoto(Guid id, IFormFile photo)
     {
         if (!IsCurrentUser(id))
@@ -150,6 +152,7 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPost("photo")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> UploadPhotoLegacy(IFormFile photoFile)
     {
         if (photoFile == null || photoFile.Length == 0)

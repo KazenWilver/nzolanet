@@ -6,6 +6,7 @@ export interface LocaleMessages {
     search: string
     notifications: string
     messages: string
+    fimbu: string
     bookmarks: string
     profile: string
     settings: string
@@ -67,6 +68,20 @@ export interface LocaleMessages {
     sent: string
     read: string
     deleted: string
+  }
+  fimbu: {
+    title: string
+    subtitle: string
+    statusOnline: string
+    welcomeTitle: string
+    welcomeBody: string
+    writeMessage: string
+    sendMessage: string
+    typing: string
+    clearChat: string
+    loadFailed: string
+    sendFailed: string
+    retry: string
   }
   notifications: {
     title: string

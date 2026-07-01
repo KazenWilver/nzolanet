@@ -20,4 +20,9 @@
     <ProjectReference Include="..\NzolaNet.Infrastructure\NzolaNet.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\palavras_angolanas\dicionario_angolano_full.jsonl" Link="palavras_angolanas\dicionario_angolano_full.jsonl" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\palavras_angolanas\cache_words.json" Link="palavras_angolanas\cache_words.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

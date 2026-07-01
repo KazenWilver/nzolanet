@@ -162,6 +162,10 @@
       </span>
       <span class="sr-only">Mensagens</span>
     </a>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/fimbu" [class.sidebar__mobile-link--active]="isActive('/fimbu')" aria-label="Fimbu">
+      <span class="sidebar__icon" data-icon="sparkles" aria-hidden="true"></span>
+      <span class="sr-only">Fimbu</span>
+    </a>
     <button type="button" class="sidebar__mobile-publish" appPressScale (click)="handleOpenPublishModal()" aria-label="Publicar">
       <span class="sidebar__publish-icon" aria-hidden="true">+</span>
     </button>

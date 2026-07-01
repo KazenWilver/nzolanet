@@ -1,4 +1,4 @@
-<div class="main-layout" [class.main-layout--messages]="isMessagesRoute">
+<div class="main-layout" [class.main-layout--messages]="isFullWidthChatRoute">
   <div class="main-layout__sidebar">
     <app-sidebar />
   </div>
@@ -13,7 +13,7 @@
     </main>
   </div>
 
-  @if (!isMessagesRoute) {
+  @if (!isFullWidthChatRoute) {
     <aside class="main-layout__aside">
       <app-aside />
     </aside>

@@ -49,6 +49,7 @@ export class MainLayoutComponent {
   currentUser: User | null = null;
   showMobileTopbar = false;
   isMessagesRoute = false;
+  isFullWidthChatRoute = false;
   private initialNavigation = true;
   private previousPath = '';
 
@@ -63,7 +64,7 @@ export class MainLayoutComponent {
       });
 
     this.previousPath = this.router.url.split('?')[0];
-    this.isMessagesRoute = this.previousPath.startsWith('/messages');
+    this.syncFullWidthChatRoute(this.previousPath);
     this.updateMobileTopbar(this.router.url);
 
     this.router.events
@@ -92,7 +93,7 @@ export class MainLayoutComponent {
         }
 
         const currentPath = event.urlAfterRedirects.split('?')[0];
-        this.isMessagesRoute = currentPath.startsWith('/messages');
+        this.syncFullWidthChatRoute(currentPath);
         this.updateMobileTopbar(event.urlAfterRedirects);
 
         if (this.initialNavigation) {
@@ -212,6 +213,11 @@ export class MainLayoutComponent {
   private updateMobileTopbar(url: string): void {
     const path = url.split('?')[0];
     this.showMobileTopbar = path === '/feed';
+  }
+
+  private syncFullWidthChatRoute(path: string): void {
+    this.isMessagesRoute = path.startsWith('/messages');
+    this.isFullWidthChatRoute = this.isMessagesRoute || path.startsWith('/fimbu');
   }
 
   @HostListener('document:keydown.escape')

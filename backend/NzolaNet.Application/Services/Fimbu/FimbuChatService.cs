@@ -1,0 +1,571 @@
+using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NzolaNet.Application.DTOs.Fimbu;
+using NzolaNet.Application.Interfaces;
+using NzolaNet.Application.Options;
+
+namespace NzolaNet.Application.Services.Fimbu;
+
+/// <summary>
+/// Serviço de chat da Fimbu com rotação automática entre fornecedores LLM.
+/// </summary>
+public sealed class FimbuChatService : IFimbuChatService
+{
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly FimbuSettings _settings;
+    private readonly IFimbuLexiconService _lexiconService;
+    private readonly IFimbuMoodService _moodService;
+    private readonly ILogger<FimbuChatService> _logger;
+    private readonly ConcurrentDictionary<Guid, UserSession> _sessions = new();
+    private readonly ProviderRotator _rotator;
+
+    public FimbuChatService(
+        IHttpClientFactory httpClientFactory,
+        IOptions<FimbuSettings> settings,
+        IFimbuLexiconService lexiconService,
+        IFimbuMoodService moodService,
+        ILogger<FimbuChatService> logger)
+    {
+        _httpClientFactory = httpClientFactory;
+        _settings = settings.Value;
+        _lexiconService = lexiconService;
+        _moodService = moodService;
+        _logger = logger;
+        _rotator = new ProviderRotator(_settings.ProviderCooldownSeconds);
+    }
+
+    public Task<FimbuHistoryDto> GetHistoryAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!_sessions.TryGetValue(userId, out var session))
+        {
+            return Task.FromResult(new FimbuHistoryDto());
+        }
+
+        lock (session.Sync)
+        {
+            return Task.FromResult(new FimbuHistoryDto
+            {
+                Messages = session.Messages
+                    .Select(m => new FimbuMessageDto
+                    {
+                        Role = m.Role,
+                        Content = m.Content,
+                        Timestamp = m.Timestamp
+                    })
+                    .ToList()
+            });
+        }
+    }
+
+    public Task ClearHistoryAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _sessions.TryRemove(userId, out _);
+        return Task.CompletedTask;
+    }
+
+    public async Task<FimbuChatResponseDto> SendMessageAsync(
+        Guid userId,
+        string message,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            throw new ArgumentException("A mensagem não pode estar vazia.");
+        }
+
+        var trimmed = message.Trim();
+        var session = _sessions.GetOrAdd(userId, _ => new UserSession());
+        List<LlmMessage> historySnapshot;
+        int messageIndex;
+        string systemPrompt;
+
+        lock (session.Sync)
+        {
+            messageIndex = session.Messages.Count(m => m.Role == "user") + 1;
+            session.Messages.Add(new LlmMessage("user", trimmed, DateTime.UtcNow));
+            TrimHistory(session.Messages);
+            historySnapshot = session.Messages.Select(m => m with { }).ToList();
+            var sessionTrait = _moodService.GetOrAssignSessionTrait(userId);
+            var lexiconContext = _lexiconService.BuildLexiconContext(trimmed, userId, messageIndex);
+            systemPrompt = FimbuSystemPrompt.Build(sessionTrait, lexiconContext);
+        }
+
+        var reply = await GenerateReplyAsync(historySnapshot, systemPrompt, cancellationToken);
+        var timestamp = DateTime.UtcNow;
+
+        lock (session.Sync)
+        {
+            session.Messages.Add(new LlmMessage("assistant", reply, timestamp));
+            TrimHistory(session.Messages);
+        }
+
+        return new FimbuChatResponseDto
+        {
+            Reply = reply,
+            Timestamp = timestamp
+        };
+    }
+
+    private void TrimHistory(List<LlmMessage> messages)
+    {
+        var max = Math.Max(4, _settings.MaxHistoryMessages);
+        while (messages.Count > max)
+        {
+            messages.RemoveAt(0);
+        }
+    }
+
+    private async Task<string> GenerateReplyAsync(
+        IReadOnlyList<LlmMessage> history,
+        string systemPrompt,
+        CancellationToken cancellationToken)
+    {
+        var providers = BuildProviders();
+        if (providers.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Nenhuma chave de API da Fimbu configurada. Define as variáveis NZOLANET_FIMBU_* no ambiente.");
+        }
+
+        var errors = new List<string>();
+        var attempts = providers.Count;
+
+        for (var i = 0; i < attempts; i++)
+        {
+            var provider = _rotator.GetNextAvailable(providers);
+            if (provider is null)
+            {
+                break;
+            }
+
+            try
+            {
+                var reply = await CallProviderAsync(provider, history, systemPrompt, cancellationToken);
+                _rotator.MarkSuccess(provider.Id);
+                return reply;
+            }
+            catch (RateLimitException ex)
+            {
+                _logger.LogWarning("Fimbu: limite atingido em {Provider}: {Message}", provider.Name, ex.Message);
+                _rotator.MarkRateLimited(provider.Id);
+                errors.Add($"{provider.Name}: limite de uso");
+            }
+            catch (Exception ex) when (IsRetryable(ex))
+            {
+                _logger.LogWarning(ex, "Fimbu: falha temporária em {Provider}", provider.Name);
+                _rotator.MarkRateLimited(provider.Id);
+                errors.Add($"{provider.Name}: {ex.Message}");
+            }
+        }
+
+        throw new InvalidOperationException(
+            errors.Count > 0
+                ? $"Todas as APIs da Fimbu estão indisponíveis. Detalhes: {string.Join("; ", errors)}"
+                : "Todas as APIs da Fimbu estão em cooldown. Tenta daqui a pouco.");
+    }
+
+    private List<LlmProvider> BuildProviders()
+    {
+        var list = new List<LlmProvider>();
+
+        if (!string.IsNullOrWhiteSpace(_settings.OpenRouterApiKey))
+        {
+            list.Add(new LlmProvider(
+                "openrouter",
+                "OpenRouter",
+                _settings.OpenRouterApiKey,
+                _settings.OpenRouterModel,
+                "https://openrouter.ai/api/v1/chat/completions",
+                ProviderKind.OpenAiCompatible,
+                new Dictionary<string, string>
+                {
+                    ["HTTP-Referer"] = "https://nzolanet.app",
+                    ["X-Title"] = "NzolaNet Fimbu"
+                }));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_settings.GoogleAiApiKey))
+        {
+            list.Add(new LlmProvider(
+                "google",
+                "Google AI Studio",
+                _settings.GoogleAiApiKey,
+                _settings.GoogleAiModel,
+                $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.GoogleAiModel}:generateContent",
+                ProviderKind.GoogleGemini,
+                null));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_settings.GroqApiKey))
+        {
+            list.Add(new LlmProvider(
+                "groq",
+                "Groq",
+                _settings.GroqApiKey,
+                _settings.GroqModel,
+                "https://api.groq.com/openai/v1/chat/completions",
+                ProviderKind.OpenAiCompatible,
+                null));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_settings.NvidiaApiKey))
+        {
+            list.Add(new LlmProvider(
+                "nvidia",
+                "NVIDIA NIM",
+                _settings.NvidiaApiKey,
+                _settings.NvidiaModel,
+                "https://integrate.api.nvidia.com/v1/chat/completions",
+                ProviderKind.OpenAiCompatible,
+                null));
+        }
+
+        return list;
+    }
+
+    private async Task<string> CallProviderAsync(
+        LlmProvider provider,
+        IReadOnlyList<LlmMessage> history,
+        string systemPrompt,
+        CancellationToken cancellationToken)
+    {
+        return provider.Kind switch
+        {
+            ProviderKind.OpenAiCompatible => await CallOpenAiCompatibleAsync(provider, history, systemPrompt, cancellationToken),
+            ProviderKind.GoogleGemini => await CallGoogleGeminiAsync(provider, history, systemPrompt, cancellationToken),
+            _ => throw new NotSupportedException($"Fornecedor {provider.Kind} não suportado.")
+        };
+    }
+
+    private async Task<string> CallOpenAiCompatibleAsync(
+        LlmProvider provider,
+        IReadOnlyList<LlmMessage> history,
+        string systemPrompt,
+        CancellationToken cancellationToken)
+    {
+        var client = _httpClientFactory.CreateClient("FimbuLlm");
+        using var request = new HttpRequestMessage(HttpMethod.Post, provider.Endpoint);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", provider.ApiKey);
+
+        if (provider.ExtraHeaders is not null)
+        {
+            foreach (var header in provider.ExtraHeaders)
+            {
+                request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+        }
+
+        var payload = new OpenAiChatRequest
+        {
+            Model = provider.Model,
+            Temperature = 0.92,
+            MaxTokens = 4096,
+            Messages = BuildOpenAiMessages(history, systemPrompt)
+        };
+
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(payload, JsonOptions),
+            Encoding.UTF8,
+            "application/json");
+
+        using var response = await client.SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (IsRateLimited(response.StatusCode, body))
+        {
+            throw new RateLimitException($"HTTP {(int)response.StatusCode}");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {Truncate(body, 300)}");
+        }
+
+        var parsed = JsonSerializer.Deserialize<OpenAiChatResponse>(body, JsonOptions);
+        var content = parsed?.Choices?.FirstOrDefault()?.Message?.Content?.Trim();
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new InvalidOperationException("Resposta vazia do modelo.");
+        }
+
+        return content;
+    }
+
+    private async Task<string> CallGoogleGeminiAsync(
+        LlmProvider provider,
+        IReadOnlyList<LlmMessage> history,
+        string systemPrompt,
+        CancellationToken cancellationToken)
+    {
+        var client = _httpClientFactory.CreateClient("FimbuLlm");
+        var url = $"{provider.Endpoint}?key={Uri.EscapeDataString(provider.ApiKey)}";
+
+        var contents = history.Select(m => new GeminiContent
+        {
+            Role = m.Role == "assistant" ? "model" : "user",
+            Parts = [new GeminiPart { Text = m.Content }]
+        }).ToList();
+
+        var payload = new GeminiRequest
+        {
+            SystemInstruction = new GeminiContent
+            {
+                Parts = [new GeminiPart { Text = systemPrompt }]
+            },
+            Contents = contents,
+            GenerationConfig = new GeminiGenerationConfig
+            {
+                Temperature = 0.92,
+                MaxOutputTokens = 4096
+            }
+        };
+
+        using var response = await client.PostAsJsonAsync(url, payload, JsonOptions, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (IsRateLimited(response.StatusCode, body))
+        {
+            throw new RateLimitException($"HTTP {(int)response.StatusCode}");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"HTTP {(int)response.StatusCode}: {Truncate(body, 300)}");
+        }
+
+        var parsed = JsonSerializer.Deserialize<GeminiResponse>(body, JsonOptions);
+        var content = parsed?.Candidates?
+            .FirstOrDefault()?
+            .Content?
+            .Parts?
+            .FirstOrDefault()?
+            .Text?
+            .Trim();
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new InvalidOperationException("Resposta vazia do modelo Gemini.");
+        }
+
+        return content;
+    }
+
+    private static List<OpenAiMessage> BuildOpenAiMessages(IReadOnlyList<LlmMessage> history, string systemPrompt)
+    {
+        var messages = new List<OpenAiMessage>
+        {
+            new() { Role = "system", Content = systemPrompt }
+        };
+
+        messages.AddRange(history.Select(m => new OpenAiMessage
+        {
+            Role = m.Role,
+            Content = m.Content
+        }));
+
+        return messages;
+    }
+
+    private static bool IsRateLimited(HttpStatusCode statusCode, string body)
+    {
+        if (statusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.PaymentRequired)
+        {
+            return true;
+        }
+
+        if ((int)statusCode == 529)
+        {
+            return true;
+        }
+
+        return body.Contains("rate_limit", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("quota", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("RESOURCE_EXHAUSTED", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsRetryable(Exception ex)
+    {
+        return ex is HttpRequestException or TaskCanceledException or TimeoutException;
+    }
+
+    private static string Truncate(string value, int max)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= max)
+        {
+            return value;
+        }
+
+        return value[..max] + "...";
+    }
+
+    private sealed class UserSession
+    {
+        public object Sync { get; } = new();
+
+        public List<LlmMessage> Messages { get; } = [];
+    }
+
+    private sealed record LlmMessage(string Role, string Content, DateTime Timestamp);
+
+    private enum ProviderKind
+    {
+        OpenAiCompatible,
+        GoogleGemini
+    }
+
+    private sealed record LlmProvider(
+        string Id,
+        string Name,
+        string ApiKey,
+        string Model,
+        string Endpoint,
+        ProviderKind Kind,
+        IReadOnlyDictionary<string, string>? ExtraHeaders);
+
+    private sealed class RateLimitException : Exception
+    {
+        public RateLimitException(string message) : base(message)
+        {
+        }
+    }
+
+    private sealed class ProviderRotator
+    {
+        private readonly int _cooldownSeconds;
+        private int _cursor;
+        private readonly ConcurrentDictionary<string, DateTime> _cooldowns = new();
+
+        public ProviderRotator(int cooldownSeconds)
+        {
+            _cooldownSeconds = Math.Max(15, cooldownSeconds);
+        }
+
+        public LlmProvider? GetNextAvailable(IReadOnlyList<LlmProvider> providers)
+        {
+            if (providers.Count == 0)
+            {
+                return null;
+            }
+
+            var now = DateTime.UtcNow;
+
+            for (var offset = 0; offset < providers.Count; offset++)
+            {
+                var index = (_cursor + offset) % providers.Count;
+                var provider = providers[index];
+
+                if (_cooldowns.TryGetValue(provider.Id, out var until) && until > now)
+                {
+                    continue;
+                }
+
+                _cursor = (index + 1) % providers.Count;
+                return provider;
+            }
+
+            return null;
+        }
+
+        public void MarkRateLimited(string providerId)
+        {
+            _cooldowns[providerId] = DateTime.UtcNow.AddSeconds(_cooldownSeconds);
+        }
+
+        public void MarkSuccess(string providerId)
+        {
+            _cooldowns.TryRemove(providerId, out _);
+        }
+    }
+
+    #region OpenAI JSON models
+
+    private sealed class OpenAiChatRequest
+    {
+        public string Model { get; set; } = string.Empty;
+
+        public List<OpenAiMessage> Messages { get; set; } = [];
+
+        public double Temperature { get; set; }
+
+        [JsonPropertyName("max_tokens")]
+        public int MaxTokens { get; set; }
+    }
+
+    private sealed class OpenAiMessage
+    {
+        public string Role { get; set; } = string.Empty;
+
+        public string Content { get; set; } = string.Empty;
+    }
+
+    private sealed class OpenAiChatResponse
+    {
+        public List<OpenAiChoice>? Choices { get; set; }
+    }
+
+    private sealed class OpenAiChoice
+    {
+        public OpenAiMessage? Message { get; set; }
+    }
+
+    #endregion
+
+    #region Gemini JSON models
+
+    private sealed class GeminiRequest
+    {
+        public GeminiContent? SystemInstruction { get; set; }
+
+        public List<GeminiContent> Contents { get; set; } = [];
+
+        public GeminiGenerationConfig? GenerationConfig { get; set; }
+    }
+
+    private sealed class GeminiGenerationConfig
+    {
+        public double Temperature { get; set; }
+
+        [JsonPropertyName("maxOutputTokens")]
+        public int MaxOutputTokens { get; set; }
+    }
+
+    private sealed class GeminiContent
+    {
+        public string Role { get; set; } = "user";
+
+        public List<GeminiPart> Parts { get; set; } = [];
+    }
+
+    private sealed class GeminiPart
+    {
+        public string Text { get; set; } = string.Empty;
+    }
+
+    private sealed class GeminiResponse
+    {
+        public List<GeminiCandidate>? Candidates { get; set; }
+    }
+
+    private sealed class GeminiCandidate
+    {
+        public GeminiContent? Content { get; set; }
+    }
+
+    #endregion
+}

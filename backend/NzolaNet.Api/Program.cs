@@ -17,6 +17,9 @@ using NzolaNet.Infrastructure.Services;
 using NzolaNet.Api.Middleware;
 using NzolaNet.Api.Hubs;
 using NzolaNet.Api.Services;
+using NzolaNet.Api.Swagger;
+using NzolaNet.Application.Options;
+using NzolaNet.Application.Services.Fimbu;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -134,6 +137,52 @@ builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IMediaAccessService, MediaAccessService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+
+var fimbuSettings = builder.Configuration.GetSection(FimbuSettings.SectionName).Get<FimbuSettings>() ?? new FimbuSettings();
+fimbuSettings.OpenRouterApiKey = ResolveSecret("NZOLANET_FIMBU_OPENROUTER_KEY", fimbuSettings.OpenRouterApiKey);
+fimbuSettings.GoogleAiApiKey = ResolveSecret("NZOLANET_FIMBU_GOOGLE_AI_KEY", fimbuSettings.GoogleAiApiKey);
+fimbuSettings.GroqApiKey = ResolveSecret("NZOLANET_FIMBU_GROQ_KEY", fimbuSettings.GroqApiKey);
+fimbuSettings.NvidiaApiKey = ResolveSecret("NZOLANET_FIMBU_NVIDIA_KEY", fimbuSettings.NvidiaApiKey);
+
+var configuredFimbuProviders = new[]
+{
+    string.IsNullOrWhiteSpace(fimbuSettings.OpenRouterApiKey) ? null : "OpenRouter",
+    string.IsNullOrWhiteSpace(fimbuSettings.GoogleAiApiKey) ? null : "Google AI Studio",
+    string.IsNullOrWhiteSpace(fimbuSettings.GroqApiKey) ? null : "Groq",
+    string.IsNullOrWhiteSpace(fimbuSettings.NvidiaApiKey) ? null : "NVIDIA"
+}.Count(provider => provider is not null);
+
+if (configuredFimbuProviders == 0)
+{
+    Console.WriteLine("AVISO Fimbu: nenhuma chave API configurada. Preenche a secção Fimbu em appsettings.Development.json ou define NZOLANET_FIMBU_*.");
+}
+else
+{
+    Console.WriteLine($"Fimbu: {configuredFimbuProviders} fornecedor(es) API configurado(s).");
+}
+
+builder.Services.Configure<FimbuSettings>(options =>
+{
+    options.OpenRouterApiKey = fimbuSettings.OpenRouterApiKey;
+    options.GoogleAiApiKey = fimbuSettings.GoogleAiApiKey;
+    options.GroqApiKey = fimbuSettings.GroqApiKey;
+    options.NvidiaApiKey = fimbuSettings.NvidiaApiKey;
+    options.OpenRouterModel = fimbuSettings.OpenRouterModel;
+    options.GoogleAiModel = fimbuSettings.GoogleAiModel;
+    options.GroqModel = fimbuSettings.GroqModel;
+    options.NvidiaModel = fimbuSettings.NvidiaModel;
+    options.MaxHistoryMessages = fimbuSettings.MaxHistoryMessages;
+    options.ProviderCooldownSeconds = fimbuSettings.ProviderCooldownSeconds;
+    options.RequestTimeoutSeconds = fimbuSettings.RequestTimeoutSeconds;
+});
+builder.Services.AddHttpClient("FimbuLlm", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(Math.Max(30, fimbuSettings.RequestTimeoutSeconds));
+});
+builder.Services.AddSingleton<IFimbuLexiconService, FimbuLexiconService>();
+builder.Services.AddSingleton<IFimbuMoodService, FimbuMoodService>();
+builder.Services.AddSingleton<IFimbuChatService, FimbuChatService>();
+
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IUserPresenceService, UserPresenceService>();
 builder.Services.AddSingleton<IChatRealtimeNotifier, SignalRChatRealtimeNotifier>();
@@ -196,6 +245,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "NzolaNet API", Version = "v1" });
+    c.MapType<IFormFile>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+    c.OperationFilter<SwaggerFormFileOperationFilter>();
     
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -274,3 +329,9 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
+
+static string ResolveSecret(string environmentVariableName, string? configuredValue)
+{
+    var fromEnvironment = Environment.GetEnvironmentVariable(environmentVariableName);
+    return string.IsNullOrWhiteSpace(fromEnvironment) ? (configuredValue ?? string.Empty) : fromEnvironment;
+}
