@@ -120,7 +120,9 @@ export class NotificationService {
       publicationId: dto.publicationId,
       publicationText: dto.publicationText,
       commentId: dto.commentId,
-      commentText: dto.commentText
+      commentText: dto.commentText,
+      conversationId: dto.conversationId,
+      messageText: dto.messageText
     };
   }
 }

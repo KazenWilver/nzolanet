@@ -153,6 +153,8 @@ export class NotificationsPageComponent implements OnInit {
         return 'aceitou o teu pedido de seguimento';
       case 'follow_rejected':
         return 'recusou o teu pedido de seguimento';
+      case 'message':
+        return 'enviou-te uma mensagem';
       default:
         return '';
     }
@@ -161,6 +163,10 @@ export class NotificationsPageComponent implements OnInit {
   getContextText(notification: AppNotification): string | undefined {
     if (notification.type === 'comment') {
       return notification.commentText ?? notification.publicationText;
+    }
+
+    if (notification.type === 'message') {
+      return notification.messageText;
     }
 
     return notification.publicationText;
@@ -227,6 +233,11 @@ export class NotificationsPageComponent implements OnInit {
 
     if (notification.publicationId) {
       void this.router.navigate(['/publicacoes', notification.publicationId]);
+      return;
+    }
+
+    if (notification.type === 'message' && notification.conversationId) {
+      void this.router.navigate(['/messages', notification.conversationId]);
       return;
     }
 

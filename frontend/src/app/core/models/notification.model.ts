@@ -4,7 +4,8 @@ export type NotificationType =
   | 'follow'
   | 'follow_request'
   | 'follow_accepted'
-  | 'follow_rejected';
+  | 'follow_rejected'
+  | 'message';
 
 export interface BackendNotificationDto {
   id: string;
@@ -19,6 +20,8 @@ export interface BackendNotificationDto {
   publicationText?: string;
   commentId?: string;
   commentText?: string;
+  conversationId?: string;
+  messageText?: string;
 }
 
 export interface AppNotification {
@@ -34,6 +37,8 @@ export interface AppNotification {
   publicationText?: string;
   commentId?: string;
   commentText?: string;
+  conversationId?: string;
+  messageText?: string;
 }
 
 export interface UnreadCountResponse {
