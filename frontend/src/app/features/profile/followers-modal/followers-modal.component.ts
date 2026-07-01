@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output, inject, OnChanges, SimpleChanges, DestroyRef } from '@angular/core';
+import { Component, ChangeDetectorRef, EventEmitter, Input, Output, inject, OnChanges, SimpleChanges, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import type { User } from '../../../core/models/user.model';
@@ -24,6 +25,7 @@ export class FollowersModalComponent implements OnChanges {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   @Input() open = false;
   @Input({ required: true }) profileUserId!: string;
@@ -34,11 +36,13 @@ export class FollowersModalComponent implements OnChanges {
   loading = false;
   error = false;
   togglingUserId: string | null = null;
+  followErrorUserId: string | null = null;
   currentUserId?: string;
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['open']?.currentValue || changes['mode']) && this.open) {
       this.currentUserId = this.authService.getCurrentUser()?.id;
+      this.followErrorUserId = null;
       this.loadUsers();
     }
   }
@@ -65,16 +69,15 @@ export class FollowersModalComponent implements OnChanges {
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: users => {
-        this.users = users;
-        this.loading = false;
-        this.markFollowingState();
-      },
-      error: () => {
-        this.loading = false;
-        this.error = true;
-      }
-    });
+        next: users => {
+          this.users = users;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.error = true;
+        }
+      });
   }
 
   handleClose(): void {
@@ -90,56 +93,56 @@ export class FollowersModalComponent implements OnChanges {
     return user.isFollowing === true;
   }
 
-  toggleFollow(user: User, event: MouseEvent): void {
-    event.stopPropagation();
+  isPendingUser(user: User): boolean {
+    return user.isPending === true;
+  }
 
+  toggleFollow(user: User): void {
     if (!this.currentUserId || user.id === this.currentUserId || this.togglingUserId) {
       return;
     }
 
     this.togglingUserId = user.id;
+    this.followErrorUserId = null;
     const wasFollowing = user.isFollowing === true;
+    const wasPending = user.isPending === true;
 
-    const request$ = wasFollowing
-      ? this.userService.unfollow(user.id)
-      : this.userService.follow(user.id);
+    const request$ =
+      wasFollowing || wasPending
+        ? this.userService.unfollow(user.id)
+        : this.userService.follow(user.id);
 
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: () => {
-        user.isFollowing = !wasFollowing;
-        this.togglingUserId = null;
-      },
-      error: () => {
-        this.togglingUserId = null;
-      }
-    });
+        next: () => {
+          this.users = this.users.map(item => {
+            if (item.id !== user.id) {
+              return item;
+            }
+
+            if (wasFollowing || wasPending) {
+              return { ...item, isFollowing: false, isPending: false };
+            }
+
+            if (item.isPrivate) {
+              return { ...item, isFollowing: false, isPending: true };
+            }
+
+            return { ...item, isFollowing: true, isPending: false };
+          });
+          this.togglingUserId = null;
+          this.changeDetectorRef.markForCheck();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.togglingUserId = null;
+          this.followErrorUserId = user.id;
+          this.changeDetectorRef.markForCheck();
+        }
+      });
   }
 
   getDisplayName(user: User): string {
     return user.displayName ?? user.username;
-  }
-
-  private markFollowingState(): void {
-    if (!this.currentUserId) {
-      return;
-    }
-
-    this.userService
-      .getFollowing(this.currentUserId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-      next: following => {
-        const followingIds = new Set(following.map(user => user.id));
-        this.users = this.users.map(user => ({
-          ...user,
-          isFollowing: followingIds.has(user.id)
-        }));
-      },
-      error: () => {
-        // Mantém a lista visível mesmo se o estado de seguimento falhar
-      }
-    });
   }
 }

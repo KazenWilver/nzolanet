@@ -30,12 +30,18 @@
         </button>
 
         @if (currentUserId && user.id !== currentUserId) {
-          <app-follow-button
-            size="sm"
-            [isFollowing]="isFollowingUser(user)"
-            [loading]="togglingUserId === user.id"
-            (followClick)="toggleFollow(user, $event)"
-          />
+          <div class="followers-modal__follow-wrap">
+            <app-follow-button
+              size="sm"
+              [isFollowing]="isFollowingUser(user)"
+              [isPending]="isPendingUser(user)"
+              [loading]="togglingUserId === user.id"
+              (followClick)="toggleFollow(user)"
+            />
+            @if (followErrorUserId === user.id) {
+              <span class="followers-modal__follow-error" role="alert">Erro ao actualizar</span>
+            }
+          </div>
         }
       </li>
     }

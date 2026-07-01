@@ -37,6 +37,20 @@
   }
 }
 
+.followers-modal__follow-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.followers-modal__follow-error {
+  font-size: 11px;
+  color: var(--color-danger, #f4212e);
+  white-space: nowrap;
+}
+
 .followers-modal__profile {
   display: flex;
   align-items: center;
