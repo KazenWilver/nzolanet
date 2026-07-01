@@ -43,6 +43,11 @@ export const routes: Routes = [
           import('./features/feed/feed-page/feed-page.component').then(m => m.FeedPageComponent)
       },
       {
+        path: 'welcome',
+        loadComponent: () =>
+          import('./features/auth/auth-welcome/auth-welcome.component').then(m => m.AuthWelcomeComponent)
+      },
+      {
         path: 'profile/me',
         loadComponent: () =>
           import('./features/profile/profile-me-redirect.component').then(m => m.ProfileMeRedirectComponent)

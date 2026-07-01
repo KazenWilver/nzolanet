@@ -7,7 +7,8 @@ export type NotificationType =
   | 'follow_rejected'
   | 'message'
   | 'mention'
-  | 'group_added';
+  | 'group_added'
+  | 'repost';
 
 export interface BackendNotificationDto {
   id: string;

@@ -17,12 +17,16 @@ export interface BackendMessageReactionSummaryDto {
   reactedByMe: boolean
 }
 
+export type MessageReadStatus = 'sent' | 'delivered' | 'read'
+
 export interface BackendConversationListItemDto {
   id: string
   otherUserId?: string
   otherUsername?: string
   otherDisplayName?: string
   otherPhotoUrl?: string
+  otherUserIsOnline?: boolean
+  otherUserLastSeenAt?: string
   title?: string
   description?: string
   imageUrl?: string
@@ -64,6 +68,7 @@ export interface BackendMessageDto {
   createdAt: string
   isMine: boolean
   isRead: boolean
+  readStatus?: MessageReadStatus
 }
 
 export interface MessageReplyPreview {
@@ -96,6 +101,8 @@ export interface ConversationListItem {
   otherUsername?: string
   otherDisplayName?: string
   otherPhotoUrl?: string
+  otherUserIsOnline?: boolean
+  otherUserLastSeenAt?: string
   title?: string
   description?: string
   imageUrl?: string
@@ -130,6 +137,7 @@ export interface ChatMessage {
   createdAt: string
   isMine: boolean
   isRead: boolean
+  readStatus?: MessageReadStatus
 }
 
 export interface UnreadMessagesCountResponse {
@@ -160,6 +168,8 @@ export const mapConversationListItem = (dto: BackendConversationListItemDto): Co
   otherUsername: dto.otherUsername,
   otherDisplayName: dto.otherDisplayName,
   otherPhotoUrl: resolveMediaUrl(dto.otherPhotoUrl),
+  otherUserIsOnline: dto.otherUserIsOnline,
+  otherUserLastSeenAt: dto.otherUserLastSeenAt,
   title: dto.title,
   description: dto.description,
   imageUrl: resolveMediaUrl(dto.imageUrl),
@@ -199,5 +209,6 @@ export const mapChatMessage = (dto: BackendMessageDto): ChatMessage => ({
   reactions: mapReactions(dto.reactions),
   createdAt: dto.createdAt,
   isMine: dto.isMine,
-  isRead: dto.isRead ?? false
+  isRead: dto.isRead ?? false,
+  readStatus: dto.readStatus ?? (dto.isRead ? 'read' : 'sent')
 })

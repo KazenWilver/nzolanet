@@ -164,6 +164,20 @@
       >
         Gostos
       </button>
+      <button
+        type="button"
+        class="profile-page__tab"
+        id="profile-tab-reposts"
+        [class.profile-page__tab--active]="activeTab === 'reposts'"
+        [attr.aria-selected]="activeTab === 'reposts'"
+        aria-controls="profile-panel"
+        role="tab"
+        appPressScale
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'reposts')"
+      >
+        Repartilhas
+      </button>
     </nav>
 
     <div
@@ -171,14 +185,71 @@
       role="tabpanel"
       class="profile-page__panel"
       [attr.aria-labelledby]="
-        activeTab === 'likes'
+        activeTab === 'reposts'
+          ? 'profile-tab-reposts'
+          : activeTab === 'likes'
           ? 'profile-tab-likes'
           : activeTab === 'media'
             ? 'profile-tab-media'
             : 'profile-tab-publications'
       "
     >
-    @if (activeTab === 'likes') {
+    @if (activeTab === 'reposts') {
+      @if (contentLoadError) {
+        <div class="profile-page__error">
+          <p>Não foi possível carregar o conteúdo.</p>
+          <button type="button" class="profile-page__retry" (click)="retryContentLoad()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver as repartilhas.</p>
+        </div>
+      } @else if (loadingReposts) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
+      } @else if (repostPublications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem repartilhas.</p>
+        </div>
+      } @else {
+        @for (publication of repostPublications; track trackById($index, publication)) {
+          <div appEnterAnimation [enterIndex]="$index">
+            <app-publication-card
+              [publication]="publication"
+              [currentUserId]="currentUserId"
+              (deleted)="handlePublicationDeleted($event)"
+              (updated)="handlePublicationUpdated($event)"
+            />
+          </div>
+        }
+
+        @if (loadingMoreReposts) {
+          <app-publication-card-skeleton />
+        }
+
+        @if (repostsLoadMoreError) {
+          <div class="profile-page__load-more-error">
+            <p>Não foi possível carregar mais repartilhas.</p>
+            <button type="button" class="profile-page__retry" (click)="repostsLoadMoreError = false; loadMoreReposts()">
+              Tentar novamente
+            </button>
+          </div>
+        }
+
+        @if (repostsHasMore && !repostsLoadMoreError) {
+          <div
+            appInfiniteScroll
+            [infiniteScrollDisabled]="loadingMoreReposts"
+            (appInfiniteScroll)="loadMoreReposts()"
+            class="profile-page__scroll-sentinel"
+            aria-hidden="true"
+          ></div>
+        }
+      }
+    } @else if (activeTab === 'likes') {
       @if (contentLoadError) {
         <div class="profile-page__error">
           <p>Não foi possível carregar o conteúdo.</p>

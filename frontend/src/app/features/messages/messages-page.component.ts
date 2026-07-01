@@ -5,11 +5,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router'
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { HttpErrorResponse } from '@angular/common/http'
 import { EMPTY, Subscription, debounceTime, distinctUntilChanged, interval, switchMap } from 'rxjs'
+import gsap from 'gsap'
 import { ConversationService } from '../../core/services/conversation.service'
 import { ChatRealtimeService } from '../../core/services/chat-realtime.service'
 import { AuthService } from '../../core/services/auth.service'
 import { AnimationService } from '../../core/services/animation.service'
-import type { ChatMessage, ConversationDetail, ConversationListItem, MessageReplyPreview } from '../../core/models/conversation.model'
+import type { ChatMessage, ConversationDetail, ConversationListItem, MessageReadStatus, MessageReplyPreview } from '../../core/models/conversation.model'
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe'
@@ -61,6 +62,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   private readonly localeService = inject(LocaleService)
 
   @ViewChild('messagesScroll') messagesScroll?: ElementRef<HTMLElement>
+  @ViewChild('typingIndicator') typingIndicator?: ElementRef<HTMLElement>
 
   conversations: ConversationListItem[] = []
   messages: ChatMessage[] = []
@@ -90,6 +92,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   forwardingIds = new Set<string>()
   forwarding = false
   forwardError = ''
+  forwardCaption = ''
+  lightboxMedia: { url: string; type: 'image' | 'video'; isGif?: boolean } | null = null
   loadingOlderMessages = false
   hasMoreMessages = true
 
@@ -241,6 +245,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           this.sendingMessage = false
           this.updateConversationPreview(message)
           this.scrollMessagesToBottom()
+          this.animateMessageBubble(message.id)
         },
         error: (error: HttpErrorResponse) => {
           this.sendingMessage = false
@@ -308,6 +313,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.forwardingIds = new Set<string>()
     this.forwarding = false
     this.forwardError = ''
+    this.forwardCaption = ''
     this.actionMenuMessageId = null
     requestAnimationFrame(() => {
       const overlay = document.querySelector('.messages-page__forward-overlay')
@@ -336,6 +342,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.forwardingIds = new Set<string>()
     this.forwarding = false
     this.forwardError = ''
+    this.forwardCaption = ''
   }
 
   handleConfirmForward(): void {
@@ -346,7 +353,12 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.forwarding = true
     this.forwardError = ''
     this.conversationService
-      .forwardMessage(this.activeConversation.id, this.forwardingMessage.id, Array.from(this.forwardingIds))
+      .forwardMessage(
+        this.activeConversation.id,
+        this.forwardingMessage.id,
+        Array.from(this.forwardingIds),
+        this.forwardCaption
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -576,7 +588,70 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   handleGroupInfoUpdated(detail: ConversationDetail): void {
     this.applyConversationUpdate(detail)
     this.activeConversation = detail
-    this.groupInfoOpen = false
+  }
+
+  handleOpenMediaLightbox(url: string, type: 'image' | 'video', isGif = false): void {
+    this.lightboxMedia = { url, type, isGif }
+    requestAnimationFrame(() => {
+      const overlay = document.querySelector('.messages-page__lightbox-overlay')
+      const content = document.querySelector('.messages-page__lightbox-content')
+      if (overlay && content) {
+        this.animationService.mediaLightboxEnter(overlay, content)
+      }
+    })
+  }
+
+  handleCloseMediaLightbox(): void {
+    this.lightboxMedia = null
+  }
+
+  getPresenceLabel(conversation: ConversationListItem): string {
+    if (conversation.isGroup) {
+      return `${conversation.participantCount} participantes`
+    }
+
+    if (conversation.otherUserIsOnline) {
+      return 'Online'
+    }
+
+    if (conversation.otherUserLastSeenAt) {
+      const lastSeen = new Date(conversation.otherUserLastSeenAt)
+      const diffMs = Date.now() - lastSeen.getTime()
+      const diffMinutes = Math.floor(diffMs / 60000)
+
+      if (diffMinutes < 1) {
+        return 'Visto há instantes'
+      }
+      if (diffMinutes < 60) {
+        return `Visto há ${diffMinutes} min`
+      }
+
+      const diffHours = Math.floor(diffMinutes / 60)
+      if (diffHours < 24) {
+        return `Visto há ${diffHours}h`
+      }
+
+      return `Visto ${lastSeen.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' })}`
+    }
+
+    return conversation.otherUsername ? `@${conversation.otherUsername}` : ''
+  }
+
+  getReadStatusLabel(status?: MessageReadStatus): string {
+    if (status === 'read') {
+      return 'Lida'
+    }
+    if (status === 'delivered') {
+      return 'Entregue'
+    }
+    return 'Enviada'
+  }
+
+  getReadStatusSymbol(status?: MessageReadStatus): string {
+    if (status === 'delivered' || status === 'read') {
+      return '✓✓'
+    }
+    return '✓'
   }
 
   getConversationAvatar(conversation: ConversationListItem): string | undefined {
@@ -645,6 +720,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
         this.upsertMessage(message)
         this.scrollMessagesToBottom()
+        this.animateMessageBubble(message.id)
 
         if (!message.isMine) {
           this.conversationService.markAsRead(this.activeConversation.id).subscribe()
@@ -672,7 +748,9 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         }
 
         this.messages = this.messages.map(existing =>
-          existing.isMine ? { ...existing, isRead: true } : existing
+          existing.isMine
+            ? { ...existing, isRead: true, readStatus: 'read' as MessageReadStatus }
+            : existing
         )
       })
 
@@ -704,6 +782,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
         if (event.isTyping) {
           this.typingLabel = `${this.getConversationDisplayName(this.activeConversation)} está a escrever…`
+          this.animateTypingIndicator()
           if (this.typingClearTimeoutId) {
             clearTimeout(this.typingClearTimeoutId)
           }
@@ -758,6 +837,73 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
         this.upsertMessage(event.message)
       })
+
+    this.chatRealtime.presence$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+          return
+        }
+
+        const otherUserId = this.activeConversation.otherUserId?.toLowerCase()
+        if (!otherUserId || event.userId.toLowerCase() !== otherUserId) {
+          return
+        }
+
+        this.activeConversation = {
+          ...this.activeConversation,
+          otherUserIsOnline: event.isOnline,
+          otherUserLastSeenAt: event.lastSeenAt ?? this.activeConversation.otherUserLastSeenAt
+        }
+
+        this.conversations = this.conversations.map(conversation =>
+          conversation.id === this.activeConversation?.id
+            ? {
+                ...conversation,
+                otherUserIsOnline: event.isOnline,
+                otherUserLastSeenAt: event.lastSeenAt ?? conversation.otherUserLastSeenAt
+              }
+            : conversation
+        )
+      })
+  }
+
+  private animateMessageBubble(messageId: string): void {
+    if (!this.animationService.isEnabled) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      const bubble = document.querySelector(`[data-message-id="${messageId}"]`)
+      if (!bubble) {
+        return
+      }
+
+      gsap.fromTo(
+        bubble,
+        { opacity: 0, y: 12, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.32, ease: 'power2.out', clearProps: 'transform,opacity' }
+      )
+    })
+  }
+
+  private animateTypingIndicator(): void {
+    if (!this.animationService.isEnabled) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      const element = this.typingIndicator?.nativeElement
+      if (!element) {
+        return
+      }
+
+      gsap.fromTo(
+        element,
+        { opacity: 0.4 },
+        { opacity: 1, duration: 0.6, ease: 'sine.inOut', yoyo: true, repeat: 2 }
+      )
+    })
   }
 
   private setupFallbackPolling(): void {

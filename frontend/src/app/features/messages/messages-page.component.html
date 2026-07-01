@@ -118,12 +118,8 @@
           />
           <div class="messages-page__thread-meta">
             <strong>{{ getConversationDisplayName(activeConversation) }}</strong>
-            <span>
-              @if (activeConversation.isGroup) {
-                {{ activeConversation.participantCount }} participantes
-              } @else {
-                @{{ activeConversation.otherUsername }}
-              }
+            <span [class.messages-page__presence--online]="!activeConversation.isGroup && activeConversation.otherUserIsOnline">
+              {{ getPresenceLabel(activeConversation) }}
             </span>
           </div>
           @if (activeConversation.isGroup) {
@@ -135,7 +131,7 @@
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <circle cx="12" cy="12" r="3"></circle>
-                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 3.6 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.6a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 8a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
               </svg>
             </button>
           } @else if (activeConversation.otherUserId) {
@@ -216,10 +212,16 @@
                 <article
                   class="messages-page__bubble-wrap"
                   [class.messages-page__bubble-wrap--mine]="message.isMine"
+                  [attr.data-message-id]="message.id"
                   (touchstart)="handleMessageTouchStart(message.id)"
                   (touchend)="handleMessageTouchEnd()"
                   (touchcancel)="handleMessageTouchEnd()"
                 >
+                  @if (!message.isMine && activeConversation.isGroup) {
+                    <span class="messages-page__sender-name">
+                      {{ message.senderDisplayName ?? message.senderUsername }}
+                    </span>
+                  }
                   <div class="messages-page__bubble-actions">
                     <button
                       type="button"
@@ -275,21 +277,35 @@
                         </blockquote>
                       }
                       @if (message.videoUrl) {
-                        <video
-                          class="messages-page__bubble-video"
-                          [src]="message.videoUrl"
-                          controls
-                          preload="metadata"
-                        ></video>
+                        <button
+                          type="button"
+                          class="messages-page__media-trigger"
+                          aria-label="Abrir vídeo em ecrã inteiro"
+                          (click)="handleOpenMediaLightbox(message.videoUrl!, 'video')"
+                        >
+                          <video
+                            class="messages-page__bubble-video"
+                            [src]="message.videoUrl"
+                            preload="metadata"
+                            muted
+                          ></video>
+                        </button>
                       }
                       @if (message.imageUrl) {
-                        <img
-                          class="messages-page__bubble-image"
-                          [class.messages-page__bubble-image--gif]="message.isGif"
-                          [src]="message.imageUrl"
-                          [alt]="message.isGif ? 'GIF enviado na conversa' : 'Imagem enviada na conversa'"
-                          loading="lazy"
-                        />
+                        <button
+                          type="button"
+                          class="messages-page__media-trigger"
+                          aria-label="Abrir imagem em ecrã inteiro"
+                          (click)="handleOpenMediaLightbox(message.imageUrl!, 'image', message.isGif)"
+                        >
+                          <img
+                            class="messages-page__bubble-image"
+                            [class.messages-page__bubble-image--gif]="message.isGif"
+                            [src]="message.imageUrl"
+                            [alt]="message.isGif ? 'GIF enviado na conversa' : 'Imagem enviada na conversa'"
+                            loading="lazy"
+                          />
+                        </button>
                       }
                       @if (message.isDeletedForEveryone) {
                         <p class="messages-page__deleted-text">Mensagem apagada</p>
@@ -309,10 +325,11 @@
                         @if (message.isMine) {
                           <span
                             class="messages-page__read-status"
-                            [class.messages-page__read-status--read]="message.isRead"
-                            [attr.aria-label]="message.isRead ? 'Lida' : 'Enviada'"
+                            [class.messages-page__read-status--delivered]="message.readStatus === 'delivered'"
+                            [class.messages-page__read-status--read]="message.readStatus === 'read'"
+                            [attr.aria-label]="getReadStatusLabel(message.readStatus)"
                           >
-                            {{ message.isRead ? '✓✓' : '✓' }}
+                            {{ getReadStatusSymbol(message.readStatus) }}
                           </span>
                         }
                       </footer>
@@ -346,7 +363,7 @@
         }
 
         @if (typingLabel) {
-          <p class="messages-page__typing" aria-live="polite">{{ typingLabel }}</p>
+          <p #typingIndicator class="messages-page__typing" aria-live="polite">{{ typingLabel }}</p>
         }
 
         <footer class="messages-page__composer">
@@ -529,6 +546,15 @@
     <div class="messages-page__forward-modal" (click)="$event.stopPropagation()">
       <h3>{{ 'chat.forwardMessage' | t }}</h3>
       <p>{{ 'chat.selectConversations' | t }}</p>
+      <label class="messages-page__forward-caption">
+        <span>Legenda (opcional)</span>
+        <textarea
+          rows="2"
+          [(ngModel)]="forwardCaption"
+          placeholder="Adiciona uma mensagem…"
+          class="messages-page__forward-caption-input"
+        ></textarea>
+      </label>
       <div class="messages-page__forward-list">
         @for (conversation of conversations; track trackConversation($index, conversation)) {
           @if (activeConversation?.id !== conversation.id) {
@@ -557,6 +583,36 @@
           {{ forwarding ? ('common.loading' | t) : ('chat.forwardMessage' | t) }}
         </button>
       </div>
+    </div>
+  </div>
+}
+
+@if (lightboxMedia) {
+  <div
+    class="messages-page__lightbox-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Media em ecrã inteiro"
+    (click)="handleCloseMediaLightbox()"
+  >
+    <div class="messages-page__lightbox-content" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="messages-page__lightbox-close"
+        aria-label="Fechar"
+        (click)="handleCloseMediaLightbox()"
+      >
+        ×
+      </button>
+      @if (lightboxMedia.type === 'video') {
+        <video [src]="lightboxMedia.url" controls autoplay class="messages-page__lightbox-media"></video>
+      } @else {
+        <img
+          [src]="lightboxMedia.url"
+          [alt]="lightboxMedia.isGif ? 'GIF' : 'Imagem'"
+          class="messages-page__lightbox-media"
+        />
+      }
     </div>
   </div>
 }

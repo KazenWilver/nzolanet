@@ -80,6 +80,7 @@ export interface LocaleMessages {
     commented: string
     followed: string
     sentMessage: string
+    reposted: string
   }
   settings: {
     title: string

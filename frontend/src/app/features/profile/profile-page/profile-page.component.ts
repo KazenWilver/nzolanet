@@ -24,7 +24,7 @@ import { FollowersModalComponent } from '../followers-modal/followers-modal.comp
 import { FollowButtonComponent } from '../../../shared/components/follow-button/follow-button.component';
 import { ConversationService } from '../../../core/services/conversation.service';
 
-type ProfileTab = 'publications' | 'media' | 'likes';
+type ProfileTab = 'publications' | 'media' | 'likes' | 'reposts';
 
 @Component({
   selector: 'app-profile-page',
@@ -64,22 +64,28 @@ export class ProfilePageComponent implements OnInit {
   publications: Publication[] = [];
   mediaPublications: Publication[] = [];
   likedPublications: Publication[] = [];
+  repostPublications: Publication[] = [];
   private lastProfileUserId = '';
   loadingProfile = true;
   loadingPublications = false;
   loadingMedia = false;
   loadingLikes = false;
+  loadingReposts = false;
   loadingMorePublications = false;
   loadingMoreMedia = false;
+  loadingMoreReposts = false;
   publicationsHasMore = false;
   mediaHasMore = false;
+  repostsHasMore = false;
   private publicationsPage = 1;
   private mediaPage = 1;
+  private repostsPage = 1;
   profileError = false;
   profileNotFound = false;
   contentLoadError = false;
   publicationsLoadMoreError = false;
   mediaLoadMoreError = false;
+  repostsLoadMoreError = false;
   privateAccount = false;
   togglingFollow = false;
   openingMessage = false;
@@ -95,6 +101,7 @@ export class ProfilePageComponent implements OnInit {
   private publicationsRequestId = 0;
   private mediaRequestId = 0;
   private likesRequestId = 0;
+  private repostsRequestId = 0;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -157,10 +164,13 @@ export class ProfilePageComponent implements OnInit {
     this.publications = [];
     this.mediaPublications = [];
     this.likedPublications = [];
+    this.repostPublications = [];
     this.publicationsPage = 1;
     this.mediaPage = 1;
+    this.repostsPage = 1;
     this.publicationsHasMore = false;
     this.mediaHasMore = false;
+    this.repostsHasMore = false;
     this.activeTab = 'publications';
 
     this.userService
@@ -217,8 +227,11 @@ export class ProfilePageComponent implements OnInit {
     this.contentLoadError = false;
     this.publicationsLoadMoreError = false;
     this.mediaLoadMoreError = false;
+    this.repostsLoadMoreError = false;
     if (this.activeTab === 'likes') {
       this.loadLikedPublications(this.profile.id);
+    } else if (this.activeTab === 'reposts') {
+      this.loadReposts(this.profile.id, true);
     } else if (this.activeTab === 'media') {
       this.loadMediaPublications(this.profile.id, true);
     } else {
@@ -370,6 +383,78 @@ export class ProfilePageComponent implements OnInit {
     this.loadMediaPublications(this.profile.id, false);
   }
 
+  loadReposts(userId: string, reset = true): void {
+    if (reset) {
+      this.repostsPage = 1;
+      this.repostPublications = [];
+      this.repostsHasMore = false;
+    }
+
+    const requestId = ++this.repostsRequestId;
+    this.loadingReposts = reset;
+    this.loadingMoreReposts = !reset;
+    this.privateAccount = false;
+    this.contentLoadError = false;
+    if (reset) {
+      this.repostsLoadMoreError = false;
+    }
+
+    this.publicationService
+      .getUserReposts(userId, this.repostsPage)
+      .pipe(
+        finalize(() => {
+          if (requestId !== this.repostsRequestId) {
+            return;
+          }
+
+          this.loadingReposts = false;
+          this.loadingMoreReposts = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: response => {
+          if (requestId !== this.repostsRequestId) {
+            return;
+          }
+
+          const merged = reset
+            ? response.items
+            : this.mergePublications(this.repostPublications, response.items);
+
+          this.repostPublications = this.sortByDate(merged);
+          this.repostsHasMore = response.hasMore;
+        },
+        error: (error: HttpErrorResponse) => {
+          if (requestId !== this.repostsRequestId) {
+            return;
+          }
+
+          if (reset) {
+            this.repostPublications = [];
+            if (error.status === 403) {
+              this.privateAccount = true;
+            } else {
+              this.contentLoadError = true;
+            }
+            return;
+          }
+
+          this.repostsPage = Math.max(1, this.repostsPage - 1);
+          this.repostsLoadMoreError = true;
+        }
+      });
+  }
+
+  loadMoreReposts(): void {
+    if (!this.profile || this.loadingReposts || this.loadingMoreReposts || !this.repostsHasMore) {
+      return;
+    }
+
+    this.repostsPage += 1;
+    this.loadReposts(this.profile.id, false);
+  }
+
   loadLikedPublications(userId: string): void {
     const requestId = ++this.likesRequestId;
     this.loadingLikes = true;
@@ -436,6 +521,7 @@ export class ProfilePageComponent implements OnInit {
     this.publications = this.publications.map(patchAuthor);
     this.mediaPublications = this.mediaPublications.map(patchAuthor);
     this.likedPublications = this.likedPublications.map(patchAuthor);
+    this.repostPublications = this.repostPublications.map(patchAuthor);
   }
 
   openFollowersModal(mode: 'followers' | 'following'): void {
@@ -617,6 +703,12 @@ export class ProfilePageComponent implements OnInit {
       return;
     }
 
+    if (tab === 'reposts' && this.repostPublications.length === 0 && !this.loadingReposts) {
+      this.loadReposts(this.profile.id, true);
+      this.restoreScrollPosition(scrollContainer, scrollTop);
+      return;
+    }
+
     if (tab === 'media' && this.mediaPublications.length === 0 && !this.loadingMedia) {
       this.loadMediaPublications(this.profile.id, true);
     }
@@ -659,6 +751,7 @@ export class ProfilePageComponent implements OnInit {
     this.publications = this.publications.filter(publication => publication.id !== id);
     this.mediaPublications = this.mediaPublications.filter(publication => publication.id !== id);
     this.likedPublications = this.likedPublications.filter(publication => publication.id !== id);
+    this.repostPublications = this.repostPublications.filter(publication => publication.id !== id);
   }
 
   handlePublicationUpdated(publication: Publication): void {
@@ -669,6 +762,9 @@ export class ProfilePageComponent implements OnInit {
       item.id === publication.id ? publication : item
     );
     this.likedPublications = this.likedPublications.map(item =>
+      item.id === publication.id ? publication : item
+    );
+    this.repostPublications = this.repostPublications.map(item =>
       item.id === publication.id ? publication : item
     );
   }

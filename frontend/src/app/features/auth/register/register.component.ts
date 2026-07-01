@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AnimationService } from '../../../core/services/animation.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -33,11 +34,14 @@ const passwordsMatchValidator = (control: AbstractControl): ValidationErrors | n
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly animationService = inject(AnimationService);
+
+  @ViewChild('formRoot') formRoot?: ElementRef<HTMLElement>;
 
   readonly registerForm = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required, Validators.minLength(3), Validators.pattern(usernamePattern)]],
@@ -56,6 +60,30 @@ export class RegisterComponent {
     this.registerForm.controls.password.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.registerForm.controls.confirmPassword.updateValueAndValidity());
+  }
+
+  ngOnInit(): void {
+    requestAnimationFrame(() => this.animateEntrance());
+  }
+
+  handleTogglePassword(): void {
+    this.showPassword = !this.showPassword;
+    const toggle = this.formRoot?.nativeElement.querySelector('.auth-form__toggle');
+    if (toggle && this.animationService.isEnabled) {
+      this.animationService.pressFeedback(toggle);
+    }
+  }
+
+  private animateEntrance(): void {
+    const root = this.formRoot?.nativeElement;
+    if (!root) {
+      return;
+    }
+
+    const items = root.querySelectorAll('.auth-form__header, .auth-form__field, .auth-form__submit, .auth-form__footer');
+    if (items.length > 0) {
+      this.animationService.staggerEnter(Array.from(items), 'fadeUp', 0.05);
+    }
   }
 
   handleSubmit(): void {
@@ -79,7 +107,7 @@ export class RegisterComponent {
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => void this.router.navigate(['/feed']),
+        next: () => void this.router.navigate(['/welcome']),
         error: (error: HttpErrorResponse) => {
           this.isLoading = false;
 

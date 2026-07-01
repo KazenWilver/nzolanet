@@ -162,6 +162,8 @@ export class NotificationsPageComponent implements OnInit {
         return 'mencionou-te numa publicação';
       case 'group_added':
         return 'adicionou-te a um grupo';
+      case 'repost':
+        return this.localeService.translate('notifications.reposted');
       default:
         return '';
     }

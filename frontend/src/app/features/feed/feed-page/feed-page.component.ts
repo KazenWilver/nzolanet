@@ -93,6 +93,10 @@ export class FeedPageComponent implements OnInit {
     this.publicationService.created$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(publication => this.handleCreated(publication));
+
+    this.publicationService.reposted$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(publication => this.handleReposted(publication));
   }
 
   get isFollowingTab(): boolean {
@@ -205,6 +209,12 @@ export class FeedPageComponent implements OnInit {
     }
 
     if (isOwnPublication) {
+      this.prependPublication(publication);
+    }
+  }
+
+  handleReposted(publication: Publication): void {
+    if (this.activeTab === 'para-ti' || publication.authorId === this.currentUserId) {
       this.prependPublication(publication);
     }
   }

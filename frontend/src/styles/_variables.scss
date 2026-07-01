@@ -50,7 +50,7 @@
   // ---------------------------------------------------------------------------
   // Cores semânticas — tema claro (default)
   // ---------------------------------------------------------------------------
-  --color-bg-primary: rgb(var(--theme-light-background));
+  --color-bg-primary: #F9FAFB;
   --color-bg-secondary: rgb(var(--theme-light-sidebar-background));
   --color-bg-search: rgb(var(--theme-light-search-background));
   --color-bg-hover: rgba(15, 20, 25, 0.1);
@@ -69,30 +69,35 @@
   --color-text-muted: #536471;
   --color-text-inverse: #ffffff;
   --color-text-on-accent: #ffffff;
-  --color-text-link: rgb(var(--accent-blue));
+  --color-text-link: #06B6D4;
 
-  --color-accent: rgb(var(--accent-blue));
-  --color-accent-hover: #f07a25;
-  --color-accent-blue: rgb(var(--accent-blue));
-  --color-accent-blue-bg: rgba(var(--accent-blue) / 0.1);
+  --color-accent: #6366F1;
+  --color-accent-hover: #4F46E5;
+  --color-accent-blue: #6366F1;
+  --color-accent-blue-bg: rgba(99, 102, 241, 0.1);
   --color-accent-yellow: rgb(var(--accent-yellow));
   --color-accent-pink: rgb(var(--accent-pink));
   --color-accent-pink-bg: rgba(var(--accent-pink) / 0.1);
   --color-accent-purple: rgb(var(--accent-purple));
-  --color-accent-orange: rgb(var(--accent-orange));
-  --color-accent-green: rgb(var(--accent-green));
+  --color-accent-orange: #FF6B00;
+  --color-accent-green: #10B981;
   --color-accent-red: #f4212e;
   --color-like: rgb(var(--accent-pink));
-  --color-brand-icon: rgb(var(--accent-blue));
+  --color-brand-icon: #6366F1;
 
   --color-border: #eff3f4;
+  --color-border-muted: #E5E7EB;
   --color-border-light: #cfd9de;
+  --color-surface-secondary: #F3F4F6;
+  --chat-bubble-mine: #6366F1;
+  --chat-bubble-theirs: #F3F4F6;
+  --color-link: #06B6D4;
   --color-line-reply: #cfd9de;
   --color-shadow: rgba(101, 119, 134, 0.2);
   --color-shadow-menu: #65778633 0px 0px 15px, #65778626 0px 0px 3px 1px;
 
   --color-danger: #f4212e;
-  --color-success: rgb(var(--accent-green));
+  --color-success: #10B981;
   --color-success-foreground: #15803d;
   --color-success-border: #22c55e;
   --color-surface-muted: #fafafa;
@@ -111,14 +116,14 @@
   --color-btn-follow-bg: #0f1419;
   --color-btn-follow-text: #ffffff;
 
-  // Accent palette — Pico (#E86A17)
+  // Accent palette — indigo primary, orange secondary
   --accent-yellow: 255 213 0;
-  --accent-blue: 232 106 23;
+  --accent-blue: 99 102 241;
   --accent-pink: 249 26 130;
   --accent-purple: 120 87 255;
-  --accent-orange: 217 93 15;
-  --accent-green: 0 184 122;
-  --accent-primary-light: 240 122 37;
+  --accent-orange: 255 107 0;
+  --accent-green: 16 185 129;
+  --accent-primary-light: 129 140 248;
 
   // ---------------------------------------------------------------------------
   // Tipografia
@@ -225,11 +230,11 @@
 
 // Tema escuro (activado com body.dark-theme)
 body.dark-theme {
-  --theme-dark-background: 15 15 16;
-  --theme-dark-search-background: 24 24 24;
-  --theme-dark-sidebar-background: 21 21 21;
+  --theme-dark-background: 15 14 23;
+  --theme-dark-search-background: 24 24 28;
+  --theme-dark-sidebar-background: 21 21 28;
 
-  --color-bg-primary: rgb(var(--theme-dark-background));
+  --color-bg-primary: #0F0E17;
   --color-bg-secondary: rgb(var(--theme-dark-sidebar-background));
   --color-bg-search: rgb(var(--theme-dark-search-background));
   --color-bg-hover: rgba(231, 233, 234, 0.1);
@@ -251,7 +256,13 @@ body.dark-theme {
   --color-brand-icon: #d6d9db;
 
   --color-border: #2f3336;
+  --color-border-muted: #374151;
   --color-border-light: #333639;
+  --color-surface-secondary: #1A1926;
+  --chat-bubble-mine: #6366F1;
+  --chat-bubble-theirs: #2A2938;
+  --color-link: #06B6D4;
+  --color-success: #10B981;
   --color-line-reply: #333639;
   --color-shadow: rgba(255, 255, 255, 0.08);
   --color-shadow-menu: #ffffff33 0px 0px 15px, #ffffff26 0px 0px 3px 1px;

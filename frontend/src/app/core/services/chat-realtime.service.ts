@@ -3,7 +3,7 @@ import * as signalR from '@microsoft/signalr'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { AuthService } from './auth.service'
 import { environment } from '../../../environments/environment'
-import type { ChatMessage, MessageReactionSummary } from '../models/conversation.model'
+import type { ChatMessage, MessageReactionSummary, MessageReadStatus } from '../models/conversation.model'
 import { mapChatMessage } from '../models/conversation.model'
 
 export interface ChatTypingEvent {
@@ -17,6 +17,13 @@ export interface ChatReadReceiptEvent {
   conversationId: string
   readerUserId: string
   readAt: string
+}
+
+export interface ChatPresenceChangedEvent {
+  conversationId: string
+  userId: string
+  isOnline: boolean
+  lastSeenAt?: string
 }
 
 export interface ChatReactionChangedEvent {
@@ -44,6 +51,7 @@ interface BackendMessageBroadcast {
   reactions?: MessageReactionSummary[]
   createdAt: string
   isRead?: boolean
+  readStatus?: MessageReadStatus
 }
 
 export interface ChatMessageDeletedEvent {
@@ -73,6 +81,7 @@ export class ChatRealtimeService {
   private readonly reactionChangedSubject = new Subject<ChatReactionChangedEvent>()
   private readonly messageDeletedSubject = new Subject<ChatMessageDeletedEvent>()
   private readonly messageEditedSubject = new Subject<ChatMessageEditedEvent>()
+  private readonly presenceSubject = new Subject<ChatPresenceChangedEvent>()
 
   readonly connected$ = this.connectedSubject.asObservable()
   readonly message$ = this.messageSubject.asObservable()
@@ -81,6 +90,7 @@ export class ChatRealtimeService {
   readonly reactionChanged$ = this.reactionChangedSubject.asObservable()
   readonly messageDeleted$ = this.messageDeletedSubject.asObservable()
   readonly messageEdited$ = this.messageEditedSubject.asObservable()
+  readonly presence$ = this.presenceSubject.asObservable()
 
   async connect(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -193,7 +203,8 @@ export class ChatRealtimeService {
         isGif: payload.isGif ?? false,
         reactions: payload.reactions ?? [],
         isMine: currentUserId === payload.senderId?.toLowerCase(),
-        isRead: payload.isRead ?? false
+        isRead: payload.isRead ?? false,
+        readStatus: payload.readStatus ?? (payload.isRead ? 'read' : 'sent')
       })
       this.messageSubject.next(message)
     })
@@ -211,6 +222,15 @@ export class ChatRealtimeService {
         conversationId: String(payload.conversationId),
         readerUserId: String(payload.readerUserId),
         readAt: payload.readAt
+      })
+    })
+
+    this.connection.on('PresenceChanged', (payload: ChatPresenceChangedEvent) => {
+      this.presenceSubject.next({
+        conversationId: String(payload.conversationId),
+        userId: String(payload.userId),
+        isOnline: payload.isOnline,
+        lastSeenAt: payload.lastSeenAt
       })
     })
 
@@ -245,7 +265,8 @@ export class ChatRealtimeService {
           isGif: payload.message.isGif ?? false,
           reactions: payload.message.reactions ?? [],
           isMine: currentUserId === payload.message.senderId?.toLowerCase(),
-          isRead: payload.message.isRead ?? false
+          isRead: payload.message.isRead ?? false,
+          readStatus: payload.message.readStatus ?? (payload.message.isRead ? 'read' : 'sent')
         })
       })
     })

@@ -126,23 +126,26 @@
 }
 
 .auth-form__input-wrap .auth-form__input {
-  padding-right: 4.5rem;
+  padding-right: 3rem;
 }
 
 .auth-form__toggle {
   position: absolute;
   right: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: none;
   border-radius: var(--border-radius-full);
   background: transparent;
   color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
   cursor: pointer;
 
   &:hover {
-    background-color: rgba(232, 106, 23, 0.1);
+    background-color: rgba(99, 102, 241, 0.1);
   }
 }
 

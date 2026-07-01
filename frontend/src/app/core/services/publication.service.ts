@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { resolveMediaUrl } from '../helpers/media-url.helper';
 import type {
@@ -16,7 +16,9 @@ import type {
 export class PublicationService {
   private readonly baseUrl = `${environment.apiUrl}/publications`;
   private readonly createdSubject = new Subject<Publication>();
+  private readonly repostedSubject = new Subject<Publication>();
   readonly created$ = this.createdSubject.asObservable();
+  readonly reposted$ = this.repostedSubject.asObservable();
   readonly defaultPageSize = 20;
 
   constructor(private readonly http: HttpClient) {}
@@ -72,6 +74,30 @@ export class PublicationService {
       .pipe(map(publications => publications.map(publication => this.mapPublication(publication))));
   }
 
+  getUserReposts(
+    userId: string,
+    page = 1,
+    pageSize = this.defaultPageSize
+  ): Observable<PaginatedPublications> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('pageSize', pageSize);
+
+    return this.http
+      .get<BackendPaginatedPublicationsDto>(`${this.baseUrl}/user/${userId}/reposts`, { params })
+      .pipe(
+        map(response => this.mapPaginated(response)),
+        catchError(() =>
+          this.getByUser(userId, page, pageSize).pipe(
+            map(response => ({
+              ...response,
+              items: response.items.filter(item => !!item.quotedPublication)
+            }))
+          )
+        )
+      );
+  }
+
   create(formData: FormData): Observable<Publication> {
     return this.http
       .post<BackendPublicationDto>(this.baseUrl, formData)
@@ -120,7 +146,12 @@ export class PublicationService {
           quotedPublication: response.quotedPublication
             ? this.mapPublication(response.quotedPublication)
             : undefined
-        }))
+        })),
+        tap(response => {
+          if (response.quotedPublication) {
+            this.repostedSubject.next(response.quotedPublication);
+          }
+        })
       )
   }
 

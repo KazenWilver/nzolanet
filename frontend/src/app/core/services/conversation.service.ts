@@ -159,11 +159,13 @@ export class ConversationService {
   forwardMessage(
     conversationId: string,
     messageId: string,
-    targetConversationIds: string[]
+    targetConversationIds: string[],
+    caption?: string
   ): Observable<ChatMessage[]> {
     return this.http
       .post<BackendMessageDto[]>(`${this.baseUrl}/${conversationId}/messages/${messageId}/forward`, {
-        targetConversationIds
+        targetConversationIds,
+        caption: caption?.trim() || null
       })
       .pipe(map(messages => messages.map(mapChatMessage)))
   }

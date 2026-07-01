@@ -80,7 +80,8 @@ const ptPT: LocaleMessages = {
     liked: 'deu baze na tua publicação',
     commented: 'comentou na tua publicação',
     followed: 'começou a seguir-te',
-    sentMessage: 'enviou-te uma mensagem'
+    sentMessage: 'enviou-te uma mensagem',
+    reposted: 'repartilhou a tua publicação'
   },
   settings: {
     title: 'Definições',

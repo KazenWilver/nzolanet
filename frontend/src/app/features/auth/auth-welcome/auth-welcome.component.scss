@@ -1,0 +1,31 @@
+.auth-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 280px;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.auth-welcome__logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.25);
+}
+
+.auth-welcome__title {
+  margin: 0;
+  font-family: var(--font-family-extended);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-text-primary);
+}
+
+.auth-welcome__subtitle {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}

@@ -1,9 +1,10 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AnimationService } from '../../../core/services/animation.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TPipe } from '../../../core/i18n/translate.pipe';
@@ -24,6 +25,9 @@ export class LoginComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly animationService = inject(AnimationService);
+
+  @ViewChild('formRoot') formRoot?: ElementRef<HTMLElement>;
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -49,6 +53,28 @@ export class LoginComponent implements OnInit {
         ? this.localeService.translate('auth.sessionExpired')
         : '';
     });
+
+    requestAnimationFrame(() => this.animateEntrance());
+  }
+
+  handleTogglePassword(): void {
+    this.showPassword = !this.showPassword;
+    const toggle = this.formRoot?.nativeElement.querySelector('.auth-form__toggle');
+    if (toggle && this.animationService.isEnabled) {
+      this.animationService.pressFeedback(toggle);
+    }
+  }
+
+  private animateEntrance(): void {
+    const root = this.formRoot?.nativeElement;
+    if (!root) {
+      return;
+    }
+
+    const items = root.querySelectorAll('.auth-form__header, .auth-form__field, .auth-form__link, .auth-form__submit, .auth-form__footer');
+    if (items.length > 0) {
+      this.animationService.staggerEnter(Array.from(items), 'fadeUp', 0.06);
+    }
   }
 
   handleSubmit(): void {
@@ -68,7 +94,7 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isLoading = false;
-          void this.router.navigate(['/feed']);
+          void this.router.navigate(['/welcome']);
         },
         error: (error: HttpErrorResponse) => {
           this.isLoading = false;
