@@ -7,12 +7,9 @@ import { UserService } from '../../core/services/user.service';
 import { translateApiMessage } from '../../core/helpers/translate-api-message.helper';
 import type { User } from '../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
-import { LocaleService } from '../../core/i18n/locale.service';
 import { TPipe } from '../../core/i18n/translate.pipe';
-import { AnimationService } from '../../core/services/animation.service';
-import type { LocaleCode } from '../../core/i18n/locale.types';
 
-type SettingsSection = 'account' | 'privacy' | 'password' | 'language';
+type SettingsSection = 'account' | 'privacy' | 'password';
 
 @Component({
   selector: 'app-settings',
@@ -24,16 +21,13 @@ type SettingsSection = 'account' | 'privacy' | 'password' | 'language';
 export class SettingsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
-  readonly localeService = inject(LocaleService);
-  private readonly animationService = inject(AnimationService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly maxBioLength = 160;
   readonly sections: Array<{ id: SettingsSection; label: string }> = [
     { id: 'account', label: 'Conta' },
     { id: 'privacy', label: 'Privacidade' },
-    { id: 'password', label: 'Palavra-passe' },
-    { id: 'language', label: 'Idioma' }
+    { id: 'password', label: 'Palavra-passe' }
   ];
 
   activeSection: SettingsSection = 'account';
@@ -54,7 +48,6 @@ export class SettingsComponent implements OnInit {
   savingPassword = false;
   passwordError = '';
   passwordSuccess = false;
-  updatingLocale = false;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -79,15 +72,6 @@ export class SettingsComponent implements OnInit {
     this.privacyError = '';
     this.passwordError = '';
     this.passwordSuccess = false;
-
-    if (section === 'language') {
-      requestAnimationFrame(() => {
-        const nodes = document.querySelectorAll('.settings__language-item');
-        if (nodes.length > 0) {
-          this.animationService.staggerEnter(Array.from(nodes), 'fadeUp', 0.04);
-        }
-      });
-    }
   }
 
   saveAccount(): void {
@@ -202,15 +186,5 @@ export class SettingsComponent implements OnInit {
             translateApiMessage(rawMessage) || 'Não foi possível alterar a palavra-passe.';
         }
       });
-  }
-
-  async setLocale(code: LocaleCode): Promise<void> {
-    if (this.updatingLocale || this.localeService.currentLocale() === code) {
-      return;
-    }
-
-    this.updatingLocale = true;
-    await this.localeService.loadLocale(code);
-    this.updatingLocale = false;
   }
 }

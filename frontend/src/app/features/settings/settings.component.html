@@ -197,27 +197,6 @@
           </button>
         </section>
       }
-
-      @if (activeSection === 'language') {
-        <section class="settings__panel" aria-labelledby="settings-language-title">
-          <h2 id="settings-language-title" class="settings__panel-title">{{ 'settings.language' | t }}</h2>
-          <p class="settings__hint">{{ 'settings.languageDescription' | t }}</p>
-          <div class="settings__language-list">
-            @for (locale of localeService.supportedLocales; track locale.code) {
-              <button
-                type="button"
-                class="settings__language-item"
-                [class.settings__language-item--active]="localeService.currentLocale() === locale.code"
-                [disabled]="updatingLocale"
-                (click)="setLocale(locale.code)"
-              >
-                <span>{{ locale.flag }}</span>
-                <span>{{ locale.nativeLabel }}</span>
-              </button>
-            }
-          </div>
-        </section>
-      }
     </div>
   </div>
 </section>

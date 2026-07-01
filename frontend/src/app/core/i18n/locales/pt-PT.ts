@@ -1,5 +1,6 @@
 import type { LocaleMessages } from '../locale.types'
 
+/** Fonte única de textos da interface em português de Portugal. */
 const ptPT: LocaleMessages = {
   nav: {
     feed: 'Feed',

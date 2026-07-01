@@ -1,23 +1,4 @@
-export type LocaleCode =
-  | 'pt-PT'
-  | 'pt-BR'
-  | 'en'
-  | 'fr'
-  | 'zh'
-  | 'es'
-  | 'hi'
-  | 'ar'
-  | 'ru'
-  | 'bn'
-  | 'ur'
-  | 'ja'
-  | 'ko'
-  | 'de'
-  | 'vi'
-  | 'it'
-  | 'th'
-  | 'tr'
-  | 'sw'
+export type LocaleCode = 'pt-PT'
 
 export interface LocaleMessages {
   nav: {

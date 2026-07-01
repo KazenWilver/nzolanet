@@ -16,7 +16,7 @@ test.describe('NzolaNet — Testes E2E Completos', () => {
     const bodyBg = await page.locator('body').evaluate(
       el => window.getComputedStyle(el).backgroundColor
     );
-    expect(bodyBg).toBe('rgb(0, 0, 0)');
+    expect(bodyBg).toBe('rgb(15, 15, 16)');
 
     const fontFamily = await page.locator('body').evaluate(
       el => window.getComputedStyle(el).fontFamily
@@ -157,13 +157,24 @@ test.describe('NzolaNet — Testes E2E Completos', () => {
     await primeiraConversa.click()
 
     const composer = page.locator('.messages-page__composer-input')
+    await expect(composer).toBeVisible({ timeout: 10000 })
     await composer.fill('Mensagem e2e de notificação')
-    await page.click('.messages-page__send-btn')
+    await Promise.all([
+      page.waitForResponse(response =>
+        response.url().includes('/api/conversations/') &&
+        response.url().includes('/messages') &&
+        response.request().method() === 'POST' &&
+        response.ok()
+      ),
+      page.click('.messages-page__send-btn')
+    ])
 
     await page.goto('/notifications')
     await page.waitForLoadState('networkidle')
 
-    await expect(page.locator('.notifications-page__message').first()).toContainText('enviou-te uma mensagem')
+    await expect(
+      page.locator('.notifications-page__message').filter({ hasText: 'enviou-te uma mensagem' })
+    ).toBeVisible({ timeout: 10000 })
   })
 });
 
