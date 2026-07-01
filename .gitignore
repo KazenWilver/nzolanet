@@ -90,8 +90,10 @@ secrets.json
 *.key
 
 # ---------- Uploads (não versionar conteúdo do utilizador) ----------
-wwwroot/uploads/
+**/wwwroot/uploads/
+**/wwwroot/messages/
 uploads/
+original-*.png
 
 # ---------- Build / Cache ----------
 .cache/
