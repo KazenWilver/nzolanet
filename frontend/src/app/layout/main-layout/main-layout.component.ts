@@ -46,6 +46,7 @@ export class MainLayoutComponent {
 
   currentUser: User | null = null;
   showMobileTopbar = false;
+  isMessagesRoute = false;
   private initialNavigation = true;
   private previousPath = '';
 
@@ -60,6 +61,7 @@ export class MainLayoutComponent {
       });
 
     this.previousPath = this.router.url.split('?')[0];
+    this.isMessagesRoute = this.previousPath.startsWith('/messages');
     this.updateMobileTopbar(this.router.url);
 
     this.router.events
@@ -88,6 +90,7 @@ export class MainLayoutComponent {
         }
 
         const currentPath = event.urlAfterRedirects.split('?')[0];
+        this.isMessagesRoute = currentPath.startsWith('/messages');
         this.updateMobileTopbar(event.urlAfterRedirects);
 
         if (this.initialNavigation) {

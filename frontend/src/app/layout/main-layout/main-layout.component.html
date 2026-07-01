@@ -1,4 +1,4 @@
-<div class="main-layout">
+<div class="main-layout" [class.main-layout--messages]="isMessagesRoute">
   <div class="main-layout__sidebar">
     <app-sidebar />
   </div>
@@ -13,9 +13,11 @@
     </main>
   </div>
 
-  <aside class="main-layout__aside">
-    <app-aside />
-  </aside>
+  @if (!isMessagesRoute) {
+    <aside class="main-layout__aside">
+      <app-aside />
+    </aside>
+  }
 </div>
 
 @if (mediaOverlay.state(); as overlay) {
