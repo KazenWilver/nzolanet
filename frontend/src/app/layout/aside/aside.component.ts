@@ -5,11 +5,13 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { WhoToFollowComponent } from '../../shared/components/who-to-follow/who-to-follow.component';
 import { SearchService } from '../../core/services/search.service';
+import { AnimationService } from '../../core/services/animation.service';
+import { TPipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-aside',
   standalone: true,
-  imports: [FormsModule, RouterModule, WhoToFollowComponent],
+  imports: [FormsModule, RouterModule, WhoToFollowComponent, TPipe],
   templateUrl: './aside.component.html',
   styleUrl: './aside.component.scss'
 })
@@ -17,6 +19,7 @@ export class AsideComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchService = inject(SearchService);
+  private readonly animationService = inject(AnimationService);
 
   searchQuery = '';
   trendingHashtags: string[] = [];
@@ -38,6 +41,12 @@ export class AsideComponent implements OnInit {
       .subscribe({
         next: hashtags => {
           this.trendingHashtags = hashtags;
+          requestAnimationFrame(() => {
+            const items = document.querySelectorAll('.aside__trends li');
+            if (items.length > 0) {
+              this.animationService.staggerEnter(Array.from(items), 'fadeUp', 0.05);
+            }
+          });
         }
       });
   }

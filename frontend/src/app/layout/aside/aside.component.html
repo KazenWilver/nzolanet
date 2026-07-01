@@ -8,7 +8,7 @@
       name="asideSearch"
       [(ngModel)]="searchQuery"
       (input)="handleSearchKeyup()"
-      placeholder="Pesquisar utilizadores..."
+      [placeholder]="'nav.search' | t"
       aria-label="Pesquisa rápida de utilizadores"
     />
   </form>
@@ -16,7 +16,7 @@
   <section class="aside__section">
     <header class="aside__section-header">Tendências</header>
     @if (trendingHashtags.length === 0) {
-      <p class="aside__empty">Sem tendências de momento.</p>
+      <p class="aside__empty">{{ 'notifications.empty' | t }}</p>
     } @else {
       <ul class="aside__trends">
         @for (tag of trendingHashtags; track tag) {
