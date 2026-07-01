@@ -145,6 +145,26 @@ test.describe('NzolaNet — Testes E2E Completos', () => {
 
     await expect(likeButton).toHaveAttribute('aria-pressed', 'true');
   });
+
+  test('13. Notificação de mensagem aparece no centro de notificações', async ({ page }) => {
+    await fazerLogin(page)
+
+    await page.goto('/messages')
+    await page.waitForLoadState('networkidle')
+
+    const primeiraConversa = page.locator('.messages-page__list-item').first()
+    await expect(primeiraConversa).toBeVisible({ timeout: 10000 })
+    await primeiraConversa.click()
+
+    const composer = page.locator('.messages-page__composer-input')
+    await composer.fill('Mensagem e2e de notificação')
+    await page.click('.messages-page__send-btn')
+
+    await page.goto('/notifications')
+    await page.waitForLoadState('networkidle')
+
+    await expect(page.locator('.notifications-page__message').first()).toContainText('enviou-te uma mensagem')
+  })
 });
 
 async function fazerLogin(page: import('@playwright/test').Page): Promise<void> {

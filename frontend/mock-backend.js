@@ -194,6 +194,37 @@ function criarTokenParaUtilizador(utilizador) {
 }
 
 const followRequests = [];
+const bookmarks = [];
+const conversations = [
+  {
+    id: 'conv-1',
+    title: null,
+    isGroup: false,
+    participantIds: [1, 2],
+    lastMessageAt: '2026-06-30T12:00:00.000Z'
+  }
+];
+const conversationMessages = [
+  {
+    id: 'msg-1',
+    conversationId: 'conv-1',
+    senderId: '2',
+    senderUsername: 'ana',
+    senderDisplayName: 'Ana Silva',
+    senderPhotoUrl: '',
+    text: 'Olá! Esta é uma mensagem de teste.',
+    imageUrl: '',
+    videoUrl: '',
+    remoteImageUrl: '',
+    forwardedFromMessageId: null,
+    isEdited: false,
+    isDeletedForEveryone: false,
+    isGif: false,
+    createdAt: '2026-06-30T12:00:00.000Z',
+    reactions: [],
+    replyTo: null
+  }
+];
 
 function transformarUtilizador(u) {
   if (!u) return u;
@@ -218,6 +249,10 @@ function mapUserDto(u) {
 
 function mapPostToPublication(post, currentUser = null) {
   const author = users.find(u => u.id === post.autorId);
+  const bookmarksCount = bookmarks.filter(bookmark => bookmark.postId === post.id).length;
+  const hasBookmarked = !!currentUser && bookmarks.some(
+    bookmark => bookmark.userId === currentUser.id && bookmark.postId === post.id
+  );
   return {
     id: String(post.id),
     text: post.texto,
@@ -231,7 +266,11 @@ function mapPostToPublication(post, currentUser = null) {
     authorPhotoUrl: author?.fotoPerfil || '',
     likesCount: post.totalBazes || 0,
     commentsCount: post.totalComentarios || 0,
-    hasLiked: !!post.utilizadorDeuBaze
+    repostsCount: post.repostsCount || 0,
+    bookmarksCount,
+    hasLiked: !!post.utilizadorDeuBaze,
+    hasReposted: !!post.hasReposted,
+    hasBookmarked
   };
 }
 
@@ -717,15 +756,16 @@ app.delete('/api/notificacoes/:id', (req, res) => {
 function mapNotificationDto(notification) {
   const actor = users.find(u => u.id === notification.utilizadorId);
   const typeMap = {
-    baze: 'Like',
-    comentario: 'Comment',
-    seguidor: 'Follow',
-    pedido_seguir: 'FollowRequest'
+    baze: 'baze',
+    comentario: 'comment',
+    seguidor: 'follow',
+    pedido_seguir: 'follow_request',
+    mensagem: 'message'
   };
 
   return {
     id: String(notification.id),
-    type: typeMap[notification.tipo] || 'Like',
+    type: typeMap[notification.tipo] || 'baze',
     isRead: notification.lida ?? false,
     createdAt: notification.criadoEm,
     actorId: String(notification.utilizadorId),
@@ -735,7 +775,9 @@ function mapNotificationDto(notification) {
     publicationId: notification.postId ? String(notification.postId) : undefined,
     publicationText: notification.postId
       ? posts.find(p => p.id === notification.postId)?.texto
-      : undefined
+      : undefined,
+    conversationId: notification.conversationId,
+    messageText: notification.messageText
   };
 }
 
@@ -825,9 +867,82 @@ app.delete('/api/publications/:id/like', (req, res) => {
   return res.status(204).send();
 });
 
+app.get('/api/publications/hashtag/:tag', (req, res) => {
+  const tag = String(req.params.tag || '').toLowerCase().replace(/^#/, '');
+  const page = parseInt(req.query.page ?? '1', 10);
+  const pageSize = parseInt(req.query.pageSize ?? '20', 10);
+  const filtered = posts
+    .filter(post => (post.texto || '').toLowerCase().includes(`#${tag}`))
+    .map(post => mapPostToPublication(post, findUserByToken(req)));
+  return res.json(paginatePublications(filtered, page, pageSize));
+});
+
+app.get('/api/publications/trending-hashtags', (req, res) => {
+  const limit = parseInt(req.query.limit ?? '10', 10);
+  const counts = new Map();
+  posts.forEach(post => {
+    const text = post.texto || '';
+    const matches = text.match(/#([A-Za-z0-9_\u00C0-\u024F]+)/g) || [];
+    matches.forEach(match => {
+      const tag = match.slice(1).toLowerCase();
+      counts.set(tag, (counts.get(tag) || 0) + 1);
+    });
+  });
+  const trending = [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, Math.max(1, limit))
+    .map(entry => entry[0]);
+  return res.json(trending);
+});
+
+app.post('/api/publications/:id/bookmark', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+
+  const postId = Number(req.params.id);
+  const exists = bookmarks.some(bookmark => bookmark.userId === user.id && bookmark.postId === postId);
+  if (!exists) {
+    bookmarks.push({
+      id: bookmarks.length + 1,
+      userId: user.id,
+      postId,
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  return res.status(204).send();
+});
+
+app.delete('/api/publications/:id/bookmark', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+
+  const postId = Number(req.params.id);
+  const index = bookmarks.findIndex(bookmark => bookmark.userId === user.id && bookmark.postId === postId);
+  if (index !== -1) {
+    bookmarks.splice(index, 1);
+  }
+
+  return res.status(204).send();
+});
+
 app.get('/api/users/:id/liked-publications', (req, res) => {
   const liked = posts.filter(p => p.utilizadorDeuBaze).map(post => mapPostToPublication(post));
   return res.json(liked);
+});
+
+app.get('/api/users/me/bookmarks', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const page = parseInt(req.query.page ?? '1', 10);
+  const pageSize = parseInt(req.query.pageSize ?? '20', 10);
+  const saved = bookmarks
+    .filter(bookmark => bookmark.userId === user.id)
+    .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)))
+    .map(bookmark => posts.find(post => post.id === bookmark.postId))
+    .filter(Boolean)
+    .map(post => mapPostToPublication(post, user));
+  return res.json(paginatePublications(saved, page, pageSize));
 });
 
 app.get('/api/users/:id/followers', (req, res) => {
@@ -876,6 +991,243 @@ app.delete('/api/users/:id/follow', (req, res) => {
     if (alvoUser) alvoUser.totalSeguidores = Math.max(0, alvoUser.totalSeguidores - 1);
     user.totalSeguindo = Math.max(0, user.totalSeguindo - 1);
   }
+  return res.status(204).send();
+});
+
+app.get('/api/conversations', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+
+  const items = conversations
+    .filter(conversation => conversation.participantIds.includes(user.id))
+    .map(conversation => {
+      const otherParticipant = users.find(participant => participant.id !== user.id && conversation.participantIds.includes(participant.id));
+      return {
+        id: conversation.id,
+        otherUserId: otherParticipant ? String(otherParticipant.id) : undefined,
+        otherUsername: otherParticipant?.nomeUtilizador,
+        otherDisplayName: otherParticipant?.nome,
+        otherPhotoUrl: otherParticipant?.fotoPerfil || '',
+        title: conversation.title,
+        isGroup: conversation.isGroup,
+        participantCount: conversation.participantIds.length,
+        lastMessageText: 'Mensagem de teste',
+        lastMessageAt: conversation.lastMessageAt,
+        unreadCount: 1
+      };
+    });
+
+  return res.json(items);
+});
+
+app.get('/api/conversations/unread-count', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const count = conversations.filter(conversation => conversation.participantIds.includes(user.id)).length;
+  return res.json({ count });
+});
+
+app.post('/api/conversations', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const participantId = Number(req.body.participantId);
+  const other = users.find(item => item.id === participantId);
+  if (!other) return res.status(404).json({ message: 'Utilizador não encontrado.' });
+  const existing = conversations.find(conversation =>
+    !conversation.isGroup &&
+    conversation.participantIds.includes(user.id) &&
+    conversation.participantIds.includes(participantId)
+  );
+  const conversation = existing || {
+    id: `conv-${conversations.length + 1}`,
+    title: null,
+    isGroup: false,
+    participantIds: [user.id, participantId],
+    lastMessageAt: new Date().toISOString()
+  };
+  if (!existing) {
+    conversations.unshift(conversation);
+  }
+  return res.json({
+    id: conversation.id,
+    otherUserId: String(other.id),
+    otherUsername: other.nomeUtilizador,
+    otherDisplayName: other.nome,
+    otherPhotoUrl: other.fotoPerfil || '',
+    isGroup: false,
+    participantCount: 2,
+    lastMessageText: '',
+    lastMessageAt: conversation.lastMessageAt,
+    unreadCount: 0
+  });
+});
+
+app.post('/api/conversations/group', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+
+  const participantIds = Array.isArray(req.body.participantIds) ? req.body.participantIds.map(Number) : [];
+  const conversation = {
+    id: `conv-${conversations.length + 1}`,
+    title: req.body.title || 'Grupo',
+    isGroup: true,
+    participantIds: [user.id, ...participantIds.filter(id => Number.isFinite(id))],
+    lastMessageAt: new Date().toISOString()
+  };
+  conversations.unshift(conversation);
+
+  return res.json({
+    id: conversation.id,
+    title: conversation.title,
+    isGroup: true,
+    participantCount: conversation.participantIds.length,
+    unreadCount: 0
+  });
+});
+
+app.get('/api/conversations/:id/messages', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+
+  const limit = parseInt(req.query.limit ?? '50', 10);
+  const before = req.query.before ? new Date(String(req.query.before)).getTime() : Number.POSITIVE_INFINITY;
+  const messages = conversationMessages
+    .filter(message => message.conversationId === req.params.id)
+    .filter(message => new Date(message.createdAt).getTime() < before)
+    .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime())
+    .slice(-limit)
+    .map(message => ({
+      ...message,
+      isMine: message.senderId === String(user.id),
+      isRead: false
+    }));
+
+  return res.json(messages);
+});
+
+app.post('/api/conversations/:id/messages', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const now = new Date().toISOString();
+  const message = {
+    id: `msg-${conversationMessages.length + 1}`,
+    conversationId: req.params.id,
+    senderId: String(user.id),
+    senderUsername: user.nomeUtilizador,
+    senderDisplayName: user.nome,
+    senderPhotoUrl: user.fotoPerfil || '',
+    text: req.body.text || '',
+    imageUrl: '',
+    videoUrl: '',
+    remoteImageUrl: req.body.remoteImageUrl || '',
+    forwardedFromMessageId: null,
+    isEdited: false,
+    isDeletedForEveryone: false,
+    isGif: (req.body.remoteImageUrl || '').toLowerCase().endsWith('.gif'),
+    replyTo: null,
+    reactions: [],
+    createdAt: now
+  };
+  conversationMessages.push(message);
+
+  notificacoes.unshift({
+    id: notificacoes.length + 1,
+    tipo: 'mensagem',
+    utilizadorId: user.id,
+    utilizadorNome: user.nomeUtilizador,
+    lida: false,
+    conversationId: req.params.id,
+    messageText: message.text,
+    criadoEm: now
+  });
+
+  return res.json({ ...message, isMine: true, isRead: false });
+});
+
+app.post('/api/conversations/:id/messages/media', upload.fields([{ name: 'image' }, { name: 'video' }]), (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const now = new Date().toISOString();
+  const message = {
+    id: `msg-${conversationMessages.length + 1}`,
+    conversationId: req.params.id,
+    senderId: String(user.id),
+    senderUsername: user.nomeUtilizador,
+    senderDisplayName: user.nome,
+    senderPhotoUrl: user.fotoPerfil || '',
+    text: req.body.text || '',
+    imageUrl: req.body.remoteImageUrl || '',
+    videoUrl: '',
+    remoteImageUrl: req.body.remoteImageUrl || '',
+    forwardedFromMessageId: null,
+    isEdited: false,
+    isDeletedForEveryone: false,
+    isGif: (req.body.remoteImageUrl || '').toLowerCase().endsWith('.gif'),
+    replyTo: null,
+    reactions: [],
+    createdAt: now
+  };
+  conversationMessages.push(message);
+  return res.json({ ...message, isMine: true, isRead: false });
+});
+
+app.patch('/api/conversations/:id/messages/:messageId', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const message = conversationMessages.find(item => item.id === req.params.messageId && item.conversationId === req.params.id);
+  if (!message) return res.status(404).json({ message: 'Mensagem não encontrada.' });
+  message.text = req.body.text || message.text;
+  message.isEdited = true;
+  return res.json({ ...message, isMine: message.senderId === String(user.id), isRead: false });
+});
+
+app.delete('/api/conversations/:id/messages/:messageId', (req, res) => {
+  const scope = String(req.query.scope || 'self');
+  const index = conversationMessages.findIndex(item => item.id === req.params.messageId && item.conversationId === req.params.id);
+  if (index === -1) return res.status(404).json({ message: 'Mensagem não encontrada.' });
+  if (scope === 'self') {
+    conversationMessages.splice(index, 1);
+    return res.status(204).send();
+  }
+  conversationMessages[index].isDeletedForEveryone = true;
+  conversationMessages[index].text = '';
+  conversationMessages[index].imageUrl = '';
+  conversationMessages[index].videoUrl = '';
+  return res.status(204).send();
+});
+
+app.post('/api/conversations/:id/messages/:messageId/forward', (req, res) => {
+  const user = findUserByToken(req);
+  if (!user) return res.status(401).json({ message: 'Token inválido.' });
+  const sourceMessage = conversationMessages.find(item => item.id === req.params.messageId);
+  if (!sourceMessage) return res.status(404).json({ message: 'Mensagem não encontrada.' });
+  const targetIds = Array.isArray(req.body.targetConversationIds) ? req.body.targetConversationIds : [];
+  const now = new Date().toISOString();
+  const forwarded = targetIds.map(targetId => ({
+    ...sourceMessage,
+    id: `msg-${conversationMessages.length + 1 + Math.floor(Math.random() * 1000)}`,
+    conversationId: String(targetId),
+    senderId: String(user.id),
+    senderUsername: user.nomeUtilizador,
+    senderDisplayName: user.nome,
+    forwardedFromMessageId: sourceMessage.id,
+    createdAt: now,
+    isMine: true,
+    isRead: false
+  }));
+  conversationMessages.push(...forwarded.map(item => ({ ...item })));
+  return res.json(forwarded);
+});
+
+app.post('/api/conversations/:id/messages/:messageId/reactions', (req, res) => {
+  const message = conversationMessages.find(item => item.id === req.params.messageId && item.conversationId === req.params.id);
+  if (!message) return res.status(404).json({ message: 'Mensagem não encontrada.' });
+  const emoji = req.body.emoji || '👍';
+  message.reactions = [{ emoji, count: 1, reactedByMe: true }];
+  return res.json({ reactions: message.reactions });
+});
+
+app.put('/api/conversations/:id/read', (_req, res) => {
   return res.status(204).send();
 });
 
