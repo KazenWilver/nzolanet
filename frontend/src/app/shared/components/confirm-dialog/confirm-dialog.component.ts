@@ -12,7 +12,9 @@ export class ConfirmDialogComponent implements OnInit, OnDestroy {
   private readonly focusTrap = inject(FocusTrapService);
   private readonly scrollLock = inject(ScrollLockService);
 
-  @Input() mensagem = 'Tens a certeza?';
+  @Input() mensagem = 'Tens a certeza?'
+  @Input() textoConfirmar = 'Sim'
+  @Input() textoCancelar = 'Não';
   @Output() confirmado = new EventEmitter<void>();
   @Output() cancelado = new EventEmitter<void>();
 

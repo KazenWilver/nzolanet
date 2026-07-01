@@ -74,14 +74,12 @@ public class ConversationRepository : IConversationRepository
         IReadOnlyCollection<Guid> participantIds)
     {
         var distinctParticipants = participantIds
-            .Where(id => id != Guid.Empty)
+            .Where(id => id != Guid.Empty && id != creatorUserId)
             .Distinct()
             .ToList();
 
-        if (!distinctParticipants.Contains(creatorUserId))
-        {
-            distinctParticipants.Add(creatorUserId);
-        }
+        var orderedParticipants = new List<Guid> { creatorUserId };
+        orderedParticipants.AddRange(distinctParticipants);
 
         var now = DateTime.UtcNow;
         var conversation = new Conversation
@@ -90,7 +88,7 @@ public class ConversationRepository : IConversationRepository
             IsGroup = true,
             CreatedAt = now,
             UpdatedAt = now,
-            Participants = distinctParticipants.Select(participantId => new ConversationParticipant
+            Participants = orderedParticipants.Select(participantId => new ConversationParticipant
             {
                 UserId = participantId,
                 JoinedAt = now
@@ -479,5 +477,39 @@ public class ConversationRepository : IConversationRepository
                 (m.VideoPath != null && paths.Contains(m.VideoPath)) ||
                 (m.DocumentPath != null && paths.Contains(m.DocumentPath)) ||
                 (m.AudioPath != null && paths.Contains(m.AudioPath)));
+    }
+
+    public async Task<Guid?> GetGroupCreatorUserIdAsync(Guid conversationId)
+    {
+        return await _context.ConversationParticipants
+            .AsNoTracking()
+            .Where(participant => participant.ConversationId == conversationId)
+            .OrderBy(participant => participant.Id)
+            .Select(participant => participant.UserId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> DeleteConversationAsync(Guid conversationId)
+    {
+        var conversation = await _context.Conversations
+            .FirstOrDefaultAsync(item => item.Id == conversationId);
+
+        if (conversation == null)
+        {
+            return false;
+        }
+
+        var notifications = await _context.Notifications
+            .Where(notification => notification.ConversationId == conversationId)
+            .ToListAsync();
+
+        if (notifications.Count > 0)
+        {
+            _context.Notifications.RemoveRange(notifications);
+        }
+
+        _context.Conversations.Remove(conversation);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

@@ -32,4 +32,6 @@ public interface IConversationRepository
     Task<bool> UpdateGroupAsync(Guid conversationId, string? title, string? description, string? imagePath);
     Task<Conversation?> GetByImagePathAsync(string imagePath);
     Task<Message?> GetByMediaPathAsync(string mediaPath);
+    Task<Guid?> GetGroupCreatorUserIdAsync(Guid conversationId);
+    Task<bool> DeleteConversationAsync(Guid conversationId);
 }

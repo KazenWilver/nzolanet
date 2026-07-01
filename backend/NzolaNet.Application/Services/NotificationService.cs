@@ -260,6 +260,7 @@ public class NotificationService : INotificationService
     public async Task TryCreateMessageNotificationAsync(
         Guid actorId,
         Guid conversationId,
+        Guid messageId,
         Guid recipientId,
         string? messagePreview)
     {
@@ -276,6 +277,7 @@ public class NotificationService : INotificationService
                 ActorId = actorId,
                 Type = "message",
                 ConversationId = conversationId,
+                MessageId = messageId,
                 MessagePreview = TruncatePreview(messagePreview),
                 CreatedAt = DateTime.UtcNow
             };
@@ -287,6 +289,42 @@ public class NotificationService : INotificationService
             _logger.LogError(
                 ex,
                 "Falha ao criar notificação de mensagem para o utilizador {RecipientId}.",
+                recipientId);
+        }
+    }
+
+    public async Task TryCreateChatMentionNotificationAsync(
+        Guid actorId,
+        Guid conversationId,
+        Guid messageId,
+        Guid recipientId,
+        string? messagePreview)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "chat_mention",
+                ConversationId = conversationId,
+                MessageId = messageId,
+                MessagePreview = TruncatePreview(messagePreview),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao criar notificação de menção no chat para o utilizador {RecipientId}.",
                 recipientId);
         }
     }
@@ -406,6 +444,7 @@ public class NotificationService : INotificationService
             CommentId = notification.CommentId,
             CommentText = TruncatePreview(commentText),
             ConversationId = notification.ConversationId,
+            MessageId = notification.MessageId,
             MessageText = TruncatePreview(notification.MessagePreview)
         };
     }

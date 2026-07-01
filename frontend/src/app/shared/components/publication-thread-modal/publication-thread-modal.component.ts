@@ -33,6 +33,7 @@ import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
 import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { MentionAutocompleteDirective } from '../../directives/mention-autocomplete.directive';
 
 @Component({
   selector: 'app-publication-thread-modal',
@@ -44,7 +45,8 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
     TimeAgoPipe,
     LinkifyTextPipe,
     AvatarComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    MentionAutocompleteDirective
   ],
   templateUrl: './publication-thread-modal.component.html',
   styleUrl: './publication-thread-modal.component.scss'

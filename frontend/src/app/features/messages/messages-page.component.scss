@@ -793,7 +793,12 @@
 }
 
 .messages-page__bubble--mine .messages-page__bubble-text :deep(.linkify__mention) {
-  color: #fde047;
+  color: #ffffff;
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.65);
+  text-underline-offset: 2px;
+  text-shadow: 0 1px 2px rgba(15, 14, 23, 0.35);
 }
 
 .messages-page__bubble--theirs .messages-page__bubble-text :deep(.linkify__mention) {
@@ -1245,15 +1250,33 @@
 
 .messages-page__composer-input {
   flex: 1;
-  min-height: 44px;
-  max-height: 120px;
+  min-height: 52px;
+  max-height: 192px;
   resize: none;
+  overflow-y: auto;
   border: 1px solid var(--color-border);
-  border-radius: 9999px;
-  padding: 11px 16px;
+  border-radius: 22px;
+  padding: 14px 18px;
+  line-height: 1.45;
   font: inherit;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  &::-webkit-scrollbar-thumb,
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 
   &:focus {
     outline: 2px solid var(--color-accent);

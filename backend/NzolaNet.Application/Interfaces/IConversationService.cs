@@ -53,4 +53,5 @@ public interface IConversationService
         Guid conversationId,
         UpdateGroupConversationDto dto,
         Microsoft.AspNetCore.Http.IFormFile? image = null);
+    Task DeleteGroupConversationAsync(Guid userId, Guid conversationId);
 }

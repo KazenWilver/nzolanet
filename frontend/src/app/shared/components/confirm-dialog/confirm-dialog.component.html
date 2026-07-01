@@ -10,10 +10,10 @@
     <p class="dialogo__mensagem">{{ mensagem }}</p>
     <div class="dialogo__acoes">
       <button type="button" class="dialogo__btn dialogo__btn--cancelar" (click)="cancelar()">
-        Cancelar
+        {{ textoCancelar }}
       </button>
       <button type="button" class="dialogo__btn dialogo__btn--confirmar" (click)="confirmar()">
-        Confirmar
+        {{ textoConfirmar }}
       </button>
     </div>
   </div>

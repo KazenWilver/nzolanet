@@ -218,3 +218,36 @@
 .group-info__search {
   display: block;
 }
+
+.group-info__danger {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.group-info__danger h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.group-info__delete-btn {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-danger);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--color-danger);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.28s ease, color 0.28s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(244, 33, 46, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

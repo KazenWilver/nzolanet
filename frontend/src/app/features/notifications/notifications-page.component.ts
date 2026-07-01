@@ -246,8 +246,20 @@ export class NotificationsPageComponent implements OnInit {
     }
 
     if (notification.type === 'message' && notification.conversationId) {
-      void this.router.navigate(['/messages', notification.conversationId]);
-      return;
+      void this.router.navigate(['/messages', notification.conversationId], {
+        queryParams: notification.messageId ? { messageId: notification.messageId } : undefined
+      })
+      return
+    }
+
+    if (
+      (notification.type === 'chat_mention' || notification.type === 'mention') &&
+      notification.conversationId
+    ) {
+      void this.router.navigate(['/messages', notification.conversationId], {
+        queryParams: notification.messageId ? { messageId: notification.messageId } : undefined
+      })
+      return
     }
 
     if (notification.type === 'group_added' && notification.conversationId) {

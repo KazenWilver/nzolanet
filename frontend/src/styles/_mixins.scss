@@ -110,17 +110,22 @@
   color: var(--color-text-on-accent);
   border: none;
   transition:
-    filter var(--transition-base),
-    opacity var(--transition-base),
-    background var(--transition-base);
+    filter 0.32s ease,
+    transform 0.32s ease,
+    box-shadow 0.32s ease,
+    opacity 0.28s ease;
 
   &:hover:not(:disabled) {
     background: var(--gradient-brand-hover);
-    filter: brightness(1.04);
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(124, 58, 237, 0.28);
   }
 
   &:active:not(:disabled) {
     filter: brightness(0.96);
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.18);
   }
 
   &:disabled {

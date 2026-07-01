@@ -222,6 +222,10 @@ export class ConversationService {
     return this.http.put<void>(`${this.baseUrl}/${conversationId}/read`, {})
   }
 
+  deleteGroup(conversationId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${conversationId}/group`)
+  }
+
   getUnreadCount(): Observable<UnreadMessagesCountResponse> {
     return this.http.get<UnreadMessagesCountResponse>(`${this.baseUrl}/unread-count`)
   }

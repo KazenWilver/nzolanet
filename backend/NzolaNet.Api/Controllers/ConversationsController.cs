@@ -137,6 +137,25 @@ public class ConversationsController : ControllerBase
         }
     }
 
+    [HttpDelete("{id:guid}/group")]
+    public async Task<IActionResult> DeleteGroup(Guid id)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            await _conversationService.DeleteGroupConversationAsync(userId, id);
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
     [HttpGet("{id:guid}/messages")]
     public async Task<IActionResult> GetMessages(
         Guid id,

@@ -212,6 +212,29 @@ public class ConversationService : IConversationService
         return await MapConversationDetailAsync(reloaded, userId);
     }
 
+    public async Task DeleteGroupConversationAsync(Guid userId, Guid conversationId)
+    {
+        await EnsureParticipantAsync(userId, conversationId);
+
+        var conversation = await _conversationRepository.GetByIdForUserAsync(conversationId, userId);
+        if (conversation == null || !conversation.IsGroup)
+        {
+            throw new ArgumentException("Conversa de grupo não encontrada.");
+        }
+
+        var creatorUserId = await _conversationRepository.GetGroupCreatorUserIdAsync(conversationId);
+        if (!creatorUserId.HasValue || creatorUserId.Value != userId)
+        {
+            throw new UnauthorizedAccessException("Apenas o criador do grupo pode apagá-lo.");
+        }
+
+        var deleted = await _conversationRepository.DeleteConversationAsync(conversationId);
+        if (!deleted)
+        {
+            throw new ArgumentException("Não foi possível apagar o grupo.");
+        }
+    }
+
     public async Task<IEnumerable<MessageResponseDto>> GetMessagesAsync(
         Guid userId,
         Guid conversationId,
@@ -341,11 +364,24 @@ public class ConversationService : IConversationService
 
         var preview = FormatMessagePreview(reloaded);
         var recipients = await _conversationRepository.GetOtherParticipantIdsAsync(conversationId, userId);
+        var mentionedRecipientIds = await ResolveMentionedRecipientIdsAsync(trimmed, userId);
         foreach (var notificationRecipientId in recipients)
         {
+            if (mentionedRecipientIds.Contains(notificationRecipientId))
+            {
+                await _notificationService.TryCreateChatMentionNotificationAsync(
+                    userId,
+                    conversationId,
+                    reloaded.Id,
+                    notificationRecipientId,
+                    preview);
+                continue;
+            }
+
             await _notificationService.TryCreateMessageNotificationAsync(
                 userId,
                 conversationId,
+                reloaded.Id,
                 notificationRecipientId,
                 preview);
         }
@@ -524,6 +560,7 @@ public class ConversationService : IConversationService
                 await _notificationService.TryCreateMessageNotificationAsync(
                     userId,
                     savedMessage.ConversationId,
+                    savedMessage.Id,
                     notificationRecipientId,
                     preview);
             }
@@ -633,6 +670,10 @@ public class ConversationService : IConversationService
             })
             .ToList();
 
+        var creatorUserId = conversation.IsGroup
+            ? await _conversationRepository.GetGroupCreatorUserIdAsync(conversation.Id)
+            : null;
+
         return new ConversationDetailDto
         {
             Id = listItem.Id,
@@ -648,6 +689,7 @@ public class ConversationService : IConversationService
             LastMessageText = listItem.LastMessageText,
             LastMessageAt = listItem.LastMessageAt,
             UnreadCount = listItem.UnreadCount,
+            IsGroupCreator = creatorUserId.HasValue && creatorUserId.Value == userId,
             Participants = participants
         };
     }
@@ -846,6 +888,23 @@ public class ConversationService : IConversationService
         }
 
         return uri.ToString();
+    }
+
+    private async Task<HashSet<Guid>> ResolveMentionedRecipientIdsAsync(string? text, Guid actorUserId)
+    {
+        var mentionedUsernames = ContentParsingHelper.ExtractMentions(text);
+        var recipientIds = new HashSet<Guid>();
+
+        foreach (var username in mentionedUsernames)
+        {
+            var mentionedUser = await _userRepository.GetByUsernameAsync(username);
+            if (mentionedUser != null && mentionedUser.Id != actorUserId)
+            {
+                recipientIds.Add(mentionedUser.Id);
+            }
+        }
+
+        return recipientIds;
     }
 
     private static bool CanEditOrDeleteForEveryone(DateTime createdAt)

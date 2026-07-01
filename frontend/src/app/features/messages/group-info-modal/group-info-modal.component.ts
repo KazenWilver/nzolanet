@@ -11,12 +11,13 @@ import type { ConversationDetail, ConversationParticipant } from '../../../core/
 import type { User } from '../../../core/models/user.model'
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component'
 import { ModalComponent } from '../../../shared/components/modal/modal.component'
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component'
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component'
 
 @Component({
   selector: 'app-group-info-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent, ModalComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, AvatarComponent, ModalComponent, LoadingSpinnerComponent, ConfirmDialogComponent],
   templateUrl: './group-info-modal.component.html',
   styleUrl: './group-info-modal.component.scss'
 })
@@ -29,6 +30,7 @@ export class GroupInfoModalComponent implements OnInit {
   @Input({ required: true }) conversationId!: string
   @Output() closed = new EventEmitter<void>()
   @Output() updated = new EventEmitter<ConversationDetail>()
+  @Output() deleted = new EventEmitter<void>()
 
   detail: ConversationDetail | null = null
   loading = true
@@ -48,6 +50,9 @@ export class GroupInfoModalComponent implements OnInit {
   addMemberLoading = false
   addMemberError = ''
   addingMemberId: string | null = null
+  deleteConfirmOpen = false
+  deletingGroup = false
+  deleteError = ''
 
   private readonly searchSubject = new Subject<string>()
 
@@ -216,6 +221,40 @@ export class GroupInfoModalComponent implements OnInit {
 
   trackUser(_: number, user: User): string {
     return user.id
+  }
+
+  handleOpenDeleteGroupConfirm(): void {
+    this.deleteConfirmOpen = true
+    this.deleteError = ''
+  }
+
+  handleCancelDeleteGroup(): void {
+    this.deleteConfirmOpen = false
+    this.deleteError = ''
+  }
+
+  handleConfirmDeleteGroup(): void {
+    if (!this.detail || this.deletingGroup) {
+      return
+    }
+
+    this.deletingGroup = true
+    this.deleteError = ''
+
+    this.conversationService
+      .deleteGroup(this.detail.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.deletingGroup = false
+          this.deleteConfirmOpen = false
+          this.deleted.emit()
+        },
+        error: (error: HttpErrorResponse) => {
+          this.deletingGroup = false
+          this.deleteError = error.error?.message ?? 'Não foi possível apagar o grupo.'
+        }
+      })
   }
 
   private loadDetail(): void {

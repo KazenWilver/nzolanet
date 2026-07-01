@@ -13,6 +13,7 @@ public class Notification
     public Guid? CommentId { get; set; }
     public virtual Comment? Comment { get; set; }
     public Guid? ConversationId { get; set; }
+    public Guid? MessageId { get; set; }
     public string? MessagePreview { get; set; }
     public bool IsRead { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

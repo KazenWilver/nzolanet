@@ -15,5 +15,6 @@ public class NotificationResponseDto
     public Guid? CommentId { get; set; }
     public string? CommentText { get; set; }
     public Guid? ConversationId { get; set; }
+    public Guid? MessageId { get; set; }
     public string? MessageText { get; set; }
 }

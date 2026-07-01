@@ -7,6 +7,7 @@ export type NotificationType =
   | 'follow_rejected'
   | 'message'
   | 'mention'
+  | 'chat_mention'
   | 'group_added'
   | 'repost';
 
@@ -24,6 +25,7 @@ export interface BackendNotificationDto {
   commentId?: string;
   commentText?: string;
   conversationId?: string;
+  messageId?: string;
   messageText?: string;
 }
 
@@ -41,6 +43,7 @@ export interface AppNotification {
   commentId?: string;
   commentText?: string;
   conversationId?: string;
+  messageId?: string;
   messageText?: string;
 }
 

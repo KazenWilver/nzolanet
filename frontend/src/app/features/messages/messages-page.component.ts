@@ -22,6 +22,7 @@ import { MentionAutocompleteDirective } from '../../shared/directives/mention-au
 import { LinkifyTextPipe } from '../../shared/pipes/linkify-text.pipe'
 import { TPipe } from '../../core/i18n/translate.pipe'
 import { LocaleService } from '../../core/i18n/locale.service'
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component'
 import { resolveMediaDownloadUrl } from '../../core/helpers/media-url.helper'
 
 export interface MessageDayGroup {
@@ -47,7 +48,8 @@ export interface MessageDayGroup {
     ChatEmojiPickerComponent,
     MentionAutocompleteDirective,
     LinkifyTextPipe,
-    TPipe
+    TPipe,
+    ConfirmDialogComponent
   ],
   templateUrl: './messages-page.component.html',
   styleUrl: './messages-page.component.scss'
@@ -66,6 +68,10 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   @ViewChild('messagesScroll') messagesScroll?: ElementRef<HTMLElement>
   @ViewChild('typingIndicator') typingIndicator?: ElementRef<HTMLElement>
+  @ViewChild('composerTextarea') composerTextarea?: ElementRef<HTMLTextAreaElement>
+
+  private static readonly MAX_COMPOSER_LINES = 8
+  private static readonly MESSAGE_EDIT_DELETE_WINDOW_MS = 15 * 60 * 1000
 
   conversations: ConversationListItem[] = []
   messages: ChatMessage[] = []
@@ -106,6 +112,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   lightboxMedia: { url: string; type: 'image' | 'video' | 'audio'; isGif?: boolean; fileName?: string } | null = null
   loadingOlderMessages = false
   hasMoreMessages = true
+  pendingDelete: { message: ChatMessage; scope: 'self' | 'everyone' } | null = null
+  private pendingScrollMessageId: string | null = null
 
   private mediaRecorder: MediaRecorder | null = null
   private recordingStream: MediaStream | null = null
@@ -163,9 +171,19 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       }
     })
 
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.pendingScrollMessageId = params.get('messageId')
+      if (this.pendingScrollMessageId && this.messages.length > 0) {
+        this.scrollToMessage(this.pendingScrollMessageId)
+      }
+    })
+
     this.messageForm.controls.text.valueChanges
       .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.handleComposerInput())
+      .subscribe(() => {
+        this.handleComposerInput()
+        this.resizeComposerTextarea()
+      })
   }
 
   ngOnDestroy(): void {
@@ -319,16 +337,23 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   }
 
   handleDeleteMessage(message: ChatMessage, scope: 'self' | 'everyone'): void {
-    if (!this.activeConversation) {
+    this.actionMenuMessageId = null
+    this.pendingDelete = { message, scope }
+  }
+
+  handleConfirmDelete(): void {
+    if (!this.pendingDelete || !this.activeConversation) {
       return
     }
+
+    const { message, scope } = this.pendingDelete
+    this.pendingDelete = null
 
     this.conversationService
       .deleteMessage(this.activeConversation.id, message.id, scope)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.actionMenuMessageId = null
           if (scope === 'self') {
             this.messages = this.messages.filter(existing => existing.id !== message.id)
             return
@@ -349,8 +374,30 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
                 }
               : existing
           )
-        }
+        },
+        error: () => undefined
       })
+  }
+
+  handleCancelDelete(): void {
+    this.pendingDelete = null
+  }
+
+  resizeComposerTextarea(): void {
+    const textarea = this.composerTextarea?.nativeElement
+    if (!textarea) {
+      return
+    }
+
+    textarea.style.height = 'auto'
+    const styles = window.getComputedStyle(textarea)
+    const lineHeight = Number.parseFloat(styles.lineHeight) || 22
+    const paddingTop = Number.parseFloat(styles.paddingTop) || 0
+    const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0
+    const maxHeight = lineHeight * MessagesPageComponent.MAX_COMPOSER_LINES + paddingTop + paddingBottom
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight)
+    textarea.style.height = `${nextHeight}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
   }
 
   handleOpenForwardModal(message: ChatMessage): void {
@@ -727,6 +774,18 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.activeConversation = detail
   }
 
+  handleGroupDeleted(): void {
+    const deletedId = this.activeConversation?.id
+    this.groupInfoOpen = false
+    this.activeConversation = null
+    this.messages = []
+    if (deletedId) {
+      this.conversations = this.conversations.filter(conversation => conversation.id !== deletedId)
+    }
+    void this.router.navigate(['/messages'])
+    void this.chatRealtime.setActiveConversation(null)
+  }
+
   handleOpenMediaLightbox(
     url: string,
     type: 'image' | 'video' | 'audio',
@@ -880,11 +939,29 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   }
 
   canEditForEveryone(message: ChatMessage): boolean {
+    if (!message.isMine || message.isDeletedForEveryone || !message.text?.trim()) {
+      return false
+    }
+
+    return this.isWithinEditDeleteWindow(message.createdAt)
+  }
+
+  canDeleteForEveryone(message: ChatMessage): boolean {
     if (!message.isMine || message.isDeletedForEveryone) {
       return false
     }
 
-    return Date.now() - new Date(message.createdAt).getTime() <= 15 * 60 * 1000
+    return this.isWithinEditDeleteWindow(message.createdAt)
+  }
+
+  getDeleteConfirmMessage(): string {
+    if (!this.pendingDelete) {
+      return 'Tens a certeza?'
+    }
+
+    return this.pendingDelete.scope === 'everyone'
+      ? 'Tens a certeza que queres apagar esta mensagem para todos?'
+      : 'Tens a certeza que queres apagar esta mensagem para ti?'
   }
 
   trackConversation(_index: number, conversation: ConversationListItem): string {
@@ -1208,7 +1285,12 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           this.hasMoreMessages = messages.length >= 50
           this.loadingMessages = false
           this.messagesError = false
-          this.scrollMessagesToBottom()
+          if (this.pendingScrollMessageId) {
+            this.scrollToMessage(this.pendingScrollMessageId)
+          } else {
+            this.scrollMessagesToBottom()
+          }
+          requestAnimationFrame(() => this.resizeComposerTextarea())
         },
         error: () => {
           this.loadingMessages = false
@@ -1319,6 +1401,37 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
       element.scrollTop = element.scrollHeight
     })
+  }
+
+  private scrollToMessage(messageId: string): void {
+    requestAnimationFrame(() => {
+      const target = document.querySelector(`[data-message-id="${messageId}"]`)
+      if (target instanceof HTMLElement) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        this.animationService.enter(target, 'fadeIn')
+        return
+      }
+
+      this.scrollMessagesToBottom()
+    })
+  }
+
+  private isWithinEditDeleteWindow(createdAt: string): boolean {
+    const createdMs = this.parseUtcTimestamp(createdAt)
+    if (Number.isNaN(createdMs)) {
+      return false
+    }
+
+    return Date.now() - createdMs <= MessagesPageComponent.MESSAGE_EDIT_DELETE_WINDOW_MS
+  }
+
+  private parseUtcTimestamp(value: string): number {
+    if (!value) {
+      return Number.NaN
+    }
+
+    const normalized = /[zZ]|[+-]\d{2}:\d{2}$/.test(value) ? value : `${value}Z`
+    return Date.parse(normalized)
   }
 
   private clearPendingMedia(): void {

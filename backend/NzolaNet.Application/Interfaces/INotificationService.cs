@@ -20,9 +20,16 @@ public interface INotificationService
     Task TryCreateMessageNotificationAsync(
         Guid actorId,
         Guid conversationId,
+        Guid messageId,
         Guid recipientId,
         string? messagePreview);
     Task TryCreateMentionNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId);
+    Task TryCreateChatMentionNotificationAsync(
+        Guid actorId,
+        Guid conversationId,
+        Guid messageId,
+        Guid recipientId,
+        string? messagePreview);
     Task TryCreateGroupAddedNotificationAsync(Guid actorId, Guid conversationId, Guid recipientId);
     Task TryCreateRepostNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId, string? preview);
 }

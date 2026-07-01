@@ -15,5 +15,6 @@ public class ConversationDetailDto
     public string? LastMessageText { get; set; }
     public DateTime? LastMessageAt { get; set; }
     public int UnreadCount { get; set; }
+    public bool IsGroupCreator { get; set; }
     public IReadOnlyList<ConversationParticipantDto> Participants { get; set; } = Array.Empty<ConversationParticipantDto>();
 }

@@ -137,5 +137,35 @@
         </ul>
       }
     </section>
+
+    @if (detail.isGroupCreator) {
+      <section class="group-info__danger" aria-label="Apagar grupo">
+        <h3>Apagar grupo</h3>
+        <p class="group-info__hint">
+          Todos os participantes sairão automaticamente e o grupo será removido permanentemente.
+        </p>
+        @if (deleteError) {
+          <p class="group-info__error" role="alert">{{ deleteError }}</p>
+        }
+        <button
+          type="button"
+          class="group-info__delete-btn"
+          [disabled]="deletingGroup"
+          (click)="handleOpenDeleteGroupConfirm()"
+        >
+          Apagar grupo
+        </button>
+      </section>
+    }
   }
 </app-modal>
+
+@if (deleteConfirmOpen) {
+  <app-confirm-dialog
+    mensagem="Tens a certeza que queres apagar este grupo? Todos os participantes sairão e o grupo será eliminado."
+    [textoConfirmar]="'Sim'"
+    [textoCancelar]="'Não'"
+    (confirmado)="handleConfirmDeleteGroup()"
+    (cancelado)="handleCancelDeleteGroup()"
+  />
+}

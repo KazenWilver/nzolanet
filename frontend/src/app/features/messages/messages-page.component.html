@@ -242,6 +242,8 @@
                       <button type="button" (click)="handleOpenReactionPicker(message.id, $event)">Reagir</button>
                       @if (message.isMine && !message.isDeletedForEveryone && canEditForEveryone(message)) {
                         <button type="button" (click)="handleEditMessage(message)">Editar</button>
+                      }
+                      @if (message.isMine && !message.isDeletedForEveryone && canDeleteForEveryone(message)) {
                         <button type="button" (click)="handleDeleteMessage(message, 'everyone')">Apagar para todos</button>
                       }
                       <button type="button" (click)="handleDeleteMessage(message, 'self')">Apagar para mim</button>
@@ -654,12 +656,14 @@
               }
             </div>
             <textarea
+              #composerTextarea
               formControlName="text"
               class="messages-page__composer-input"
               appMentionAutocomplete
               rows="1"
               [placeholder]="'chat.writeMessage' | t"
               [attr.aria-label]="'chat.writeMessage' | t"
+              (input)="resizeComposerTextarea()"
               (keydown)="handleComposerKeydown($event)"
             ></textarea>
             <button
@@ -691,6 +695,7 @@
     [conversationId]="groupConversation.id"
     (closed)="handleCloseGroupInfo()"
     (updated)="handleGroupInfoUpdated($event)"
+    (deleted)="handleGroupDeleted()"
   />
 }
 
@@ -770,4 +775,14 @@
       }
     </div>
   </div>
+}
+
+@if (pendingDelete) {
+  <app-confirm-dialog
+    [mensagem]="getDeleteConfirmMessage()"
+    [textoConfirmar]="'Sim'"
+    [textoCancelar]="'Não'"
+    (confirmado)="handleConfirmDelete()"
+    (cancelado)="handleCancelDelete()"
+  />
 }

@@ -113,7 +113,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         builder.Entity<Notification>(entity =>
         {
             entity.HasKey(n => n.Id);
-            entity.Property(n => n.Type).IsRequired().HasMaxLength(20);
+            entity.Property(n => n.Type).IsRequired().HasMaxLength(32);
             entity.Property(n => n.MessagePreview).HasMaxLength(200);
 
             entity.HasOne(n => n.Recipient)

@@ -46,6 +46,7 @@ export interface BackendConversationParticipantDto {
 
 export interface BackendConversationDetailDto extends BackendConversationListItemDto {
   participants: BackendConversationParticipantDto[]
+  isGroupCreator?: boolean
 }
 
 export interface BackendMessageDto {
@@ -118,6 +119,7 @@ export interface ConversationListItem {
 
 export interface ConversationDetail extends ConversationListItem {
   participants: ConversationParticipant[]
+  isGroupCreator?: boolean
 }
 
 export interface ChatMessage {
@@ -188,6 +190,7 @@ export const mapConversationListItem = (dto: BackendConversationListItemDto): Co
 
 export const mapConversationDetail = (dto: BackendConversationDetailDto): ConversationDetail => ({
   ...mapConversationListItem(dto),
+  isGroupCreator: dto.isGroupCreator ?? false,
   participants: (dto.participants ?? []).map(participant => ({
     userId: participant.userId,
     username: participant.username,

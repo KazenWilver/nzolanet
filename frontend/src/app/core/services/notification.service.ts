@@ -127,6 +127,7 @@ export class NotificationService {
       commentId: dto.commentId,
       commentText: dto.commentText,
       conversationId: dto.conversationId,
+      messageId: dto.messageId,
       messageText: dto.messageText
     };
   }
