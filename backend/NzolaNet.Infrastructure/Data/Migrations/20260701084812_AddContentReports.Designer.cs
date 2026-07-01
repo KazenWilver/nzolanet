@@ -746,7 +746,7 @@ namespace NzolaNet.Infrastructure.Data.Migrations
                     b.HasOne("NzolaNet.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -960,7 +960,7 @@ namespace NzolaNet.Infrastructure.Data.Migrations
                     b.HasOne("NzolaNet.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Post");

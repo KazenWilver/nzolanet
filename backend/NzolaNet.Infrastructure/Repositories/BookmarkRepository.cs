@@ -67,18 +67,37 @@ public class BookmarkRepository : IBookmarkRepository
         int page,
         int pageSize)
     {
-        var query = _context.Bookmarks
+        var bookmarkQuery = _context.Bookmarks
             .AsNoTracking()
-            .Where(bookmark => bookmark.UserId == userId)
-            .OrderByDescending(bookmark => bookmark.CreatedAt)
-            .Select(bookmark => bookmark.Post)
-            .Include(post => post.User);
+            .Where(bookmark => bookmark.UserId == userId);
 
-        var totalCount = await query.CountAsync();
-        var items = await query
+        var totalCount = await bookmarkQuery.CountAsync();
+
+        var bookmarkEntries = await bookmarkQuery
+            .OrderByDescending(bookmark => bookmark.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .Select(bookmark => new { bookmark.PostId })
             .ToListAsync();
+
+        if (bookmarkEntries.Count == 0)
+        {
+            return (Array.Empty<Post>(), totalCount);
+        }
+
+        var postIds = bookmarkEntries.Select(entry => entry.PostId).ToList();
+
+        var posts = await _context.Posts
+            .AsNoTracking()
+            .Include(post => post.User)
+            .Where(post => postIds.Contains(post.Id))
+            .ToListAsync();
+
+        var postsById = posts.ToDictionary(post => post.Id);
+        var items = bookmarkEntries
+            .Where(entry => postsById.ContainsKey(entry.PostId))
+            .Select(entry => postsById[entry.PostId])
+            .ToList();
 
         return (items, totalCount);
     }

@@ -84,8 +84,17 @@ Test-Step "Unlike publication" {
 }
 
 Test-Step "Create comment" {
-  $body = @{ text = "Smoke comment" } | ConvertTo-Json
-  $script:comment = Invoke-RestMethod -Uri "$base/publications/$($script:pub.id)/comments" -Method POST -Headers $script:user2Headers -Body $body -ContentType "application/json"
+  $boundary = [System.Guid]::NewGuid().ToString()
+  $LF = "`r`n"
+  $bodyLines = (
+    "--$boundary",
+    "Content-Disposition: form-data; name=`"text`"",
+    "",
+    "Smoke comment",
+    "--$boundary--",
+    ""
+  ) -join $LF
+  $script:comment = Invoke-RestMethod -Uri "$base/publications/$($script:pub.id)/comments" -Method POST -Headers $script:user2Headers -ContentType "multipart/form-data; boundary=$boundary" -Body $bodyLines
   if (-not $script:comment.id) { throw "No comment id" }
 }
 
