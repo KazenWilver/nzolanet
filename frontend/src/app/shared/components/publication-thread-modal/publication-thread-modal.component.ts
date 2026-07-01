@@ -419,8 +419,14 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     const overlay = this.threadOverlayRef?.nativeElement;
     const shell = this.threadShellRef?.nativeElement;
     if (overlay && shell) {
-      this.animationService.modalEnter(overlay, shell);
-      const closeButton = shell.querySelector<HTMLElement>('.thread-modal__close');
+      if (this.useMediaLayout) {
+        this.animationService.mediaLightboxEnter(overlay, shell);
+      } else {
+        this.animationService.modalEnter(overlay, shell);
+      }
+      const closeButton = shell.querySelector<HTMLElement>(
+        this.useMediaLayout ? '.thread-modal__media-close' : '.thread-modal__close'
+      );
       this.focusTrap.activate(shell, closeButton ?? undefined);
     }
   }

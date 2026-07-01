@@ -26,13 +26,15 @@
 }
 
 <ng-template #modalChrome>
-  <header class="thread-modal__header">
-    <button type="button" class="thread-modal__close" aria-label="Fechar" (click)="handleClose()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M18 6 6 18M6 6l12 12"></path>
-      </svg>
-    </button>
-  </header>
+  @if (!useMediaLayout) {
+    <header class="thread-modal__header">
+      <button type="button" class="thread-modal__close" aria-label="Fechar" (click)="handleClose()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </header>
+  }
   <ng-container *ngTemplateOutlet="modalContent" />
 </ng-template>
 
@@ -40,25 +42,16 @@
   @if (useMediaLayout) {
     <div class="thread-modal__split">
       <div class="thread-modal__media-pane">
+        <button type="button" class="thread-modal__media-close" aria-label="Fechar" (click)="handleClose()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+
         <div class="thread-modal__media-stage">
           @if (publication.imageUrl) {
-            <div
-              class="thread-modal__media-bg thread-modal__media-bg--image"
-              [style.background-image]="'url(' + publication.imageUrl + ')'"
-              aria-hidden="true"
-            ></div>
             <img [src]="publication.imageUrl" alt="Imagem da publicação" class="thread-modal__media" />
           } @else if (publication.videoUrl) {
-            <video
-              class="thread-modal__media-bg"
-              [src]="publication.videoUrl"
-              muted
-              loop
-              playsinline
-              autoplay
-              tabindex="-1"
-              aria-hidden="true"
-            ></video>
             <video
               #modalVideo
               [src]="publication.videoUrl"

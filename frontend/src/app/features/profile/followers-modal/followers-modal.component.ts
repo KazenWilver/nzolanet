@@ -8,13 +8,14 @@ import type { User } from '../../../core/models/user.model';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { FollowButtonComponent } from '../../../shared/components/follow-button/follow-button.component';
 
 type FollowersModalMode = 'followers' | 'following';
 
 @Component({
   selector: 'app-followers-modal',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, ModalComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, AvatarComponent, ModalComponent, LoadingSpinnerComponent, FollowButtonComponent],
   templateUrl: './followers-modal.component.html',
   styleUrl: './followers-modal.component.scss'
 })

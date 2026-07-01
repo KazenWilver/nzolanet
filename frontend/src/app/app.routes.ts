@@ -66,8 +66,12 @@ export const routes: Routes = [
       {
         path: 'messages',
         loadComponent: () =>
-          import('./features/placeholder/placeholder-page.component').then(m => m.PlaceholderPageComponent),
-        data: { featureName: 'Mensagens' }
+          import('./features/messages/messages-page.component').then(m => m.MessagesPageComponent)
+      },
+      {
+        path: 'messages/:conversationId',
+        loadComponent: () =>
+          import('./features/messages/messages-page.component').then(m => m.MessagesPageComponent)
       },
       { path: 'notificacoes', redirectTo: 'notifications', pathMatch: 'full' },
       {

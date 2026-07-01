@@ -66,6 +66,10 @@
   }
 
   @for (publication of publications; track trackById($index, publication)) {
+    @if ($index === 5 && activeTab === 'para-ti' && !loading) {
+      <app-who-to-follow variant="feed" [count]="3" />
+    }
+
     <div [id]="'publication-' + publication.id" appEnterAnimation [enterIndex]="$index">
       <app-publication-card
         [publication]="publication"

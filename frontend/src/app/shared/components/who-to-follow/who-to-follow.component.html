@@ -1,51 +1,63 @@
-<section class="who-to-follow" aria-labelledby="who-to-follow-title">
-  <h2 id="who-to-follow-title" class="who-to-follow__title">Quem seguir</h2>
-
-  @if (loading) {
-    <div class="who-to-follow__loading">
-      <app-loading-spinner tamanho="sm" />
+@if (shouldRender) {
+  <section
+    class="who-to-follow"
+    [class.who-to-follow--feed]="isFeedVariant"
+    [class.who-to-follow--sidebar]="!isFeedVariant"
+    aria-labelledby="who-to-follow-title"
+  >
+    <div class="who-to-follow__header">
+      <h2 id="who-to-follow-title" class="who-to-follow__title">
+        {{ isFeedVariant ? 'Sugestões para ti' : 'Quem seguir' }}
+      </h2>
     </div>
-  } @else if (error) {
-    <p class="who-to-follow__message">Não foi possível carregar sugestões.</p>
-  } @else if (suggestions.length === 0) {
-    <p class="who-to-follow__message">Sem sugestões por agora.</p>
-  } @else {
-    <ul class="who-to-follow__list">
-      @for (user of suggestions; track trackById($index, user)) {
-        <li>
-          <article class="who-to-follow__item">
-            <div
-              class="who-to-follow__main"
-              tabindex="0"
-              role="link"
-              [attr.aria-label]="'Ver perfil de ' + getDisplayName(user)"
-              (click)="navigateToProfile(user.id)"
-              (keydown)="handleProfileKeydown(user.id, $event)"
-            >
-              <app-avatar
-                [src]="user.profilePhotoUrl"
-                [username]="user.username"
-                size="sm"
-              />
 
-              <div class="who-to-follow__info">
-                <strong class="who-to-follow__name">{{ getDisplayName(user) }}</strong>
-                <span class="who-to-follow__username">@{{ user.username }}</span>
+    @if (loading) {
+      <div class="who-to-follow__loading">
+        <app-loading-spinner tamanho="sm" />
+      </div>
+    } @else if (error) {
+      <p class="who-to-follow__message">Não foi possível carregar sugestões.</p>
+    } @else if (suggestions.length === 0) {
+      <p class="who-to-follow__message">Sem sugestões por agora.</p>
+    } @else {
+      <ul class="who-to-follow__list">
+        @for (user of suggestions; track trackById($index, user)) {
+          <li>
+            <article class="who-to-follow__item">
+              <div
+                class="who-to-follow__main"
+                tabindex="0"
+                role="link"
+                [attr.aria-label]="'Ver perfil de ' + getDisplayName(user)"
+                (click)="navigateToProfile(user.id)"
+                (keydown)="handleProfileKeydown(user.id, $event)"
+              >
+                <app-avatar
+                  [src]="user.profilePhotoUrl"
+                  [username]="user.username"
+                  size="sm"
+                />
+
+                <div class="who-to-follow__info">
+                  <strong class="who-to-follow__name">{{ getDisplayName(user) }}</strong>
+                  <span class="who-to-follow__username">@{{ user.username }}</span>
+                  @if (getBioPreview(user); as bio) {
+                    <span class="who-to-follow__bio">{{ bio }}</span>
+                  }
+                </div>
               </div>
-            </div>
 
-            <button
-              type="button"
-              class="who-to-follow__follow-btn"
-              [class.who-to-follow__follow-btn--following]="user.isFollowing || user.isPending"
-              [disabled]="togglingUserId === user.id"
-              (click)="toggleFollow(user, $event)"
-            >
-              {{ getFollowLabel(user) }}
-            </button>
-          </article>
-        </li>
-      }
-    </ul>
-  }
-</section>
+              <app-follow-button
+                size="sm"
+                [isFollowing]="user.isFollowing === true"
+                [isPending]="user.isPending === true"
+                [loading]="togglingUserId === user.id"
+                (followClick)="toggleFollow(user, $event)"
+              />
+            </article>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}

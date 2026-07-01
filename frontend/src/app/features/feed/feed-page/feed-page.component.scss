@@ -33,13 +33,14 @@
 }
 
 @media (max-width: 500px) {
-  .feed-page__sticky-top app-page-header {
+  .feed-page__sticky-top {
     display: none;
   }
+}
 
-  .feed-page__tab {
-    padding: var(--spacing-md) var(--spacing-sm);
-    font-size: var(--font-size-sm);
+@media (min-width: 501px) {
+  .feed-page__sticky-top app-page-header {
+    display: block;
   }
 }
 

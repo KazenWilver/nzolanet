@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import type { Publication } from '../../../core/models/publication.model';
 import { PublicationService } from '../../../core/services/publication.service';
+import { PublicationMediaOverlayService } from '../../../core/services/publication-media-overlay.service';
 import { AnimationService } from '../../../core/services/animation.service';
 import { RelativeTimeService } from '../../../core/services/relative-time.service';
 import { LinkifyTextPipe } from '../../pipes/linkify-text.pipe';
@@ -33,6 +34,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
 export class PublicationCardComponent implements OnChanges {
   private readonly publicationService = inject(PublicationService);
   private readonly animationService = inject(AnimationService);
+  private readonly mediaOverlay = inject(PublicationMediaOverlayService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   readonly relativeTime = inject(RelativeTimeService);
@@ -323,16 +325,13 @@ export class PublicationCardComponent implements OnChanges {
   }
 
   private navigateToPublication(mediaFocus: boolean): void {
-    const videoTime = mediaFocus ? this.getCapturedVideoTime() : 0;
+    if (mediaFocus && (this.publication.imageUrl || this.publication.videoUrl)) {
+      const videoTime = this.getCapturedVideoTime();
+      this.mediaOverlay.open(this.publication, videoTime > 0 ? Math.floor(videoTime) : 0);
+      return;
+    }
 
-    void this.router.navigate(['/publicacoes', this.publication.id], {
-      queryParams: mediaFocus
-        ? {
-            media: '1',
-            ...(videoTime > 0 ? { t: Math.floor(videoTime) } : {})
-          }
-        : undefined
-    });
+    void this.router.navigate(['/publicacoes', this.publication.id]);
   }
 
   private getCapturedVideoTime(): number {

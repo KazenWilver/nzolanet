@@ -23,6 +23,22 @@
             </span>
             <span class="sidebar__label">{{ item.label }}</span>
           </a>
+        } @else if (isMessagesItem(item)) {
+          <a
+            class="sidebar__link sidebar__link--messages"
+            [class.sidebar__link--active]="isActive(item.route)"
+            [routerLink]="item.route"
+          >
+            <span class="sidebar__icon-wrap">
+              <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+              @if (unreadMessagesCount > 0) {
+                <span class="sidebar__badge" aria-label="{{ unreadMessagesCount }} mensagens por ler">
+                  {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
+                </span>
+              }
+            </span>
+            <span class="sidebar__label">{{ item.label }}</span>
+          </a>
         } @else {
           <a
             class="sidebar__link"
@@ -72,17 +88,57 @@
     </button>
 
     @if (currentUser) {
-      <a class="sidebar__account" [routerLink]="profileRoute">
-        <app-avatar
-          [src]="currentUser.profilePhotoUrl"
-          [username]="currentUser.username"
-          size="sm"
-        />
-        <span class="sidebar__account-text">
-          <strong>{{ displayName }}</strong>
-          <small>@{{ currentUser.username }}</small>
-        </span>
-      </a>
+      <div class="sidebar__account-wrap" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="sidebar__account"
+          [class.sidebar__account--open]="accountMenuOpen"
+          (click)="handleToggleAccountMenu($event)"
+          [attr.aria-expanded]="accountMenuOpen"
+          aria-haspopup="menu"
+          aria-label="Menu da conta"
+        >
+          <app-avatar
+            [src]="currentUser.profilePhotoUrl"
+            [username]="currentUser.username"
+            size="sm"
+          />
+          <span class="sidebar__account-text">
+            <strong>{{ displayName }}</strong>
+            <small>@{{ currentUser.username }}</small>
+          </span>
+          <svg class="sidebar__account-more" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="5" cy="12" r="1.75"></circle>
+            <circle cx="12" cy="12" r="1.75"></circle>
+            <circle cx="19" cy="12" r="1.75"></circle>
+          </svg>
+        </button>
+
+        @if (accountMenuOpen) {
+          <nav class="sidebar__account-menu" role="menu" aria-label="Opções da conta">
+            <div class="sidebar__account-menu-header" role="presentation">
+              <app-avatar
+                [src]="currentUser.profilePhotoUrl"
+                [username]="currentUser.username"
+                size="sm"
+              />
+              <div class="sidebar__account-menu-meta">
+                <strong>{{ displayName }}</strong>
+                <small>@{{ currentUser.username }}</small>
+              </div>
+            </div>
+            <a class="sidebar__account-menu-item" [routerLink]="profileRoute" role="menuitem" (click)="accountMenuOpen = false">
+              Ver perfil
+            </a>
+            <a class="sidebar__account-menu-item" routerLink="/settings" role="menuitem" (click)="accountMenuOpen = false">
+              Definições
+            </a>
+            <button type="button" class="sidebar__account-menu-item sidebar__account-menu-item--danger" role="menuitem" (click)="handleLogout()">
+              Terminar sessão
+            </button>
+          </nav>
+        }
+      </div>
     }
   </div>
 

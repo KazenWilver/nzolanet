@@ -2,7 +2,20 @@ import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'nzolanet_token';
 
+const hasAccessToken = (url: string): boolean => {
+  try {
+    const query = url.includes('?') ? url.slice(url.indexOf('?') + 1) : '';
+    return new URLSearchParams(query).has('access_token');
+  } catch {
+    return url.includes('access_token=');
+  }
+};
+
 const appendAccessToken = (url: string): string => {
+  if (hasAccessToken(url)) {
+    return url;
+  }
+
   if (typeof localStorage === 'undefined') {
     return url;
   }

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -7,6 +7,7 @@ import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { ThemeService } from '../../core/services/theme.service';
 import { PublishModalService } from '../../core/services/publish-modal.service';
+import { ConversationService } from '../../core/services/conversation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PressScaleDirective } from '../../shared/directives/press-scale.directive';
 
@@ -35,7 +36,15 @@ interface SidebarNotificationsItem {
   icon: string;
 }
 
-type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem | SidebarNotificationsItem;
+interface SidebarMessagesItem {
+  type: 'messages';
+  id: string;
+  label: string;
+  route: string;
+  icon: string;
+}
+
+type SidebarItem = SidebarLinkItem | SidebarPlaceholderItem | SidebarNotificationsItem | SidebarMessagesItem;
 
 @Component({
   selector: 'app-sidebar',
@@ -49,17 +58,20 @@ export class SidebarComponent {
   readonly themeService = inject(ThemeService);
   private readonly publishModal = inject(PublishModalService);
   private readonly notificationService = inject(NotificationService);
+  private readonly conversationService = inject(ConversationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   currentUser: User | null = null;
   unreadCount = 0;
+  unreadMessagesCount = 0;
+  accountMenuOpen = false;
 
   readonly primaryNavItems: SidebarItem[] = [
     { type: 'link', id: 'feed', label: 'Feed', route: '/feed', exact: true, icon: 'home' },
     { type: 'link', id: 'search', label: 'Pesquisar', route: '/search', icon: 'search' },
     { type: 'notifications', id: 'notifications', label: 'Notificações', route: '/notifications', icon: 'bell' },
-    { type: 'placeholder', id: 'messages', label: 'Mensagens', route: '/messages', icon: 'mail' }
+    { type: 'messages', id: 'messages', label: 'Mensagens', route: '/messages', icon: 'mail' }
   ];
 
   readonly secondaryNavItems: SidebarItem[] = [
@@ -78,6 +90,16 @@ export class SidebarComponent {
       .subscribe(count => {
         this.unreadCount = count;
       });
+
+    this.conversationService.unreadCount$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(count => {
+        this.unreadMessagesCount = count;
+      });
+  }
+
+  isMessagesItem(item: SidebarItem): item is SidebarMessagesItem {
+    return item.type === 'messages';
   }
 
   get profileRoute(): string {
@@ -98,6 +120,23 @@ export class SidebarComponent {
 
   handleToggleTheme(): void {
     this.themeService.toggleTheme();
+  }
+
+  handleToggleAccountMenu(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.accountMenuOpen = !this.accountMenuOpen;
+  }
+
+  handleLogout(): void {
+    this.accountMenuOpen = false;
+    this.authService.logout();
+    void this.router.navigate(['/login']);
+  }
+
+  @HostListener('document:click')
+  handleDocumentClick(): void {
+    this.accountMenuOpen = false;
   }
 
   isActive(route: string, exact = false): boolean {

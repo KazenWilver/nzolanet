@@ -30,15 +30,12 @@
         </button>
 
         @if (currentUserId && user.id !== currentUserId) {
-          <button
-            type="button"
-            class="followers-modal__follow-btn"
-            [class.followers-modal__follow-btn--following]="isFollowingUser(user)"
-            [disabled]="togglingUserId === user.id"
-            (click)="toggleFollow(user, $event)"
-          >
-            {{ isFollowingUser(user) ? 'A seguir' : 'Seguir' }}
-          </button>
+          <app-follow-button
+            size="sm"
+            [isFollowing]="isFollowingUser(user)"
+            [loading]="togglingUserId === user.id"
+            (followClick)="toggleFollow(user, $event)"
+          />
         }
       </li>
     }

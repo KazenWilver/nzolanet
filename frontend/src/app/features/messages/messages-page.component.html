@@ -1,0 +1,165 @@
+<div class="messages-page">
+  <header class="messages-page__header">
+    <h1 class="messages-page__title">Mensagens</h1>
+  </header>
+
+  <div class="messages-page__layout">
+    <aside class="messages-page__list-pane" aria-label="Lista de conversas">
+      @if (loadingConversations) {
+        <div class="messages-page__loading">
+          <app-loading-spinner tamanho="md" />
+        </div>
+      } @else if (conversationsError) {
+        <div class="messages-page__empty">
+          <p>Não foi possível carregar as conversas.</p>
+          <button type="button" class="messages-page__retry" (click)="loadConversations()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (conversations.length === 0) {
+        <div class="messages-page__empty">
+          <p>Ainda não tens conversas.</p>
+          <p class="messages-page__hint">Visita um perfil e toca em «Mensagem» para começar.</p>
+        </div>
+      } @else {
+        <ul class="messages-page__list" role="list">
+          @for (conversation of conversations; track trackConversation($index, conversation)) {
+            <li>
+              <button
+                type="button"
+                class="messages-page__list-item"
+                [class.messages-page__list-item--active]="activeConversation?.id === conversation.id"
+                (click)="handleSelectConversation(conversation)"
+              >
+                <app-avatar
+                  [src]="conversation.otherPhotoUrl"
+                  [username]="conversation.otherUsername"
+                  size="md"
+                />
+                <span class="messages-page__list-body">
+                  <span class="messages-page__list-top">
+                    <strong>{{ getConversationDisplayName(conversation) }}</strong>
+                    @if (conversation.lastMessageAt) {
+                      <time [dateTime]="conversation.lastMessageAt">
+                        {{ conversation.lastMessageAt | tempoAtras : relativeTime.tick() }}
+                      </time>
+                    }
+                  </span>
+                  <span class="messages-page__list-preview">
+                    @if (conversation.lastMessageText) {
+                      {{ conversation.lastMessageText }}
+                    } @else {
+                      Iniciar conversa
+                    }
+                  </span>
+                </span>
+                @if (conversation.unreadCount > 0) {
+                  <span class="messages-page__unread-dot" aria-label="{{ conversation.unreadCount }} por ler"></span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <section
+      class="messages-page__thread-pane"
+      [class.messages-page__thread-pane--empty]="!activeConversation"
+      aria-label="Conversa activa"
+    >
+      @if (!activeConversation) {
+        <div class="messages-page__thread-empty">
+          <h2>Selecciona uma mensagem</h2>
+          <p>Escolhe uma conversa existente ou inicia uma nova a partir de um perfil.</p>
+        </div>
+      } @else {
+        <header class="messages-page__thread-header">
+          <button
+            type="button"
+            class="messages-page__back-btn"
+            aria-label="Voltar à lista"
+            (click)="handleBackToList()"
+          >
+            ←
+          </button>
+          <app-avatar
+            [src]="activeConversation.otherPhotoUrl"
+            [username]="activeConversation.otherUsername"
+            size="sm"
+          />
+          <div class="messages-page__thread-meta">
+            <strong>{{ getConversationDisplayName(activeConversation) }}</strong>
+            <span>@{{ activeConversation.otherUsername }}</span>
+          </div>
+          <a
+            class="messages-page__profile-link"
+            [routerLink]="['/profile', activeConversation.otherUserId]"
+            aria-label="Ver perfil"
+          >
+            Ver perfil
+          </a>
+        </header>
+
+        @if (loadingMessages) {
+          <div class="messages-page__loading messages-page__loading--thread">
+            <app-loading-spinner tamanho="md" />
+          </div>
+        } @else if (messagesError) {
+          <div class="messages-page__empty messages-page__empty--thread">
+            <p>Não foi possível carregar as mensagens.</p>
+          </div>
+        } @else {
+          <div #messagesScroll class="messages-page__messages" role="log" aria-live="polite" aria-relevant="additions">
+            @if (messages.length === 0) {
+              <p class="messages-page__thread-hint">Envia a primeira mensagem para iniciar a conversa.</p>
+            }
+            @for (message of messages; track trackMessage($index, message)) {
+              <article
+                class="messages-page__bubble"
+                [class.messages-page__bubble--mine]="message.isMine"
+                [class.messages-page__bubble--theirs]="!message.isMine"
+              >
+                @if (!message.isMine) {
+                  <app-avatar
+                    [src]="message.senderPhotoUrl"
+                    [username]="message.senderUsername"
+                    size="xs"
+                  />
+                }
+                <div class="messages-page__bubble-content">
+                  <p>{{ message.text }}</p>
+                  <time [dateTime]="message.createdAt">{{ message.createdAt | tempoAtras : relativeTime.tick() }}</time>
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        <footer class="messages-page__composer">
+          @if (sendError) {
+            <p class="messages-page__send-error" role="alert">{{ sendError }}</p>
+          }
+          <form class="messages-page__composer-form" [formGroup]="messageForm" (ngSubmit)="handleSendMessage()">
+            <textarea
+              formControlName="text"
+              class="messages-page__composer-input"
+              rows="1"
+              placeholder="Escreve uma mensagem…"
+              aria-label="Escrever mensagem"
+              (keydown)="handleComposerKeydown($event)"
+            ></textarea>
+            <button
+              type="submit"
+              class="messages-page__send-btn"
+              [disabled]="messageForm.invalid || sendingMessage"
+              aria-label="Enviar mensagem"
+            >
+              Enviar
+            </button>
+          </form>
+        </footer>
+      }
+    </section>
+  </div>
+</div>

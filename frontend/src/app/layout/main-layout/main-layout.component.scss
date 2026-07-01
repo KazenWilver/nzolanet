@@ -8,12 +8,10 @@
   overflow: hidden;
   margin: 0 auto;
   background-color: var(--color-bg-primary);
-  box-shadow: 0 0 0 1px var(--color-border);
+  box-shadow: 1px 0 0 var(--color-border);
 
   @media (min-width: 1280px) {
-    box-shadow:
-      -1px 0 0 var(--color-border),
-      1px 0 0 var(--color-border);
+    box-shadow: 1px 0 0 var(--color-border);
   }
 
   @media (min-width: 1920px) {
@@ -61,28 +59,17 @@
   height: 100dvh;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--color-text-muted) 45%, transparent) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   border-right: var(--border-width) solid var(--color-border);
   background-color: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
 
   &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: color-mix(in srgb, var(--color-text-muted) 40%, transparent);
-    border-radius: 999px;
-  }
-
-  &:hover::-webkit-scrollbar-thumb {
-    background-color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   @media (min-width: 501px) {
@@ -105,8 +92,16 @@
 
     &.main-layout__center--mobile-topbar {
       --sticky-offset-top: calc(
-        var(--height-mobile-topbar, 52px) + env(safe-area-inset-top, 0px)
+        var(--height-mobile-topbar, 52px) + var(--height-mobile-feed-tabs, 48px) +
+          env(safe-area-inset-top, 0px)
       );
+
+      app-topbar {
+        position: sticky;
+        top: 0;
+        z-index: var(--z-topbar, 100);
+        flex-shrink: 0;
+      }
     }
   }
 }

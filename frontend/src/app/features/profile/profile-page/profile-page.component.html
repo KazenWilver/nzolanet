@@ -34,32 +34,43 @@
       </div>
 
       <div class="profile-page__info">
-        <div class="profile-page__avatar">
-          <app-avatar
-            [src]="profile.profilePhotoUrl"
-            [username]="profile.username"
-            size="lg"
-            [withRing]="true"
-          />
-        </div>
+        <div class="profile-page__avatar-row">
+          <div class="profile-page__avatar">
+            <app-avatar
+              [src]="profile.profilePhotoUrl"
+              [username]="profile.username"
+              size="xl"
+              [withRing]="true"
+            />
+          </div>
 
-        <div class="profile-page__actions">
-          @if (isOwnProfile) {
-            <button type="button" class="profile-page__btn profile-page__btn--secondary" (click)="openEditModal()">
-              Editar perfil
-            </button>
+          <div class="profile-page__actions">
+            @if (isOwnProfile) {
+              <button type="button" class="profile-page__btn profile-page__btn--secondary" (click)="openEditModal()">
+                Editar perfil
+              </button>
           } @else {
-            <button
-              type="button"
-              class="profile-page__btn"
-              [class.profile-page__btn--primary]="!profile.isFollowing && !profile.isPending"
-              [class.profile-page__btn--following]="profile.isFollowing || profile.isPending"
-              [disabled]="togglingFollow"
-              (click)="toggleFollow()"
-            >
-              {{ followLabel }}
-            </button>
+            <div class="profile-page__actions-group">
+              <app-follow-button
+                [isFollowing]="profile.isFollowing === true"
+                [isPending]="profile.isPending === true"
+                [loading]="togglingFollow"
+                (followClick)="toggleFollow()"
+              />
+              <button
+                type="button"
+                class="profile-page__btn profile-page__btn--secondary"
+                [disabled]="openingMessage"
+                (click)="handleOpenMessage()"
+              >
+                {{ openingMessage ? 'A abrir…' : 'Mensagem' }}
+              </button>
+            </div>
+            @if (messageError) {
+              <p class="profile-page__message-error" role="alert">{{ messageError }}</p>
+            }
           }
+          </div>
         </div>
 
         <div class="profile-page__details">

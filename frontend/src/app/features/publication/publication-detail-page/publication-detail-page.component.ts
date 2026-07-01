@@ -82,6 +82,10 @@ export class PublicationDetailPageComponent implements OnInit {
     this.publication = updated;
   }
 
+  handleMediaClose(): void {
+    void this.router.navigate(['/feed']);
+  }
+
   retryLoad(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {

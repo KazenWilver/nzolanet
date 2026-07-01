@@ -135,7 +135,7 @@ export class AnimationService {
     gsap.killTweensOf([overlay, dialog]);
 
     if (!this.isEnabled) {
-      gsap.set([overlay, dialog], { clearProps: 'opacity,transform,scale,y' });
+      gsap.set([overlay, dialog], { clearProps: 'opacity,transform,scale,y,x' });
       return;
     }
 
@@ -165,6 +165,44 @@ export class AnimationService {
       overwrite: 'auto',
       clearProps: 'opacity,transform'
     });
+  }
+
+  mediaLightboxEnter(overlay: Element, dialog: Element): void {
+    gsap.killTweensOf([overlay, dialog]);
+
+    if (!this.isEnabled) {
+      gsap.set([overlay, dialog], { clearProps: 'opacity,transform,scale,x' });
+      return;
+    }
+
+    gsap.set(overlay, { opacity: 0 });
+    gsap.set(dialog, { opacity: 0, scale: 0.96, x: this.isMobile ? 0 : 24 });
+
+    const timeline = gsap.timeline({ defaults: { ease: 'power3.out', overwrite: 'auto' } });
+    timeline.to(overlay, { opacity: 1, duration: 0.28 });
+    timeline.to(
+      dialog,
+      { opacity: 1, scale: 1, x: 0, duration: 0.42, clearProps: 'opacity,transform' },
+      '-=0.12'
+    );
+  }
+
+  tabIndicator(tab: Element): void {
+    if (!this.isEnabled) {
+      return;
+    }
+
+    gsap.fromTo(
+      tab,
+      { y: 6, opacity: 0.65 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.28,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity'
+      }
+    );
   }
 
   likePop(element: Element): void {

@@ -7,17 +7,28 @@ import { TopbarComponent } from '../topbar/topbar.component';
 import { AsideComponent } from '../aside/aside.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { CreatePostComponent } from '../../features/feed/create-post/create-post.component';
+import { PublicationThreadModalComponent } from '../../shared/components/publication-thread-modal/publication-thread-modal.component';
 import { PublishModalService } from '../../core/services/publish-modal.service';
 import { AccountMenuService } from '../../core/services/account-menu.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RouteTransitionService } from '../../core/services/route-transition.service';
 import { FocusTrapService } from '../../core/services/focus-trap.service';
+import { PublicationMediaOverlayService } from '../../core/services/publication-media-overlay.service';
 import type { User } from '../../core/models/user.model';
+import type { Publication } from '../../core/models/publication.model';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterModule, SidebarComponent, TopbarComponent, AsideComponent, ModalComponent, CreatePostComponent],
+  imports: [
+    RouterModule,
+    SidebarComponent,
+    TopbarComponent,
+    AsideComponent,
+    ModalComponent,
+    CreatePostComponent,
+    PublicationThreadModalComponent
+  ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
@@ -29,6 +40,7 @@ export class MainLayoutComponent {
   private readonly focusTrap = inject(FocusTrapService);
   readonly publishModal = inject(PublishModalService);
   readonly accountMenu = inject(AccountMenuService);
+  readonly mediaOverlay = inject(PublicationMediaOverlayService);
 
   @ViewChild('accountMenuNav') accountMenuNavRef?: ElementRef<HTMLElement>;
 
@@ -114,6 +126,14 @@ export class MainLayoutComponent {
     }
   }
 
+  handleCloseMediaOverlay(): void {
+    this.mediaOverlay.close();
+  }
+
+  handleMediaOverlayPublicationChange(publication: Publication): void {
+    this.mediaOverlay.updatePublication(publication);
+  }
+
   handleCloseAccountMenu(): void {
     this.focusTrap.deactivate();
     this.accountMenu.close();
@@ -190,6 +210,11 @@ export class MainLayoutComponent {
 
   @HostListener('document:keydown.escape')
   handleEscapeKey(): void {
+    if (this.mediaOverlay.state()) {
+      this.handleCloseMediaOverlay();
+      return;
+    }
+
     if (this.accountMenu.isOpen()) {
       this.handleCloseAccountMenu();
     }

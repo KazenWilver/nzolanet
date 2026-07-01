@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
@@ -21,6 +21,8 @@ import { PressScaleDirective } from '../../../shared/directives/press-scale.dire
 import { ProfileParallaxDirective } from '../../../shared/directives/profile-parallax.directive';
 import { EditProfileModalComponent } from '../edit-profile-modal/edit-profile-modal.component';
 import { FollowersModalComponent } from '../followers-modal/followers-modal.component';
+import { FollowButtonComponent } from '../../../shared/components/follow-button/follow-button.component';
+import { ConversationService } from '../../../core/services/conversation.service';
 
 type ProfileTab = 'publications' | 'media' | 'likes';
 
@@ -41,17 +43,20 @@ type ProfileTab = 'publications' | 'media' | 'likes';
     PressScaleDirective,
     ProfileParallaxDirective,
     EditProfileModalComponent,
-    FollowersModalComponent
+    FollowersModalComponent,
+    FollowButtonComponent
   ],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.scss'
 })
 export class ProfilePageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly userService = inject(UserService);
   private readonly publicationService = inject(PublicationService);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
+  private readonly conversationService = inject(ConversationService);
   private readonly destroyRef = inject(DestroyRef);
 
   profile: User | null = null;
@@ -76,6 +81,8 @@ export class ProfilePageComponent implements OnInit {
   mediaLoadMoreError = false;
   privateAccount = false;
   togglingFollow = false;
+  openingMessage = false;
+  messageError = '';
   processingFollowRequest = false;
   showIncomingFollowRequest = false;
   editModalOpen = false;
@@ -503,6 +510,29 @@ export class ProfilePageComponent implements OnInit {
         this.togglingFollow = false;
       }
     });
+  }
+
+  handleOpenMessage(): void {
+    if (!this.profile || this.isOwnProfile || this.openingMessage) {
+      return;
+    }
+
+    this.openingMessage = true;
+    this.messageError = '';
+
+    this.conversationService
+      .getOrCreateConversation(this.profile.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: conversation => {
+          this.openingMessage = false;
+          void this.router.navigate(['/messages', conversation.id]);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.openingMessage = false;
+          this.messageError = error.error?.message ?? 'Não foi possível abrir a conversa.';
+        }
+      });
   }
 
   handleApproveIncomingRequest(): void {

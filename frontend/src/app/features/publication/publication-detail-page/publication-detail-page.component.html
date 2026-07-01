@@ -1,10 +1,12 @@
-<div class="publication-detail-page">
-  <app-page-header
-    title="Publicação"
-    [subtitle]="headerSubtitle"
-    [showBack]="true"
-    backLink="/feed"
-  />
+<div class="publication-detail-page" [class.publication-detail-page--media]="mediaFocus">
+  @if (!mediaFocus) {
+    <app-page-header
+      title="Publicação"
+      [subtitle]="headerSubtitle"
+      [showBack]="true"
+      backLink="/feed"
+    />
+  }
 
   @if (loading) {
     <app-publication-card-skeleton />
@@ -29,9 +31,10 @@
     <app-publication-thread-modal
       [publication]="publication"
       [open]="true"
-      [embedded]="true"
+      [embedded]="!mediaFocus"
       [mediaFocus]="mediaFocus"
       [videoStartTime]="videoStartTime"
+      (closed)="handleMediaClose()"
       (publicationChange)="handlePublicationChange($event)"
     />
   }

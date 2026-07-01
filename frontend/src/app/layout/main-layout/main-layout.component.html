@@ -18,6 +18,18 @@
   </aside>
 </div>
 
+@if (mediaOverlay.state(); as overlay) {
+  <app-publication-thread-modal
+    [publication]="overlay.publication"
+    [open]="true"
+    [embedded]="false"
+    [mediaFocus]="true"
+    [videoStartTime]="overlay.videoStartTime"
+    (closed)="handleCloseMediaOverlay()"
+    (publicationChange)="handleMediaOverlayPublicationChange($event)"
+  />
+}
+
 <app-modal
   [open]="publishModal.isOpen()"
   title="Criar publicação"

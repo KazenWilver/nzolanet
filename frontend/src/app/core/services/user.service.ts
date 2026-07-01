@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { resolveMediaUrl } from '../helpers/media-url.helper';
 import { FeedTabService } from './feed-tab.service';
 import type { BackendUserDto } from '../models/auth.model';
 import { mapBackendUser, toLegacyUser, type LegacyUser, type UpdateProfileDto, type User } from '../models/user.model';
@@ -161,11 +160,6 @@ export class UserService {
   }
 
   private mapUser(dto: BackendUserDto): User {
-    const user = mapBackendUser(dto);
-    return {
-      ...user,
-      profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl),
-      coverPhotoUrl: resolveMediaUrl(user.coverPhotoUrl)
-    };
+    return mapBackendUser(dto);
   }
 }

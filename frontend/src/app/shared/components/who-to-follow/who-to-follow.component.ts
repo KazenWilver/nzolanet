@@ -3,25 +3,31 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
+import { AnimationService } from '../../../core/services/animation.service';
 import type { User } from '../../../core/models/user.model';
 import { AvatarComponent } from '../avatar/avatar.component';
+import { FollowButtonComponent } from '../follow-button/follow-button.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+
+export type WhoToFollowVariant = 'sidebar' | 'feed';
 
 @Component({
   selector: 'app-who-to-follow',
   standalone: true,
-  imports: [AvatarComponent, LoadingSpinnerComponent],
+  imports: [AvatarComponent, FollowButtonComponent, LoadingSpinnerComponent],
   templateUrl: './who-to-follow.component.html',
   styleUrl: './who-to-follow.component.scss'
 })
 export class WhoToFollowComponent implements OnInit {
   @Input() count = 3;
+  @Input() variant: WhoToFollowVariant = 'sidebar';
 
   private static readonly RECENT_SUGGESTIONS_KEY = 'nzolanet-recent-suggestions';
   private static readonly MAX_RECENT_SUGGESTIONS = 30;
 
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
+  private readonly animationService = inject(AnimationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -44,18 +50,30 @@ export class WhoToFollowComponent implements OnInit {
       });
   }
 
+  get isFeedVariant(): boolean {
+    return this.variant === 'feed';
+  }
+
+  get shouldRender(): boolean {
+    if (this.loading || this.error) {
+      return true;
+    }
+
+    const minCount = this.isFeedVariant ? 2 : 1;
+    return this.suggestions.length >= minCount;
+  }
+
   getDisplayName(user: User): string {
     return user.displayName ?? user.username;
   }
 
-  getFollowLabel(user: User): string {
-    if (user.isFollowing) {
-      return 'A seguir';
+  getBioPreview(user: User): string | null {
+    const bio = user.bio?.trim();
+    if (!bio) {
+      return null;
     }
-    if (user.isPending) {
-      return 'Pendente';
-    }
-    return 'Seguir';
+
+    return bio.length > 72 ? `${bio.slice(0, 69)}…` : bio;
   }
 
   navigateToProfile(userId: string): void {
@@ -88,19 +106,40 @@ export class WhoToFollowComponent implements OnInit {
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: () => {
-        this.suggestions = this.suggestions.filter(item => item.id !== user.id);
-        this.togglingUserId = null;
-        this.loadReplacementSuggestion();
-      },
-      error: () => {
-        this.togglingUserId = null;
-      }
-    });
+        next: () => {
+          this.updateSuggestion(user.id, wasFollowing || wasPending ? 'unfollow' : 'follow', user.isPrivate);
+          this.togglingUserId = null;
+        },
+        error: () => {
+          this.togglingUserId = null;
+        }
+      });
   }
 
   trackById(_: number, user: User): string {
     return user.id;
+  }
+
+  private updateSuggestion(
+    userId: string,
+    action: 'follow' | 'unfollow',
+    isPrivate: boolean
+  ): void {
+    this.suggestions = this.suggestions.map(item => {
+      if (item.id !== userId) {
+        return item;
+      }
+
+      if (action === 'unfollow') {
+        return { ...item, isFollowing: false, isPending: false };
+      }
+
+      if (isPrivate) {
+        return { ...item, isFollowing: false, isPending: true };
+      }
+
+      return { ...item, isFollowing: true, isPending: false };
+    });
   }
 
   private loadSuggestions(): void {
@@ -113,37 +152,38 @@ export class WhoToFollowComponent implements OnInit {
       .getSuggestions(this.count, excludeIds)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: users => {
-        this.suggestions = users;
-        this.rememberSuggestionIds(users.map(user => user.id));
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.error = true;
-        this.suggestions = [];
-      }
-    });
+        next: users => {
+          const filtered = users.filter(
+            user =>
+              user.id !== this.currentUserId &&
+              !user.isFollowing &&
+              !user.isPending
+          );
+          this.suggestions = filtered;
+          this.rememberSuggestionIds(filtered.map(user => user.id));
+          this.loading = false;
+          requestAnimationFrame(() => this.animateList());
+        },
+        error: () => {
+          this.loading = false;
+          this.error = true;
+          this.suggestions = [];
+        }
+      });
   }
 
-  private loadReplacementSuggestion(): void {
-    if (this.suggestions.length >= this.count) {
+  private animateList(): void {
+    const root = document.querySelector(
+      this.isFeedVariant ? '.who-to-follow--feed' : '.who-to-follow--sidebar'
+    );
+    if (!root) {
       return;
     }
 
-    this.userService
-      .getSuggestions(1, this.getRecentSuggestionIds())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-      next: users => {
-        const existingIds = new Set(this.suggestions.map(user => user.id));
-        const replacement = users.find(user => !existingIds.has(user.id));
-        if (replacement) {
-          this.suggestions = [...this.suggestions, replacement];
-          this.rememberSuggestionIds([replacement.id]);
-        }
-      }
-    });
+    const items = Array.from(root.querySelectorAll('.who-to-follow__item'));
+    if (items.length) {
+      this.animationService.staggerEnter(items, 'fadeUp', 0.06);
+    }
   }
 
   private getRecentSuggestionIds(): string[] {

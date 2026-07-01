@@ -17,6 +17,9 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Follow> Follows { get; set; } = null!;
     public DbSet<Like> Likes { get; set; } = null!;
     public DbSet<Notification> Notifications { get; set; } = null!;
+    public DbSet<Conversation> Conversations { get; set; } = null!;
+    public DbSet<ConversationParticipant> ConversationParticipants { get; set; } = null!;
+    public DbSet<Message> Messages { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -123,6 +126,49 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                   .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasIndex(n => new { n.RecipientId, n.IsRead, n.CreatedAt });
+        });
+
+        builder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.CreatedAt).IsRequired();
+            entity.Property(c => c.UpdatedAt).IsRequired();
+        });
+
+        builder.Entity<ConversationParticipant>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+
+            entity.HasOne(p => p.Conversation)
+                  .WithMany(c => c.Participants)
+                  .HasForeignKey(p => p.ConversationId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(p => p.User)
+                  .WithMany()
+                  .HasForeignKey(p => p.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(p => new { p.ConversationId, p.UserId }).IsUnique();
+            entity.HasIndex(p => p.UserId);
+        });
+
+        builder.Entity<Message>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Text).IsRequired().HasMaxLength(2000);
+
+            entity.HasOne(m => m.Conversation)
+                  .WithMany(c => c.Messages)
+                  .HasForeignKey(m => m.ConversationId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.Sender)
+                  .WithMany()
+                  .HasForeignKey(m => m.SenderId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(m => new { m.ConversationId, m.CreatedAt });
         });
     }
 }

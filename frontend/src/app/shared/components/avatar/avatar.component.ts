@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { resolveMediaUrl } from '../../../core/helpers/media-url.helper';
 
-type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
+type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 @Component({
   selector: 'app-avatar',
@@ -76,6 +76,12 @@ type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
       width: 64px;
       height: 64px;
       font-size: 1.25rem;
+    }
+
+    .avatar--xl {
+      width: 134px;
+      height: 134px;
+      font-size: 2.5rem;
     }
 
     .avatar--ring {

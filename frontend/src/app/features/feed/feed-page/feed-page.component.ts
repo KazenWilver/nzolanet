@@ -16,6 +16,7 @@ import { PublicationCardSkeletonComponent } from '../../../shared/components/pub
 import { EnterAnimationDirective } from '../../../shared/directives/enter-animation.directive';
 import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
 import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
+import { WhoToFollowComponent } from '../../../shared/components/who-to-follow/who-to-follow.component';
 
 @Component({
   selector: 'app-feed-page',
@@ -28,7 +29,8 @@ import { PressScaleDirective } from '../../../shared/directives/press-scale.dire
     PublicationCardSkeletonComponent,
     InfiniteScrollDirective,
     EnterAnimationDirective,
-    PressScaleDirective
+    PressScaleDirective,
+    WhoToFollowComponent
   ],
   templateUrl: './feed-page.component.html',
   styleUrl: './feed-page.component.scss'
