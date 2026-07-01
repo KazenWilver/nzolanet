@@ -14,15 +14,18 @@ public class PublicationsController : ControllerBase
     private readonly IPostService _postService;
     private readonly ILikeService _likeService;
     private readonly ICommentService _commentService;
+    private readonly IRepostService _repostService;
 
     public PublicationsController(
         IPostService postService,
         ILikeService likeService,
-        ICommentService commentService)
+        ICommentService commentService,
+        IRepostService repostService)
     {
         _postService = postService;
         _likeService = likeService;
         _commentService = commentService;
+        _repostService = repostService;
     }
 
     [HttpGet]
@@ -182,5 +185,21 @@ public class PublicationsController : ControllerBase
         var userId = AuthClaimsHelper.GetUserId(User);
         await _likeService.UnlikeAsync(userId, id);
         return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("{id}/repost")]
+    public async Task<IActionResult> ToggleRepost(Guid id)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var (isReposted, repostsCount) = await _repostService.ToggleRepostAsync(userId, id);
+            return Ok(new { hasReposted = isReposted, repostsCount });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

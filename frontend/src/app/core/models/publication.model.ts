@@ -11,7 +11,9 @@ export interface Publication {
   authorPhotoUrl?: string;
   likesCount: number;
   commentsCount: number;
+  repostsCount: number;
   hasLiked?: boolean;
+  hasReposted?: boolean;
 }
 
 export interface UpdatePublicationDto {
@@ -31,7 +33,9 @@ export interface BackendPublicationDto {
   authorPhotoUrl?: string;
   likesCount: number;
   commentsCount: number;
+  repostsCount?: number;
   hasLiked?: boolean;
+  hasReposted?: boolean;
 }
 
 export interface PaginatedPublications {

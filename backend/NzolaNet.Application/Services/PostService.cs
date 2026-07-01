@@ -14,6 +14,7 @@ public class PostService : IPostService
     private readonly ILikeRepository _likeRepository;
     private readonly ICommentRepository _commentRepository;
     private readonly INotificationRepository _notificationRepository;
+    private readonly IRepostRepository _repostRepository;
     private readonly IStorageService _storageService;
 
     public PostService(
@@ -23,6 +24,7 @@ public class PostService : IPostService
         ILikeRepository likeRepository,
         ICommentRepository commentRepository,
         INotificationRepository notificationRepository,
+        IRepostRepository repostRepository,
         IStorageService storageService)
     {
         _postRepository = postRepository;
@@ -31,6 +33,7 @@ public class PostService : IPostService
         _likeRepository = likeRepository;
         _commentRepository = commentRepository;
         _notificationRepository = notificationRepository;
+        _repostRepository = repostRepository;
         _storageService = storageService;
     }
 
@@ -397,11 +400,14 @@ public class PostService : IPostService
         var postIds = postList.Select(p => p.Id).ToList();
         var likeCounts = await _likeRepository.GetLikeCountsByPostIdsAsync(postIds);
         var commentCounts = await _commentRepository.GetCommentCountsByPostIdsAsync(postIds);
+        var repostCounts = await _repostRepository.GetRepostCountsByPostIdsAsync(postIds);
         HashSet<Guid> likedPostIds = new();
+        HashSet<Guid> repostedPostIds = new();
 
         if (currentUserId.HasValue)
         {
             likedPostIds = await _likeRepository.GetLikedPostIdsForUserAsync(currentUserId.Value, postIds);
+            repostedPostIds = await _repostRepository.GetRepostedPostIdsForUserAsync(currentUserId.Value, postIds);
         }
 
         return postList.Select(post => MapToDto(
@@ -409,7 +415,9 @@ public class PostService : IPostService
             currentUserId,
             likeCounts.GetValueOrDefault(post.Id),
             commentCounts.GetValueOrDefault(post.Id),
-            currentUserId.HasValue ? likedPostIds.Contains(post.Id) : null));
+            repostCounts.GetValueOrDefault(post.Id),
+            currentUserId.HasValue ? likedPostIds.Contains(post.Id) : null,
+            currentUserId.HasValue ? repostedPostIds.Contains(post.Id) : null));
     }
 
     private static PublicationResponseDto MapToDto(
@@ -417,7 +425,9 @@ public class PostService : IPostService
         Guid? currentUserId = null,
         int? likesCount = null,
         int? commentsCount = null,
-        bool? hasLiked = null)
+        int? repostsCount = null,
+        bool? hasLiked = null,
+        bool? hasReposted = null)
     {
         if (!hasLiked.HasValue && currentUserId.HasValue)
         {
@@ -438,7 +448,9 @@ public class PostService : IPostService
             AuthorPhotoUrl = post.User?.ProfilePhoto,
             LikesCount = likesCount ?? post.Likes?.Count ?? 0,
             CommentsCount = commentsCount ?? post.Comments?.Count ?? 0,
-            HasLiked = hasLiked
+            RepostsCount = repostsCount ?? 0,
+            HasLiked = hasLiked,
+            HasReposted = hasReposted
         };
     }
 }

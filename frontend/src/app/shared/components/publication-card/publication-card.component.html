@@ -193,6 +193,26 @@
 
         <button
           type="button"
+          class="publication-card__action publication-card__action--repost"
+          [class.publication-card__action--reposted]="publication.hasReposted"
+          [disabled]="repostingInProgress"
+          (click)="toggleRepost($event)"
+          [attr.aria-pressed]="publication.hasReposted"
+          aria-label="Repartilhar publicação"
+        >
+          <span class="publication-card__action-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 1l4 4-4 4"></path>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <path d="M7 23l-4-4 4-4"></path>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+          </span>
+          <span class="publication-card__action-count">{{ publication.repostsCount }}</span>
+        </button>
+
+        <button
+          type="button"
           class="publication-card__action publication-card__action--share"
           aria-label="Partilhar ligação"
           (click)="handleShare($event)"
@@ -205,6 +225,10 @@
             </svg>
           </span>
         </button>
+
+        @if (repostError) {
+          <span class="publication-card__like-error">{{ repostError }}</span>
+        }
 
         @if (shareFeedback) {
           <span class="publication-card__share-feedback" role="status">{{ shareFeedback }}</span>

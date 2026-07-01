@@ -99,6 +99,13 @@ export class PublicationService {
     return this.http.delete<void>(`${this.baseUrl}/${id}/like`);
   }
 
+  toggleRepost(id: string): Observable<{ hasReposted: boolean; repostsCount: number }> {
+    return this.http.post<{ hasReposted: boolean; repostsCount: number }>(
+      `${this.baseUrl}/${id}/repost`,
+      {}
+    );
+  }
+
   private mapPaginated(dto: BackendPaginatedPublicationsDto): PaginatedPublications {
     return {
       items: dto.items.map(item => this.mapPublication(item)),
@@ -123,7 +130,9 @@ export class PublicationService {
       authorPhotoUrl: resolveMediaUrl(dto.authorPhotoUrl),
       likesCount: dto.likesCount ?? 0,
       commentsCount: dto.commentsCount ?? 0,
-      hasLiked: dto.hasLiked ?? false
+      repostsCount: dto.repostsCount ?? 0,
+      hasLiked: dto.hasLiked ?? false,
+      hasReposted: dto.hasReposted ?? false
     };
   }
 }

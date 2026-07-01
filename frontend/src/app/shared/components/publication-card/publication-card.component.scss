@@ -374,6 +374,15 @@
   stroke: var(--color-accent-pink);
 }
 
+.publication-card__action--repost:hover,
+.publication-card__action--reposted {
+  color: var(--color-accent);
+
+  .publication-card__action-icon {
+    background-color: var(--color-accent-blue-bg);
+  }
+}
+
 .publication-card__action--share:hover {
   color: var(--color-accent-blue);
 

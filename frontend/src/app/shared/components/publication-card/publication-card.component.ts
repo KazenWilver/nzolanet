@@ -54,7 +54,9 @@ export class PublicationCardComponent implements OnChanges {
   likeError = '';
   deleteError = '';
   deleting = false;
-  likingInProgress = false;
+  likingInProgress = false
+  repostingInProgress = false
+  repostError = '';
   imageLoadFailed = false;
   videoLoadFailed = false;
   shareFeedback = '';
@@ -297,6 +299,50 @@ export class PublicationCardComponent implements OnChanges {
     event.preventDefault();
     event.stopPropagation();
     this.navigateToPublication(true);
+  }
+
+  toggleRepost(event: MouseEvent): void {
+    event.stopPropagation()
+    if (this.repostingInProgress) {
+      return
+    }
+
+    const previousReposted = this.publication.hasReposted ?? false
+    const previousCount = this.publication.repostsCount ?? 0
+
+    this.publication = {
+      ...this.publication,
+      hasReposted: !previousReposted,
+      repostsCount: previousReposted ? Math.max(0, previousCount - 1) : previousCount + 1
+    }
+    this.repostError = ''
+
+    this.repostingInProgress = true
+    this.publicationService
+      .toggleRepost(this.publication.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          this.publication = {
+            ...this.publication,
+            hasReposted: result.hasReposted,
+            repostsCount: result.repostsCount
+          }
+          this.repostingInProgress = false
+        },
+        error: () => {
+          this.publication = {
+            ...this.publication,
+            hasReposted: previousReposted,
+            repostsCount: previousCount
+          }
+          this.repostError = 'Não foi possível repartilhar.'
+          this.repostingInProgress = false
+          setTimeout(() => {
+            this.repostError = ''
+          }, 4000)
+        }
+      })
   }
 
   handleShare(event: MouseEvent): void {
