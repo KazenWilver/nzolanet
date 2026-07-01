@@ -1,5 +1,22 @@
 import { resolveMediaUrl } from '../helpers/media-url.helper'
 
+export interface BackendMessageReplyPreviewDto {
+  id: string
+  senderId: string
+  senderUsername: string
+  senderDisplayName?: string
+  text: string
+  imageUrl?: string
+  videoUrl?: string
+  isGif: boolean
+}
+
+export interface BackendMessageReactionSummaryDto {
+  emoji: string
+  count: number
+  reactedByMe: boolean
+}
+
 export interface BackendConversationListItemDto {
   id: string
   otherUserId: string
@@ -20,9 +37,30 @@ export interface BackendMessageDto {
   senderPhotoUrl?: string
   text: string
   imageUrl?: string
+  videoUrl?: string
+  isGif: boolean
+  replyTo?: BackendMessageReplyPreviewDto
+  reactions: BackendMessageReactionSummaryDto[]
   createdAt: string
   isMine: boolean
   isRead: boolean
+}
+
+export interface MessageReplyPreview {
+  id: string
+  senderId: string
+  senderUsername: string
+  senderDisplayName?: string
+  text: string
+  imageUrl?: string
+  videoUrl?: string
+  isGif: boolean
+}
+
+export interface MessageReactionSummary {
+  emoji: string
+  count: number
+  reactedByMe: boolean
 }
 
 export interface ConversationListItem {
@@ -45,6 +83,10 @@ export interface ChatMessage {
   senderPhotoUrl?: string
   text: string
   imageUrl?: string
+  videoUrl?: string
+  isGif: boolean
+  replyTo?: MessageReplyPreview
+  reactions: MessageReactionSummary[]
   createdAt: string
   isMine: boolean
   isRead: boolean
@@ -53,6 +95,24 @@ export interface ChatMessage {
 export interface UnreadMessagesCountResponse {
   count: number
 }
+
+const mapReplyPreview = (dto: BackendMessageReplyPreviewDto): MessageReplyPreview => ({
+  id: dto.id,
+  senderId: dto.senderId,
+  senderUsername: dto.senderUsername,
+  senderDisplayName: dto.senderDisplayName,
+  text: dto.text,
+  imageUrl: resolveMediaUrl(dto.imageUrl),
+  videoUrl: resolveMediaUrl(dto.videoUrl),
+  isGif: dto.isGif ?? false
+})
+
+const mapReactions = (dto: BackendMessageReactionSummaryDto[] | undefined): MessageReactionSummary[] =>
+  (dto ?? []).map(reaction => ({
+    emoji: reaction.emoji,
+    count: reaction.count,
+    reactedByMe: reaction.reactedByMe
+  }))
 
 export const mapConversationListItem = (dto: BackendConversationListItemDto): ConversationListItem => ({
   id: dto.id,
@@ -74,6 +134,10 @@ export const mapChatMessage = (dto: BackendMessageDto): ChatMessage => ({
   senderPhotoUrl: resolveMediaUrl(dto.senderPhotoUrl),
   text: dto.text,
   imageUrl: resolveMediaUrl(dto.imageUrl),
+  videoUrl: resolveMediaUrl(dto.videoUrl),
+  isGif: dto.isGif ?? false,
+  replyTo: dto.replyTo ? mapReplyPreview(dto.replyTo) : undefined,
+  reactions: mapReactions(dto.reactions),
   createdAt: dto.createdAt,
   isMine: dto.isMine,
   isRead: dto.isRead ?? false

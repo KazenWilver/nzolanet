@@ -3,7 +3,7 @@ import * as signalR from '@microsoft/signalr'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { AuthService } from './auth.service'
 import { environment } from '../../../environments/environment'
-import type { ChatMessage } from '../models/conversation.model'
+import type { ChatMessage, MessageReactionSummary } from '../models/conversation.model'
 import { mapChatMessage } from '../models/conversation.model'
 
 export interface ChatTypingEvent {
@@ -19,6 +19,12 @@ export interface ChatReadReceiptEvent {
   readAt: string
 }
 
+export interface ChatReactionChangedEvent {
+  conversationId: string
+  messageId: string
+  reactions: MessageReactionSummary[]
+}
+
 interface BackendMessageBroadcast {
   id: string
   conversationId: string
@@ -28,6 +34,10 @@ interface BackendMessageBroadcast {
   senderPhotoUrl?: string
   text: string
   imageUrl?: string
+  videoUrl?: string
+  isGif?: boolean
+  replyTo?: ChatMessage['replyTo']
+  reactions?: MessageReactionSummary[]
   createdAt: string
   isRead?: boolean
 }
@@ -43,11 +53,13 @@ export class ChatRealtimeService {
   private readonly messageSubject = new Subject<ChatMessage>()
   private readonly typingSubject = new Subject<ChatTypingEvent>()
   private readonly readReceiptSubject = new Subject<ChatReadReceiptEvent>()
+  private readonly reactionChangedSubject = new Subject<ChatReactionChangedEvent>()
 
   readonly connected$ = this.connectedSubject.asObservable()
   readonly message$ = this.messageSubject.asObservable()
   readonly typing$ = this.typingSubject.asObservable()
   readonly readReceipt$ = this.readReceiptSubject.asObservable()
+  readonly reactionChanged$ = this.reactionChangedSubject.asObservable()
 
   async connect(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -157,6 +169,8 @@ export class ChatRealtimeService {
       const currentUserId = this.authService.getCurrentUser()?.id?.toLowerCase()
       const message = mapChatMessage({
         ...payload,
+        isGif: payload.isGif ?? false,
+        reactions: payload.reactions ?? [],
         isMine: currentUserId === payload.senderId?.toLowerCase(),
         isRead: payload.isRead ?? false
       })
@@ -176,6 +190,18 @@ export class ChatRealtimeService {
         conversationId: String(payload.conversationId),
         readerUserId: String(payload.readerUserId),
         readAt: payload.readAt
+      })
+    })
+
+    this.connection.on('MessageReactionChanged', (payload: ChatReactionChangedEvent) => {
+      this.reactionChangedSubject.next({
+        conversationId: String(payload.conversationId),
+        messageId: String(payload.messageId),
+        reactions: (payload.reactions ?? []).map(reaction => ({
+          emoji: reaction.emoji,
+          count: reaction.count,
+          reactedByMe: reaction.reactedByMe
+        }))
       })
     })
 

@@ -1,0 +1,13 @@
+<div class="chat-emoji-picker" role="listbox" aria-label="Escolher emoji">
+  @for (emoji of emojis; track emoji) {
+    <button
+      type="button"
+      class="chat-emoji-picker__item"
+      role="option"
+      [attr.aria-label]="'Emoji ' + emoji"
+      (click)="handleSelect(emoji)"
+    >
+      {{ emoji }}
+    </button>
+  }
+</div>

@@ -169,37 +169,103 @@
 
               @for (message of group.messages; track trackMessage($index, message)) {
                 <article
-                  class="messages-page__bubble"
-                  [class.messages-page__bubble--mine]="message.isMine"
-                  [class.messages-page__bubble--theirs]="!message.isMine"
+                  class="messages-page__bubble-wrap"
+                  [class.messages-page__bubble-wrap--mine]="message.isMine"
                 >
-                  <div class="messages-page__bubble-content">
-                    @if (message.imageUrl) {
-                      <img
-                        class="messages-page__bubble-image"
-                        [src]="message.imageUrl"
-                        alt="Imagem enviada na conversa"
-                        loading="lazy"
-                      />
-                    }
-                    @if (message.text) {
-                      <p>{{ message.text }}</p>
-                    }
-                    <footer class="messages-page__bubble-meta">
-                      <time [dateTime]="message.createdAt">
-                        {{ message.createdAt | date:'HH:mm' }}
-                      </time>
-                      @if (message.isMine) {
-                        <span
-                          class="messages-page__read-status"
-                          [class.messages-page__read-status--read]="message.isRead"
-                          [attr.aria-label]="message.isRead ? 'Lida' : 'Enviada'"
-                        >
-                          {{ message.isRead ? '✓✓' : '✓' }}
-                        </span>
-                      }
-                    </footer>
+                  <div class="messages-page__bubble-actions">
+                    <button
+                      type="button"
+                      class="messages-page__bubble-action"
+                      aria-label="Responder"
+                      (click)="handleReplyToMessage(message)"
+                    >
+                      ↩
+                    </button>
+                    <button
+                      type="button"
+                      class="messages-page__bubble-action"
+                      aria-label="Reagir"
+                      (click)="handleOpenReactionPicker(message.id, $event)"
+                    >
+                      ☺
+                    </button>
                   </div>
+
+                  @if (reactionPickerMessageId === message.id) {
+                    <div class="messages-page__reaction-picker">
+                      <app-chat-emoji-picker
+                        mode="reaction"
+                        (emojiSelected)="handleReactionSelected(message, $event)"
+                        (closed)="reactionPickerMessageId = null"
+                      />
+                    </div>
+                  }
+
+                  <article
+                    class="messages-page__bubble"
+                    [class.messages-page__bubble--mine]="message.isMine"
+                    [class.messages-page__bubble--theirs]="!message.isMine"
+                  >
+                    <div class="messages-page__bubble-content">
+                      @if (message.replyTo) {
+                        <blockquote class="messages-page__reply-quote">
+                          <strong>{{ getReplyAuthorName(message.replyTo) }}</strong>
+                          <span>{{ getReplyPreviewLabel(message.replyTo) }}</span>
+                        </blockquote>
+                      }
+                      @if (message.videoUrl) {
+                        <video
+                          class="messages-page__bubble-video"
+                          [src]="message.videoUrl"
+                          controls
+                          preload="metadata"
+                        ></video>
+                      }
+                      @if (message.imageUrl) {
+                        <img
+                          class="messages-page__bubble-image"
+                          [class.messages-page__bubble-image--gif]="message.isGif"
+                          [src]="message.imageUrl"
+                          [alt]="message.isGif ? 'GIF enviado na conversa' : 'Imagem enviada na conversa'"
+                          loading="lazy"
+                        />
+                      }
+                      @if (message.text) {
+                        <p>{{ message.text }}</p>
+                      }
+                      <footer class="messages-page__bubble-meta">
+                        <time [dateTime]="message.createdAt">
+                          {{ message.createdAt | date:'HH:mm' }}
+                        </time>
+                        @if (message.isMine) {
+                          <span
+                            class="messages-page__read-status"
+                            [class.messages-page__read-status--read]="message.isRead"
+                            [attr.aria-label]="message.isRead ? 'Lida' : 'Enviada'"
+                          >
+                            {{ message.isRead ? '✓✓' : '✓' }}
+                          </span>
+                        }
+                      </footer>
+                    </div>
+                  </article>
+
+                  @if (message.reactions.length > 0) {
+                    <div class="messages-page__reactions" [class.messages-page__reactions--mine]="message.isMine">
+                      @for (reaction of message.reactions; track reaction.emoji) {
+                        <button
+                          type="button"
+                          class="messages-page__reaction-chip"
+                          [class.messages-page__reaction-chip--mine]="reaction.reactedByMe"
+                          [attr.aria-label]="'Reacção ' + reaction.emoji"
+                          (click)="handleReactionSelected(message, reaction.emoji)"
+                        >
+                          <span>{{ reaction.emoji }}</span>
+                          <span>{{ reaction.count }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
                 </article>
               }
             }
@@ -218,14 +284,35 @@
           @if (sendError) {
             <p class="messages-page__send-error" role="alert">{{ sendError }}</p>
           }
-          @if (pendingImagePreview) {
+          @if (replyingTo) {
+            <div class="messages-page__reply-banner">
+              <div class="messages-page__reply-banner-body">
+                <span class="messages-page__reply-banner-label">A responder a {{ getReplyAuthorName(replyingTo) }}</span>
+                <span class="messages-page__reply-banner-text">{{ getReplyPreviewLabel(replyingTo) }}</span>
+              </div>
+              <button
+                type="button"
+                class="messages-page__reply-banner-close"
+                aria-label="Cancelar resposta"
+                (click)="handleCancelReply()"
+              >
+                ×
+              </button>
+            </div>
+          }
+          @if (pendingImagePreview || pendingVideoPreview) {
             <div class="messages-page__pending-image">
-              <img [src]="pendingImagePreview" alt="Pré-visualização da imagem" />
+              @if (pendingImagePreview) {
+                <img [src]="pendingImagePreview" alt="Pré-visualização da imagem" />
+              }
+              @if (pendingVideoPreview) {
+                <video [src]="pendingVideoPreview" controls muted></video>
+              }
               <button
                 type="button"
                 class="messages-page__pending-image-remove"
-                aria-label="Remover imagem"
-                (click)="handleRemovePendingImage()"
+                aria-label="Remover ficheiro"
+                (click)="handleRemovePendingMedia()"
               >
                 ×
               </button>
@@ -241,6 +328,24 @@
               tabindex="-1"
               (change)="handleImageSelected($event)"
             />
+            <input
+              #gifInput
+              type="file"
+              accept="image/gif"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              (change)="handleGifSelected($event)"
+            />
+            <input
+              #videoInput
+              type="file"
+              accept="video/*"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              (change)="handleVideoSelected($event)"
+            />
             <button
               type="button"
               class="messages-page__image-btn"
@@ -253,6 +358,45 @@
                 <path d="m21 15-5-5L5 21"></path>
               </svg>
             </button>
+            <button
+              type="button"
+              class="messages-page__image-btn"
+              aria-label="Enviar GIF"
+              (click)="gifInput.click()"
+            >
+              GIF
+            </button>
+            <button
+              type="button"
+              class="messages-page__image-btn"
+              aria-label="Enviar vídeo"
+              (click)="videoInput.click()"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2"></rect>
+              </svg>
+            </button>
+            <div class="messages-page__emoji-anchor">
+              <button
+                type="button"
+                class="messages-page__image-btn"
+                aria-label="Inserir emoji"
+                [attr.aria-expanded]="composerEmojiOpen"
+                (click)="handleToggleComposerEmoji()"
+              >
+                ☺
+              </button>
+              @if (composerEmojiOpen) {
+                <div class="messages-page__composer-emoji-picker">
+                  <app-chat-emoji-picker
+                    mode="composer"
+                    (emojiSelected)="handleComposerEmojiSelected($event)"
+                    (closed)="composerEmojiOpen = false"
+                  />
+                </div>
+              }
+            </div>
             <textarea
               formControlName="text"
               class="messages-page__composer-input"

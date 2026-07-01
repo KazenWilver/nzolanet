@@ -8,12 +8,13 @@ import { EMPTY, Subscription, debounceTime, distinctUntilChanged, interval, swit
 import { ConversationService } from '../../core/services/conversation.service'
 import { ChatRealtimeService } from '../../core/services/chat-realtime.service'
 import { AuthService } from '../../core/services/auth.service'
-import type { ChatMessage, ConversationListItem } from '../../core/models/conversation.model'
+import type { ChatMessage, ConversationListItem, MessageReplyPreview } from '../../core/models/conversation.model'
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe'
 import { RelativeTimeService } from '../../core/services/relative-time.service'
 import { NewConversationModalComponent } from './new-conversation-modal/new-conversation-modal.component'
+import { ChatEmojiPickerComponent } from './chat-emoji-picker/chat-emoji-picker.component'
 
 export interface MessageDayGroup {
   key: string
@@ -33,7 +34,8 @@ export interface MessageDayGroup {
     AvatarComponent,
     LoadingSpinnerComponent,
     TimeAgoPipe,
-    NewConversationModalComponent
+    NewConversationModalComponent,
+    ChatEmojiPickerComponent
   ],
   templateUrl: './messages-page.component.html',
   styleUrl: './messages-page.component.scss'
@@ -66,6 +68,11 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   newConversationOpen = false
   pendingImage: File | null = null
   pendingImagePreview = ''
+  pendingVideo: File | null = null
+  pendingVideoPreview = ''
+  replyingTo: ChatMessage | null = null
+  composerEmojiOpen = false
+  reactionPickerMessageId: string | null = null
 
   private typingTimeoutId?: ReturnType<typeof setTimeout>
   private typingClearTimeoutId?: ReturnType<typeof setTimeout>
@@ -77,7 +84,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   get canSendMessage(): boolean {
     const hasText = this.messageForm.controls.text.value.trim().length > 0
-    return (hasText || !!this.pendingImage) && !this.sendingMessage
+    return (hasText || !!this.pendingImage || !!this.pendingVideo) && !this.sendingMessage
   }
 
   ngOnInit(): void {
@@ -105,7 +112,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pollingSubscription?.unsubscribe()
-    this.clearPendingImage()
+    this.clearPendingMedia()
     void this.chatRealtime.setActiveConversation(null)
   }
 
@@ -175,7 +182,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     const text = this.messageForm.controls.text.value.trim()
-    if (!text && !this.pendingImage) {
+    if (!text && !this.pendingImage && !this.pendingVideo) {
       return
     }
 
@@ -183,16 +190,24 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.sendError = ''
     void this.chatRealtime.notifyStoppedTyping(this.activeConversation.id)
 
-    const imageToSend = this.pendingImage
-    const request$ = imageToSend
-      ? this.conversationService.sendMessageWithMedia(this.activeConversation.id, imageToSend, text)
-      : this.conversationService.sendMessage(this.activeConversation.id, text)
+    const replyToMessageId = this.replyingTo?.id
+    const hasMedia = !!this.pendingImage || !!this.pendingVideo
+    const request$ = hasMedia
+      ? this.conversationService.sendMessageWithMedia(this.activeConversation.id, {
+          text,
+          image: this.pendingImage ?? undefined,
+          video: this.pendingVideo ?? undefined,
+          replyToMessageId
+        })
+      : this.conversationService.sendMessage(this.activeConversation.id, text, replyToMessageId)
 
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: message => {
-          this.clearPendingImage()
+          this.clearPendingMedia()
+          this.replyingTo = null
+          this.composerEmojiOpen = false
           this.appendMessageIfMissing(message)
           this.messageForm.reset()
           this.sendingMessage = false
@@ -206,6 +221,67 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       })
   }
 
+  handleReplyToMessage(message: ChatMessage): void {
+    this.replyingTo = message
+    this.reactionPickerMessageId = null
+  }
+
+  handleCancelReply(): void {
+    this.replyingTo = null
+  }
+
+  handleOpenReactionPicker(messageId: string, event: MouseEvent): void {
+    event.stopPropagation()
+    this.reactionPickerMessageId = this.reactionPickerMessageId === messageId ? null : messageId
+    this.composerEmojiOpen = false
+  }
+
+  handleReactionSelected(message: ChatMessage, emoji: string): void {
+    if (!this.activeConversation) {
+      return
+    }
+
+    this.reactionPickerMessageId = null
+    this.conversationService
+      .toggleReaction(this.activeConversation.id, message.id, emoji)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: reactions => {
+          this.messages = this.messages.map(existing =>
+            existing.id === message.id ? { ...existing, reactions } : existing
+          )
+        }
+      })
+  }
+
+  handleComposerEmojiSelected(emoji: string): void {
+    const control = this.messageForm.controls.text
+    control.setValue(`${control.value}${emoji}`)
+    this.composerEmojiOpen = false
+  }
+
+  handleToggleComposerEmoji(): void {
+    this.composerEmojiOpen = !this.composerEmojiOpen
+    this.reactionPickerMessageId = null
+  }
+
+  getReplyPreviewLabel(reply: MessageReplyPreview | ChatMessage): string {
+    if (reply.text?.trim()) {
+      return reply.text.trim()
+    }
+    if (reply.videoUrl) {
+      return 'Vídeo'
+    }
+    if (reply.imageUrl) {
+      return reply.isGif ? 'GIF' : 'Imagem'
+    }
+    return 'Mensagem'
+  }
+
+  getReplyAuthorName(reply: MessageReplyPreview | ChatMessage): string {
+    return reply.senderDisplayName ?? reply.senderUsername
+  }
+
   handleImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]
@@ -215,16 +291,31 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       return
     }
 
-    if (this.pendingImagePreview) {
-      URL.revokeObjectURL(this.pendingImagePreview)
-    }
-
+    this.clearPendingMedia()
     this.pendingImage = file
     this.pendingImagePreview = URL.createObjectURL(file)
   }
 
-  handleRemovePendingImage(): void {
-    this.clearPendingImage()
+  handleGifSelected(event: Event): void {
+    this.handleImageSelected(event)
+  }
+
+  handleVideoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+
+    if (!file || !file.type.startsWith('video/')) {
+      return
+    }
+
+    this.clearPendingMedia()
+    this.pendingVideo = file
+    this.pendingVideoPreview = URL.createObjectURL(file)
+  }
+
+  handleRemovePendingMedia(): void {
+    this.clearPendingMedia()
   }
 
   handleComposerKeydown(event: KeyboardEvent): void {
@@ -360,6 +451,18 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
         this.typingLabel = ''
       })
+
+    this.chatRealtime.reactionChanged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+          return
+        }
+
+        this.messages = this.messages.map(existing =>
+          existing.id === event.messageId ? { ...existing, reactions: event.reactions } : existing
+        )
+      })
   }
 
   private setupFallbackPolling(): void {
@@ -428,6 +531,9 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.messagesError = false
     this.sendError = ''
     this.typingLabel = ''
+    this.replyingTo = null
+    this.reactionPickerMessageId = null
+    this.composerEmojiOpen = false
 
     void this.chatRealtime.setActiveConversation(conversation.id)
 
@@ -475,9 +581,16 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       return
     }
 
-    const preview = message.isMine
-      ? `Tu: ${message.text || (message.imageUrl ? 'Imagem' : '')}`
-      : message.text || (message.imageUrl ? 'Imagem' : '')
+    const mediaLabel = message.videoUrl
+      ? 'Vídeo'
+      : message.imageUrl
+        ? message.isGif
+          ? 'GIF'
+          : 'Imagem'
+        : ''
+    const replyPrefix = message.replyTo ? '↩ ' : ''
+    const content = message.text || mediaLabel || 'Mensagem'
+    const preview = message.isMine ? `Tu: ${replyPrefix}${content}` : `${replyPrefix}${content}`
 
     this.activeConversation = {
       ...this.activeConversation,
@@ -543,12 +656,17 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     })
   }
 
-  private clearPendingImage(): void {
+  private clearPendingMedia(): void {
     if (this.pendingImagePreview) {
       URL.revokeObjectURL(this.pendingImagePreview)
     }
+    if (this.pendingVideoPreview) {
+      URL.revokeObjectURL(this.pendingVideoPreview)
+    }
     this.pendingImage = null
     this.pendingImagePreview = ''
+    this.pendingVideo = null
+    this.pendingVideoPreview = ''
   }
 
   private setupPushNotifications(): void {
@@ -579,7 +697,10 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     const title = conversation
       ? this.getConversationDisplayName(conversation)
       : 'Nova mensagem'
-    const body = message.text?.trim() || (message.imageUrl ? 'Enviou uma imagem' : 'Nova mensagem')
+    const body = message.text?.trim()
+      || (message.videoUrl ? 'Enviou um vídeo' : '')
+      || (message.imageUrl ? (message.isGif ? 'Enviou um GIF' : 'Enviou uma imagem') : '')
+      || 'Nova mensagem'
 
     new Notification(title, {
       body,

@@ -7,11 +7,20 @@ import { AuthService } from './auth.service'
 import type {
   BackendConversationListItemDto,
   BackendMessageDto,
+  BackendMessageReactionSummaryDto,
   ChatMessage,
   ConversationListItem,
+  MessageReactionSummary,
   UnreadMessagesCountResponse
 } from '../models/conversation.model'
 import { mapChatMessage, mapConversationListItem } from '../models/conversation.model'
+
+export interface SendMediaOptions {
+  text?: string
+  image?: File
+  video?: File
+  replyToMessageId?: string
+}
 
 @Injectable({ providedIn: 'root' })
 export class ConversationService {
@@ -66,22 +75,50 @@ export class ConversationService {
       .pipe(map(messages => messages.map(mapChatMessage)))
   }
 
-  sendMessage(conversationId: string, text: string): Observable<ChatMessage> {
+  sendMessage(conversationId: string, text: string, replyToMessageId?: string): Observable<ChatMessage> {
     return this.http
-      .post<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages`, { text })
+      .post<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages`, {
+        text,
+        replyToMessageId: replyToMessageId ?? null
+      })
       .pipe(map(mapChatMessage))
   }
 
-  sendMessageWithMedia(conversationId: string, image: File, text?: string): Observable<ChatMessage> {
+  sendMessageWithMedia(conversationId: string, options: SendMediaOptions): Observable<ChatMessage> {
     const formData = new FormData()
-    if (text?.trim()) {
-      formData.append('text', text.trim())
+    if (options.text?.trim()) {
+      formData.append('text', options.text.trim())
     }
-    formData.append('image', image)
+    if (options.replyToMessageId) {
+      formData.append('replyToMessageId', options.replyToMessageId)
+    }
+    if (options.image) {
+      formData.append('image', options.image)
+    }
+    if (options.video) {
+      formData.append('video', options.video)
+    }
 
     return this.http
       .post<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages/media`, formData)
       .pipe(map(mapChatMessage))
+  }
+
+  toggleReaction(
+    conversationId: string,
+    messageId: string,
+    emoji: string
+  ): Observable<MessageReactionSummary[]> {
+    return this.http
+      .post<{ reactions: BackendMessageReactionSummaryDto[] }>(
+        `${this.baseUrl}/${conversationId}/messages/${messageId}/reactions`,
+        { emoji }
+      )
+      .pipe(map(response => response.reactions.map(reaction => ({
+        emoji: reaction.emoji,
+        count: reaction.count,
+        reactedByMe: reaction.reactedByMe
+      }))))
   }
 
   markAsRead(conversationId: string): Observable<void> {
