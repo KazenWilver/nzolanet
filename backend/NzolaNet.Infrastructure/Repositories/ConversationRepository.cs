@@ -198,4 +198,22 @@ public class ConversationRepository : IConversationRepository
             m.SenderId != userId &&
             (!participant.LastReadAt.HasValue || m.CreatedAt > participant.LastReadAt));
     }
+
+    public async Task<DateTime?> GetOtherParticipantLastReadAtAsync(Guid conversationId, Guid userId)
+    {
+        return await _context.ConversationParticipants
+            .AsNoTracking()
+            .Where(p => p.ConversationId == conversationId && p.UserId != userId)
+            .Select(p => p.LastReadAt)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetOtherParticipantIdsAsync(Guid conversationId, Guid userId)
+    {
+        return await _context.ConversationParticipants
+            .AsNoTracking()
+            .Where(p => p.ConversationId == conversationId && p.UserId != userId)
+            .Select(p => p.UserId)
+            .ToListAsync();
+    }
 }

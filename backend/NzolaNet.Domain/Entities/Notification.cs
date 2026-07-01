@@ -12,6 +12,8 @@ public class Notification
     public virtual Post? Publication { get; set; }
     public Guid? CommentId { get; set; }
     public virtual Comment? Comment { get; set; }
+    public Guid? ConversationId { get; set; }
+    public string? MessagePreview { get; set; }
     public bool IsRead { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

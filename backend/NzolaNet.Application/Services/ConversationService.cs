@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Conversations;
+using NzolaNet.Application.Helpers;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
@@ -13,15 +15,21 @@ public class ConversationService : IConversationService
     private readonly IConversationRepository _conversationRepository;
     private readonly IUserRepository _userRepository;
     private readonly IFollowRepository _followRepository;
+    private readonly IStorageService _storageService;
+    private readonly INotificationService _notificationService;
 
     public ConversationService(
         IConversationRepository conversationRepository,
         IUserRepository userRepository,
-        IFollowRepository followRepository)
+        IFollowRepository followRepository,
+        IStorageService storageService,
+        INotificationService notificationService)
     {
         _conversationRepository = conversationRepository;
         _userRepository = userRepository;
         _followRepository = followRepository;
+        _storageService = storageService;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<ConversationListItemDto>> GetConversationsAsync(Guid userId)
@@ -68,16 +76,23 @@ public class ConversationService : IConversationService
 
         var safeLimit = Math.Clamp(limit, 1, MaxMessagesPageSize);
         var messages = await _conversationRepository.GetMessagesAsync(conversationId, safeLimit, before);
+        var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
 
-        return messages.Select(message => MapMessage(message, userId));
+        return messages.Select(message => MapMessage(message, userId, otherLastRead));
     }
 
-    public async Task<MessageResponseDto> SendMessageAsync(Guid userId, Guid conversationId, string text)
+    public async Task<MessageResponseDto> SendMessageAsync(
+        Guid userId,
+        Guid conversationId,
+        string? text,
+        IFormFile? image = null)
     {
         await EnsureParticipantAsync(userId, conversationId);
 
         var trimmed = text?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(trimmed))
+        var hasImage = image is { Length: > 0 };
+
+        if (string.IsNullOrWhiteSpace(trimmed) && !hasImage)
         {
             throw new ArgumentException("A mensagem não pode estar vazia.");
         }
@@ -85,6 +100,11 @@ public class ConversationService : IConversationService
         if (trimmed.Length > MaxMessageLength)
         {
             throw new ArgumentException($"A mensagem não pode exceder {MaxMessageLength} caracteres.");
+        }
+
+        if (hasImage)
+        {
+            FileHelper.ValidateImageFile(image!);
         }
 
         var message = new Message
@@ -95,14 +115,35 @@ public class ConversationService : IConversationService
             CreatedAt = DateTime.UtcNow
         };
 
+        if (hasImage)
+        {
+            message.ImagePath = await _storageService.SaveFileAsync(image!, "messages");
+        }
+
         var saved = await _conversationRepository.AddMessageAsync(message);
-        return MapMessage(saved, userId);
+        var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
+        var response = MapMessage(saved, userId, otherLastRead);
+
+        var preview = FormatMessagePreview(saved);
+        var recipients = await _conversationRepository.GetOtherParticipantIdsAsync(conversationId, userId);
+        foreach (var recipientId in recipients)
+        {
+            await _notificationService.TryCreateMessageNotificationAsync(
+                userId,
+                conversationId,
+                recipientId,
+                preview);
+        }
+
+        return response;
     }
 
-    public async Task MarkAsReadAsync(Guid userId, Guid conversationId)
+    public async Task<DateTime> MarkAsReadAsync(Guid userId, Guid conversationId)
     {
         await EnsureParticipantAsync(userId, conversationId);
-        await _conversationRepository.MarkAsReadAsync(conversationId, userId, DateTime.UtcNow);
+        var readAt = DateTime.UtcNow;
+        await _conversationRepository.MarkAsReadAsync(conversationId, userId, readAt);
+        return readAt;
     }
 
     public async Task<UnreadMessagesCountDto> GetUnreadCountAsync(Guid userId)
@@ -149,14 +190,19 @@ public class ConversationService : IConversationService
             OtherUsername = otherUser.UserName ?? string.Empty,
             OtherDisplayName = otherUser.DisplayName,
             OtherPhotoUrl = otherUser.ProfilePhoto,
-            LastMessageText = lastMessage?.Text,
+            LastMessageText = FormatMessagePreview(lastMessage),
             LastMessageAt = lastMessage?.CreatedAt,
             UnreadCount = unreadCount
         };
     }
 
-    private static MessageResponseDto MapMessage(Message message, Guid currentUserId)
+    private static MessageResponseDto MapMessage(Message message, Guid currentUserId, DateTime? otherLastReadAt)
     {
+        var isMine = message.SenderId == currentUserId;
+        var isRead = isMine &&
+            otherLastReadAt.HasValue &&
+            otherLastReadAt.Value >= message.CreatedAt;
+
         return new MessageResponseDto
         {
             Id = message.Id,
@@ -166,8 +212,30 @@ public class ConversationService : IConversationService
             SenderDisplayName = message.Sender.DisplayName,
             SenderPhotoUrl = message.Sender.ProfilePhoto,
             Text = message.Text,
+            ImageUrl = message.ImagePath,
             CreatedAt = message.CreatedAt,
-            IsMine = message.SenderId == currentUserId
+            IsMine = isMine,
+            IsRead = isRead
         };
+    }
+
+    private static string? FormatMessagePreview(Message? message)
+    {
+        if (message == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(message.ImagePath) && string.IsNullOrWhiteSpace(message.Text))
+        {
+            return "Imagem";
+        }
+
+        if (!string.IsNullOrWhiteSpace(message.ImagePath) && !string.IsNullOrWhiteSpace(message.Text))
+        {
+            return message.Text;
+        }
+
+        return message.Text;
     }
 }

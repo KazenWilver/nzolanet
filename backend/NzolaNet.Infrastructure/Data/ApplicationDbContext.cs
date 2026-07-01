@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Conversation> Conversations { get; set; } = null!;
     public DbSet<ConversationParticipant> ConversationParticipants { get; set; } = null!;
     public DbSet<Message> Messages { get; set; } = null!;
+    public DbSet<Repost> Reposts { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -104,6 +105,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         {
             entity.HasKey(n => n.Id);
             entity.Property(n => n.Type).IsRequired().HasMaxLength(20);
+            entity.Property(n => n.MessagePreview).HasMaxLength(200);
 
             entity.HasOne(n => n.Recipient)
                   .WithMany()
@@ -126,6 +128,24 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                   .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasIndex(n => new { n.RecipientId, n.IsRead, n.CreatedAt });
+        });
+
+        builder.Entity<Repost>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+
+            entity.HasOne(r => r.User)
+                  .WithMany()
+                  .HasForeignKey(r => r.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.Post)
+                  .WithMany()
+                  .HasForeignKey(r => r.PostId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(r => new { r.UserId, r.PostId }).IsUnique();
+            entity.HasIndex(r => r.PostId);
         });
 
         builder.Entity<Conversation>(entity =>
@@ -157,6 +177,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         {
             entity.HasKey(m => m.Id);
             entity.Property(m => m.Text).IsRequired().HasMaxLength(2000);
+            entity.Property(m => m.ImagePath).HasMaxLength(500);
 
             entity.HasOne(m => m.Conversation)
                   .WithMany(c => c.Messages)

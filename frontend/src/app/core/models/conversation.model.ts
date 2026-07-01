@@ -19,8 +19,10 @@ export interface BackendMessageDto {
   senderDisplayName?: string
   senderPhotoUrl?: string
   text: string
+  imageUrl?: string
   createdAt: string
   isMine: boolean
+  isRead: boolean
 }
 
 export interface ConversationListItem {
@@ -42,8 +44,10 @@ export interface ChatMessage {
   senderDisplayName?: string
   senderPhotoUrl?: string
   text: string
+  imageUrl?: string
   createdAt: string
   isMine: boolean
+  isRead: boolean
 }
 
 export interface UnreadMessagesCountResponse {
@@ -69,6 +73,8 @@ export const mapChatMessage = (dto: BackendMessageDto): ChatMessage => ({
   senderDisplayName: dto.senderDisplayName,
   senderPhotoUrl: resolveMediaUrl(dto.senderPhotoUrl),
   text: dto.text,
+  imageUrl: resolveMediaUrl(dto.imageUrl),
   createdAt: dto.createdAt,
-  isMine: dto.isMine
+  isMine: dto.isMine,
+  isRead: dto.isRead ?? false
 })

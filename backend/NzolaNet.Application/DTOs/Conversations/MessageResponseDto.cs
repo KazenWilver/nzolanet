@@ -9,6 +9,8 @@ public class MessageResponseDto
     public string? SenderDisplayName { get; set; }
     public string? SenderPhotoUrl { get; set; }
     public string Text { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsMine { get; set; }
+    public bool IsRead { get; set; }
 }

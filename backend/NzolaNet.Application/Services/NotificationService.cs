@@ -257,6 +257,40 @@ public class NotificationService : INotificationService
         }
     }
 
+    public async Task TryCreateMessageNotificationAsync(
+        Guid actorId,
+        Guid conversationId,
+        Guid recipientId,
+        string? messagePreview)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "message",
+                ConversationId = conversationId,
+                MessagePreview = TruncatePreview(messagePreview),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao criar notificação de mensagem para o utilizador {RecipientId}.",
+                recipientId);
+        }
+    }
+
     private NotificationResponseDto MapToDto(Notification notification)
     {
         var publicationText = notification.Publication?.Text;
@@ -275,7 +309,9 @@ public class NotificationService : INotificationService
             PublicationId = notification.PublicationId,
             PublicationText = TruncatePreview(publicationText),
             CommentId = notification.CommentId,
-            CommentText = TruncatePreview(commentText)
+            CommentText = TruncatePreview(commentText),
+            ConversationId = notification.ConversationId,
+            MessageText = TruncatePreview(notification.MessagePreview)
         };
     }
 

@@ -95,13 +95,38 @@ public class ConversationsController : ControllerBase
         }
     }
 
+    [HttpPost("{id:guid}/messages/media")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> SendMessageWithMedia(
+        Guid id,
+        [FromForm] string? text,
+        [FromForm] IFormFile? image)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var message = await _conversationService.SendMessageAsync(userId, id, text, image);
+            await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
+            return Ok(message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
     [HttpPut("{id:guid}/read")]
     public async Task<IActionResult> MarkAsRead(Guid id)
     {
         try
         {
             var userId = AuthClaimsHelper.GetUserId(User);
-            await _conversationService.MarkAsReadAsync(userId, id);
+            var readAt = await _conversationService.MarkAsReadAsync(userId, id);
+            await _chatRealtimeNotifier.NotifyReadReceiptAsync(id, userId, readAt);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

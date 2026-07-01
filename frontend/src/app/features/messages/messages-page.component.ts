@@ -64,17 +64,25 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   typingLabel = ''
   realtimeConnected = false
   newConversationOpen = false
+  pendingImage: File | null = null
+  pendingImagePreview = ''
 
   private typingTimeoutId?: ReturnType<typeof setTimeout>
   private typingClearTimeoutId?: ReturnType<typeof setTimeout>
   private pollingSubscription?: Subscription
 
   readonly messageForm = this.formBuilder.nonNullable.group({
-    text: ['', [Validators.required, Validators.maxLength(2000)]]
+    text: ['', [Validators.maxLength(2000)]]
   })
+
+  get canSendMessage(): boolean {
+    const hasText = this.messageForm.controls.text.value.trim().length > 0
+    return (hasText || !!this.pendingImage) && !this.sendingMessage
+  }
 
   ngOnInit(): void {
     void this.chatRealtime.connect().catch(() => undefined)
+    this.setupPushNotifications()
     this.loadConversations()
     this.setupRealtimeListeners()
     this.setupFallbackPolling()
@@ -97,6 +105,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pollingSubscription?.unsubscribe()
+    this.clearPendingImage()
     void this.chatRealtime.setActiveConversation(null)
   }
 
@@ -161,12 +170,12 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   }
 
   handleSendMessage(): void {
-    if (!this.activeConversation || this.messageForm.invalid || this.sendingMessage) {
+    if (!this.activeConversation || !this.canSendMessage) {
       return
     }
 
     const text = this.messageForm.controls.text.value.trim()
-    if (!text) {
+    if (!text && !this.pendingImage) {
       return
     }
 
@@ -174,11 +183,16 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.sendError = ''
     void this.chatRealtime.notifyStoppedTyping(this.activeConversation.id)
 
-    this.conversationService
-      .sendMessage(this.activeConversation.id, text)
+    const imageToSend = this.pendingImage
+    const request$ = imageToSend
+      ? this.conversationService.sendMessageWithMedia(this.activeConversation.id, imageToSend, text)
+      : this.conversationService.sendMessage(this.activeConversation.id, text)
+
+    request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: message => {
+          this.clearPendingImage()
           this.appendMessageIfMissing(message)
           this.messageForm.reset()
           this.sendingMessage = false
@@ -190,6 +204,27 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           this.sendError = error.error?.message ?? 'Não foi possível enviar a mensagem.'
         }
       })
+  }
+
+  handleImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+
+    if (!file || !file.type.startsWith('image/')) {
+      return
+    }
+
+    if (this.pendingImagePreview) {
+      URL.revokeObjectURL(this.pendingImagePreview)
+    }
+
+    this.pendingImage = file
+    this.pendingImagePreview = URL.createObjectURL(file)
+  }
+
+  handleRemovePendingImage(): void {
+    this.clearPendingImage()
   }
 
   handleComposerKeydown(event: KeyboardEvent): void {
@@ -266,6 +301,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(message => {
         if (!this.activeConversation || message.conversationId !== this.activeConversation.id) {
+          this.maybeNotifyIncomingMessage(message)
           this.refreshConversationsSilently()
           return
         }
@@ -278,6 +314,24 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         }
       })
 
+    this.chatRealtime.readReceipt$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+          return
+        }
+
+        const readerId = event.readerUserId.toLowerCase()
+        const otherId = this.activeConversation.otherUserId.toLowerCase()
+        if (readerId !== otherId) {
+          return
+        }
+
+        this.messages = this.messages.map(existing =>
+          existing.isMine ? { ...existing, isRead: true } : existing
+        )
+      })
+
     this.chatRealtime.typing$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(event => {
@@ -285,13 +339,16 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           return
         }
 
-        const currentUserId = this.authService.getCurrentUser()?.id
-        if (event.userId === currentUserId) {
+        const currentUserId = this.authService.getCurrentUser()?.id?.toLowerCase()
+        const otherUserId = this.activeConversation.otherUserId.toLowerCase()
+        const eventUserId = event.userId.toLowerCase()
+
+        if (!eventUserId || eventUserId === currentUserId || eventUserId !== otherUserId) {
           return
         }
 
         if (event.isTyping) {
-          this.typingLabel = `${event.username} está a escrever…`
+          this.typingLabel = `${this.getConversationDisplayName(this.activeConversation)} está a escrever…`
           if (this.typingClearTimeoutId) {
             clearTimeout(this.typingClearTimeoutId)
           }
@@ -418,7 +475,9 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       return
     }
 
-    const preview = message.isMine ? `Tu: ${message.text}` : message.text
+    const preview = message.isMine
+      ? `Tu: ${message.text || (message.imageUrl ? 'Imagem' : '')}`
+      : message.text || (message.imageUrl ? 'Imagem' : '')
 
     this.activeConversation = {
       ...this.activeConversation,
@@ -481,6 +540,51 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       }
 
       element.scrollTop = element.scrollHeight
+    })
+  }
+
+  private clearPendingImage(): void {
+    if (this.pendingImagePreview) {
+      URL.revokeObjectURL(this.pendingImagePreview)
+    }
+    this.pendingImage = null
+    this.pendingImagePreview = ''
+  }
+
+  private setupPushNotifications(): void {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return
+    }
+
+    if (Notification.permission === 'default') {
+      void Notification.requestPermission()
+    }
+  }
+
+  private maybeNotifyIncomingMessage(message: ChatMessage): void {
+    if (message.isMine) {
+      return
+    }
+
+    const isActiveConversation = this.activeConversation?.id === message.conversationId
+    if (isActiveConversation && document.hasFocus()) {
+      return
+    }
+
+    if (Notification.permission !== 'granted') {
+      return
+    }
+
+    const conversation = this.conversations.find(item => item.id === message.conversationId)
+    const title = conversation
+      ? this.getConversationDisplayName(conversation)
+      : 'Nova mensagem'
+    const body = message.text?.trim() || (message.imageUrl ? 'Enviou uma imagem' : 'Nova mensagem')
+
+    new Notification(title, {
+      body,
+      icon: '/nzolanet-logo.png',
+      tag: `nzolanet-msg-${message.conversationId}`
     })
   }
 }

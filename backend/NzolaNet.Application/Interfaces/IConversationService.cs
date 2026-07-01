@@ -11,7 +11,11 @@ public interface IConversationService
         Guid conversationId,
         int limit = 50,
         DateTime? before = null);
-    Task<MessageResponseDto> SendMessageAsync(Guid userId, Guid conversationId, string text);
-    Task MarkAsReadAsync(Guid userId, Guid conversationId);
+    Task<MessageResponseDto> SendMessageAsync(
+        Guid userId,
+        Guid conversationId,
+        string? text,
+        Microsoft.AspNetCore.Http.IFormFile? image = null);
+    Task<DateTime> MarkAsReadAsync(Guid userId, Guid conversationId);
     Task<UnreadMessagesCountDto> GetUnreadCountAsync(Guid userId);
 }

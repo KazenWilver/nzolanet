@@ -17,4 +17,6 @@ public interface IConversationRepository
     Task<bool> MarkAsReadAsync(Guid conversationId, Guid userId, DateTime readAt);
     Task<int> GetUnreadCountAsync(Guid userId);
     Task<int> GetUnreadCountForConversationAsync(Guid conversationId, Guid userId);
+    Task<DateTime?> GetOtherParticipantLastReadAtAsync(Guid conversationId, Guid userId);
+    Task<IReadOnlyList<Guid>> GetOtherParticipantIdsAsync(Guid conversationId, Guid userId);
 }

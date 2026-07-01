@@ -72,6 +72,18 @@ export class ConversationService {
       .pipe(map(mapChatMessage))
   }
 
+  sendMessageWithMedia(conversationId: string, image: File, text?: string): Observable<ChatMessage> {
+    const formData = new FormData()
+    if (text?.trim()) {
+      formData.append('text', text.trim())
+    }
+    formData.append('image', image)
+
+    return this.http
+      .post<BackendMessageDto>(`${this.baseUrl}/${conversationId}/messages/media`, formData)
+      .pipe(map(mapChatMessage))
+  }
+
   markAsRead(conversationId: string): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${conversationId}/read`, {})
   }
