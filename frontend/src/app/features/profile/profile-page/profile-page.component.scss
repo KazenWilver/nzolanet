@@ -327,6 +327,66 @@
   }
 }
 
+@media (max-width: 500px) {
+  .profile-page__info {
+    padding: 0 14px;
+    margin-top: -58px;
+  }
+
+  .profile-page__avatar-row {
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .profile-page__name {
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .profile-page__username {
+    font-size: 0.9rem;
+  }
+
+  .profile-page__bio {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .profile-page__stats {
+    gap: 14px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+  }
+
+  .profile-page__stat {
+    font-size: 0.9rem;
+  }
+
+  .profile-page__tabs {
+    gap: 2px;
+  }
+
+  .profile-page__tab {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+
+  .profile-page__btn {
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  .profile-page__panel {
+    padding: 0 6px;
+  }
+
+  .profile-page__follow-request {
+    padding: 14px;
+  }
+}
+
 @media (max-width: 390px) {
   .profile-page__info {
     padding: 0 12px;

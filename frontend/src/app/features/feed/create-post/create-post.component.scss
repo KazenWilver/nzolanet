@@ -6,6 +6,10 @@
   border-bottom: 1px solid vars.$color-border;
   padding: 16px;
 
+  @media (max-width: 500px) {
+    padding: 12px 14px;
+  }
+
   &--modal {
     border-bottom: none;
     padding: 0;
@@ -86,6 +90,12 @@
 
   &::placeholder {
     color: vars.$color-text-secondary;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 1rem;
+    min-height: 48px;
+    padding: 6px 0;
   }
 }
 

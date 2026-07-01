@@ -138,6 +138,12 @@
   overflow: hidden;
 }
 
+@media (max-width: 500px) {
+  .main-layout--messages .main-layout__center {
+    padding-bottom: 0;
+  }
+}
+
 .main-layout__aside {
   width: var(--width-sidebar-right);
   flex-shrink: 0;

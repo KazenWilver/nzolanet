@@ -42,3 +42,30 @@
   font-size: var(--font-size-base);
   color: rgba(255, 255, 255, 0.78);
 }
+
+@media (max-width: 500px) {
+  .auth-welcome {
+    padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.625rem;
+  }
+
+  .auth-welcome__logo {
+    width: 104px;
+    height: 104px;
+    margin-bottom: 0.25rem;
+  }
+
+  .auth-welcome__title {
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+  }
+
+  .auth-welcome__tagline {
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+    max-width: 22ch;
+  }
+
+  .auth-welcome__subtitle {
+    font-size: 0.9rem;
+    max-width: 28ch;
+  }
+}
