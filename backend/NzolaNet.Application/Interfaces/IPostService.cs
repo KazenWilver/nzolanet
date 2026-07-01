@@ -21,4 +21,6 @@ public interface IPostService
         bool mediaOnly = false);
     Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
     Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
+    Task<PaginatedPublicationsResponseDto> GetByHashtagAsync(string tag, Guid? currentUserId, int page, int pageSize);
+    Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 10);
 }

@@ -15,6 +15,8 @@ public class PublicationResponseDto
     public int LikesCount { get; set; }
     public int CommentsCount { get; set; }
     public int RepostsCount { get; set; }
+    public int BookmarksCount { get; set; }
     public bool? HasLiked { get; set; }
     public bool? HasReposted { get; set; }
+    public bool? HasBookmarked { get; set; }
 }

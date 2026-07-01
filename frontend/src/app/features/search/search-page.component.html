@@ -11,10 +11,10 @@
       name="searchUsers"
       class="search-page__input"
       type="search"
-      placeholder="Pesquisar utilizadores..."
+      placeholder="Pesquisar utilizadores, @menções ou #hashtags"
       [formControl]="searchControl"
       autocomplete="off"
-      aria-label="Pesquisar utilizadores"
+      aria-label="Pesquisar"
     />
     @if (loading) {
       <div class="search-page__input-spinner">
@@ -35,17 +35,23 @@
 
     @if (!hasQuery && !loading && !error) {
       <p class="search-page__message">
-        Escreve pelo menos 2 caracteres para pesquisar utilizadores.
+        Escreve pelo menos 2 caracteres para pesquisar.
       </p>
     }
 
-    @if (hasQuery && !loading && !error && results.length === 0) {
+    @if (hasQuery && !loading && !error && !isHashtagQuery && results.length === 0) {
       <p class="search-page__message">
         Nenhum utilizador encontrado para '{{ currentQuery }}'.
       </p>
     }
 
-    @if (results.length > 0) {
+    @if (hasQuery && !loading && !error && isHashtagQuery && publicationResults.length === 0) {
+      <p class="search-page__message">
+        Nenhuma publicação encontrada para '{{ currentQuery }}'.
+      </p>
+    }
+
+    @if (!isHashtagQuery && results.length > 0) {
       <h2 class="search-page__results-title">Resultados</h2>
       <ul class="search-page__results">
         @for (user of results; track trackById($index, user)) {
@@ -87,6 +93,18 @@
           </li>
         }
       </ul>
+    }
+
+    @if (isHashtagQuery && publicationResults.length > 0) {
+      <h2 class="search-page__results-title">Publicações</h2>
+      <div class="search-page__results">
+        @for (publication of publicationResults; track publication.id) {
+          <app-publication-card
+            [publication]="publication"
+            [currentUserId]="currentUserId"
+          />
+        }
+      </div>
     }
   </div>
 </section>

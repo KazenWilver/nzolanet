@@ -15,17 +15,20 @@ public class PublicationsController : ControllerBase
     private readonly ILikeService _likeService;
     private readonly ICommentService _commentService;
     private readonly IRepostService _repostService;
+    private readonly IBookmarkService _bookmarkService;
 
     public PublicationsController(
         IPostService postService,
         ILikeService likeService,
         ICommentService commentService,
-        IRepostService repostService)
+        IRepostService repostService,
+        IBookmarkService bookmarkService)
     {
         _postService = postService;
         _likeService = likeService;
         _commentService = commentService;
         _repostService = repostService;
+        _bookmarkService = bookmarkService;
     }
 
     [HttpGet]
@@ -81,6 +84,29 @@ public class PublicationsController : ControllerBase
         {
             return ForbiddenResultHelper.Create(ex.Message);
         }
+    }
+
+    [HttpGet("hashtag/{tag}")]
+    public async Task<IActionResult> GetByHashtag(
+        string tag,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var safePage = Math.Max(page, 1);
+        var safePageSize = Math.Clamp(pageSize, 1, 50);
+        var results = await _postService.GetByHashtagAsync(
+            tag,
+            AuthClaimsHelper.GetOptionalUserId(User),
+            safePage,
+            safePageSize);
+        return Ok(results);
+    }
+
+    [HttpGet("trending-hashtags")]
+    public async Task<IActionResult> GetTrendingHashtags([FromQuery] int limit = 10)
+    {
+        var hashtags = await _postService.GetTrendingHashtagsAsync(limit);
+        return Ok(hashtags);
     }
 
     [HttpGet("user/{userId}")]
@@ -201,5 +227,23 @@ public class PublicationsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    [Authorize]
+    [HttpPost("{id}/bookmark")]
+    public async Task<IActionResult> Bookmark(Guid id)
+    {
+        var userId = AuthClaimsHelper.GetUserId(User);
+        await _bookmarkService.ToggleBookmarkAsync(userId, id, bookmark: true);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete("{id}/bookmark")]
+    public async Task<IActionResult> RemoveBookmark(Guid id)
+    {
+        var userId = AuthClaimsHelper.GetUserId(User);
+        await _bookmarkService.ToggleBookmarkAsync(userId, id, bookmark: false);
+        return NoContent();
     }
 }

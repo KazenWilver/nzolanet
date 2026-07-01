@@ -14,6 +14,21 @@
   </form>
 
   <section class="aside__section">
+    <header class="aside__section-header">Tendências</header>
+    @if (trendingHashtags.length === 0) {
+      <p class="aside__empty">Sem tendências de momento.</p>
+    } @else {
+      <ul class="aside__trends">
+        @for (tag of trendingHashtags; track tag) {
+          <li>
+            <a [routerLink]="['/search']" [queryParams]="{ q: '#' + tag }">#{{ tag }}</a>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="aside__section">
     <app-who-to-follow [count]="3" />
   </section>
 </aside>

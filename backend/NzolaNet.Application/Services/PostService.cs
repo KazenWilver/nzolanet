@@ -15,6 +15,7 @@ public class PostService : IPostService
     private readonly ICommentRepository _commentRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IRepostRepository _repostRepository;
+    private readonly IBookmarkRepository _bookmarkRepository;
     private readonly IStorageService _storageService;
 
     public PostService(
@@ -25,6 +26,7 @@ public class PostService : IPostService
         ICommentRepository commentRepository,
         INotificationRepository notificationRepository,
         IRepostRepository repostRepository,
+        IBookmarkRepository bookmarkRepository,
         IStorageService storageService)
     {
         _postRepository = postRepository;
@@ -34,6 +36,7 @@ public class PostService : IPostService
         _commentRepository = commentRepository;
         _notificationRepository = notificationRepository;
         _repostRepository = repostRepository;
+        _bookmarkRepository = bookmarkRepository;
         _storageService = storageService;
     }
 
@@ -327,6 +330,61 @@ public class PostService : IPostService
         return await MapPostsToDtosAsync(visiblePosts, currentUserId);
     }
 
+    public async Task<PaginatedPublicationsResponseDto> GetByHashtagAsync(
+        string tag,
+        Guid? currentUserId,
+        int page,
+        int pageSize)
+    {
+        var normalizedTag = tag.Trim().TrimStart('#');
+        if (string.IsNullOrWhiteSpace(normalizedTag))
+        {
+            throw new ArgumentException("Hashtag inválida.");
+        }
+
+        var (items, totalCount) = await _postRepository.SearchByHashtagAsync(normalizedTag, page, pageSize);
+        var dtos = (await MapPostsToDtosAsync(items, currentUserId)).ToList();
+        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
+    }
+
+    public async Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 10)
+    {
+        var safeLimit = Math.Clamp(limit, 1, 20);
+        var postTexts = await _postRepository.GetRecentPostTextsAsync(300);
+        var hashtagRegex = new System.Text.RegularExpressions.Regex(
+            @"#([A-Za-z0-9_\u00C0-\u024F]+)",
+            System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var text in postTexts)
+        {
+            foreach (System.Text.RegularExpressions.Match match in hashtagRegex.Matches(text))
+            {
+                var hashtag = match.Groups[1].Value;
+                if (string.IsNullOrWhiteSpace(hashtag))
+                {
+                    continue;
+                }
+
+                counts[hashtag] = counts.GetValueOrDefault(hashtag) + 1;
+            }
+        }
+
+        return counts
+            .OrderByDescending(entry => entry.Value)
+            .ThenBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(safeLimit)
+            .Select(entry => entry.Key)
+            .ToList();
+    }
+
+    public Task<IEnumerable<PublicationResponseDto>> MapPostsForCurrentUserAsync(
+        IEnumerable<Post> posts,
+        Guid? currentUserId)
+    {
+        return MapPostsToDtosAsync(posts, currentUserId);
+    }
+
     private async Task EnsureCanViewUserPostsAsync(Guid targetUserId, Guid? currentUserId)
     {
         var targetUser = await _userRepository.GetByIdAsync(targetUserId);
@@ -401,13 +459,16 @@ public class PostService : IPostService
         var likeCounts = await _likeRepository.GetLikeCountsByPostIdsAsync(postIds);
         var commentCounts = await _commentRepository.GetCommentCountsByPostIdsAsync(postIds);
         var repostCounts = await _repostRepository.GetRepostCountsByPostIdsAsync(postIds);
+        var bookmarkCounts = await _bookmarkRepository.GetBookmarkCountsByPostIdsAsync(postIds);
         HashSet<Guid> likedPostIds = new();
         HashSet<Guid> repostedPostIds = new();
+        HashSet<Guid> bookmarkedPostIds = new();
 
         if (currentUserId.HasValue)
         {
             likedPostIds = await _likeRepository.GetLikedPostIdsForUserAsync(currentUserId.Value, postIds);
             repostedPostIds = await _repostRepository.GetRepostedPostIdsForUserAsync(currentUserId.Value, postIds);
+            bookmarkedPostIds = await _bookmarkRepository.GetBookmarkedPostIdsForUserAsync(currentUserId.Value, postIds);
         }
 
         return postList.Select(post => MapToDto(
@@ -416,8 +477,10 @@ public class PostService : IPostService
             likeCounts.GetValueOrDefault(post.Id),
             commentCounts.GetValueOrDefault(post.Id),
             repostCounts.GetValueOrDefault(post.Id),
+            bookmarkCounts.GetValueOrDefault(post.Id),
             currentUserId.HasValue ? likedPostIds.Contains(post.Id) : null,
-            currentUserId.HasValue ? repostedPostIds.Contains(post.Id) : null));
+            currentUserId.HasValue ? repostedPostIds.Contains(post.Id) : null,
+            currentUserId.HasValue ? bookmarkedPostIds.Contains(post.Id) : null));
     }
 
     private static PublicationResponseDto MapToDto(
@@ -426,8 +489,10 @@ public class PostService : IPostService
         int? likesCount = null,
         int? commentsCount = null,
         int? repostsCount = null,
+        int? bookmarksCount = null,
         bool? hasLiked = null,
-        bool? hasReposted = null)
+        bool? hasReposted = null,
+        bool? hasBookmarked = null)
     {
         if (!hasLiked.HasValue && currentUserId.HasValue)
         {
@@ -449,8 +514,10 @@ public class PostService : IPostService
             LikesCount = likesCount ?? post.Likes?.Count ?? 0,
             CommentsCount = commentsCount ?? post.Comments?.Count ?? 0,
             RepostsCount = repostsCount ?? 0,
+            BookmarksCount = bookmarksCount ?? 0,
             HasLiked = hasLiked,
-            HasReposted = hasReposted
+            HasReposted = hasReposted,
+            HasBookmarked = hasBookmarked
         };
     }
 }

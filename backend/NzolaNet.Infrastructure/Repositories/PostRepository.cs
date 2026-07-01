@@ -149,6 +149,37 @@ public class PostRepository : IPostRepository
         return (items, totalCount);
     }
 
+    public async Task<(IEnumerable<Post> Items, int TotalCount)> SearchByHashtagAsync(string tag, int page, int pageSize)
+    {
+        var normalizedTag = tag.Trim().TrimStart('#');
+        var pattern = $"%#{normalizedTag}%";
+
+        var query = _context.Posts
+            .Include(p => p.User)
+            .Where(p => !string.IsNullOrWhiteSpace(p.Text) && EF.Functions.Like(p.Text, pattern))
+            .OrderByDescending(p => p.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
+    public async Task<IEnumerable<string>> GetRecentPostTextsAsync(int limit)
+    {
+        return await _context.Posts
+            .AsNoTracking()
+            .Where(post => !string.IsNullOrWhiteSpace(post.Text))
+            .OrderByDescending(post => post.CreatedAt)
+            .Take(limit)
+            .Select(post => post.Text)
+            .ToListAsync();
+    }
+
     public async Task<bool> CreateAsync(Post post)
     {
         _context.Posts.Add(post);

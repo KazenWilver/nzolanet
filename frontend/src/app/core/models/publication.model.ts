@@ -12,8 +12,10 @@ export interface Publication {
   likesCount: number;
   commentsCount: number;
   repostsCount: number;
+  bookmarksCount: number;
   hasLiked?: boolean;
   hasReposted?: boolean;
+  hasBookmarked?: boolean;
 }
 
 export interface UpdatePublicationDto {
@@ -34,8 +36,10 @@ export interface BackendPublicationDto {
   likesCount: number;
   commentsCount: number;
   repostsCount?: number;
+  bookmarksCount?: number;
   hasLiked?: boolean;
   hasReposted?: boolean;
+  hasBookmarked?: boolean;
 }
 
 export interface PaginatedPublications {

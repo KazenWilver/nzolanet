@@ -9,22 +9,26 @@ import {
   debounceTime,
   distinctUntilChanged,
   finalize,
+  map,
   switchMap,
   tap
 } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { SearchService } from '../../core/services/search.service';
 import { UserService } from '../../core/services/user.service';
+import { PublicationService } from '../../core/services/publication.service';
 import type { User } from '../../core/models/user.model';
+import type { Publication } from '../../core/models/publication.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { FollowButtonComponent } from '../../shared/components/follow-button/follow-button.component';
+import { PublicationCardComponent } from '../../shared/components/publication-card/publication-card.component';
 
 @Component({
   selector: 'app-search-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, FollowButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, FollowButtonComponent, PublicationCardComponent],
   templateUrl: './search-page.component.html',
   styleUrl: './search-page.component.scss'
 })
@@ -33,16 +37,19 @@ export class SearchPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly searchService = inject(SearchService);
   private readonly userService = inject(UserService);
+  private readonly publicationService = inject(PublicationService);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly searchControl = new FormControl('', { nonNullable: true });
 
   results: User[] = [];
+  publicationResults: Publication[] = [];
   loading = false;
   error = false;
   togglingUserId: string | null = null;
   currentUserId?: string;
+  searchMode: 'users' | 'publications' = 'users';
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id;
@@ -66,11 +73,33 @@ export class SearchPageComponent implements OnInit {
           const trimmed = query.trim();
           if (trimmed.length < 2) {
             this.loading = false;
+            this.publicationResults = [];
             return of([]);
           }
 
           this.loading = true;
-          return this.searchService.searchUsers(trimmed).pipe(
+          if (trimmed.startsWith('#')) {
+            this.searchMode = 'publications';
+            return this.searchService.searchPublicationsByHashtag(trimmed).pipe(
+              map(publications => {
+                this.publicationResults = publications;
+                return [];
+              }),
+              catchError(() => {
+                this.error = true;
+                this.publicationResults = [];
+                return of([]);
+              }),
+              finalize(() => {
+                this.loading = false;
+              })
+            );
+          }
+
+          const userQuery = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+          this.searchMode = 'users';
+          this.publicationResults = [];
+          return this.searchService.searchUsers(userQuery).pipe(
             catchError(() => {
               this.error = true;
               return of([]);
@@ -89,6 +118,10 @@ export class SearchPageComponent implements OnInit {
 
   get hasQuery(): boolean {
     return this.searchControl.value.trim().length >= 2;
+  }
+
+  get isHashtagQuery(): boolean {
+    return this.searchControl.value.trim().startsWith('#');
   }
 
   get currentQuery(): string {

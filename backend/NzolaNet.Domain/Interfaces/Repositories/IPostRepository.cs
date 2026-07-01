@@ -27,6 +27,8 @@ public interface IPostRepository
         int page,
         int pageSize,
         bool mediaOnly = false);
+    Task<(IEnumerable<Post> Items, int TotalCount)> SearchByHashtagAsync(string tag, int page, int pageSize);
+    Task<IEnumerable<string>> GetRecentPostTextsAsync(int limit);
     Task<bool> CreateAsync(Post post);
     Task<bool> UpdateAsync(Post post);
     Task<bool> DeleteAsync(Post post);
