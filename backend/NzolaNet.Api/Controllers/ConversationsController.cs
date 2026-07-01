@@ -12,10 +12,14 @@ namespace NzolaNet.Api.Controllers;
 public class ConversationsController : ControllerBase
 {
     private readonly IConversationService _conversationService;
+    private readonly IChatRealtimeNotifier _chatRealtimeNotifier;
 
-    public ConversationsController(IConversationService conversationService)
+    public ConversationsController(
+        IConversationService conversationService,
+        IChatRealtimeNotifier chatRealtimeNotifier)
     {
         _conversationService = conversationService;
+        _chatRealtimeNotifier = chatRealtimeNotifier;
     }
 
     [HttpGet]
@@ -78,6 +82,7 @@ public class ConversationsController : ControllerBase
         {
             var userId = AuthClaimsHelper.GetUserId(User);
             var message = await _conversationService.SendMessageAsync(userId, id, dto.Text);
+            await _chatRealtimeNotifier.NotifyMessageAsync(id, message, userId);
             return Ok(message);
         }
         catch (ArgumentException ex)

@@ -15,6 +15,8 @@ using NzolaNet.Infrastructure.Identity;
 using NzolaNet.Infrastructure.Repositories;
 using NzolaNet.Infrastructure.Services;
 using NzolaNet.Api.Middleware;
+using NzolaNet.Api.Hubs;
+using NzolaNet.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +87,22 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = "role",
         ClockSkew = TimeSpan.Zero
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // 4. Registo de Repositórios e Serviços (Injeção de Dependências)
@@ -108,6 +126,8 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IMediaAccessService, MediaAccessService>();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IChatRealtimeNotifier, SignalRChatRealtimeNotifier>();
 
 // 4.5. Configura a política de CORS para o frontend Angular
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
@@ -240,5 +260,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
