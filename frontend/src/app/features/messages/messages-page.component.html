@@ -1,29 +1,49 @@
 <div class="messages-page">
-  <header class="messages-page__header">
-    <h1 class="messages-page__title">Mensagens</h1>
-  </header>
-
   <div class="messages-page__layout">
-    <aside class="messages-page__list-pane" aria-label="Lista de conversas">
+    <aside class="messages-page__inbox" aria-label="Lista de conversas">
+      <header class="messages-page__inbox-header">
+        <h1 class="messages-page__inbox-title">Chat</h1>
+        <div class="messages-page__inbox-actions">
+          <a class="messages-page__icon-btn" routerLink="/search" aria-label="Nova conversa">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+          </a>
+        </div>
+      </header>
+
+      <label class="messages-page__search" aria-label="Pesquisar conversas">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          type="search"
+          [(ngModel)]="searchQuery"
+          placeholder="Pesquisar"
+          class="messages-page__search-input"
+        />
+      </label>
+
       @if (loadingConversations) {
         <div class="messages-page__loading">
           <app-loading-spinner tamanho="md" />
         </div>
       } @else if (conversationsError) {
-        <div class="messages-page__empty">
+        <div class="messages-page__state">
           <p>Não foi possível carregar as conversas.</p>
-          <button type="button" class="messages-page__retry" (click)="loadConversations()">
+          <button type="button" class="messages-page__pill-btn" (click)="loadConversations()">
             Tentar novamente
           </button>
         </div>
-      } @else if (conversations.length === 0) {
-        <div class="messages-page__empty">
-          <p>Ainda não tens conversas.</p>
-          <p class="messages-page__hint">Visita um perfil e toca em «Mensagem» para começar.</p>
+      } @else if (visibleConversations.length === 0) {
+        <div class="messages-page__state">
+          <p>{{ searchQuery ? 'Nenhuma conversa encontrada.' : 'Ainda não tens conversas.' }}</p>
         </div>
       } @else {
         <ul class="messages-page__list" role="list">
-          @for (conversation of conversations; track trackConversation($index, conversation)) {
+          @for (conversation of visibleConversations; track trackConversation($index, conversation)) {
             <li>
               <button
                 type="button"
@@ -46,11 +66,7 @@
                     }
                   </span>
                   <span class="messages-page__list-preview">
-                    @if (conversation.lastMessageText) {
-                      {{ conversation.lastMessageText }}
-                    } @else {
-                      Iniciar conversa
-                    }
+                    {{ getPreviewText(conversation) }}
                   </span>
                 </span>
                 @if (conversation.unreadCount > 0) {
@@ -63,15 +79,17 @@
       }
     </aside>
 
-    <section
-      class="messages-page__thread-pane"
-      [class.messages-page__thread-pane--empty]="!activeConversation"
-      aria-label="Conversa activa"
-    >
+    <section class="messages-page__stage" aria-label="Conversa activa">
       @if (!activeConversation) {
-        <div class="messages-page__thread-empty">
-          <h2>Selecciona uma mensagem</h2>
-          <p>Escolhe uma conversa existente ou inicia uma nova a partir de um perfil.</p>
+        <div class="messages-page__welcome">
+          <div class="messages-page__welcome-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h2>Iniciar conversa</h2>
+          <p>Escolhe uma conversa existente ou começa uma nova a partir de um perfil.</p>
+          <a routerLink="/search" class="messages-page__welcome-btn">Nova conversa</a>
         </div>
       } @else {
         <header class="messages-page__thread-header">
@@ -81,7 +99,9 @@
             aria-label="Voltar à lista"
             (click)="handleBackToList()"
           >
-            ←
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
           </button>
           <app-avatar
             [src]="activeConversation.otherPhotoUrl"
@@ -93,11 +113,15 @@
             <span>@{{ activeConversation.otherUsername }}</span>
           </div>
           <a
-            class="messages-page__profile-link"
+            class="messages-page__icon-btn"
             [routerLink]="['/profile', activeConversation.otherUserId]"
             aria-label="Ver perfil"
           >
-            Ver perfil
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="1.75"></circle>
+              <circle cx="12" cy="12" r="1.75"></circle>
+              <circle cx="19" cy="12" r="1.75"></circle>
+            </svg>
           </a>
         </header>
 
@@ -106,34 +130,56 @@
             <app-loading-spinner tamanho="md" />
           </div>
         } @else if (messagesError) {
-          <div class="messages-page__empty messages-page__empty--thread">
+          <div class="messages-page__state messages-page__state--thread">
             <p>Não foi possível carregar as mensagens.</p>
           </div>
         } @else {
           <div #messagesScroll class="messages-page__messages" role="log" aria-live="polite" aria-relevant="additions">
+            <div class="messages-page__intro">
+              <app-avatar
+                [src]="activeConversation.otherPhotoUrl"
+                [username]="activeConversation.otherUsername"
+                size="xl"
+              />
+              <h3>{{ getConversationDisplayName(activeConversation) }}</h3>
+              <p>@{{ activeConversation.otherUsername }}</p>
+              <a
+                class="messages-page__intro-btn"
+                [routerLink]="['/profile', activeConversation.otherUserId]"
+              >
+                Ver perfil
+              </a>
+            </div>
+
+            @for (group of messageDayGroups; track trackDayGroup($index, group)) {
+              <div class="messages-page__day-separator">
+                <span>{{ group.label }}</span>
+              </div>
+
+              @for (message of group.messages; track trackMessage($index, message)) {
+                <article
+                  class="messages-page__bubble"
+                  [class.messages-page__bubble--mine]="message.isMine"
+                  [class.messages-page__bubble--theirs]="!message.isMine"
+                >
+                  <div class="messages-page__bubble-content">
+                    <p>{{ message.text }}</p>
+                    <time [dateTime]="message.createdAt">
+                      {{ message.createdAt | date:'HH:mm' }}
+                    </time>
+                  </div>
+                </article>
+              }
+            }
+
             @if (messages.length === 0) {
               <p class="messages-page__thread-hint">Envia a primeira mensagem para iniciar a conversa.</p>
             }
-            @for (message of messages; track trackMessage($index, message)) {
-              <article
-                class="messages-page__bubble"
-                [class.messages-page__bubble--mine]="message.isMine"
-                [class.messages-page__bubble--theirs]="!message.isMine"
-              >
-                @if (!message.isMine) {
-                  <app-avatar
-                    [src]="message.senderPhotoUrl"
-                    [username]="message.senderUsername"
-                    size="xs"
-                  />
-                }
-                <div class="messages-page__bubble-content">
-                  <p>{{ message.text }}</p>
-                  <time [dateTime]="message.createdAt">{{ message.createdAt | tempoAtras : relativeTime.tick() }}</time>
-                </div>
-              </article>
-            }
           </div>
+        }
+
+        @if (typingLabel) {
+          <p class="messages-page__typing" aria-live="polite">{{ typingLabel }}</p>
         }
 
         <footer class="messages-page__composer">
@@ -141,11 +187,16 @@
             <p class="messages-page__send-error" role="alert">{{ sendError }}</p>
           }
           <form class="messages-page__composer-form" [formGroup]="messageForm" (ngSubmit)="handleSendMessage()">
+            <div class="messages-page__composer-tools" aria-hidden="true">
+              <span class="messages-page__tool-icon">+</span>
+              <span class="messages-page__tool-icon">GIF</span>
+              <span class="messages-page__tool-icon">☺</span>
+            </div>
             <textarea
               formControlName="text"
               class="messages-page__composer-input"
               rows="1"
-              placeholder="Escreve uma mensagem…"
+              placeholder="Escreve uma mensagem"
               aria-label="Escrever mensagem"
               (keydown)="handleComposerKeydown($event)"
             ></textarea>
@@ -155,7 +206,9 @@
               [disabled]="messageForm.invalid || sendingMessage"
               aria-label="Enviar mensagem"
             >
-              Enviar
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"></path>
+              </svg>
             </button>
           </form>
         </footer>

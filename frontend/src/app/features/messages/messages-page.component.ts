@@ -1,16 +1,24 @@
-import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import { CommonModule } from '@angular/common'
+import { CommonModule, DatePipe } from '@angular/common'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { HttpErrorResponse } from '@angular/common/http'
-import { EMPTY, interval, switchMap } from 'rxjs'
+import { EMPTY, Subscription, debounceTime, distinctUntilChanged, interval, switchMap } from 'rxjs'
 import { ConversationService } from '../../core/services/conversation.service'
+import { ChatRealtimeService } from '../../core/services/chat-realtime.service'
+import { AuthService } from '../../core/services/auth.service'
 import type { ChatMessage, ConversationListItem } from '../../core/models/conversation.model'
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe'
 import { RelativeTimeService } from '../../core/services/relative-time.service'
+
+export interface MessageDayGroup {
+  key: string
+  label: string
+  messages: ChatMessage[]
+}
 
 @Component({
   selector: 'app-messages-page',
@@ -19,6 +27,8 @@ import { RelativeTimeService } from '../../core/services/relative-time.service'
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    FormsModule,
+    DatePipe,
     AvatarComponent,
     LoadingSpinnerComponent,
     TimeAgoPipe
@@ -26,8 +36,10 @@ import { RelativeTimeService } from '../../core/services/relative-time.service'
   templateUrl: './messages-page.component.html',
   styleUrl: './messages-page.component.scss'
 })
-export class MessagesPageComponent implements OnInit {
+export class MessagesPageComponent implements OnInit, OnDestroy {
   private readonly conversationService = inject(ConversationService)
+  private readonly chatRealtime = inject(ChatRealtimeService)
+  private readonly authService = inject(AuthService)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly destroyRef = inject(DestroyRef)
@@ -46,13 +58,23 @@ export class MessagesPageComponent implements OnInit {
   conversationsError = false
   messagesError = false
   sendError = ''
+  searchQuery = ''
+  typingLabel = ''
+  realtimeConnected = false
+
+  private typingTimeoutId?: ReturnType<typeof setTimeout>
+  private typingClearTimeoutId?: ReturnType<typeof setTimeout>
+  private pollingSubscription?: Subscription
 
   readonly messageForm = this.formBuilder.nonNullable.group({
     text: ['', [Validators.required, Validators.maxLength(2000)]]
   })
 
   ngOnInit(): void {
+    void this.chatRealtime.connect()
     this.loadConversations()
+    this.setupRealtimeListeners()
+    this.setupFallbackPolling()
 
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const conversationId = params.get('conversationId')
@@ -61,29 +83,50 @@ export class MessagesPageComponent implements OnInit {
       } else {
         this.activeConversation = null
         this.messages = []
+        void this.chatRealtime.setActiveConversation(null)
       }
     })
 
-    interval(4000)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        switchMap(() => {
-          if (!this.activeConversation) {
-            return EMPTY
-          }
+    this.messageForm.controls.text.valueChanges
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.handleComposerInput())
+  }
 
-          return this.conversationService.getMessages(this.activeConversation.id)
-        })
-      )
-      .subscribe({
-        next: messages => {
-          if (!this.activeConversation) {
-            return
-          }
+  ngOnDestroy(): void {
+    this.pollingSubscription?.unsubscribe()
+    void this.chatRealtime.setActiveConversation(null)
+  }
 
-          this.messages = messages
-        }
-      })
+  get visibleConversations(): ConversationListItem[] {
+    const query = this.searchQuery.trim().toLowerCase()
+    if (!query) {
+      return this.conversations
+    }
+
+    return this.conversations.filter(conversation => {
+      const displayName = this.getConversationDisplayName(conversation).toLowerCase()
+      return displayName.includes(query) || conversation.otherUsername.toLowerCase().includes(query)
+    })
+  }
+
+  get messageDayGroups(): MessageDayGroup[] {
+    const groups = new Map<string, MessageDayGroup>()
+
+    for (const message of this.messages) {
+      const date = new Date(message.createdAt)
+      const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+      const label = this.formatDayLabel(date)
+
+      const existing = groups.get(key)
+      if (existing) {
+        existing.messages.push(message)
+        continue
+      }
+
+      groups.set(key, { key, label, messages: [message] })
+    }
+
+    return Array.from(groups.values())
   }
 
   loadConversations(): void {
@@ -126,13 +169,14 @@ export class MessagesPageComponent implements OnInit {
 
     this.sendingMessage = true
     this.sendError = ''
+    void this.chatRealtime.notifyStoppedTyping(this.activeConversation.id)
 
     this.conversationService
       .sendMessage(this.activeConversation.id, text)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: message => {
-          this.messages = [...this.messages, message]
+          this.appendMessageIfMissing(message)
           this.messageForm.reset()
           this.sendingMessage = false
           this.updateConversationPreview(message)
@@ -160,6 +204,20 @@ export class MessagesPageComponent implements OnInit {
     return conversation.otherDisplayName ?? conversation.otherUsername
   }
 
+  getPreviewText(conversation: ConversationListItem): string {
+    if (!conversation.lastMessageText) {
+      return 'Iniciar conversa'
+    }
+
+    const currentUserId = this.authService.getCurrentUser()?.id
+    const isOwnPreview = conversation.lastMessageText.startsWith('Tu:')
+    if (isOwnPreview) {
+      return conversation.lastMessageText
+    }
+
+    return conversation.lastMessageText
+  }
+
   trackConversation(_index: number, conversation: ConversationListItem): string {
     return conversation.id
   }
@@ -168,10 +226,104 @@ export class MessagesPageComponent implements OnInit {
     return message.id
   }
 
+  trackDayGroup(_index: number, group: MessageDayGroup): string {
+    return group.key
+  }
+
+  private setupRealtimeListeners(): void {
+    this.chatRealtime.connected$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(connected => {
+        this.realtimeConnected = connected
+      })
+
+    this.chatRealtime.message$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(message => {
+        if (!this.activeConversation || message.conversationId !== this.activeConversation.id) {
+          this.refreshConversationsSilently()
+          return
+        }
+
+        this.appendMessageIfMissing(message)
+        this.scrollMessagesToBottom()
+
+        if (!message.isMine) {
+          this.conversationService.markAsRead(this.activeConversation.id).subscribe()
+        }
+      })
+
+    this.chatRealtime.typing$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+          return
+        }
+
+        const currentUserId = this.authService.getCurrentUser()?.id
+        if (event.userId === currentUserId) {
+          return
+        }
+
+        if (event.isTyping) {
+          this.typingLabel = `${event.username} está a escrever…`
+          if (this.typingClearTimeoutId) {
+            clearTimeout(this.typingClearTimeoutId)
+          }
+          this.typingClearTimeoutId = setTimeout(() => {
+            this.typingLabel = ''
+          }, 2800)
+          return
+        }
+
+        this.typingLabel = ''
+      })
+  }
+
+  private setupFallbackPolling(): void {
+    this.pollingSubscription = interval(12000)
+      .pipe(
+        switchMap(() => {
+          if (this.realtimeConnected || !this.activeConversation) {
+            return EMPTY
+          }
+
+          return this.conversationService.getMessages(this.activeConversation.id)
+        })
+      )
+      .subscribe(messages => {
+        if (!this.activeConversation) {
+          return
+        }
+
+        this.messages = messages
+      })
+  }
+
+  private handleComposerInput(): void {
+    if (!this.activeConversation) {
+      return
+    }
+
+    const hasText = this.messageForm.controls.text.value.trim().length > 0
+    if (!hasText) {
+      void this.chatRealtime.notifyStoppedTyping(this.activeConversation.id)
+      return
+    }
+
+    if (this.typingTimeoutId) {
+      clearTimeout(this.typingTimeoutId)
+    }
+
+    this.typingTimeoutId = setTimeout(() => {
+      void this.chatRealtime.notifyTyping(this.activeConversation!.id)
+    }, 200)
+  }
+
   private selectConversationById(conversationId: string): void {
     const existing = this.conversations.find(conversation => conversation.id === conversationId)
     if (existing) {
-      this.openConversation(existing)
+      void this.openConversation(existing)
       return
     }
 
@@ -183,7 +335,7 @@ export class MessagesPageComponent implements OnInit {
     this.messages = []
   }
 
-  private openConversation(conversation: ConversationListItem): void {
+  private async openConversation(conversation: ConversationListItem): Promise<void> {
     if (this.activeConversation?.id === conversation.id && !this.loadingMessages) {
       return
     }
@@ -193,6 +345,9 @@ export class MessagesPageComponent implements OnInit {
     this.loadingMessages = true
     this.messagesError = false
     this.sendError = ''
+    this.typingLabel = ''
+
+    await this.chatRealtime.setActiveConversation(conversation.id)
 
     this.conversationService
       .getMessages(conversation.id)
@@ -223,14 +378,25 @@ export class MessagesPageComponent implements OnInit {
     }
   }
 
+  private appendMessageIfMissing(message: ChatMessage): void {
+    if (this.messages.some(existing => existing.id === message.id)) {
+      return
+    }
+
+    this.messages = [...this.messages, message]
+    this.updateConversationPreview(message)
+  }
+
   private updateConversationPreview(message: ChatMessage): void {
     if (!this.activeConversation) {
       return
     }
 
+    const preview = message.isMine ? `Tu: ${message.text}` : message.text
+
     this.activeConversation = {
       ...this.activeConversation,
-      lastMessageText: message.text,
+      lastMessageText: preview,
       lastMessageAt: message.createdAt
     }
 
@@ -239,7 +405,7 @@ export class MessagesPageComponent implements OnInit {
         conversation.id === this.activeConversation?.id
           ? {
               ...conversation,
-              lastMessageText: message.text,
+              lastMessageText: preview,
               lastMessageAt: message.createdAt
             }
           : conversation
@@ -249,6 +415,36 @@ export class MessagesPageComponent implements OnInit {
         const rightTime = right.lastMessageAt ? new Date(right.lastMessageAt).getTime() : 0
         return rightTime - leftTime
       })
+  }
+
+  private refreshConversationsSilently(): void {
+    this.conversationService
+      .getConversations()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(conversations => {
+        this.conversations = conversations
+        this.conversationService.refreshUnreadCount().subscribe()
+      })
+  }
+
+  private formatDayLabel(date: Date): string {
+    const today = new Date()
+    const yesterday = new Date()
+    yesterday.setDate(today.getDate() - 1)
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Hoje'
+    }
+
+    if (date.toDateString() === yesterday.toDateString()) {
+      return 'Ontem'
+    }
+
+    return date.toLocaleDateString('pt-PT', {
+      day: 'numeric',
+      month: 'short',
+      year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+    })
   }
 
   private scrollMessagesToBottom(): void {
