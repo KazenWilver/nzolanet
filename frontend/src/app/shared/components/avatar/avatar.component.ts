@@ -99,7 +99,7 @@ export class AvatarComponent implements OnChanges {
   resolvedSrc?: string;
   imageError = false;
   initial = '?';
-  avatarColor = '#1d9bf0';
+  avatarColor = '#E86A17';
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['src'] || changes['avatarKey']) {
@@ -119,7 +119,7 @@ export class AvatarComponent implements OnChanges {
 
   private buildColorFromUsername(value: string): string {
     if (!value) {
-      return '#1d9bf0';
+      return '#E86A17';
     }
 
     let hash = 0;

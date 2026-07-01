@@ -301,7 +301,7 @@ export class AnimationService {
     const rect = origin.getBoundingClientRect();
     const originX = rect.left + rect.width / 2;
     const originY = rect.top + rect.height / 2;
-    const colors = ['#f91880', '#7856ff', '#1d9bf0', '#ffd400', '#00ba7c'];
+    const colors = ['#f91880', '#7856ff', '#E86A17', '#ffd400', '#00ba7c'];
 
     if (!this.confettiCanvas) {
       this.confettiCanvas = document.createElement('canvas');

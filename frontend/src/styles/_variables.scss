@@ -68,10 +68,11 @@
   --color-text-secondary: #536471;
   --color-text-muted: #536471;
   --color-text-inverse: #ffffff;
+  --color-text-on-accent: #ffffff;
   --color-text-link: rgb(var(--accent-blue));
 
   --color-accent: rgb(var(--accent-blue));
-  --color-accent-hover: #1a8cd8;
+  --color-accent-hover: #f07a25;
   --color-accent-blue: rgb(var(--accent-blue));
   --color-accent-blue-bg: rgba(var(--accent-blue) / 0.1);
   --color-accent-yellow: rgb(var(--accent-yellow));
@@ -110,13 +111,14 @@
   --color-btn-follow-bg: #0f1419;
   --color-btn-follow-text: #ffffff;
 
-  // Accent palette (RGB triplets)
+  // Accent palette — Pico (#E86A17)
   --accent-yellow: 255 213 0;
-  --accent-blue: 29 155 240;
+  --accent-blue: 232 106 23;
   --accent-pink: 249 26 130;
   --accent-purple: 120 87 255;
-  --accent-orange: 255 122 0;
+  --accent-orange: 217 93 15;
   --accent-green: 0 184 122;
+  --accent-primary-light: 240 122 37;
 
   // ---------------------------------------------------------------------------
   // Tipografia
@@ -209,7 +211,7 @@
   --nz-color-text: #14171a;
   --nz-color-text-secondary: #657786;
   --nz-color-border: #e6ecf0;
-  --nz-color-hover: rgba(29, 161, 242, 0.1);
+  --nz-color-hover: rgba(232, 106, 23, 0.12);
   --nz-color-gray-hover: rgba(0, 0, 0, 0.05);
   --nz-color-input-bg: #eff3f4;
   --nz-color-input-focus-bg: #ffffff;
@@ -223,6 +225,10 @@
 
 // Tema escuro (activado com body.dark-theme)
 body.dark-theme {
+  --theme-dark-background: 15 15 16;
+  --theme-dark-search-background: 24 24 24;
+  --theme-dark-sidebar-background: 21 21 21;
+
   --color-bg-primary: rgb(var(--theme-dark-background));
   --color-bg-secondary: rgb(var(--theme-dark-sidebar-background));
   --color-bg-search: rgb(var(--theme-dark-search-background));
@@ -241,6 +247,7 @@ body.dark-theme {
   --color-text-secondary: #71767b;
   --color-text-muted: #71767b;
   --color-text-inverse: #0f1419;
+  --color-text-on-accent: #ffffff;
   --color-brand-icon: #d6d9db;
 
   --color-border: #2f3336;
@@ -265,7 +272,7 @@ body.dark-theme {
   --nz-color-text: var(--color-text-primary);
   --nz-color-text-secondary: var(--color-text-secondary);
   --nz-color-border: var(--color-border);
-  --nz-color-hover: rgba(29, 155, 240, 0.1);
+  --nz-color-hover: rgba(232, 106, 23, 0.12);
   --nz-color-gray-hover: var(--color-bg-hover);
   --nz-color-input-bg: var(--color-bg-input);
   --nz-color-input-focus-bg: var(--color-bg-input-focus);

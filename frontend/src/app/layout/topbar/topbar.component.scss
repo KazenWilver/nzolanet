@@ -65,8 +65,9 @@
   }
 
   .topbar__brand-icon {
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
   }
 
   .topbar__brand-name {
