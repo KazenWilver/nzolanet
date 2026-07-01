@@ -131,7 +131,8 @@
         aria-controls="profile-panel"
         role="tab"
         appPressScale
-        (click)="setActiveTab('publications')"
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'publications')"
       >
         Publicações
       </button>
@@ -144,7 +145,8 @@
         aria-controls="profile-panel"
         role="tab"
         appPressScale
-        (click)="setActiveTab('media')"
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'media')"
       >
         Media
       </button>
@@ -157,7 +159,8 @@
         aria-controls="profile-panel"
         role="tab"
         appPressScale
-        (click)="setActiveTab('likes')"
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'likes')"
       >
         Gostos
       </button>
@@ -166,6 +169,7 @@
     <div
       id="profile-panel"
       role="tabpanel"
+      class="profile-page__panel"
       [attr.aria-labelledby]="
         activeTab === 'likes'
           ? 'profile-tab-likes'

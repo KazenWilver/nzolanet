@@ -181,9 +181,17 @@
   }
 }
 
+.profile-page__panel {
+  min-height: 48vh;
+}
+
 .profile-page__tabs {
   display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 4;
   border-bottom: 1px solid vars.$color-border;
+  background-color: var(--color-bg-primary);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;

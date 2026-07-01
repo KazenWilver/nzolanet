@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -58,6 +58,7 @@ export class ProfilePageComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly conversationService = inject(ConversationService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly hostRef = inject(ElementRef<HTMLElement>);
 
   profile: User | null = null;
   publications: Publication[] = [];
@@ -596,20 +597,62 @@ export class ProfilePageComponent implements OnInit {
   }
 
   setActiveTab(tab: ProfileTab): void {
+    if (tab === this.activeTab) {
+      return;
+    }
+
+    const scrollContainer = this.getScrollContainer();
+    const scrollTop = scrollContainer?.scrollTop ?? 0;
+
     this.activeTab = tab;
 
     if (!this.profile || !this.canViewPublications) {
+      this.restoreScrollPosition(scrollContainer, scrollTop);
       return;
     }
 
     if (tab === 'likes' && this.likedPublications.length === 0 && !this.loadingLikes) {
       this.loadLikedPublications(this.profile.id);
+      this.restoreScrollPosition(scrollContainer, scrollTop);
       return;
     }
 
     if (tab === 'media' && this.mediaPublications.length === 0 && !this.loadingMedia) {
       this.loadMediaPublications(this.profile.id, true);
     }
+
+    this.restoreScrollPosition(scrollContainer, scrollTop);
+  }
+
+  handleTabClick(event: MouseEvent, tab: ProfileTab): void {
+    event.preventDefault();
+    (event.currentTarget as HTMLButtonElement | null)?.blur();
+    this.setActiveTab(tab);
+  }
+
+  private getScrollContainer(): HTMLElement | null {
+    return document.querySelector('.main-layout__center');
+  }
+
+  private restoreScrollPosition(scrollContainer: HTMLElement | null, scrollTop: number): void {
+    if (!scrollContainer) {
+      return;
+    }
+
+    const tabsElement = this.hostRef.nativeElement.querySelector('.profile-page__tabs') as HTMLElement | null;
+    const anchorTop = tabsElement
+      ? tabsElement.getBoundingClientRect().top -
+        scrollContainer.getBoundingClientRect().top +
+        scrollContainer.scrollTop
+      : scrollTop;
+    const nextScrollTop = Math.max(scrollTop, anchorTop);
+
+    requestAnimationFrame(() => {
+      scrollContainer.scrollTop = nextScrollTop;
+      requestAnimationFrame(() => {
+        scrollContainer.scrollTop = nextScrollTop;
+      });
+    });
   }
 
   handlePublicationDeleted(id: string): void {
