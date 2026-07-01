@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ public static class DbSeeder
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
         var userManager = services.GetRequiredService<UserManager<User>>();
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
         var configuration = services.GetRequiredService<IConfiguration>();
         var logger = services.GetRequiredService<ILogger<ApplicationDbContext>>();
 
@@ -32,7 +34,7 @@ public static class DbSeeder
             await roleManager.CreateAsync(new IdentityRole<Guid>(UserRoleName));
         }
 
-        await CleanupAutomatedTestUsersAsync(userManager, logger);
+        await CleanupAutomatedTestUsersAsync(dbContext, userManager, logger);
 
         var seedSection = configuration.GetSection("SeedAdmin");
         var adminEmail = seedSection["Email"];
@@ -80,6 +82,7 @@ public static class DbSeeder
     }
 
     private static async Task CleanupAutomatedTestUsersAsync(
+        ApplicationDbContext dbContext,
         UserManager<User> userManager,
         ILogger logger)
     {
@@ -90,7 +93,10 @@ public static class DbSeeder
             var username = user.UserName ?? string.Empty;
             var isAutomatedTestUser =
                 testUserPattern.IsMatch(username) ||
-                user.DisplayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" ||
+                username.StartsWith("smokeuser", StringComparison.OrdinalIgnoreCase) ||
+                (user.Email?.EndsWith("@test.local", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                user.DisplayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" or "Smoke Test User" ||
+                (user.DisplayName?.StartsWith("Smoke Test", StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (user.DisplayName?.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (user.DisplayName?.StartsWith("Alice ", StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (user.DisplayName?.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase) ?? false);
@@ -98,6 +104,17 @@ public static class DbSeeder
             if (!isAutomatedTestUser)
             {
                 continue;
+            }
+
+            var userId = user.Id;
+            var relatedNotifications = await dbContext.Notifications
+                .Where(notification => notification.ActorId == userId || notification.RecipientId == userId)
+                .ToListAsync();
+
+            if (relatedNotifications.Count > 0)
+            {
+                dbContext.Notifications.RemoveRange(relatedNotifications);
+                await dbContext.SaveChangesAsync();
             }
 
             var result = await userManager.DeleteAsync(user);

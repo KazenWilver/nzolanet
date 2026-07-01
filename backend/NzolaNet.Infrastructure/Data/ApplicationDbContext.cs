@@ -39,6 +39,11 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.Property(p => p.ImagePath).HasMaxLength(500);
             entity.Property(p => p.VideoPath).HasMaxLength(500);
 
+            entity.HasOne(p => p.QuotedPost)
+                  .WithMany()
+                  .HasForeignKey(p => p.QuotedPostId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
             // Relação Post -> User (1 para N)
             entity.HasOne(p => p.User)
                   .WithMany(u => u.Posts)
@@ -156,6 +161,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         {
             entity.HasKey(c => c.Id);
             entity.Property(c => c.Title).HasMaxLength(100);
+            entity.Property(c => c.Description).HasMaxLength(500);
+            entity.Property(c => c.ImagePath).HasMaxLength(500);
             entity.Property(c => c.IsGroup).HasDefaultValue(false);
             entity.Property(c => c.CreatedAt).IsRequired();
             entity.Property(c => c.UpdatedAt).IsRequired();

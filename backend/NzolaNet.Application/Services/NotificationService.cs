@@ -291,6 +291,67 @@ public class NotificationService : INotificationService
         }
     }
 
+    public async Task TryCreateMentionNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "mention",
+                PublicationId = publicationId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao criar notificação de menção para o utilizador {RecipientId}.",
+                recipientId);
+        }
+    }
+
+    public async Task TryCreateGroupAddedNotificationAsync(
+        Guid actorId,
+        Guid conversationId,
+        Guid recipientId)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "group_added",
+                ConversationId = conversationId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao criar notificação de grupo para o utilizador {RecipientId}.",
+                recipientId);
+        }
+    }
+
     private NotificationResponseDto MapToDto(Notification notification)
     {
         var publicationText = notification.Publication?.Text;

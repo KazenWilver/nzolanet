@@ -160,23 +160,36 @@ public class UserRepository : IUserRepository
         IEnumerable<Guid>? excludeExtraIds = null)
     {
         var excludedIds = await _context.Follows
-            .Where(f => f.FollowerId == currentUserId)
+            .Where(f => f.FollowerId == currentUserId && f.IsApproved)
+            .Select(f => f.FollowedId)
+            .ToListAsync();
+
+        var pendingOutgoing = await _context.Follows
+            .Where(f => f.FollowerId == currentUserId && !f.IsApproved)
             .Select(f => f.FollowedId)
             .ToListAsync();
 
         excludedIds.Add(currentUserId);
+        excludedIds.AddRange(pendingOutgoing);
 
         if (excludeExtraIds != null)
         {
             excludedIds.AddRange(excludeExtraIds);
         }
 
-        var poolSize = Math.Clamp(count * 10, 30, 100);
+        var poolSize = Math.Clamp(count * 8, 24, 80);
 
         var candidates = await _context.Users
             .Where(u => !excludedIds.Contains(u.Id))
-            .OrderBy(_ => Guid.NewGuid())
+            .Select(u => new
+            {
+                User = u,
+                FollowerCount = _context.Follows.Count(f => f.FollowedId == u.Id && f.IsApproved)
+            })
+            .OrderByDescending(entry => entry.FollowerCount)
+            .ThenBy(entry => entry.User.DisplayName)
             .Take(poolSize)
+            .Select(entry => entry.User)
             .ToListAsync();
 
         return candidates
@@ -195,12 +208,23 @@ public class UserRepository : IUserRepository
             return true;
         }
 
+        if (username.StartsWith("smokeuser", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (user.Email?.EndsWith("@test.local", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return true;
+        }
+
         if (displayName.StartsWith("Alice ", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        return displayName is "Alice Audit" or "Alice FixTest" or "Feed Alice"
+        return displayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" or "Smoke Test User"
+            || displayName.StartsWith("Smoke Test", StringComparison.OrdinalIgnoreCase)
             || displayName.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase)
             || displayName.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase);
     }

@@ -28,4 +28,6 @@ public interface IConversationRepository
     Task<bool> IsMessageHiddenForUserAsync(Guid messageId, Guid userId);
     Task HideMessageForUserAsync(Guid messageId, Guid userId);
     Task UpdateMessageAsync(Message message);
+    Task<bool> AddParticipantsAsync(Guid conversationId, IReadOnlyCollection<Guid> participantIds);
+    Task<bool> UpdateGroupAsync(Guid conversationId, string? title, string? description, string? imagePath);
 }

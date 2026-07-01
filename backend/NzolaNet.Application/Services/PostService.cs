@@ -17,6 +17,7 @@ public class PostService : IPostService
     private readonly IRepostRepository _repostRepository;
     private readonly IBookmarkRepository _bookmarkRepository;
     private readonly IStorageService _storageService;
+    private readonly INotificationService _notificationService;
 
     public PostService(
         IPostRepository postRepository,
@@ -27,7 +28,8 @@ public class PostService : IPostService
         INotificationRepository notificationRepository,
         IRepostRepository repostRepository,
         IBookmarkRepository bookmarkRepository,
-        IStorageService storageService)
+        IStorageService storageService,
+        INotificationService notificationService)
     {
         _postRepository = postRepository;
         _userRepository = userRepository;
@@ -38,6 +40,7 @@ public class PostService : IPostService
         _repostRepository = repostRepository;
         _bookmarkRepository = bookmarkRepository;
         _storageService = storageService;
+        _notificationService = notificationService;
     }
 
     public async Task<PublicationResponseDto> CreateAsync(Guid userId, CreatePublicationDto createDto)
@@ -100,7 +103,31 @@ public class PostService : IPostService
         }
 
         post.User = user;
+        await NotifyMentionedUsersAsync(userId, post.Id, createDto.Text);
         return MapToDto(post, userId);
+    }
+
+    private async Task NotifyMentionedUsersAsync(Guid actorId, Guid publicationId, string? text)
+    {
+        var mentions = ContentParsingHelper.ExtractMentions(text);
+        if (mentions.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var username in mentions)
+        {
+            var mentionedUser = await _userRepository.GetByUsernameAsync(username);
+            if (mentionedUser == null)
+            {
+                continue;
+            }
+
+            await _notificationService.TryCreateMentionNotificationAsync(
+                actorId,
+                publicationId,
+                mentionedUser.Id);
+        }
     }
 
     public async Task<PublicationResponseDto> UpdateAsync(Guid userId, Guid postId, UpdatePublicationDto updateDto)
@@ -343,13 +370,23 @@ public class PostService : IPostService
         }
 
         var (items, totalCount) = await _postRepository.SearchByHashtagAsync(normalizedTag, page, pageSize);
-        var dtos = (await MapPostsToDtosAsync(items, currentUserId)).ToList();
-        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
+        var itemList = items
+            .Where(post => ContentParsingHelper.ContainsHashtag(post.Text, normalizedTag))
+            .ToList();
+        HashSet<Guid>? followedIds = null;
+        if (currentUserId.HasValue)
+        {
+            followedIds = (await _followRepository.GetFollowedUserIdsAsync(currentUserId.Value)).ToHashSet();
+        }
+
+        var visibleItems = FilterVisiblePosts(itemList, currentUserId, followedIds).ToList();
+        var dtos = (await MapPostsToDtosAsync(visibleItems, currentUserId)).ToList();
+        return BuildPaginatedResponse(dtos, page, pageSize, visibleItems.Count);
     }
 
-    public async Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 10)
+    public async Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 5)
     {
-        var safeLimit = Math.Clamp(limit, 1, 20);
+        var safeLimit = Math.Clamp(limit, 1, 5);
         var postTexts = await _postRepository.GetRecentPostTextsAsync(300);
         var hashtagRegex = new System.Text.RegularExpressions.Regex(
             @"#([A-Za-z0-9_\u00C0-\u024F]+)",
@@ -517,7 +554,24 @@ public class PostService : IPostService
             BookmarksCount = bookmarksCount ?? 0,
             HasLiked = hasLiked,
             HasReposted = hasReposted,
-            HasBookmarked = hasBookmarked
+            HasBookmarked = hasBookmarked,
+            QuotedPublication = post.QuotedPost == null ? null : MapQuotedPost(post.QuotedPost)
+        };
+    }
+
+    private static PublicationResponseDto MapQuotedPost(Post quotedPost)
+    {
+        return new PublicationResponseDto
+        {
+            Id = quotedPost.Id,
+            Text = quotedPost.Text,
+            ImageUrl = quotedPost.ImagePath,
+            VideoUrl = quotedPost.VideoPath,
+            CreatedAt = quotedPost.CreatedAt,
+            AuthorId = quotedPost.UserId,
+            AuthorUsername = quotedPost.User?.UserName ?? string.Empty,
+            AuthorDisplayName = quotedPost.User?.DisplayName,
+            AuthorPhotoUrl = quotedPost.User?.ProfilePhoto
         };
     }
 }

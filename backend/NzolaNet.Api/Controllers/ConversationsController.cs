@@ -30,6 +30,21 @@ public class ConversationsController : ControllerBase
         return Ok(conversations);
     }
 
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var conversation = await _conversationService.GetConversationAsync(userId, id);
+            return Ok(conversation);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
     [HttpGet("unread-count")]
     public async Task<IActionResult> GetUnreadCount()
     {
@@ -69,6 +84,56 @@ public class ConversationsController : ControllerBase
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:guid}/participants")]
+    public async Task<IActionResult> AddParticipants(Guid id, [FromBody] AddGroupParticipantsDto dto)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var conversation = await _conversationService.AddGroupParticipantsAsync(
+                userId,
+                id,
+                dto.ParticipantIds?.ToList() ?? new List<Guid>());
+            return Ok(conversation);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
+    [HttpPatch("{id:guid}/group")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateGroup(
+        Guid id,
+        [FromForm] string? title,
+        [FromForm] string? description,
+        [FromForm] IFormFile? image)
+    {
+        try
+        {
+            var userId = AuthClaimsHelper.GetUserId(User);
+            var conversation = await _conversationService.UpdateGroupAsync(
+                userId,
+                id,
+                new UpdateGroupConversationDto { Title = title, Description = description },
+                image);
+            return Ok(conversation);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
         }
     }
 

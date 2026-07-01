@@ -124,10 +124,12 @@ public class AuthService : IAuthService
 
         await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
 
+        var exposeLink = _configuration.GetValue<bool>("AppSettings:ExposePasswordResetLink");
+
         return new ForgotPasswordResponseDto
         {
             Message = safeMessage,
-            DevResetLink = _environment.IsDevelopment() ? resetLink : null
+            DevResetLink = exposeLink || _environment.IsDevelopment() ? resetLink : null
         };
     }
 

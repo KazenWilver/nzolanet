@@ -11,6 +11,8 @@ public class Post : Baze
     public string Text { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
     public string? VideoPath { get; set; }
+    public Guid? QuotedPostId { get; set; }
+    public virtual Post? QuotedPost { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();

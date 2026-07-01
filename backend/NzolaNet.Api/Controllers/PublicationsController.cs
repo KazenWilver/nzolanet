@@ -107,7 +107,7 @@ public class PublicationsController : ControllerBase
     }
 
     [HttpGet("trending-hashtags")]
-    public async Task<IActionResult> GetTrendingHashtags([FromQuery] int limit = 10)
+    public async Task<IActionResult> GetTrendingHashtags([FromQuery] int limit = 5)
     {
         var hashtags = await _postService.GetTrendingHashtagsAsync(limit);
         return Ok(hashtags);
@@ -219,13 +219,16 @@ public class PublicationsController : ControllerBase
 
     [Authorize]
     [HttpPost("{id}/repost")]
-    public async Task<IActionResult> ToggleRepost(Guid id)
+    public async Task<IActionResult> Repost(Guid id, [FromBody] RepostPublicationDto? dto)
     {
         try
         {
             var userId = AuthClaimsHelper.GetUserId(User);
-            var (isReposted, repostsCount) = await _repostService.ToggleRepostAsync(userId, id);
-            return Ok(new { hasReposted = isReposted, repostsCount });
+            var (isReposted, repostsCount, quotedPublication) = await _repostService.RepostAsync(
+                userId,
+                id,
+                dto?.Text);
+            return Ok(new { hasReposted = isReposted, repostsCount, quotedPublication });
         }
         catch (ArgumentException ex)
         {

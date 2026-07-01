@@ -19,4 +19,5 @@ public class PublicationResponseDto
     public bool? HasLiked { get; set; }
     public bool? HasReposted { get; set; }
     public bool? HasBookmarked { get; set; }
+    public PublicationResponseDto? QuotedPublication { get; set; }
 }

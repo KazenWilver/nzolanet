@@ -51,6 +51,19 @@ public class ConversationService : IConversationService
         return items;
     }
 
+    public async Task<ConversationDetailDto> GetConversationAsync(Guid userId, Guid conversationId)
+    {
+        await EnsureParticipantAsync(userId, conversationId);
+
+        var conversation = await _conversationRepository.GetByIdForUserAsync(conversationId, userId);
+        if (conversation == null)
+        {
+            throw new UnauthorizedAccessException("Conversa não encontrada.");
+        }
+
+        return await MapConversationDetailAsync(conversation, userId);
+    }
+
     public async Task<ConversationListItemDto> GetOrCreateConversationAsync(Guid userId, Guid participantId)
     {
         if (userId == participantId)
@@ -100,7 +113,100 @@ public class ConversationService : IConversationService
         }
 
         var conversation = await _conversationRepository.CreateGroupConversationAsync(userId, title, participantIds);
+        foreach (var participantId in participantIds)
+        {
+            await _notificationService.TryCreateGroupAddedNotificationAsync(
+                userId,
+                conversation.Id,
+                participantId);
+        }
+
         return await MapConversationAsync(conversation, userId);
+    }
+
+    public async Task<ConversationDetailDto> AddGroupParticipantsAsync(
+        Guid userId,
+        Guid conversationId,
+        IReadOnlyList<Guid> participantIds)
+    {
+        await EnsureParticipantAsync(userId, conversationId);
+
+        var conversation = await _conversationRepository.GetByIdForUserAsync(conversationId, userId);
+        if (conversation == null || !conversation.IsGroup)
+        {
+            throw new ArgumentException("Conversa de grupo não encontrada.");
+        }
+
+        var newParticipantIds = participantIds
+            .Where(id => id != Guid.Empty && id != userId)
+            .Distinct()
+            .ToList();
+
+        if (newParticipantIds.Count == 0)
+        {
+            throw new ArgumentException("Seleciona pelo menos um participante.");
+        }
+
+        foreach (var participantId in newParticipantIds)
+        {
+            var participant = await _userRepository.GetByIdAsync(participantId);
+            if (participant == null)
+            {
+                throw new ArgumentException("Um dos participantes não foi encontrado.");
+            }
+        }
+
+        var added = await _conversationRepository.AddParticipantsAsync(conversationId, newParticipantIds);
+        if (!added)
+        {
+            throw new ArgumentException("Não foi possível adicionar participantes.");
+        }
+
+        foreach (var participantId in newParticipantIds)
+        {
+            await _notificationService.TryCreateGroupAddedNotificationAsync(userId, conversationId, participantId);
+        }
+
+        var reloaded = await _conversationRepository.GetByIdForUserAsync(conversationId, userId)
+            ?? conversation;
+        return await MapConversationDetailAsync(reloaded, userId);
+    }
+
+    public async Task<ConversationDetailDto> UpdateGroupAsync(
+        Guid userId,
+        Guid conversationId,
+        UpdateGroupConversationDto dto,
+        IFormFile? image = null)
+    {
+        await EnsureParticipantAsync(userId, conversationId);
+
+        var conversation = await _conversationRepository.GetByIdForUserAsync(conversationId, userId);
+        if (conversation == null || !conversation.IsGroup)
+        {
+            throw new ArgumentException("Conversa de grupo não encontrada.");
+        }
+
+        string? imagePath = null;
+        if (image is { Length: > 0 })
+        {
+            FileHelper.ValidateImageFile(image);
+            imagePath = await _storageService.SaveFileAsync(image, "uploads/groups");
+        }
+
+        var updated = await _conversationRepository.UpdateGroupAsync(
+            conversationId,
+            dto.Title,
+            dto.Description,
+            imagePath);
+
+        if (!updated)
+        {
+            throw new ArgumentException("Não foi possível atualizar o grupo.");
+        }
+
+        var reloaded = await _conversationRepository.GetByIdForUserAsync(conversationId, userId)
+            ?? conversation;
+        return await MapConversationDetailAsync(reloaded, userId);
     }
 
     public async Task<IEnumerable<MessageResponseDto>> GetMessagesAsync(
@@ -471,6 +577,39 @@ public class ConversationService : IConversationService
         }
     }
 
+    private async Task<ConversationDetailDto> MapConversationDetailAsync(Conversation conversation, Guid userId)
+    {
+        var listItem = await MapConversationAsync(conversation, userId);
+        var participants = conversation.Participants
+            .OrderBy(participant => participant.User.DisplayName ?? participant.User.UserName)
+            .Select(participant => new ConversationParticipantDto
+            {
+                UserId = participant.UserId,
+                Username = participant.User.UserName ?? string.Empty,
+                DisplayName = participant.User.DisplayName,
+                PhotoUrl = participant.User.ProfilePhoto
+            })
+            .ToList();
+
+        return new ConversationDetailDto
+        {
+            Id = listItem.Id,
+            OtherUserId = listItem.OtherUserId,
+            OtherUsername = listItem.OtherUsername,
+            OtherDisplayName = listItem.OtherDisplayName,
+            OtherPhotoUrl = listItem.OtherPhotoUrl,
+            Title = listItem.Title,
+            Description = conversation.Description,
+            ImageUrl = conversation.ImagePath,
+            IsGroup = listItem.IsGroup,
+            ParticipantCount = listItem.ParticipantCount,
+            LastMessageText = listItem.LastMessageText,
+            LastMessageAt = listItem.LastMessageAt,
+            UnreadCount = listItem.UnreadCount,
+            Participants = participants
+        };
+    }
+
     private async Task<ConversationListItemDto> MapConversationAsync(Conversation conversation, Guid userId)
     {
         var lastMessage = await _conversationRepository.GetLastMessageAsync(conversation.Id);
@@ -483,6 +622,8 @@ public class ConversationService : IConversationService
             {
                 Id = conversation.Id,
                 Title = conversation.Title,
+                Description = conversation.Description,
+                ImageUrl = conversation.ImagePath,
                 IsGroup = true,
                 ParticipantCount = participantCount,
                 LastMessageText = FormatMessagePreview(lastMessage),

@@ -22,4 +22,6 @@ public interface INotificationService
         Guid conversationId,
         Guid recipientId,
         string? messagePreview);
+    Task TryCreateMentionNotificationAsync(Guid actorId, Guid publicationId, Guid recipientId);
+    Task TryCreateGroupAddedNotificationAsync(Guid actorId, Guid conversationId, Guid recipientId);
 }

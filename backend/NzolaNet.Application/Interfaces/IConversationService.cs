@@ -6,6 +6,7 @@ public interface IConversationService
 {
     int MessageEditDeleteWindowMinutes { get; }
     Task<IEnumerable<ConversationListItemDto>> GetConversationsAsync(Guid userId);
+    Task<ConversationDetailDto> GetConversationAsync(Guid userId, Guid conversationId);
     Task<ConversationListItemDto> GetOrCreateConversationAsync(Guid userId, Guid participantId);
     Task<ConversationListItemDto> CreateGroupConversationAsync(Guid userId, CreateGroupConversationDto dto);
     Task<IEnumerable<MessageResponseDto>> GetMessagesAsync(
@@ -43,4 +44,10 @@ public interface IConversationService
         string emoji);
     Task<DateTime> MarkAsReadAsync(Guid userId, Guid conversationId);
     Task<UnreadMessagesCountDto> GetUnreadCountAsync(Guid userId);
+    Task<ConversationDetailDto> AddGroupParticipantsAsync(Guid userId, Guid conversationId, IReadOnlyList<Guid> participantIds);
+    Task<ConversationDetailDto> UpdateGroupAsync(
+        Guid userId,
+        Guid conversationId,
+        UpdateGroupConversationDto dto,
+        Microsoft.AspNetCore.Http.IFormFile? image = null);
 }

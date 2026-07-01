@@ -366,4 +366,81 @@ public class ConversationRepository : IConversationRepository
         _context.Messages.Update(message);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<bool> AddParticipantsAsync(Guid conversationId, IReadOnlyCollection<Guid> participantIds)
+    {
+        var conversation = await _context.Conversations
+            .Include(c => c.Participants)
+            .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+        if (conversation == null || !conversation.IsGroup)
+        {
+            return false;
+        }
+
+        var existingIds = conversation.Participants.Select(p => p.UserId).ToHashSet();
+        var now = DateTime.UtcNow;
+        var added = false;
+
+        foreach (var participantId in participantIds.Distinct())
+        {
+            if (participantId == Guid.Empty || existingIds.Contains(participantId))
+            {
+                continue;
+            }
+
+            conversation.Participants.Add(new ConversationParticipant
+            {
+                ConversationId = conversationId,
+                UserId = participantId,
+                JoinedAt = now
+            });
+            added = true;
+        }
+
+        if (!added)
+        {
+            return false;
+        }
+
+        conversation.UpdatedAt = now;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdateGroupAsync(
+        Guid conversationId,
+        string? title,
+        string? description,
+        string? imagePath)
+    {
+        var conversation = await _context.Conversations
+            .FirstOrDefaultAsync(c => c.Id == conversationId && c.IsGroup);
+
+        if (conversation == null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            conversation.Title = title.Trim();
+        }
+
+        if (description != null)
+        {
+            conversation.Description = string.IsNullOrWhiteSpace(description)
+                ? null
+                : description.Trim();
+        }
+
+        if (imagePath != null)
+        {
+            conversation.ImagePath = string.IsNullOrWhiteSpace(imagePath) ? null : imagePath;
+        }
+
+        conversation.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

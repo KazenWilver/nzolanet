@@ -22,6 +22,8 @@ public class PostRepository : IPostRepository
     {
         return await _context.Posts
             .Include(p => p.User)
+            .Include(p => p.QuotedPost!)
+                .ThenInclude(quoted => quoted.User)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
     }
@@ -58,7 +60,10 @@ public class PostRepository : IPostRepository
         IReadOnlyCollection<Guid> followedUserIds)
     {
         var query = ApplyVisibilityFilter(
-            _context.Posts.Include(p => p.User),
+            _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.QuotedPost!)
+                    .ThenInclude(quoted => quoted.User),
             currentUserId,
             followedUserIds);
 
@@ -99,6 +104,8 @@ public class PostRepository : IPostRepository
     {
         var query = _context.Posts
             .Include(p => p.User)
+            .Include(p => p.QuotedPost!)
+                .ThenInclude(quoted => quoted.User)
             .Where(p => followedUserIds.Contains(p.UserId))
             .OrderByDescending(p => p.CreatedAt);
 
@@ -152,10 +159,17 @@ public class PostRepository : IPostRepository
     public async Task<(IEnumerable<Post> Items, int TotalCount)> SearchByHashtagAsync(string tag, int page, int pageSize)
     {
         var normalizedTag = tag.Trim().TrimStart('#');
+        if (string.IsNullOrWhiteSpace(normalizedTag))
+        {
+            return (Array.Empty<Post>(), 0);
+        }
+
         var pattern = $"%#{normalizedTag}%";
 
         var query = _context.Posts
             .Include(p => p.User)
+            .Include(p => p.QuotedPost!)
+                .ThenInclude(quoted => quoted.User)
             .Where(p => !string.IsNullOrWhiteSpace(p.Text) && EF.Functions.Like(p.Text, pattern))
             .OrderByDescending(p => p.CreatedAt);
 
@@ -173,7 +187,8 @@ public class PostRepository : IPostRepository
     {
         return await _context.Posts
             .AsNoTracking()
-            .Where(post => !string.IsNullOrWhiteSpace(post.Text))
+            .Include(post => post.User)
+            .Where(post => !string.IsNullOrWhiteSpace(post.Text) && !post.User.IsPrivate)
             .OrderByDescending(post => post.CreatedAt)
             .Take(limit)
             .Select(post => post.Text)
