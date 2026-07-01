@@ -10,18 +10,19 @@
         <textarea
           id="comment-new-text"
           class="comments-section__textarea"
+          appMentionAutocomplete
           [(ngModel)]="newCommentText"
           name="newComment"
           rows="1"
           maxlength="280"
-          placeholder="Adiciona um comentário"
-          aria-label="Adiciona um comentário"
+          [placeholder]="'feed.commentPlaceholder' | t"
+          [attr.aria-label]="'feed.commentPlaceholder' | t"
         ></textarea>
         <button type="submit" class="comments-section__submit" [disabled]="!canSubmit">
           @if (submitting) {
             <app-loading-spinner tamanho="sm" />
           } @else {
-            Publicar
+            {{ 'common.publish' | t }}
           }
         </button>
       </div>
@@ -68,6 +69,7 @@
               <textarea
                 id="comment-edit-text"
                 class="comments-section__edit-textarea"
+                appMentionAutocomplete
                 [(ngModel)]="editText"
                 name="editComment"
                 rows="2"
@@ -90,7 +92,7 @@
           } @else {
             <p class="comments-section__text">{{ comment.text }}</p>
 
-            @if (canEdit(comment) || canDelete(comment)) {
+            @if (canEdit(comment) || canDelete(comment) || canReport(comment)) {
               <div class="comments-section__actions">
                 @if (canEdit(comment)) {
                   <button type="button" class="comments-section__action" (click)="startEdit(comment)">
@@ -107,6 +109,15 @@
                     Apagar
                   </button>
                 }
+                @if (canReport(comment)) {
+                  <button
+                    type="button"
+                    class="comments-section__action comments-section__action--danger"
+                    (click)="openReportDialog(comment.id)"
+                  >
+                    {{ 'report.button' | t }}
+                  </button>
+                }
               </div>
             }
           }
@@ -114,4 +125,12 @@
       </li>
     }
   </ul>
+
+  @if (reportingCommentId) {
+    <app-report-dialog
+      targetType="comment"
+      [targetId]="reportingCommentId"
+      (closed)="reportingCommentId = null"
+    />
+  }
 </section>

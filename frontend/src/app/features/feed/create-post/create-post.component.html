@@ -7,7 +7,7 @@
         size="md"
       />
       <button type="button" class="create-publication__trigger" appPressScale (click)="openForm()">
-        O que está a acontecer?
+        {{ 'feed.createPrompt' | t }}
       </button>
     </div>
   }
@@ -23,7 +23,8 @@
         <textarea
           id="publication-text"
           class="create-publication__textarea"
-          placeholder="O que está a acontecer?"
+          appMentionAutocomplete
+          [placeholder]="'feed.createPrompt' | t"
           [(ngModel)]="text"
           name="text"
           rows="2"
@@ -102,13 +103,13 @@
 
         <div class="create-publication__actions">
           <button type="button" class="create-publication__btn-cancel" (click)="cancel()">
-            Cancelar
+            {{ 'common.cancel' | t }}
           </button>
           <button type="submit" class="create-publication__btn-publish" appPressScale [disabled]="!canPublish">
             @if (publishing) {
               <app-loading-spinner tamanho="sm" />
             } @else {
-              Publicar
+              {{ 'common.publish' | t }}
             }
           </button>
         </div>

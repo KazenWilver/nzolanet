@@ -3,6 +3,7 @@
 @use 'styles/mixins' as mixins;
 @use 'styles/animations';
 @use 'app/styles/global';
+@use 'app/shared/directives/mention-autocomplete.directive';
 
 *,
 *::before,

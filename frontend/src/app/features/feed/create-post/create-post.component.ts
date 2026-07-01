@@ -13,11 +13,22 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { AnimationService } from '../../../core/services/animation.service';
 import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
+import { MentionAutocompleteDirective } from '../../../shared/directives/mention-autocomplete.directive';
+import { TPipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-create-post',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent, LoadingSpinnerComponent, ConfirmDialogComponent, PressScaleDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AvatarComponent,
+    LoadingSpinnerComponent,
+    ConfirmDialogComponent,
+    PressScaleDirective,
+    MentionAutocompleteDirective,
+    TPipe
+  ],
   templateUrl: './create-post.component.html',
   styleUrl: './create-post.component.scss'
 })

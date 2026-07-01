@@ -8,6 +8,7 @@ import { EMPTY, Subscription, debounceTime, distinctUntilChanged, interval, swit
 import { ConversationService } from '../../core/services/conversation.service'
 import { ChatRealtimeService } from '../../core/services/chat-realtime.service'
 import { AuthService } from '../../core/services/auth.service'
+import { AnimationService } from '../../core/services/animation.service'
 import type { ChatMessage, ConversationListItem, MessageReplyPreview } from '../../core/models/conversation.model'
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
@@ -15,6 +16,9 @@ import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe'
 import { RelativeTimeService } from '../../core/services/relative-time.service'
 import { NewConversationModalComponent } from './new-conversation-modal/new-conversation-modal.component'
 import { ChatEmojiPickerComponent } from './chat-emoji-picker/chat-emoji-picker.component'
+import { MentionAutocompleteDirective } from '../../shared/directives/mention-autocomplete.directive'
+import { TPipe } from '../../core/i18n/translate.pipe'
+import { LocaleService } from '../../core/i18n/locale.service'
 
 export interface MessageDayGroup {
   key: string
@@ -35,7 +39,9 @@ export interface MessageDayGroup {
     LoadingSpinnerComponent,
     TimeAgoPipe,
     NewConversationModalComponent,
-    ChatEmojiPickerComponent
+    ChatEmojiPickerComponent,
+    MentionAutocompleteDirective,
+    TPipe
   ],
   templateUrl: './messages-page.component.html',
   styleUrl: './messages-page.component.scss'
@@ -44,11 +50,13 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   private readonly conversationService = inject(ConversationService)
   private readonly chatRealtime = inject(ChatRealtimeService)
   private readonly authService = inject(AuthService)
+  private readonly animationService = inject(AnimationService)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly destroyRef = inject(DestroyRef)
   private readonly formBuilder = inject(FormBuilder)
   readonly relativeTime = inject(RelativeTimeService)
+  private readonly localeService = inject(LocaleService)
 
   @ViewChild('messagesScroll') messagesScroll?: ElementRef<HTMLElement>
 
@@ -239,7 +247,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         },
         error: (error: HttpErrorResponse) => {
           this.sendingMessage = false
-          this.sendError = error.error?.message ?? 'Não foi possível enviar a mensagem.'
+          this.sendError = error.error?.message ?? this.localeService.translate('errors.generic')
         }
       })
   }
@@ -304,6 +312,17 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.forwarding = false
     this.forwardError = ''
     this.actionMenuMessageId = null
+    requestAnimationFrame(() => {
+      const overlay = document.querySelector('.messages-page__forward-overlay')
+      const dialog = document.querySelector('.messages-page__forward-modal')
+      if (overlay && dialog) {
+        this.animationService.modalEnter(overlay, dialog)
+      }
+      const items = document.querySelectorAll('.messages-page__forward-item')
+      if (items.length > 0) {
+        this.animationService.staggerEnter(Array.from(items), 'fadeUp', 0.04)
+      }
+    })
   }
 
   handleToggleForwardConversation(conversationId: string): void {
@@ -340,7 +359,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
         },
         error: (error: HttpErrorResponse) => {
           this.forwarding = false
-          this.forwardError = error.error?.message ?? 'Não foi possível encaminhar a mensagem.'
+          this.forwardError = error.error?.message ?? this.localeService.translate('errors.generic')
         }
       })
   }
@@ -354,6 +373,14 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.reactionPickerMessageId = this.reactionPickerMessageId === messageId ? null : messageId
     this.composerEmojiOpen = false
     this.actionMenuMessageId = null
+    if (this.reactionPickerMessageId) {
+      requestAnimationFrame(() => {
+        const picker = document.querySelector('.messages-page__reaction-picker')
+        if (picker) {
+          this.animationService.dropdownIn(picker)
+        }
+      })
+    }
   }
 
   handleReactionSelected(message: ChatMessage, emoji: string): void {
@@ -395,7 +422,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     if (reply.imageUrl) {
       return reply.isGif ? 'GIF' : 'Imagem'
     }
-    return 'Mensagem'
+    return this.localeService.translate('chat.sendMessage')
   }
 
   getReplyAuthorName(reply: MessageReplyPreview | ChatMessage): string {

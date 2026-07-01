@@ -131,6 +131,42 @@ export class AnimationService {
     });
   }
 
+  dropdownIn(element: Element): gsap.core.Tween | null {
+    if (!this.isEnabled) {
+      return null;
+    }
+
+    gsap.killTweensOf(element);
+    gsap.set(element, { opacity: 0, y: 6, scale: 0.98, transformOrigin: 'top center' });
+    return gsap.to(element, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: this.isMobile ? 0.2 : 0.24,
+      ease: 'power2.out',
+      overwrite: 'auto',
+      clearProps: 'opacity,transform'
+    });
+  }
+
+  listItemIn(element: Element, index = 0): gsap.core.Tween | null {
+    if (!this.isEnabled) {
+      return null;
+    }
+
+    gsap.killTweensOf(element);
+    gsap.set(element, { opacity: 0, y: 8 });
+    return gsap.to(element, {
+      opacity: 1,
+      y: 0,
+      duration: 0.2,
+      delay: Math.min(index * 0.025, 0.2),
+      ease: 'power2.out',
+      overwrite: 'auto',
+      clearProps: 'opacity,transform'
+    });
+  }
+
   modalEnter(overlay: Element, dialog: Element): void {
     gsap.killTweensOf([overlay, dialog]);
 

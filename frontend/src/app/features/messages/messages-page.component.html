@@ -2,7 +2,7 @@
   <div class="messages-page__layout">
     <aside class="messages-page__inbox" aria-label="Lista de conversas">
       <header class="messages-page__inbox-header">
-        <h1 class="messages-page__inbox-title">Chat</h1>
+        <h1 class="messages-page__inbox-title">{{ 'chat.title' | t }}</h1>
         <div class="messages-page__inbox-actions">
           <button
             type="button"
@@ -26,7 +26,7 @@
         <input
           type="search"
           [(ngModel)]="searchQuery"
-          placeholder="Pesquisar"
+          [placeholder]="'chat.searchConversations' | t"
           class="messages-page__search-input"
         />
       </label>
@@ -465,9 +465,10 @@
             <textarea
               formControlName="text"
               class="messages-page__composer-input"
+              appMentionAutocomplete
               rows="1"
-              placeholder="Escreve uma mensagem"
-              aria-label="Escrever mensagem"
+              [placeholder]="'chat.writeMessage' | t"
+              [attr.aria-label]="'chat.writeMessage' | t"
               (keydown)="handleComposerKeydown($event)"
             ></textarea>
             <input
@@ -505,8 +506,8 @@
 @if (forwardingMessage) {
   <div class="messages-page__forward-overlay" (click)="handleCloseForwardModal()">
     <div class="messages-page__forward-modal" (click)="$event.stopPropagation()">
-      <h3>Encaminhar mensagem</h3>
-      <p>Seleciona conversas de destino</p>
+      <h3>{{ 'chat.forwardMessage' | t }}</h3>
+      <p>{{ 'chat.selectConversations' | t }}</p>
       <div class="messages-page__forward-list">
         @for (conversation of conversations; track trackConversation($index, conversation)) {
           @if (activeConversation?.id !== conversation.id) {
@@ -525,14 +526,14 @@
         <p class="messages-page__send-error">{{ forwardError }}</p>
       }
       <div class="messages-page__forward-actions">
-        <button type="button" class="messages-page__pill-btn" (click)="handleCloseForwardModal()">Cancelar</button>
+        <button type="button" class="messages-page__pill-btn" (click)="handleCloseForwardModal()">{{ 'common.cancel' | t }}</button>
         <button
           type="button"
           class="messages-page__pill-btn"
           [disabled]="forwarding || forwardingIds.size === 0"
           (click)="handleConfirmForward()"
         >
-          {{ forwarding ? 'A encaminhar…' : 'Encaminhar' }}
+          {{ forwarding ? ('common.loading' | t) : ('chat.forwardMessage' | t) }}
         </button>
       </div>
     </div>

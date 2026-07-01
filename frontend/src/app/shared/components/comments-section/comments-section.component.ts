@@ -11,6 +11,9 @@ import { TimeAgoPipe } from '../../pipes/time-ago.pipe';
 import { RelativeTimeService } from '../../../core/services/relative-time.service';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { MentionAutocompleteDirective } from '../../directives/mention-autocomplete.directive';
+import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
+import { TPipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-comments-section',
@@ -21,7 +24,10 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
     RouterModule,
     TimeAgoPipe,
     AvatarComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    MentionAutocompleteDirective,
+    ReportDialogComponent,
+    TPipe
   ],
   templateUrl: './comments-section.component.html',
   styleUrl: './comments-section.component.scss'
@@ -47,6 +53,7 @@ export class CommentsSectionComponent implements OnInit {
   editText = '';
   savingEditId: string | null = null;
   deletingId: string | null = null;
+  reportingCommentId: string | null = null;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -195,6 +202,17 @@ export class CommentsSectionComponent implements OnInit {
       return false;
     }
     return comment.authorId === this.currentUser.id || this.authService.estaAdmin();
+  }
+
+  canReport(comment: Comment): boolean {
+    if (!this.currentUser) {
+      return false;
+    }
+    return comment.authorId !== this.currentUser.id;
+  }
+
+  openReportDialog(commentId: string): void {
+    this.reportingCommentId = commentId;
   }
 
   getAuthorName(comment: Comment): string {
