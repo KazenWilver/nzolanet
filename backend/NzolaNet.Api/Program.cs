@@ -229,6 +229,8 @@ Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "profiles"));
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "covers"));
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "publications"));
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "comments"));
+Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "messages"));
+Directory.CreateDirectory(Path.Combine(webRoot, "messages"));
 
 // Migrate database on startup
 using (var scope = app.Services.CreateScope())

@@ -314,23 +314,23 @@ public class ConversationService : IConversationService
 
         if (hasImage)
         {
-            message.ImagePath = await _storageService.SaveFileAsync(image!, "messages");
+            message.ImagePath = await _storageService.SaveFileAsync(image!, "uploads/messages");
         }
 
         if (hasVideo)
         {
-            message.VideoPath = await _storageService.SaveFileAsync(video!, "messages");
+            message.VideoPath = await _storageService.SaveFileAsync(video!, "uploads/messages");
         }
 
         if (hasDocument)
         {
-            message.DocumentPath = await _storageService.SaveFileAsync(document!, "messages");
+            message.DocumentPath = await _storageService.SaveFileAsync(document!, "uploads/messages");
             message.DocumentFileName = Path.GetFileName(document!.FileName);
         }
 
         if (hasAudio)
         {
-            message.AudioPath = await _storageService.SaveFileAsync(audio!, "messages");
+            message.AudioPath = await _storageService.SaveFileAsync(audio!, "uploads/messages");
         }
 
         var saved = await _conversationRepository.AddMessageAsync(message);

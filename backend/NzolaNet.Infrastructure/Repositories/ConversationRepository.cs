@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NzolaNet.Application.Helpers;
 using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
 using NzolaNet.Infrastructure.Data;
@@ -461,16 +462,22 @@ public class ConversationRepository : IConversationRepository
             .FirstOrDefaultAsync(c => c.ImagePath == imagePath);
     }
 
-    public Task<Message?> GetByMediaPathAsync(string mediaPath)
+    public async Task<Message?> GetByMediaPathAsync(string mediaPath)
     {
-        return _context.Messages
+        var paths = MessageMediaPathHelper.GetEquivalentPaths(mediaPath);
+        if (paths.Count == 0)
+        {
+            return null;
+        }
+
+        return await _context.Messages
             .AsNoTracking()
             .Include(m => m.Conversation)
                 .ThenInclude(c => c.Participants)
             .FirstOrDefaultAsync(m =>
-                m.ImagePath == mediaPath ||
-                m.VideoPath == mediaPath ||
-                m.DocumentPath == mediaPath ||
-                m.AudioPath == mediaPath);
+                (m.ImagePath != null && paths.Contains(m.ImagePath)) ||
+                (m.VideoPath != null && paths.Contains(m.VideoPath)) ||
+                (m.DocumentPath != null && paths.Contains(m.DocumentPath)) ||
+                (m.AudioPath != null && paths.Contains(m.AudioPath)));
     }
 }

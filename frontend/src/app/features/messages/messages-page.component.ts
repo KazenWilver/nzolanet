@@ -22,6 +22,7 @@ import { MentionAutocompleteDirective } from '../../shared/directives/mention-au
 import { LinkifyTextPipe } from '../../shared/pipes/linkify-text.pipe'
 import { TPipe } from '../../core/i18n/translate.pipe'
 import { LocaleService } from '../../core/i18n/locale.service'
+import { resolveMediaDownloadUrl } from '../../core/helpers/media-url.helper'
 
 export interface MessageDayGroup {
   key: string
@@ -748,6 +749,21 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  handleDownloadDocument(url: string, fileName?: string): void {
+    const downloadUrl = resolveMediaDownloadUrl(url, fileName)
+    if (!downloadUrl) {
+      return
+    }
+
+    const anchor = document.createElement('a')
+    anchor.href = downloadUrl
+    anchor.rel = 'noopener noreferrer'
+    if (fileName?.trim()) {
+      anchor.download = fileName.trim()
+    }
+    anchor.click()
   }
 
   handleToggleAudioPlayback(messageId: string, url: string): void {

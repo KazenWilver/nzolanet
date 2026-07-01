@@ -29,6 +29,32 @@ const appendAccessToken = (url: string): string => {
   return `${url}${separator}access_token=${encodeURIComponent(token)}`;
 };
 
+/**
+ * Converte caminhos legados de mensagens (/messages) para o endpoint protegido (/uploads/messages).
+ */
+export const normalizeProtectedMediaPath = (url: string): string => {
+  const path = url.startsWith('/') ? url : `/${url}`;
+
+  if (path.startsWith('/messages/')) {
+    return `/uploads/messages/${path.slice('/messages/'.length)}`;
+  }
+
+  return path;
+};
+
+const isProtectedMediaPath = (path: string): boolean =>
+  path.startsWith('/uploads/') || path.startsWith('/messages/');
+
+const toAbsoluteMediaPath = (path: string): string => {
+  const normalized = normalizeProtectedMediaPath(path);
+
+  if (!environment.uploadsUrl) {
+    return normalized;
+  }
+
+  return `${environment.uploadsUrl}${normalized}`;
+};
+
 export const resolveMediaUrl = (url: string | undefined | null): string | undefined => {
   if (!url) {
     return undefined;
@@ -39,12 +65,34 @@ export const resolveMediaUrl = (url: string | undefined | null): string | undefi
   }
 
   const path = url.startsWith('/') ? url : `/${url}`;
-  const isUploadPath = path.startsWith('/uploads/');
 
-  if (!environment.uploadsUrl) {
-    return isUploadPath ? appendAccessToken(path) : path;
+  if (!isProtectedMediaPath(path)) {
+    return path;
   }
 
-  const absoluteUrl = `${environment.uploadsUrl}${path}`;
-  return isUploadPath ? appendAccessToken(absoluteUrl) : absoluteUrl;
+  return appendAccessToken(toAbsoluteMediaPath(path));
+};
+
+/**
+ * URL autenticada para transferência (Content-Disposition: attachment no servidor).
+ */
+export const resolveMediaDownloadUrl = (
+  url: string | undefined | null,
+  fileName?: string
+): string | undefined => {
+  const resolved = resolveMediaUrl(url);
+  if (!resolved) {
+    return undefined;
+  }
+
+  const separator = resolved.includes('?') ? '&' : '?';
+  const params = new URLSearchParams(resolved.includes('?') ? resolved.slice(resolved.indexOf('?') + 1) : '');
+  params.set('download', 'true');
+
+  if (fileName?.trim()) {
+    params.set('filename', fileName.trim());
+  }
+
+  const base = resolved.includes('?') ? resolved.slice(0, resolved.indexOf('?')) : resolved;
+  return `${base}?${params.toString()}`;
 };

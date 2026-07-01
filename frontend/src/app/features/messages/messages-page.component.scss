@@ -603,7 +603,8 @@
 
 .messages-page__bubble-video {
   display: block;
-  max-width: min(280px, 100%);
+  width: 100%;
+  max-width: min(320px, 100%);
   max-height: 280px;
   border-radius: 12px;
   margin-bottom: 6px;
@@ -798,39 +799,104 @@
   color: #4f46e5;
 }
 
-.messages-page__document-link {
+.messages-page__video-wrap {
+  position: relative;
+  display: block;
+  max-width: min(100%, 320px);
+  margin-bottom: 6px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .messages-page__bubble-video {
+    margin-bottom: 0;
+  }
+}
+
+.messages-page__media-expand {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(15, 14, 23, 0.55);
+  color: #ffffff;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+
+  &:hover {
+    background: rgba(15, 14, 23, 0.75);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.messages-page__document {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   width: 100%;
   min-width: 220px;
   padding: 10px 12px;
-  border: none;
   border-radius: 12px;
   background: rgba(99, 102, 241, 0.12);
-  color: inherit;
-  text-decoration: none;
+}
+
+.messages-page__document-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.messages-page__document-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 600;
-  text-align: left;
+}
+
+.messages-page__document-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.messages-page__document-btn {
+  flex: 1;
+  min-height: 34px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--gradient-brand);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
 
   &:hover {
-    background: rgba(99, 102, 241, 0.2);
+    filter: brightness(1.05);
   }
 
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  &--secondary {
+    background: transparent;
+    border: 1px solid currentColor;
+    color: inherit;
   }
 }
 
-.messages-page__bubble--mine .messages-page__document-link {
+.messages-page__bubble--mine .messages-page__document {
   background: rgba(255, 255, 255, 0.14);
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.22);
-  }
+.messages-page__bubble--mine .messages-page__document-btn--secondary {
+  border-color: rgba(255, 255, 255, 0.65);
+  color: #ffffff;
 }
 
 .messages-page__audio-player {
