@@ -22,5 +22,10 @@ public interface IPostService
     Task<IEnumerable<PublicationResponseDto>> GetLikedByUserIdAsync(Guid targetUserId, Guid? currentUserId = null);
     Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null);
     Task<PaginatedPublicationsResponseDto> GetByHashtagAsync(string tag, Guid? currentUserId, int page, int pageSize);
+    Task<PaginatedPublicationsResponseDto> GetUserRepostsPagedAsync(
+        Guid targetUserId,
+        Guid? currentUserId,
+        int page,
+        int pageSize);
     Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 5);
 }

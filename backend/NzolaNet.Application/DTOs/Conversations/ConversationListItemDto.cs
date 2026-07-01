@@ -15,4 +15,6 @@ public class ConversationListItemDto
     public string? LastMessageText { get; set; }
     public DateTime? LastMessageAt { get; set; }
     public int UnreadCount { get; set; }
+    public bool? OtherUserIsOnline { get; set; }
+    public DateTime? OtherUserLastSeenAt { get; set; }
 }

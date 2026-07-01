@@ -13,17 +13,20 @@ public class MediaAccessService : IMediaAccessService
     private readonly IPostRepository _postRepository;
     private readonly ICommentRepository _commentRepository;
     private readonly IFollowRepository _followRepository;
+    private readonly IConversationRepository _conversationRepository;
 
     public MediaAccessService(
         IUserRepository userRepository,
         IPostRepository postRepository,
         ICommentRepository commentRepository,
-        IFollowRepository followRepository)
+        IFollowRepository followRepository,
+        IConversationRepository conversationRepository)
     {
         _userRepository = userRepository;
         _postRepository = postRepository;
         _commentRepository = commentRepository;
         _followRepository = followRepository;
+        _conversationRepository = conversationRepository;
     }
 
     public async Task<bool> CanAccessAsync(Guid userId, string normalizedPath)
@@ -42,8 +45,22 @@ public class MediaAccessService : IMediaAccessService
             "covers" => await CanAccessCoverPhotoAsync(userId, normalizedPath),
             "publications" => await CanAccessPublicationMediaAsync(userId, normalizedPath),
             "comments" => await CanAccessCommentMediaAsync(userId, normalizedPath),
+            "groups" => await CanAccessGroupMediaAsync(userId, normalizedPath),
+            "messages" => await CanAccessMessageMediaAsync(userId, normalizedPath),
             _ => false
         };
+    }
+
+    private async Task<bool> CanAccessGroupMediaAsync(Guid userId, string normalizedPath)
+    {
+        var conversation = await _conversationRepository.GetByImagePathAsync(normalizedPath);
+        return conversation?.Participants.Any(participant => participant.UserId == userId) == true;
+    }
+
+    private async Task<bool> CanAccessMessageMediaAsync(Guid userId, string normalizedPath)
+    {
+        var message = await _conversationRepository.GetByMediaPathAsync(normalizedPath);
+        return message?.Conversation.Participants.Any(participant => participant.UserId == userId) == true;
     }
 
     private async Task<bool> CanAccessProfilePhotoAsync(Guid userId, string normalizedPath)

@@ -384,6 +384,20 @@ public class PostService : IPostService
         return BuildPaginatedResponse(dtos, page, pageSize, visibleItems.Count);
     }
 
+    public async Task<PaginatedPublicationsResponseDto> GetUserRepostsPagedAsync(
+        Guid targetUserId,
+        Guid? currentUserId,
+        int page,
+        int pageSize)
+    {
+        await EnsureCanViewUserPostsAsync(targetUserId, currentUserId);
+
+        var (items, totalCount) = await _postRepository.GetQuotedRepostsByUserPagedAsync(targetUserId, page, pageSize);
+        var itemList = items.ToList();
+        var dtos = (await MapPostsToDtosAsync(itemList, currentUserId)).ToList();
+        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
+    }
+
     public async Task<IReadOnlyList<string>> GetTrendingHashtagsAsync(int limit = 5)
     {
         var safeLimit = Math.Clamp(limit, 1, 5);

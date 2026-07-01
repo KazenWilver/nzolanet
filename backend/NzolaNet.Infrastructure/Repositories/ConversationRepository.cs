@@ -443,4 +443,21 @@ public class ConversationRepository : IConversationRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public Task<Conversation?> GetByImagePathAsync(string imagePath)
+    {
+        return _context.Conversations
+            .AsNoTracking()
+            .Include(c => c.Participants)
+            .FirstOrDefaultAsync(c => c.ImagePath == imagePath);
+    }
+
+    public Task<Message?> GetByMediaPathAsync(string mediaPath)
+    {
+        return _context.Messages
+            .AsNoTracking()
+            .Include(m => m.Conversation)
+                .ThenInclude(c => c.Participants)
+            .FirstOrDefaultAsync(m => m.ImagePath == mediaPath || m.VideoPath == mediaPath);
+    }
 }

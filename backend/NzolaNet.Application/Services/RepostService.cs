@@ -10,15 +10,18 @@ public class RepostService : IRepostService
     private readonly IRepostRepository _repostRepository;
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
+    private readonly INotificationService _notificationService;
 
     public RepostService(
         IRepostRepository repostRepository,
         IPostRepository postRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        INotificationService notificationService)
     {
         _repostRepository = repostRepository;
         _postRepository = postRepository;
         _userRepository = userRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<(bool IsReposted, int RepostsCount)> ToggleRepostAsync(Guid userId, Guid postId)
@@ -80,6 +83,11 @@ public class RepostService : IRepostService
                 PostId = postId,
                 CreatedAt = DateTime.UtcNow
             });
+
+            var preview = string.IsNullOrWhiteSpace(post.Text)
+                ? "repartilhou a tua publicação"
+                : post.Text;
+            await _notificationService.TryCreateRepostNotificationAsync(userId, postId, post.UserId, preview);
         }
 
         var count = await _repostRepository.GetRepostCountAsync(postId);

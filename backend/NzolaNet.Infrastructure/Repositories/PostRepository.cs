@@ -195,6 +195,28 @@ public class PostRepository : IPostRepository
             .ToListAsync();
     }
 
+    public async Task<(IEnumerable<Post> Items, int TotalCount)> GetQuotedRepostsByUserPagedAsync(
+        Guid userId,
+        int page,
+        int pageSize)
+    {
+        var query = _context.Posts
+            .AsNoTracking()
+            .Include(post => post.User)
+            .Include(post => post.QuotedPost!)
+                .ThenInclude(quoted => quoted.User)
+            .Where(post => post.UserId == userId && post.QuotedPostId != null)
+            .OrderByDescending(post => post.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<bool> CreateAsync(Post post)
     {
         _context.Posts.Add(post);

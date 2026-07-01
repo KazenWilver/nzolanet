@@ -19,6 +19,7 @@ public class ConversationService : IConversationService
     private readonly IFollowRepository _followRepository;
     private readonly IStorageService _storageService;
     private readonly INotificationService _notificationService;
+    private readonly IUserPresenceService _presenceService;
 
     public ConversationService(
         IConversationRepository conversationRepository,
@@ -26,7 +27,8 @@ public class ConversationService : IConversationService
         IUserRepository userRepository,
         IFollowRepository followRepository,
         IStorageService storageService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IUserPresenceService presenceService)
     {
         _conversationRepository = conversationRepository;
         _messageReactionRepository = messageReactionRepository;
@@ -34,6 +36,7 @@ public class ConversationService : IConversationService
         _followRepository = followRepository;
         _storageService = storageService;
         _notificationService = notificationService;
+        _presenceService = presenceService;
     }
 
     public int MessageEditDeleteWindowMinutes => MessageEditDeleteWindowMinutesValue;
@@ -220,6 +223,7 @@ public class ConversationService : IConversationService
         var safeLimit = Math.Clamp(limit, 1, MaxMessagesPageSize);
         var messages = (await _conversationRepository.GetMessagesAsync(conversationId, userId, safeLimit, before)).ToList();
         var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
+        var recipientId = await GetDirectRecipientUserIdAsync(conversationId, userId);
         var reactions = await _messageReactionRepository.GetByMessageIdsAsync(messages.Select(m => m.Id));
         var reactionMap = BuildReactionSummaries(reactions, userId);
 
@@ -227,7 +231,8 @@ public class ConversationService : IConversationService
             message,
             userId,
             otherLastRead,
-            reactionMap.GetValueOrDefault(message.Id)));
+            reactionMap.GetValueOrDefault(message.Id),
+            recipientId));
     }
 
     public async Task<MessageResponseDto> SendMessageAsync(
@@ -305,16 +310,17 @@ public class ConversationService : IConversationService
         var saved = await _conversationRepository.AddMessageAsync(message);
         var reloaded = await _conversationRepository.GetMessageByIdAsync(saved.Id, conversationId) ?? saved;
         var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
-        var response = MapMessage(reloaded, userId, otherLastRead, Array.Empty<MessageReactionSummaryDto>());
+        var recipientId = await GetDirectRecipientUserIdAsync(conversationId, userId);
+        var response = MapMessage(reloaded, userId, otherLastRead, Array.Empty<MessageReactionSummaryDto>(), recipientId);
 
         var preview = FormatMessagePreview(reloaded);
         var recipients = await _conversationRepository.GetOtherParticipantIdsAsync(conversationId, userId);
-        foreach (var recipientId in recipients)
+        foreach (var notificationRecipientId in recipients)
         {
             await _notificationService.TryCreateMessageNotificationAsync(
                 userId,
                 conversationId,
-                recipientId,
+                notificationRecipientId,
                 preview);
         }
 
@@ -368,11 +374,12 @@ public class ConversationService : IConversationService
         var reloaded = await _conversationRepository.GetMessageByIdAsync(messageId, conversationId)
             ?? message;
         var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(conversationId, userId);
+        var recipientId = await GetDirectRecipientUserIdAsync(conversationId, userId);
         var reactions = await _messageReactionRepository.GetByMessageIdsAsync(new[] { messageId });
         var mappedReactions = BuildReactionSummaries(reactions, userId).GetValueOrDefault(messageId)
             ?? Array.Empty<MessageReactionSummaryDto>();
 
-        return MapMessage(reloaded, userId, otherLastRead, mappedReactions);
+        return MapMessage(reloaded, userId, otherLastRead, mappedReactions, recipientId);
     }
 
     public async Task DeleteMessageAsync(
@@ -424,7 +431,8 @@ public class ConversationService : IConversationService
         Guid userId,
         Guid sourceConversationId,
         Guid messageId,
-        IReadOnlyList<Guid> targetConversationIds)
+        IReadOnlyList<Guid> targetConversationIds,
+        string? caption = null)
     {
         await EnsureParticipantAsync(userId, sourceConversationId);
 
@@ -453,11 +461,15 @@ public class ConversationService : IConversationService
         }
 
         var now = DateTime.UtcNow;
+        var captionText = caption?.Trim();
+        var forwardedText = !string.IsNullOrWhiteSpace(captionText)
+            ? captionText
+            : sourceMessage.Text;
         var messages = targetIds.Select(targetId => new Message
         {
             ConversationId = targetId,
             SenderId = userId,
-            Text = sourceMessage.Text,
+            Text = forwardedText,
             ImagePath = sourceMessage.ImagePath,
             VideoPath = sourceMessage.VideoPath,
             RemoteImageUrl = sourceMessage.RemoteImageUrl,
@@ -472,17 +484,18 @@ public class ConversationService : IConversationService
         foreach (var savedMessage in savedMessages)
         {
             var otherLastRead = await _conversationRepository.GetOtherParticipantLastReadAtAsync(savedMessage.ConversationId, userId);
-            var mapped = MapMessage(savedMessage, userId, otherLastRead, Array.Empty<MessageReactionSummaryDto>());
+            var recipientId = await GetDirectRecipientUserIdAsync(savedMessage.ConversationId, userId);
+            var mapped = MapMessage(savedMessage, userId, otherLastRead, Array.Empty<MessageReactionSummaryDto>(), recipientId);
             response.Add(mapped);
 
             var recipients = await _conversationRepository.GetOtherParticipantIdsAsync(savedMessage.ConversationId, userId);
             var preview = FormatMessagePreview(savedMessage);
-            foreach (var recipientId in recipients)
+            foreach (var notificationRecipientId in recipients)
             {
                 await _notificationService.TryCreateMessageNotificationAsync(
                     userId,
                     savedMessage.ConversationId,
-                    recipientId,
+                    notificationRecipientId,
                     preview);
             }
         }
@@ -647,20 +660,31 @@ public class ConversationService : IConversationService
             ParticipantCount = participantCount,
             LastMessageText = FormatMessagePreview(lastMessage),
             LastMessageAt = lastMessage?.CreatedAt,
-            UnreadCount = unreadCount
+            UnreadCount = unreadCount,
+            OtherUserIsOnline = _presenceService.IsOnline(otherUser.Id),
+            OtherUserLastSeenAt = _presenceService.GetLastSeenUtc(otherUser.Id)
         };
     }
 
-    private static MessageResponseDto MapMessage(
+    private MessageResponseDto MapMessage(
         Message message,
         Guid currentUserId,
         DateTime? otherLastReadAt,
-        IReadOnlyList<MessageReactionSummaryDto>? reactions)
+        IReadOnlyList<MessageReactionSummaryDto>? reactions,
+        Guid? recipientUserId = null)
     {
         var isMine = message.SenderId == currentUserId;
         var isRead = isMine &&
             otherLastReadAt.HasValue &&
             otherLastReadAt.Value >= message.CreatedAt;
+        var recipientOnline = recipientUserId.HasValue && _presenceService.IsOnline(recipientUserId.Value);
+        var readStatus = !isMine
+            ? "sent"
+            : isRead
+                ? "read"
+                : recipientOnline
+                    ? "delivered"
+                    : "sent";
 
         return new MessageResponseDto
         {
@@ -682,8 +706,15 @@ public class ConversationService : IConversationService
             Reactions = reactions ?? Array.Empty<MessageReactionSummaryDto>(),
             CreatedAt = message.CreatedAt,
             IsMine = isMine,
-            IsRead = isRead
+            IsRead = isRead,
+            ReadStatus = readStatus
         };
+    }
+
+    private async Task<Guid?> GetDirectRecipientUserIdAsync(Guid conversationId, Guid userId)
+    {
+        var others = await _conversationRepository.GetOtherParticipantIdsAsync(conversationId, userId);
+        return others.Count == 1 ? others[0] : null;
     }
 
     private static MessageReplyPreviewDto MapReplyPreview(Message message)

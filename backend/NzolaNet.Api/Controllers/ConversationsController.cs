@@ -295,7 +295,8 @@ public class ConversationsController : ControllerBase
                 userId,
                 id,
                 messageId,
-                dto.TargetConversationIds);
+                dto.TargetConversationIds,
+                dto.Caption);
 
             foreach (var message in forwarded)
             {

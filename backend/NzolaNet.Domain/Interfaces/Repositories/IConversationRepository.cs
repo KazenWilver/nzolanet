@@ -30,4 +30,6 @@ public interface IConversationRepository
     Task UpdateMessageAsync(Message message);
     Task<bool> AddParticipantsAsync(Guid conversationId, IReadOnlyCollection<Guid> participantIds);
     Task<bool> UpdateGroupAsync(Guid conversationId, string? title, string? description, string? imagePath);
+    Task<Conversation?> GetByImagePathAsync(string imagePath);
+    Task<Message?> GetByMediaPathAsync(string mediaPath);
 }

@@ -113,6 +113,29 @@ public class PublicationsController : ControllerBase
         return Ok(hashtags);
     }
 
+    [HttpGet("user/{userId}/reposts")]
+    public async Task<IActionResult> GetUserReposts(
+        Guid userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var safePage = Math.Max(page, 1);
+            var safePageSize = Math.Clamp(pageSize, 1, 50);
+            var publications = await _postService.GetUserRepostsPagedAsync(
+                userId,
+                AuthClaimsHelper.GetOptionalUserId(User),
+                safePage,
+                safePageSize);
+            return Ok(publications);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ForbiddenResultHelper.Create(ex.Message);
+        }
+    }
+
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(
         Guid userId,

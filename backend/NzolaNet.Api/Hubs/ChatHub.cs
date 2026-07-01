@@ -11,14 +11,44 @@ namespace NzolaNet.Api.Hubs;
 public class ChatHub : Hub
 {
     private readonly IConversationRepository _conversationRepository;
-    private readonly IChatRealtimeNotifier _chatRealtimeNotifier;
+    private readonly IUserPresenceService _presenceService;
 
     public ChatHub(
         IConversationRepository conversationRepository,
-        IChatRealtimeNotifier chatRealtimeNotifier)
+        IUserPresenceService presenceService)
     {
         _conversationRepository = conversationRepository;
-        _chatRealtimeNotifier = chatRealtimeNotifier;
+        _presenceService = presenceService;
+    }
+
+    public override async Task OnConnectedAsync()
+    {
+        var userId = AuthClaimsHelper.GetUserId(Context.User!);
+        _presenceService.UserConnected(userId, Context.ConnectionId);
+        await Clients.Others.SendAsync("PresenceChanged", new
+        {
+            UserId = userId.ToString(),
+            IsOnline = true,
+            LastSeenAt = (DateTime?)null
+        });
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var userId = AuthClaimsHelper.GetUserId(Context.User!);
+        var wentOffline = _presenceService.UserDisconnected(userId, Context.ConnectionId);
+        if (wentOffline)
+        {
+            await Clients.Others.SendAsync("PresenceChanged", new
+            {
+                UserId = userId.ToString(),
+                IsOnline = false,
+                LastSeenAt = _presenceService.GetLastSeenUtc(userId)
+            });
+        }
+
+        await base.OnDisconnectedAsync(exception);
     }
 
     public async Task JoinConversation(string conversationId)

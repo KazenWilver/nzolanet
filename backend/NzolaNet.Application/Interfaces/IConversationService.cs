@@ -36,7 +36,8 @@ public interface IConversationService
         Guid userId,
         Guid sourceConversationId,
         Guid messageId,
-        IReadOnlyList<Guid> targetConversationIds);
+        IReadOnlyList<Guid> targetConversationIds,
+        string? caption = null);
     Task<IReadOnlyList<MessageReactionSummaryDto>> ToggleReactionAsync(
         Guid userId,
         Guid conversationId,

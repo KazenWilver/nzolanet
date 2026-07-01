@@ -21,4 +21,5 @@ public class MessageResponseDto
     public DateTime CreatedAt { get; set; }
     public bool IsMine { get; set; }
     public bool IsRead { get; set; }
+    public string ReadStatus { get; set; } = "sent";
 }

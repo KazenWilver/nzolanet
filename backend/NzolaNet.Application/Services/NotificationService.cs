@@ -352,6 +352,40 @@ public class NotificationService : INotificationService
         }
     }
 
+    public async Task TryCreateRepostNotificationAsync(
+        Guid actorId,
+        Guid publicationId,
+        Guid recipientId,
+        string? preview)
+    {
+        if (actorId == recipientId)
+        {
+            return;
+        }
+
+        try
+        {
+            var notification = new Notification
+            {
+                RecipientId = recipientId,
+                ActorId = actorId,
+                Type = "repost",
+                PublicationId = publicationId,
+                MessagePreview = TruncatePreview(preview),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao criar notificação de repartilha para o utilizador {RecipientId}.",
+                recipientId);
+        }
+    }
+
     private NotificationResponseDto MapToDto(Notification notification)
     {
         var publicationText = notification.Publication?.Text;
