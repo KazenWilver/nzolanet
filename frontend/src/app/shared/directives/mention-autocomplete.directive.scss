@@ -28,7 +28,10 @@
   width: 100%;
   box-sizing: border-box;
   background: transparent !important;
-  color: transparent;
+  // O texto real fica invisível: quem se vê é a camada de highlight por baixo,
+  // que colore as menções. O caret continua visível via caret-color. Usa-se
+  // !important porque os estilos do componente (textarea) têm mais especificidade.
+  color: transparent !important;
   caret-color: var(--color-text-primary);
 
   &::placeholder {

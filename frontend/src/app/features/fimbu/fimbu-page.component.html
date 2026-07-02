@@ -96,12 +96,12 @@
                 >
                   <div class="fimbu-page__bubble-content">
                     <p class="fimbu-page__bubble-text" [innerHTML]="message.content | fimbuMessageText"></p>
+                    <footer class="fimbu-page__bubble-meta">
+                      <time [dateTime]="message.timestamp">
+                        {{ message.timestamp | date: 'HH:mm' }}
+                      </time>
+                    </footer>
                   </div>
-                  <footer class="fimbu-page__bubble-meta">
-                    <time [dateTime]="message.timestamp">
-                      {{ message.timestamp | date: 'HH:mm' }}
-                    </time>
-                  </footer>
                 </article>
               </article>
             }

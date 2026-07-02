@@ -396,15 +396,12 @@
 .messages-page__day-separator {
   display: flex;
   justify-content: center;
-  margin: 16px 0 8px;
+  margin: 18px 0 10px;
 
   span {
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--color-text-secondary);
-    padding: 4px 12px;
-    border-radius: 9999px;
-    background: var(--color-bg-hover);
   }
 }
 
@@ -560,7 +557,7 @@
     }
 
     .messages-page__bubble-meta {
-      justify-content: flex-start;
+      justify-content: flex-end;
     }
 
     .messages-page__read-more {
@@ -583,13 +580,17 @@
 .messages-page__bubble-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 4px;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 0;
+  line-height: 1;
 
   time {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: inherit;
+    opacity: 0.72;
     letter-spacing: 0.01em;
   }
 }
@@ -643,7 +644,8 @@
     .messages-page__read-more,
     .messages-page__edited-label,
     .messages-page__forwarded-label,
-    .messages-page__deleted-text {
+    .messages-page__deleted-text,
+    .messages-page__bubble-meta {
       grid-column: 1;
       width: 0;
       min-width: 100%;
