@@ -212,17 +212,6 @@ public class CommentService : ICommentService
         return comments.Select(MapToResponseDto);
     }
 
-    public async Task<IEnumerable<CommentDto>> GetAllAsync()
-    {
-        var comments = await _commentRepository.GetAllAsync();
-        return comments.Select(MapToLegacyDto);
-    }
-
-    public async Task<int> GetTotalCountAsync()
-    {
-        return await _commentRepository.GetTotalCountAsync();
-    }
-
     private static CommentResponseDto MapToResponseDto(Comment comment)
     {
         return new CommentResponseDto
@@ -238,20 +227,6 @@ public class CommentService : ICommentService
             AuthorPhotoUrl = comment.User?.ProfilePhoto,
             ImageUrl = comment.ImagePath,
             VideoUrl = comment.VideoPath
-        };
-    }
-
-    private static CommentDto MapToLegacyDto(Comment comment)
-    {
-        return new CommentDto
-        {
-            Id = comment.Id,
-            UserId = comment.UserId,
-            UserName = comment.User?.UserName ?? string.Empty,
-            UserPhoto = comment.User?.ProfilePhoto,
-            PostId = comment.PostId,
-            Text = comment.Text,
-            CreatedAt = comment.CreatedAt
         };
     }
 }

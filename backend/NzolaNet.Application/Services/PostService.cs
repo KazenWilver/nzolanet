@@ -270,11 +270,6 @@ public class PostService : IPostService
         return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
     }
 
-    public async Task<IEnumerable<PublicationResponseDto>> GetFeedAsync(Guid userId)
-    {
-        return await GetFollowingFeedAsync(userId);
-    }
-
     public async Task<PublicationResponseDto?> GetByIdAsync(Guid id, Guid? currentUserId = null)
     {
         var post = await _postRepository.GetByIdAsync(id);

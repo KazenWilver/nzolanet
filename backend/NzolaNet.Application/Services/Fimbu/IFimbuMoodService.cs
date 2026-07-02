@@ -18,10 +18,4 @@ public interface IFimbuMoodService
     /// sessão arranca com uma personalidade fresca da Fimbu.
     /// </summary>
     FimbuSessionMood AssignNewSessionMood(Guid userId);
-
-    /// <summary>
-    /// Remove a combinação associada ao utilizador. Deve ser chamado no logout
-    /// para garantir que o próximo login sorteia uma personalidade nova.
-    /// </summary>
-    void ClearSessionMood(Guid userId);
 }

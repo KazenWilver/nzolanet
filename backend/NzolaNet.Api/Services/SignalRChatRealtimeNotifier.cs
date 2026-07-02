@@ -55,19 +55,6 @@ public class SignalRChatRealtimeNotifier : IChatRealtimeNotifier
             });
     }
 
-    public async Task NotifyTypingAsync(Guid conversationId, Guid userId, string username, bool isTyping)
-    {
-        await _hubContext.Clients
-            .Group(ChatHub.GetGroupName(conversationId))
-            .SendAsync("TypingChanged", new
-            {
-                ConversationId = conversationId.ToString(),
-                UserId = userId.ToString(),
-                Username = username,
-                IsTyping = isTyping
-            });
-    }
-
     public async Task NotifyReactionChangedAsync(
         Guid conversationId,
         Guid messageId,

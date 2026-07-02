@@ -25,58 +25,6 @@ export interface UpdateProfileDto {
   isPrivate?: boolean;
 }
 
-/** @deprecated Usar User — mantido para compatibilidade com componentes existentes */
-export interface LegacyUser {
-  id: string;
-  nome: string;
-  nomeUtilizador: string;
-  email: string;
-  fotoPerfil?: string;
-  fotoCapa?: string;
-  bio?: string;
-  localizacao?: string;
-  totalSeguidores: number;
-  totalSeguindo: number;
-  totalPublicacoes: number;
-  privado: boolean;
-  eAdmin: boolean;
-  estaASeguir?: boolean;
-  estaPendente?: boolean;
-  criadoEm: string;
-}
-
-/** Formulário de login dos componentes existentes */
-export interface LoginDto {
-  email: string;
-  senha: string;
-}
-
-/** @deprecated Usar LoginDto de auth.model nos novos serviços */
-export interface LoginDtoLegacy {
-  email: string;
-  senha: string;
-}
-
-/** @deprecated Usar RegisterDto de auth.model */
-export interface RegistoDto {
-  nome: string;
-  nomeUtilizador: string;
-  email: string;
-  senha: string;
-  confirmarSenha: string;
-}
-
-/** @deprecated Usar ForgotPasswordDto de auth.model */
-export interface RecuperarSenhaDto {
-  email: string;
-}
-
-/** @deprecated Usar AuthResponse de auth.model */
-export interface RespostaAutenticacao {
-  token: string;
-  utilizador: LegacyUser;
-}
-
 export const mapBackendUser = (dto: BackendUserDto): User => ({
   id: dto.id,
   username: dto.username,
@@ -93,21 +41,4 @@ export const mapBackendUser = (dto: BackendUserDto): User => ({
   isFollowing: dto.isFollowing,
   isPending: dto.isPending,
   hasIncomingFollowRequest: dto.hasIncomingFollowRequest
-});
-
-export const toLegacyUser = (user: User): LegacyUser => ({
-  id: user.id,
-  nome: user.displayName ?? user.username,
-  nomeUtilizador: user.username,
-  email: user.email ?? '',
-  fotoPerfil: user.profilePhotoUrl,
-  fotoCapa: user.coverPhotoUrl,
-  bio: user.bio,
-  totalSeguidores: user.followersCount,
-  totalSeguindo: user.followingCount,
-  totalPublicacoes: 0,
-  privado: user.isPrivate,
-  eAdmin: user.role === 'Admin',
-  estaASeguir: user.isFollowing,
-  criadoEm: user.createdAt
 });

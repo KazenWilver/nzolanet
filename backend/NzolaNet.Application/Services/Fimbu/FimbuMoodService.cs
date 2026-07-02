@@ -5,9 +5,8 @@ namespace NzolaNet.Application.Services.Fimbu;
 /// <summary>
 /// Sorteia e persiste a combinação de personalidade da Fimbu por utilizador.
 /// A combinação é atribuída uma vez por sessão (no primeiro pedido após login)
-/// e mantém-se estável até ao logout, quando é removida via
-/// <see cref="ClearSessionMood"/> — o próximo login sorteia outra, diferente
-/// da anterior.
+/// e mantém-se estável até ao próximo login, quando é sorteada outra combinação
+/// diferente da anterior.
 /// </summary>
 public sealed class FimbuMoodService : IFimbuMoodService
 {
@@ -685,11 +684,6 @@ public sealed class FimbuMoodService : IFimbuMoodService
         var novaCombinacao = Sortear(previous);
         _activeMoods[userId] = novaCombinacao;
         return novaCombinacao;
-    }
-
-    public void ClearSessionMood(Guid userId)
-    {
-        _activeMoods.TryRemove(userId, out _);
     }
 
     private static FimbuSessionMood Sortear(FimbuSessionMood? previous)

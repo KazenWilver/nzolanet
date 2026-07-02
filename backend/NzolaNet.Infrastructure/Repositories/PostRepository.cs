@@ -37,22 +37,6 @@ public class PostRepository : IPostRepository
             .ToListAsync();
     }
 
-    public async Task<(IEnumerable<Post> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
-    {
-        var query = _context.Posts
-            .Include(p => p.User)
-            .OrderByDescending(p => p.CreatedAt);
-
-        var totalCount = await query.CountAsync();
-        var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .AsNoTracking()
-            .ToListAsync();
-
-        return (items, totalCount);
-    }
-
     public async Task<(IEnumerable<Post> Items, int TotalCount)> GetAllVisiblePagedAsync(
         int page,
         int pageSize,

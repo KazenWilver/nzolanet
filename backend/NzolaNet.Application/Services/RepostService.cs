@@ -24,12 +24,6 @@ public class RepostService : IRepostService
         _notificationService = notificationService;
     }
 
-    public async Task<(bool IsReposted, int RepostsCount)> ToggleRepostAsync(Guid userId, Guid postId)
-    {
-        var (isReposted, count, _) = await RepostAsync(userId, postId, null);
-        return (isReposted, count);
-    }
-
     public async Task<(bool IsReposted, int RepostsCount, PublicationResponseDto? QuotedPublication)> RepostAsync(
         Guid userId,
         Guid postId,
@@ -92,16 +86,6 @@ public class RepostService : IRepostService
 
         var count = await _repostRepository.GetRepostCountAsync(postId);
         return (true, count, quotedPublication);
-    }
-
-    public Task<int> GetRepostCountAsync(Guid postId)
-    {
-        return _repostRepository.GetRepostCountAsync(postId);
-    }
-
-    public Task<bool> HasUserRepostedAsync(Guid userId, Guid postId)
-    {
-        return _repostRepository.HasUserRepostedAsync(userId, postId);
     }
 
     private static PublicationResponseDto MapToDto(Post post, Post quotedSource, User author)

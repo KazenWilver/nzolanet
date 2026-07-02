@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Comentario } from '../models/comment.model';
 
 export interface AdminMetrics {
   totalUtilizadores: number;
@@ -12,8 +11,18 @@ export interface AdminMetrics {
   totalBazes: number;
 }
 
-export interface ComentarioReportado extends Comentario {
+export interface ComentarioReportado {
+  id: string;
+  postId: string;
+  autorId: string;
+  autorNome: string;
+  autorFoto?: string;
+  autorNomeUtilizador: string;
+  texto: string;
+  criadoEm: string;
+  atualizadoEm?: string;
   reportsCount: number;
+  reports?: Array<{ userId: string; motivo: string; criadoEm: string }>;
 }
 
 @Injectable({ providedIn: 'root' })

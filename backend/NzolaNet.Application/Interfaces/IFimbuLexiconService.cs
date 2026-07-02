@@ -5,7 +5,5 @@ namespace NzolaNet.Application.Interfaces;
 /// </summary>
 public interface IFimbuLexiconService
 {
-    int EntryCount { get; }
-
     string BuildLexiconContext(string userMessage, Guid userId, int messageIndex);
 }

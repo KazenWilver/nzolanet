@@ -80,28 +80,6 @@ public class LikeService : ILikeService
         await _notificationService.CleanupBazeNotificationAsync(userId, postId, post.UserId);
     }
 
-    public async Task<bool> ToggleLikeAsync(Guid userId, Guid postId)
-    {
-        if (await _likeRepository.HasUserLikedAsync(userId, postId))
-        {
-            await UnlikeAsync(userId, postId);
-            return true;
-        }
-
-        await LikeAsync(userId, postId);
-        return true;
-    }
-
-    public async Task<int> GetLikeCountAsync(Guid postId)
-    {
-        return await _likeRepository.GetCountByPostIdAsync(postId);
-    }
-
-    public async Task<bool> HasUserLikedAsync(Guid userId, Guid postId)
-    {
-        return await _likeRepository.HasUserLikedAsync(userId, postId);
-    }
-
     private async Task EnsureCanInteractWithPostAsync(Guid userId, Post post)
     {
         var author = post.User;

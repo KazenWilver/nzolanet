@@ -9,7 +9,6 @@ public interface IPostRepository
 {
     Task<Post?> GetByIdAsync(Guid id);
     Task<IEnumerable<Post>> GetAllAsync();
-    Task<(IEnumerable<Post> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
     Task<(IEnumerable<Post> Items, int TotalCount)> GetAllVisiblePagedAsync(
         int page,
         int pageSize,

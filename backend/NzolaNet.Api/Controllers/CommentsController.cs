@@ -20,46 +20,6 @@ public class CommentsController : ControllerBase
         _reportService = reportService;
     }
 
-    [HttpGet("/api/posts/{postId}/comments")]
-    public async Task<IActionResult> GetByPostLegacy(Guid postId)
-    {
-        return await GetCommentsInternal(postId);
-    }
-
-    [Authorize(Roles = "Admin")]
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var comments = await _commentService.GetAllAsync();
-        return Ok(comments);
-    }
-
-    [Authorize(Roles = "Admin")]
-    [HttpGet("count")]
-    public async Task<IActionResult> GetCount()
-    {
-        var count = await _commentService.GetTotalCountAsync();
-        return Ok(new { total = count });
-    }
-
-    [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> CreateLegacy([FromBody] CreateCommentLegacyDto createDto)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var userId = AuthClaimsHelper.GetUserId(User);
-        var comment = await _commentService.CreateAsync(
-            userId,
-            createDto.PostId,
-            new CreateCommentDto { Text = createDto.Text });
-
-        return CreatedAtAction(nameof(GetByPostLegacy), new { postId = comment.PublicationId }, ToLegacyDto(comment));
-    }
-
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCommentDto updateDto)
@@ -107,34 +67,5 @@ public class CommentsController : ControllerBase
         {
             return Conflict(new { message = ex.Message });
         }
-    }
-
-    private async Task<IActionResult> GetCommentsInternal(Guid publicationId)
-    {
-        try
-        {
-            var comments = await _commentService.GetByPublicationAsync(
-                publicationId,
-                AuthClaimsHelper.GetOptionalUserId(User));
-            return Ok(comments);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return ForbiddenResultHelper.Create(ex.Message);
-        }
-    }
-
-    private static CommentDto ToLegacyDto(CommentResponseDto comment)
-    {
-        return new CommentDto
-        {
-            Id = comment.Id,
-            UserId = comment.AuthorId,
-            UserName = comment.AuthorUsername,
-            UserPhoto = comment.AuthorPhotoUrl,
-            PostId = comment.PublicationId,
-            Text = comment.Text,
-            CreatedAt = comment.CreatedAt
-        };
     }
 }

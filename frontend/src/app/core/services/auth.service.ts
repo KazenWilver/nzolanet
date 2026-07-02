@@ -8,20 +8,11 @@ import type {
   BackendAuthResponseDto,
   ForgotPasswordDto,
   ForgotPasswordResponse,
-  LoginDto as AuthLoginDto,
+  LoginDto,
   RegisterDto,
   ResetPasswordDto
 } from '../models/auth.model';
-import {
-  mapBackendUser,
-  toLegacyUser,
-  type LegacyUser,
-  type LoginDtoLegacy,
-  type RecuperarSenhaDto,
-  type RegistoDto,
-  type RespostaAutenticacao,
-  type User
-} from '../models/user.model';
+import { mapBackendUser, type User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -32,11 +23,6 @@ export class AuthService {
   private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  /** @deprecated Usar currentUser$ — emite formato legado para componentes existentes */
-  readonly utilizador$ = this.currentUser$.pipe(
-    map(user => (user ? toLegacyUser(user) : null))
-  );
-
   constructor(
     private readonly http: HttpClient,
     private readonly router: Router
@@ -44,13 +30,11 @@ export class AuthService {
     this.restoreSession();
   }
 
-  login(dto: AuthLoginDto | LoginDtoLegacy): Observable<AuthResponse> {
-    const password = 'password' in dto ? dto.password : dto.senha;
-
+  login(dto: LoginDto): Observable<AuthResponse> {
     return this.http
       .post<BackendAuthResponseDto>(`${this.baseUrl}/login`, {
         email: dto.email,
-        password
+        password: dto.password
       })
       .pipe(
         map(response => this.mapAuthResponse(response)),
@@ -158,74 +142,6 @@ export class AuthService {
     });
     localStorage.setItem(this.userKey, JSON.stringify(normalized));
     this.currentUserSubject.next(normalized);
-  }
-
-  /** @deprecated Usar login */
-  loginLegacy(dados: LoginDtoLegacy): Observable<RespostaAutenticacao> {
-    return this.login({ email: dados.email, password: dados.senha }).pipe(
-      map(response => ({
-        token: response.token,
-        utilizador: toLegacyUser(response.user)
-      }))
-    );
-  }
-
-  /** @deprecated Usar register */
-  registar(dados: RegistoDto): Observable<RespostaAutenticacao> {
-    return this.register({
-      username: dados.nomeUtilizador,
-      email: dados.email,
-      password: dados.senha,
-      displayName: dados.nome
-    }).pipe(
-      map(response => ({
-        token: response.token,
-        utilizador: toLegacyUser(response.user)
-      }))
-    );
-  }
-
-  /** @deprecated Usar forgotPassword */
-  recuperarSenha(dados: RecuperarSenhaDto): Observable<ForgotPasswordResponse> {
-    return this.forgotPassword(dados.email);
-  }
-
-  /** @deprecated Usar logout */
-  terminarSessao(): void {
-    this.logout();
-  }
-
-  /** @deprecated Usar getToken */
-  obterToken(): string | null {
-    return this.getToken();
-  }
-
-  /** @deprecated Usar isAuthenticated */
-  estaAutenticado(): boolean {
-    return this.isAuthenticated();
-  }
-
-  /** @deprecated Usar getCurrentUser */
-  obterUtilizadorAtual(): LegacyUser | null {
-    const user = this.getCurrentUser();
-    return user ? toLegacyUser(user) : null;
-  }
-
-  /** @deprecated Usar updateCurrentUser */
-  atualizarUtilizadorAtual(utilizador: LegacyUser): void {
-    this.updateCurrentUser({
-      id: utilizador.id,
-      username: utilizador.nomeUtilizador,
-      displayName: utilizador.nome,
-      email: utilizador.email,
-      bio: utilizador.bio,
-      profilePhotoUrl: utilizador.fotoPerfil,
-      isPrivate: utilizador.privado,
-      followersCount: utilizador.totalSeguidores,
-      followingCount: utilizador.totalSeguindo,
-      createdAt: utilizador.criadoEm,
-      role: utilizador.eAdmin ? 'Admin' : 'User'
-    });
   }
 
   estaAdmin(): boolean {

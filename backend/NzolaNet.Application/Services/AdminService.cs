@@ -1,6 +1,5 @@
 using NzolaNet.Application.DTOs.Admin;
 using NzolaNet.Application.DTOs.Auth;
-using NzolaNet.Application.Exceptions;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Domain.Interfaces.Repositories;
 

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NzolaNet.Application.DTOs.Comments;
 
@@ -18,6 +15,4 @@ public interface ICommentService
     Task<CommentResponseDto> UpdateAsync(Guid userId, Guid commentId, UpdateCommentDto updateDto);
     Task DeleteAsync(Guid userId, Guid commentId, bool isAdmin);
     Task<IEnumerable<CommentResponseDto>> GetByPublicationAsync(Guid publicationId, Guid? currentUserId = null);
-    Task<IEnumerable<CommentDto>> GetAllAsync();
-    Task<int> GetTotalCountAsync();
 }

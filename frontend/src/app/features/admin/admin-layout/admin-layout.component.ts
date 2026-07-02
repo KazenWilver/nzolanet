@@ -13,7 +13,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class AdminLayoutComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
-  terminarSessao(): void {
-    this.authService.terminarSessao();
+  handleLogout(): void {
+    this.authService.logout();
   }
 }

@@ -40,8 +40,6 @@ public class ConversationService : IConversationService
         _presenceService = presenceService;
     }
 
-    public int MessageEditDeleteWindowMinutes => MessageEditDeleteWindowMinutesValue;
-
     public async Task<IEnumerable<ConversationListItemDto>> GetConversationsAsync(Guid userId)
     {
         var conversations = await _conversationRepository.GetByUserIdAsync(userId);

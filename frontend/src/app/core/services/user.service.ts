@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { FeedTabService } from './feed-tab.service';
 import type { BackendUserDto } from '../models/auth.model';
-import { mapBackendUser, toLegacyUser, type LegacyUser, type UpdateProfileDto, type User } from '../models/user.model';
+import { mapBackendUser, type UpdateProfileDto, type User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -87,82 +87,12 @@ export class UserService {
       .pipe(map(users => users.map(user => this.mapUser(user))));
   }
 
-  /** @deprecated Usar getProfile */
-  obterPorId(id: string): Observable<LegacyUser> {
-    return this.getProfile(id).pipe(map(user => toLegacyUser(user)));
-  }
-
-  /** @deprecated Usar getFollowers */
-  obterSeguidores(id: string): Observable<LegacyUser[]> {
-    return this.getFollowers(id).pipe(map(users => users.map(user => toLegacyUser(user))));
-  }
-
-  /** @deprecated Usar getFollowing */
-  obterSeguindo(id: string): Observable<LegacyUser[]> {
-    return this.getFollowing(id).pipe(map(users => users.map(user => toLegacyUser(user))));
-  }
-
-  /** @deprecated Usar follow */
-  seguir(id: string): Observable<void> {
-    return this.follow(id);
-  }
-
-  /** @deprecated Usar unfollow */
-  deixarDeSeguir(id: string): Observable<void> {
-    return this.unfollow(id);
-  }
-
-  /** @deprecated Usar updateProfile + uploadPhoto */
-  editarPerfil(id: string, dados: FormData): Observable<LegacyUser> {
-    const bio = dados.get('bio') as string | null;
-    const privado = dados.get('privado') === 'true';
-    const foto = dados.get('foto') as File | null;
-
-    return this.updateProfile(id, {
-      bio: bio ?? undefined,
-      isPrivate: privado
-    }).pipe(
-      switchMap(user => {
-        if (foto) {
-          return this.uploadPhoto(id, foto).pipe(map(updated => toLegacyUser(updated)));
-        }
-        return of(toLegacyUser(user));
-      })
-    );
-  }
-
-  obterPedidosPendentes(): Observable<unknown[]> {
-    return this.http.get<unknown[]>(`${this.baseUrl}/follow-requests`);
-  }
-
   approveFollowRequest(followerId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/follow-requests/${followerId}/approve`, {});
   }
 
   rejectFollowRequest(followerId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/follow-requests/${followerId}/reject`, {});
-  }
-
-  /** @deprecated Usar approveFollowRequest */
-  aprovarPedido(followerId: string): Observable<unknown> {
-    return this.approveFollowRequest(followerId);
-  }
-
-  /** @deprecated Usar rejectFollowRequest */
-  rejeitarPedido(followerId: string): Observable<unknown> {
-    return this.rejectFollowRequest(followerId);
-  }
-
-  /** @deprecated Usar SearchService.searchUsers */
-  pesquisar(termo: string): Observable<LegacyUser[]> {
-    const query = termo.trim();
-    if (!query) {
-      return of([]);
-    }
-
-    return this.http
-      .get<BackendUserDto[]>(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`)
-      .pipe(map(users => users.map(user => toLegacyUser(this.mapUser(user)))));
   }
 
   private mapUser(dto: BackendUserDto): User {

@@ -285,47 +285,6 @@ export class AnimationService {
     );
   }
 
-  shake(element: Element): void {
-    if (!this.isEnabled) {
-      return;
-    }
-
-    gsap.killTweensOf(element);
-    gsap.fromTo(
-      element,
-      { x: 0 },
-      {
-        x: -6,
-        duration: 0.06,
-        ease: 'power1.inOut',
-        yoyo: true,
-        repeat: 5,
-        onComplete: () => {
-          gsap.set(element, { clearProps: 'transform,x' });
-        }
-      }
-    );
-  }
-
-  expandHeight(element: Element): void {
-    if (!this.isEnabled) {
-      return;
-    }
-
-    gsap.killTweensOf(element);
-    gsap.fromTo(
-      element,
-      { opacity: 0, height: 0 },
-      {
-        opacity: 1,
-        height: 'auto',
-        duration: 0.34,
-        ease: 'power2.out',
-        clearProps: 'height,opacity'
-      }
-    );
-  }
-
   /**
    * Explosão de confetti a partir do centro de um elemento (ex.: botão Baze).
    */

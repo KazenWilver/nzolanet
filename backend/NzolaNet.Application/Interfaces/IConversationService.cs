@@ -4,7 +4,6 @@ namespace NzolaNet.Application.Interfaces;
 
 public interface IConversationService
 {
-    int MessageEditDeleteWindowMinutes { get; }
     Task<IEnumerable<ConversationListItemDto>> GetConversationsAsync(Guid userId);
     Task<ConversationDetailDto> GetConversationAsync(Guid userId, Guid conversationId);
     Task<ConversationListItemDto> GetOrCreateConversationAsync(Guid userId, Guid participantId);

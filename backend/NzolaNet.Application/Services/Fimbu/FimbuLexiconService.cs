@@ -49,8 +49,6 @@ public sealed partial class FimbuLexiconService : IFimbuLexiconService
         _lexicon = new Lazy<LexiconData>(() => LoadEntriesSafely(_settings, _logger));
     }
 
-    public int EntryCount => _lexicon.Value.Entries.Count;
-
     public string BuildLexiconContext(string userMessage, Guid userId, int messageIndex)
     {
         var lexicon = _lexicon.Value;
