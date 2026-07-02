@@ -2,31 +2,22 @@
 @use '../../../styles/mixins' as mixins;
 
 .create-publication {
-  margin: 12px 12px 0;
+  background-color: vars.$color-background;
+  border-bottom: 1px solid vars.$color-border;
   padding: 16px;
-  @include mixins.card-elevated;
 
   @media (max-width: 500px) {
-    margin: 10px 10px 0;
-    padding: 14px;
+    padding: 12px 14px;
   }
 
   &--modal {
-    margin: 0;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+    border-bottom: none;
     padding: 0;
     background-color: var(--color-bg-modal);
     position: relative;
     z-index: 0;
     isolation: isolate;
     overflow: hidden;
-
-    &:hover {
-      box-shadow: none;
-      border-color: transparent;
-    }
   }
 }
 

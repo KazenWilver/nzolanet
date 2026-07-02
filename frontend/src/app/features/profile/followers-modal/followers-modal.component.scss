@@ -23,9 +23,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .followers-modal__item {
@@ -33,8 +30,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
-  @include mixins.card-profile;
+  padding: 12px 0;
+  border-bottom: 1px solid vars.$color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .followers-modal__follow-wrap {

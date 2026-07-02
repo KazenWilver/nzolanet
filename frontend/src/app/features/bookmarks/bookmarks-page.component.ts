@@ -61,7 +61,6 @@ import { TPipe } from '../../core/i18n/translate.pipe'
       display: flex;
       flex-direction: column;
       gap: 0;
-      padding: 12px 0 16px;
     }
   `
 })

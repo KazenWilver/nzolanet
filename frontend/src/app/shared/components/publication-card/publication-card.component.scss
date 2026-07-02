@@ -3,23 +3,25 @@
 
 .publication-card {
   display: block;
-  margin: 0 12px 12px;
-  padding: 16px;
-  @include mixins.card-elevated;
+  padding: 12px 16px;
+  border-bottom: 1px solid vars.$color-border;
+  background-color: vars.$color-background;
+  @include mixins.hover-animation;
+
+  &:hover {
+    background-color: var(--color-bg-card-hover);
+  }
 
   @media (max-width: 500px) {
-    margin: 0 10px 10px;
-    padding: 14px;
+    padding: 12px 14px;
   }
 
   @media (min-width: 1280px) {
-    margin: 0 16px 14px;
-    padding: 18px 20px;
+    padding: 12px 20px;
   }
 
   &--highlighted {
-    background-color: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-primary));
-    border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border-muted));
+    background-color: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-primary));
   }
 }
 
