@@ -20,6 +20,7 @@
           [class.admin-page__realtime-pill--reconnecting]="estadoRealtime === 'reconnecting'"
           [class.admin-page__realtime-pill--offline]="estadoRealtime === 'offline'"
         >
+          <span *ngIf="estadoRealtime === 'reconnecting'" class="admin-page__realtime-spinner" aria-hidden="true"></span>
           {{ obterTextoEstadoRealtime() }}
         </strong>
       </p>

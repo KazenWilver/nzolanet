@@ -104,6 +104,16 @@
   }
 }
 
+.admin-page__realtime-spinner {
+  width: 11px;
+  height: 11px;
+  margin-right: 6px;
+  border-radius: 50%;
+  border: 2px solid rgba(217, 119, 6, 0.28);
+  border-top-color: currentColor;
+  animation: admin-realtime-spinner 0.8s linear infinite, admin-realtime-pulse 1.2s ease-in-out infinite;
+}
+
 .admin-page__btn {
   border: none;
   border-radius: 999px;
@@ -906,6 +916,29 @@
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes admin-realtime-spinner {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes admin-realtime-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.2);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.08);
   }
 }
 
