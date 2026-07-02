@@ -561,6 +561,15 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     return reply.senderDisplayName ?? reply.senderUsername
   }
 
+  getDeletedForEveryoneLabel(message: ChatMessage): string {
+    if (message.isMine) {
+      return 'Apagaste esta mensagem para todos'
+    }
+
+    const author = message.senderDisplayName ?? message.senderUsername
+    return `${author} apagou esta mensagem para todos`
+  }
+
   handleImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]

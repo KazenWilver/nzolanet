@@ -671,8 +671,16 @@
 }
 
 .messages-page__deleted-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-style: italic;
-  opacity: 0.85;
+  opacity: 0.75;
+}
+
+.messages-page__deleted-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .messages-page__edited-label,

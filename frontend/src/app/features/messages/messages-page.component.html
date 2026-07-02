@@ -379,7 +379,13 @@
                         </div>
                       }
                       @if (message.isDeletedForEveryone) {
-                        <p class="messages-page__deleted-text">Mensagem apagada</p>
+                        <p class="messages-page__deleted-text">
+                          <svg class="messages-page__deleted-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <line x1="5.6" y1="5.6" x2="18.4" y2="18.4"></line>
+                          </svg>
+                          <span>{{ getDeletedForEveryoneLabel(message) }}</span>
+                        </p>
                       } @else if (message.text) {
                         <p
                           class="messages-page__bubble-text"

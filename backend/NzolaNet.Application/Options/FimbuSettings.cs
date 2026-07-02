@@ -30,6 +30,12 @@ public class FimbuSettings
     public int RequestTimeoutSeconds { get; set; } = 90;
 
     /// <summary>
+    /// Máximo de tokens da resposta visível. Com raciocínio desligado, 2048 chega
+    /// para respostas completas sem truncar o final da frase.
+    /// </summary>
+    public int MaxResponseTokens { get; set; } = 2048;
+
+    /// <summary>
     /// Caminho opcional para a pasta palavras_angolanas.
     /// </summary>
     public string? LexiconPath { get; set; }

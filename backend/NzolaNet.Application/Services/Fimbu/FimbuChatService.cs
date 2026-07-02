@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NzolaNet.Application.DTOs.Fimbu;
@@ -15,8 +16,11 @@ namespace NzolaNet.Application.Services.Fimbu;
 /// <summary>
 /// Serviço de chat da Fimbu com rotação automática entre fornecedores LLM.
 /// </summary>
-public sealed class FimbuChatService : IFimbuChatService
+public sealed partial class FimbuChatService : IFimbuChatService
 {
+    [GeneratedRegex(@"<think>[\s\S]*?</think>", RegexOptions.IgnoreCase)]
+    private static partial Regex ThinkBlockRegex();
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -196,6 +200,10 @@ public sealed class FimbuChatService : IFimbuChatService
                 {
                     ["HTTP-Referer"] = "https://nzolanet.app",
                     ["X-Title"] = "NzolaNet Fimbu"
+                },
+                new Dictionary<string, object>
+                {
+                    ["reasoning"] = new Dictionary<string, object> { ["enabled"] = false }
                 }));
         }
 
@@ -208,6 +216,7 @@ public sealed class FimbuChatService : IFimbuChatService
                 _settings.GoogleAiModel,
                 $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.GoogleAiModel}:generateContent",
                 ProviderKind.GoogleGemini,
+                null,
                 null));
         }
 
@@ -220,7 +229,11 @@ public sealed class FimbuChatService : IFimbuChatService
                 _settings.GroqModel,
                 "https://api.groq.com/openai/v1/chat/completions",
                 ProviderKind.OpenAiCompatible,
-                null));
+                null,
+                new Dictionary<string, object>
+                {
+                    ["reasoning_effort"] = "low"
+                }));
         }
 
         if (!string.IsNullOrWhiteSpace(_settings.NvidiaApiKey))
@@ -232,7 +245,11 @@ public sealed class FimbuChatService : IFimbuChatService
                 _settings.NvidiaModel,
                 "https://integrate.api.nvidia.com/v1/chat/completions",
                 ProviderKind.OpenAiCompatible,
-                null));
+                null,
+                new Dictionary<string, object>
+                {
+                    ["chat_template_kwargs"] = new Dictionary<string, object> { ["enable_thinking"] = false }
+                }));
         }
 
         return list;
@@ -270,13 +287,21 @@ public sealed class FimbuChatService : IFimbuChatService
             }
         }
 
-        var payload = new OpenAiChatRequest
+        var payload = new Dictionary<string, object>
         {
-            Model = provider.Model,
-            Temperature = 0.92,
-            MaxTokens = 4096,
-            Messages = BuildOpenAiMessages(history, systemPrompt)
+            ["model"] = provider.Model,
+            ["temperature"] = 0.92,
+            ["max_tokens"] = Math.Max(512, _settings.MaxResponseTokens),
+            ["messages"] = BuildOpenAiMessages(history, systemPrompt)
         };
+
+        if (provider.ExtraBody is not null)
+        {
+            foreach (var entry in provider.ExtraBody)
+            {
+                payload[entry.Key] = entry.Value;
+            }
+        }
 
         request.Content = new StringContent(
             JsonSerializer.Serialize(payload, JsonOptions),
@@ -297,7 +322,7 @@ public sealed class FimbuChatService : IFimbuChatService
         }
 
         var parsed = JsonSerializer.Deserialize<OpenAiChatResponse>(body, JsonOptions);
-        var content = parsed?.Choices?.FirstOrDefault()?.Message?.Content?.Trim();
+        var content = CleanReply(parsed?.Choices?.FirstOrDefault()?.Message?.Content);
 
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -332,7 +357,8 @@ public sealed class FimbuChatService : IFimbuChatService
             GenerationConfig = new GeminiGenerationConfig
             {
                 Temperature = 0.92,
-                MaxOutputTokens = 4096
+                MaxOutputTokens = Math.Max(512, _settings.MaxResponseTokens),
+                ThinkingConfig = new GeminiThinkingConfig { ThinkingBudget = 0 }
             }
         };
 
@@ -350,13 +376,12 @@ public sealed class FimbuChatService : IFimbuChatService
         }
 
         var parsed = JsonSerializer.Deserialize<GeminiResponse>(body, JsonOptions);
-        var content = parsed?.Candidates?
+        var content = CleanReply(parsed?.Candidates?
             .FirstOrDefault()?
             .Content?
             .Parts?
             .FirstOrDefault()?
-            .Text?
-            .Trim();
+            .Text);
 
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -364,6 +389,20 @@ public sealed class FimbuChatService : IFimbuChatService
         }
 
         return content;
+    }
+
+    /// <summary>
+    /// Remove blocos de raciocínio (&lt;think&gt;...&lt;/think&gt;) que alguns modelos deixam escapar.
+    /// </summary>
+    private static string? CleanReply(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return raw;
+        }
+
+        var cleaned = ThinkBlockRegex().Replace(raw, string.Empty);
+        return cleaned.Trim();
     }
 
     private static List<OpenAiMessage> BuildOpenAiMessages(IReadOnlyList<LlmMessage> history, string systemPrompt)
@@ -436,7 +475,8 @@ public sealed class FimbuChatService : IFimbuChatService
         string Model,
         string Endpoint,
         ProviderKind Kind,
-        IReadOnlyDictionary<string, string>? ExtraHeaders);
+        IReadOnlyDictionary<string, string>? ExtraHeaders,
+        IReadOnlyDictionary<string, object>? ExtraBody);
 
     private sealed class RateLimitException : Exception
     {
@@ -495,18 +535,6 @@ public sealed class FimbuChatService : IFimbuChatService
 
     #region OpenAI JSON models
 
-    private sealed class OpenAiChatRequest
-    {
-        public string Model { get; set; } = string.Empty;
-
-        public List<OpenAiMessage> Messages { get; set; } = [];
-
-        public double Temperature { get; set; }
-
-        [JsonPropertyName("max_tokens")]
-        public int MaxTokens { get; set; }
-    }
-
     private sealed class OpenAiMessage
     {
         public string Role { get; set; } = string.Empty;
@@ -543,6 +571,15 @@ public sealed class FimbuChatService : IFimbuChatService
 
         [JsonPropertyName("maxOutputTokens")]
         public int MaxOutputTokens { get; set; }
+
+        [JsonPropertyName("thinkingConfig")]
+        public GeminiThinkingConfig? ThinkingConfig { get; set; }
+    }
+
+    private sealed class GeminiThinkingConfig
+    {
+        [JsonPropertyName("thinkingBudget")]
+        public int ThinkingBudget { get; set; }
     }
 
     private sealed class GeminiContent
