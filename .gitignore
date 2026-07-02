@@ -90,9 +90,10 @@ secrets.json
 *.key
 
 # ---------- Uploads (não versionar conteúdo do utilizador) ----------
-**/wwwroot/uploads/
-**/wwwroot/messages/
-uploads/
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep
+**/wwwroot/messages/*
+!**/wwwroot/messages/.gitkeep
 original-*.png
 
 # ---------- Build / Cache ----------
@@ -112,5 +113,9 @@ coverage/
 .claude/
 .cursor/
 
-# ---------- Extras (prompts, referências, clones de design, build local) ----------
+# ---------- Extras (referências locais: design, clones, prompts, PDFs) ----------
 extras/
+
+# ---------- Léxico Fimbu (manter só ficheiros usados em runtime pela API) ----------
+palavras_angolanas/dicionario_angolano_train.jsonl
+palavras_angolanas/dicionario_angolano.md
