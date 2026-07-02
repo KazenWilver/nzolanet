@@ -10,6 +10,7 @@
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  box-sizing: border-box;
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: anywhere;
@@ -25,15 +26,20 @@
   position: relative;
   z-index: 1;
   width: 100%;
+  box-sizing: border-box;
   background: transparent !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent;
+  color: transparent;
   caret-color: var(--color-text-primary);
+
+  &::placeholder {
+    color: var(--color-text-secondary);
+    -webkit-text-fill-color: var(--color-text-secondary);
+    opacity: 1;
+  }
 
   &::selection {
     background: color-mix(in srgb, var(--color-accent) 28%, transparent);
     color: transparent;
-    -webkit-text-fill-color: transparent;
   }
 }
 

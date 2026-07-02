@@ -42,6 +42,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
   private dropdownElement: HTMLElement | null = null
   private highlightElement: HTMLElement | null = null
   private wrapperElement: HTMLElement | null = null
+  private resizeObserver: ResizeObserver | null = null
   private mentionStart = -1
   private mentionCaret = -1
   private activeIndex = -1
@@ -73,6 +74,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.setupHighlightLayer()
     this.updateHighlight()
+    this.observeTextareaResize()
   }
 
   @HostListener('input')
@@ -154,6 +156,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect()
     this.subscription.unsubscribe()
     this.closeDropdown()
   }
@@ -383,6 +386,18 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
     this.syncHighlightStyles()
   }
 
+  private observeTextareaResize(): void {
+    if (typeof ResizeObserver === 'undefined') {
+      return
+    }
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.syncHighlightStyles()
+      this.syncHighlightScroll()
+    })
+    this.resizeObserver.observe(this.host.nativeElement)
+  }
+
   private syncHighlightStyles(): void {
     if (!this.highlightElement) {
       return
@@ -393,8 +408,13 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
     const properties = [
       'boxSizing',
       'width',
+      'height',
       'minHeight',
       'maxHeight',
+      'marginTop',
+      'marginRight',
+      'marginBottom',
+      'marginLeft',
       'paddingTop',
       'paddingRight',
       'paddingBottom',
@@ -403,6 +423,11 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
       'borderRightWidth',
       'borderBottomWidth',
       'borderLeftWidth',
+      'borderTopStyle',
+      'borderRightStyle',
+      'borderBottomStyle',
+      'borderLeftStyle',
+      'borderRadius',
       'fontStyle',
       'fontVariant',
       'fontWeight',
@@ -415,7 +440,13 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
       'textAlign',
       'textTransform',
       'textIndent',
-      'textDecoration'
+      'textDecoration',
+      'whiteSpace',
+      'wordBreak',
+      'overflowWrap',
+      'tabSize',
+      'overflowX',
+      'overflowY'
     ] as const
 
     properties.forEach(property => {
@@ -428,6 +459,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
       return
     }
 
+    this.syncHighlightStyles()
     this.highlightElement.innerHTML = this.buildHighlightHtml(this.host.nativeElement.value)
     this.syncHighlightScroll()
   }
@@ -459,7 +491,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
 
         return escaped
       })
-      .join('')
+      .join('') + (value.endsWith('\n') ? '<br>' : '')
   }
 
   private escapeHtml(value: string): string {
