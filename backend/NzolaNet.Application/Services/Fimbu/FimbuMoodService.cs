@@ -676,6 +676,17 @@ public sealed class FimbuMoodService : IFimbuMoodService
         return _activeMoods.GetOrAdd(userId, _ => Sortear(previous: null));
     }
 
+    public FimbuSessionMood AssignNewSessionMood(Guid userId)
+    {
+        var previous = _activeMoods.TryGetValue(userId, out var existente)
+            ? existente
+            : (FimbuSessionMood?)null;
+
+        var novaCombinacao = Sortear(previous);
+        _activeMoods[userId] = novaCombinacao;
+        return novaCombinacao;
+    }
+
     public void ClearSessionMood(Guid userId)
     {
         _activeMoods.TryRemove(userId, out _);

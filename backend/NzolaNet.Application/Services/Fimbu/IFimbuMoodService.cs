@@ -13,6 +13,13 @@ public interface IFimbuMoodService
     FimbuSessionMood GetOrAssignSessionMood(Guid userId);
 
     /// <summary>
+    /// Sorteia e regista uma combinação nova para o utilizador, diferente da
+    /// anterior. Deve ser chamado no login/registo para garantir que cada
+    /// sessão arranca com uma personalidade fresca da Fimbu.
+    /// </summary>
+    FimbuSessionMood AssignNewSessionMood(Guid userId);
+
+    /// <summary>
     /// Remove a combinação associada ao utilizador. Deve ser chamado no logout
     /// para garantir que o próximo login sorteia uma personalidade nova.
     /// </summary>
