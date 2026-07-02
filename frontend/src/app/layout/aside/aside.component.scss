@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 .aside {
   display: flex;
   flex-direction: column;
@@ -29,41 +31,39 @@
 .aside__search-input {
   width: 100%;
   padding: 12px 14px 12px 42px;
-  border: none;
+  border: 1px solid var(--color-border-muted);
   border-radius: var(--border-radius-full);
   background-color: var(--color-bg-search);
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
   font-family: inherit;
+  box-shadow: 0 2px 8px rgba(15, 14, 23, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus {
-    outline: 2px solid var(--color-accent);
+    outline: none;
+    border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border-muted));
     background-color: var(--color-bg-primary);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
   }
 }
 
 .aside__section {
-  border-radius: var(--border-radius-lg);
-  background-color: var(--color-bg-widget);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 1px 3px rgba(15, 20, 25, 0.04);
-  overflow: hidden;
-}
-
-body.dark-theme .aside__section {
-  box-shadow: none;
+  @include mixins.card-widget;
 }
 
 .aside__section-header {
   margin: 0;
-  padding: 12px 16px 0;
-  font-weight: 700;
+  padding: 16px 18px 8px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
 
 .aside__empty {
   margin: 0;
-  padding: 12px 16px 16px;
+  padding: 12px 18px 18px;
   color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
@@ -71,7 +71,7 @@ body.dark-theme .aside__section {
 .aside__trends {
   list-style: none;
   margin: 0;
-  padding: 4px 0 8px;
+  padding: 4px 8px 12px;
 }
 
 .aside__trend-item {
@@ -82,7 +82,8 @@ body.dark-theme .aside__section {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
   color: inherit;
   text-decoration: none;
   transition: background-color var(--transition-base);

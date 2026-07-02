@@ -60,7 +60,8 @@ import { TPipe } from '../../core/i18n/translate.pipe'
     .bookmarks-page__list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 0;
+      padding: 12px 0 16px;
     }
   `
 })

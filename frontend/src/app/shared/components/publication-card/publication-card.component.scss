@@ -3,25 +3,23 @@
 
 .publication-card {
   display: block;
-  padding: 12px 16px;
-  border-bottom: 1px solid vars.$color-border;
-  background-color: vars.$color-background;
-  @include mixins.hover-animation;
-
-  &:hover {
-    background-color: var(--color-bg-card-hover);
-  }
+  margin: 0 12px 12px;
+  padding: 16px;
+  @include mixins.card-elevated;
 
   @media (max-width: 500px) {
-    padding: 12px 14px;
+    margin: 0 10px 10px;
+    padding: 14px;
   }
 
   @media (min-width: 1280px) {
-    padding: 12px 20px;
+    margin: 0 16px 14px;
+    padding: 18px 20px;
   }
 
   &--highlighted {
-    background-color: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-primary));
+    background-color: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-primary));
+    border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border-muted));
   }
 }
 
@@ -88,11 +86,12 @@
 }
 
 .publication-card__edited {
-  font-size: 12px;
-  color: vars.$color-text-secondary;
-  background-color: vars.$color-border;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface-secondary);
+  padding: 3px 8px;
+  border-radius: 9999px;
 }
 
 .publication-card__menu-wrap {
@@ -196,9 +195,10 @@
 .publication-card__media {
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid vars.$color-border;
-  margin-top: 8px;
+  border: none;
+  margin-top: 10px;
   background-color: var(--color-media-bg);
+  box-shadow: 0 2px 12px rgba(15, 14, 23, 0.08);
 
   &--clickable {
     cursor: zoom-in;
@@ -248,10 +248,11 @@
   margin-top: var(--spacing-sm);
   border: 1px solid var(--color-border-muted);
   border-radius: 14px;
-  padding: 12px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  background: var(--color-surface-secondary);
 }
 
 .publication-card__quoted-header {
@@ -349,12 +350,14 @@
 }
 
 .publication-card__footer {
-  margin-top: 12px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-muted);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex-wrap: wrap;
-  max-width: 425px;
+  max-width: 100%;
 }
 
 .publication-card__action {

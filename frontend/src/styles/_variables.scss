@@ -111,6 +111,13 @@
   --chat-inbox-active: rgba(99, 102, 241, 0.1);
   --chat-composer-pill-bg: #f9fafb;
   --chat-composer-pill-border: #e5e7eb;
+  --card-elevated-radius: 20px;
+  --card-elevated-shadow: 0 4px 24px rgba(15, 14, 23, 0.06);
+  --card-elevated-shadow-hover: 0 10px 36px rgba(99, 102, 241, 0.12);
+  --card-profile-radius: 16px;
+  --card-profile-bg: #ffffff;
+  --card-widget-radius: 24px;
+  --card-widget-shadow: 0 10px 40px rgba(15, 14, 23, 0.07);
   --color-link: #06B6D4;
   --color-line-reply: #cfd9de;
   --color-shadow: rgba(101, 119, 134, 0.2);
@@ -287,6 +294,13 @@ body.dark-theme {
   --chat-inbox-active: rgba(99, 102, 241, 0.16);
   --chat-composer-pill-bg: #1a1926;
   --chat-composer-pill-border: #2f3336;
+  --card-elevated-radius: 20px;
+  --card-elevated-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  --card-elevated-shadow-hover: 0 10px 36px rgba(99, 102, 241, 0.18);
+  --card-profile-radius: 16px;
+  --card-profile-bg: #1a1926;
+  --card-widget-radius: 24px;
+  --card-widget-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
   --color-link: #06B6D4;
   --color-success: #10B981;
   --color-line-reply: #333639;

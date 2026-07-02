@@ -1,26 +1,36 @@
+@use '../../../styles/mixins' as mixins;
+
 .who-to-follow {
-  padding: 12px 16px;
+  padding: 16px 16px 12px;
 }
 
 .who-to-follow--feed {
-  margin: 0;
+  margin: 0 12px 12px;
   padding: 16px;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-primary);
+  @include mixins.card-elevated;
+
+  @media (max-width: 500px) {
+    margin: 0 10px 10px;
+  }
+}
+
+.who-to-follow--sidebar {
+  padding: 20px 16px 12px;
 }
 
 .who-to-follow__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .who-to-follow__title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 800;
   color: var(--color-text-primary);
+  letter-spacing: -0.02em;
 }
 
 .who-to-follow--feed .who-to-follow__title {
@@ -46,11 +56,11 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .who-to-follow--feed .who-to-follow__list {
-  gap: 0;
+  gap: 10px;
 }
 
 .who-to-follow__item {
@@ -59,33 +69,32 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 10px;
-  border-radius: var(--border-radius-md);
-  padding: 8px 4px;
+  padding: 12px;
+}
+
+.who-to-follow--sidebar .who-to-follow__item {
+  @include mixins.card-profile;
+  padding: 14px;
 }
 
 .who-to-follow--feed .who-to-follow__item {
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--color-border);
-
-  &:last-child {
-    border-bottom: none;
-  }
+  @include mixins.card-profile;
+  padding: 12px 14px;
 }
 
 .who-to-follow__main {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
   cursor: pointer;
   border-radius: var(--border-radius-sm);
-  padding-right: 4px;
-  transition: background-color 0.15s ease;
+  transition: opacity 0.15s ease;
 
   &:hover,
   &:focus-visible {
-    background-color: var(--color-bg-hover, rgba(0, 0, 0, 0.04));
+    opacity: 0.88;
     outline: none;
   }
 
@@ -112,7 +121,7 @@
 }
 
 .who-to-follow__username {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -121,12 +130,13 @@
 
 .who-to-follow__bio {
   font-size: 0.8125rem;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--color-text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin-top: 2px;
 }
 
 .who-to-follow__follow-btn {

@@ -1,3 +1,5 @@
+@use '../../../styles/mixins' as mixins;
+
 @keyframes publication-skeleton-shimmer {
   0% {
     background-position: 200% 0;
@@ -9,8 +11,14 @@
 }
 
 .publication-skeleton {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border);
+  margin: 0 12px 12px;
+  padding: 16px;
+  @include mixins.card-elevated;
+
+  @media (max-width: 500px) {
+    margin: 0 10px 10px;
+    padding: 14px;
+  }
 }
 
 .publication-skeleton__grid {
