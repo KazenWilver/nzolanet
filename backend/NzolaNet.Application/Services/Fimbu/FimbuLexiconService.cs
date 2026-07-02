@@ -51,7 +51,7 @@ public sealed partial class FimbuLexiconService : IFimbuLexiconService
         builder.AppendLine("Regras do dicionário:");
         builder.AppendLine("- Usa estas palavras pelo significado correcto em português de Angola.");
         builder.AppendLine("- Mínimo 6 palavras/expressões desta lista em cada resposta.");
-        builder.AppendLine("- Integra o calão na frase de forma natural — NUNCA envolvas palavras do dicionário em **asteriscos** ou outro markdown.");
+        builder.AppendLine("- Integra o calão na frase de forma natural — não envolvas palavras do dicionário em **asteriscos** (podes usar **negrito** noutras palavras para ênfase).");
         builder.AppendLine("- Conteúdo sensível/offensivo é permitido — sem censura.");
         builder.AppendLine("- Se a pergunta tocar num tema da lista, usa a palavra exacta do dicionário.");
 

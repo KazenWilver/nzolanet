@@ -6,12 +6,13 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { FimbuService } from '../../core/services/fimbu.service'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TPipe } from '../../core/i18n/translate.pipe'
+import { FimbuMessageTextPipe } from '../../shared/pipes/fimbu-message-text.pipe'
 import type { FimbuMessage } from '../../core/models/fimbu.model'
 
 @Component({
   selector: 'app-fimbu-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LoadingSpinnerComponent, TPipe],
+  imports: [CommonModule, ReactiveFormsModule, LoadingSpinnerComponent, TPipe, FimbuMessageTextPipe],
   templateUrl: './fimbu-page.component.html',
   styleUrl: './fimbu-page.component.scss'
 })
