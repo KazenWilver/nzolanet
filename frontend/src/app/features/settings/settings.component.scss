@@ -9,6 +9,10 @@
 .settings__header {
   padding: 16px;
   border-bottom: 1px solid vars.$color-border;
+
+  @media (max-width: 500px) {
+    display: none;
+  }
 }
 
 .settings__title {
@@ -23,6 +27,7 @@
   gap: 0;
   border-bottom: 1px solid vars.$color-border;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
   @media (max-width: 768px) {
     display: flex;
@@ -32,7 +37,8 @@
 .settings__nav-item {
   flex: 1;
   min-width: max-content;
-  padding: 14px 16px;
+  min-height: 48px;
+  padding: 14px 18px;
   border: none;
   background: transparent;
   font-size: 15px;

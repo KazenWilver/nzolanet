@@ -17,6 +17,7 @@ import { EnterAnimationDirective } from '../../../shared/directives/enter-animat
 import { InfiniteScrollDirective } from '../../../shared/directives/infinite-scroll.directive';
 import { PressScaleDirective } from '../../../shared/directives/press-scale.directive';
 import { WhoToFollowComponent } from '../../../shared/components/who-to-follow/who-to-follow.component';
+import { TrendsPanelComponent } from '../../../shared/components/trends-panel/trends-panel.component';
 
 @Component({
   selector: 'app-feed-page',
@@ -30,7 +31,8 @@ import { WhoToFollowComponent } from '../../../shared/components/who-to-follow/w
     InfiniteScrollDirective,
     EnterAnimationDirective,
     PressScaleDirective,
-    WhoToFollowComponent
+    WhoToFollowComponent,
+    TrendsPanelComponent
   ],
   templateUrl: './feed-page.component.html',
   styleUrl: './feed-page.component.scss'

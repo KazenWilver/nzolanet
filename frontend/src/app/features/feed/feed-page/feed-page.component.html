@@ -33,6 +33,10 @@
   </div>
 
   <div id="feed-panel" role="tabpanel" [attr.aria-labelledby]="activeTab === 'a-seguir' ? 'feed-tab-a-seguir' : 'feed-tab-para-ti'">
+  <section class="feed-page__mobile-explore" aria-label="Explorar">
+    <app-trends-panel />
+  </section>
+
   <app-create-post (postCriado)="handleCreated($event)" />
 
   @if (loading) {

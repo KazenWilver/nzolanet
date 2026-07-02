@@ -34,9 +34,13 @@
     }
 
     @if (!hasQuery && !loading && !error) {
-      <p class="search-page__message">
-        Escreve pelo menos 2 caracteres para pesquisar.
-      </p>
+      <div class="search-page__discover">
+        <app-trends-panel [compact]="true" />
+        <app-who-to-follow variant="feed" [count]="3" />
+        <p class="search-page__message">
+          Escreve pelo menos 2 caracteres para pesquisar.
+        </p>
+      </div>
     }
 
     @if (hasQuery && !loading && !error && !isHashtagQuery && results.length === 0) {

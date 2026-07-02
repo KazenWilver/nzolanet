@@ -14,26 +14,7 @@
   </form>
 
   <section class="aside__section">
-    <header class="aside__section-header">Tendências</header>
-    @if (trendsError) {
-      <p class="aside__empty">Não foi possível carregar tendências.</p>
-    } @else if (trendingHashtags.length === 0) {
-      <p class="aside__empty">Sem tendências por agora.</p>
-    } @else {
-      <ol class="aside__trends">
-        @for (item of trendingHashtags; track item.tag; let i = $index) {
-          <li class="aside__trend-item">
-            <a [routerLink]="['/search']" [queryParams]="{ q: '#' + item.tag }" class="aside__trend-link">
-              <span class="aside__trend-rank">{{ i + 1 }}.</span>
-              <span class="aside__trend-body">
-                <span class="aside__trend-tag">#{{ item.tag }}</span>
-                <span class="aside__trend-count">{{ item.count }} publicações</span>
-              </span>
-            </a>
-          </li>
-        }
-      </ol>
-    }
+    <app-trends-panel />
   </section>
 
   <section class="aside__section">

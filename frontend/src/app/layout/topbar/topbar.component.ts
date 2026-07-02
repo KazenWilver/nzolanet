@@ -92,8 +92,7 @@ export class TopbarComponent {
       { prefix: '/search', titleKey: 'nav.search' },
       { prefix: '/notifications', titleKey: 'notifications.title' },
       { prefix: '/bookmarks', titleKey: 'nav.bookmarks' },
-      { prefix: '/settings', titleKey: 'nav.settings' },
-      { prefix: '/profile', titleKey: 'nav.profile' }
+      { prefix: '/settings', titleKey: 'nav.settings' }
     ];
 
     const matchedRoute = titleRoutes.find(route => path === route.prefix || path.startsWith(`${route.prefix}/`));

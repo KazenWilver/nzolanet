@@ -243,8 +243,7 @@ export class MainLayoutComponent {
       '/search',
       '/notifications',
       '/bookmarks',
-      '/settings',
-      '/profile'
+      '/settings'
     ];
     const isShellRoute = shellRoutes.some(route => path === route || path.startsWith(`${route}/`));
 

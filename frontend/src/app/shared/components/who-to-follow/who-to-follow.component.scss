@@ -63,17 +63,28 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   border-radius: var(--border-radius-md);
-  padding: 8px 4px;
+  padding: 10px 8px;
 }
 
 .who-to-follow--feed .who-to-follow__item {
-  padding: 12px 4px;
+  padding: 14px 8px;
   border-bottom: 1px solid var(--color-border);
 
   &:last-child {
     border-bottom: none;
+  }
+}
+
+@media (max-width: 500px) {
+  .who-to-follow--feed .who-to-follow__item {
+    padding-inline: 12px;
+  }
+
+  .who-to-follow__follow-btn,
+  .who-to-follow app-follow-button {
+    flex-shrink: 0;
   }
 }
 
@@ -134,6 +145,3 @@
   overflow: hidden;
 }
 
-.who-to-follow__follow-btn {
-  display: none;
-}

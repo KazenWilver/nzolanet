@@ -4,26 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { WhoToFollowComponent } from '../../shared/components/who-to-follow/who-to-follow.component';
-import { SearchService } from '../../core/services/search.service';
-import { AnimationService } from '../../core/services/animation.service';
+import { TrendsPanelComponent } from '../../shared/components/trends-panel/trends-panel.component';
 import { TPipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-aside',
   standalone: true,
-  imports: [FormsModule, RouterModule, WhoToFollowComponent, TPipe],
+  imports: [FormsModule, RouterModule, WhoToFollowComponent, TrendsPanelComponent, TPipe],
   templateUrl: './aside.component.html',
   styleUrl: './aside.component.scss'
 })
 export class AsideComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly searchService = inject(SearchService);
-  private readonly animationService = inject(AnimationService);
 
   searchQuery = '';
-  trendingHashtags: { tag: string; count: number }[] = [];
-  trendsError = false;
 
   ngOnInit(): void {
     this.syncFromUrl(this.router.url);
@@ -35,26 +30,6 @@ export class AsideComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(url => this.syncFromUrl(url));
-
-    this.searchService
-      .getTrendingHashtags(5)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: hashtags => {
-          this.trendingHashtags = hashtags ?? [];
-          this.trendsError = false;
-          requestAnimationFrame(() => {
-            const items = document.querySelectorAll('.aside__trends li');
-            if (items.length > 0) {
-              this.animationService.staggerEnter(Array.from(items), 'fadeUp', 0.05);
-            }
-          });
-        },
-        error: () => {
-          this.trendingHashtags = [];
-          this.trendsError = true;
-        }
-      });
   }
 
   handleSearchInput(): void {

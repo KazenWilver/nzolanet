@@ -21,4 +21,10 @@
       <p class="page-header__subtitle">{{ subtitle }}</p>
     }
   </div>
+
+  @if (showAccountMenu) {
+    <div class="page-header__actions">
+      <app-mobile-account-button />
+    </div>
+  }
 </header>

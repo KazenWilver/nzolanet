@@ -23,11 +23,23 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { FollowButtonComponent } from '../../shared/components/follow-button/follow-button.component';
 import { PublicationCardComponent } from '../../shared/components/publication-card/publication-card.component';
+import { TrendsPanelComponent } from '../../shared/components/trends-panel/trends-panel.component';
+import { WhoToFollowComponent } from '../../shared/components/who-to-follow/who-to-follow.component';
 
 @Component({
   selector: 'app-search-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AvatarComponent, LoadingSpinnerComponent, PageHeaderComponent, FollowButtonComponent, PublicationCardComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AvatarComponent,
+    LoadingSpinnerComponent,
+    PageHeaderComponent,
+    FollowButtonComponent,
+    PublicationCardComponent,
+    TrendsPanelComponent,
+    WhoToFollowComponent
+  ],
   templateUrl: './search-page.component.html',
   styleUrl: './search-page.component.scss'
 })
