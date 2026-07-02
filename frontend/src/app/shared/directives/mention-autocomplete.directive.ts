@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Directive,
   ElementRef,
   HostListener,
@@ -25,7 +26,7 @@ interface MentionQuery {
   selector: 'textarea[appMentionAutocomplete]',
   standalone: true
 })
-export class MentionAutocompleteDirective implements OnDestroy {
+export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
   /** Quando false, desactiva menções (ex.: conversas 1 a 1). */
   @Input() mentionAutocompleteEnabled = true
 
@@ -39,10 +40,14 @@ export class MentionAutocompleteDirective implements OnDestroy {
   private readonly mentionQuery$ = new Subject<MentionQuery>()
   private readonly subscription = new Subscription()
   private dropdownElement: HTMLElement | null = null
+  private highlightElement: HTMLElement | null = null
+  private wrapperElement: HTMLElement | null = null
   private mentionStart = -1
   private mentionCaret = -1
   private activeIndex = -1
   private suggestions: User[] = []
+
+  private static readonly mentionTokenExact = /^@[a-zA-Z0-9._-]+$/
 
   constructor() {
     this.subscription.add(
@@ -65,8 +70,15 @@ export class MentionAutocompleteDirective implements OnDestroy {
     )
   }
 
+  ngAfterViewInit(): void {
+    this.setupHighlightLayer()
+    this.updateHighlight()
+  }
+
   @HostListener('input')
   handleInput(): void {
+    this.updateHighlight()
+
     if (!this.mentionAutocompleteEnabled) {
       this.closeDropdown()
       return
@@ -130,8 +142,14 @@ export class MentionAutocompleteDirective implements OnDestroy {
     }, 120)
   }
 
+  @HostListener('scroll')
+  handleScroll(): void {
+    this.syncHighlightScroll()
+  }
+
   @HostListener('window:resize')
   handleResize(): void {
+    this.syncHighlightStyles()
     this.positionDropdown()
   }
 
@@ -317,11 +335,140 @@ export class MentionAutocompleteDirective implements OnDestroy {
 
     textarea.value = nextValue
     textarea.dispatchEvent(new Event('input', { bubbles: true }))
+    this.updateHighlight()
 
     const caretPosition = before.length + mentionText.length
     textarea.focus()
     textarea.setSelectionRange(caretPosition, caretPosition)
     this.closeDropdown()
+  }
+
+  private setupHighlightLayer(): void {
+    const textarea = this.host.nativeElement
+    const parent = textarea.parentNode
+
+    if (!parent) {
+      return
+    }
+
+    const wrapper = this.renderer.createElement('div') as HTMLElement
+    this.renderer.addClass(wrapper, 'mention-field')
+
+    const highlight = this.renderer.createElement('div') as HTMLElement
+    this.renderer.addClass(highlight, 'mention-field__highlight')
+    this.renderer.setAttribute(highlight, 'aria-hidden', 'true')
+
+    this.renderer.insertBefore(parent, wrapper, textarea)
+    this.renderer.removeChild(parent, textarea)
+    this.renderer.appendChild(wrapper, highlight)
+    this.renderer.appendChild(wrapper, textarea)
+    this.renderer.addClass(textarea, 'mention-field__input')
+
+    const computed = window.getComputedStyle(textarea)
+    if (computed.flexGrow !== '0' || computed.flex !== '0 1 auto') {
+      this.renderer.setStyle(wrapper, 'flex', computed.flex)
+      this.renderer.setStyle(wrapper, 'flex-grow', computed.flexGrow)
+      this.renderer.setStyle(wrapper, 'flex-shrink', computed.flexShrink)
+      this.renderer.setStyle(wrapper, 'flex-basis', computed.flexBasis)
+      this.renderer.setStyle(wrapper, 'min-width', computed.minWidth)
+      this.renderer.setStyle(textarea, 'flex', 'unset')
+    }
+
+    if (computed.width && computed.width !== 'auto') {
+      this.renderer.setStyle(wrapper, 'width', computed.width)
+    }
+
+    this.wrapperElement = wrapper
+    this.highlightElement = highlight
+    this.syncHighlightStyles()
+  }
+
+  private syncHighlightStyles(): void {
+    if (!this.highlightElement) {
+      return
+    }
+
+    const textarea = this.host.nativeElement
+    const styles = window.getComputedStyle(textarea)
+    const properties = [
+      'boxSizing',
+      'width',
+      'minHeight',
+      'maxHeight',
+      'paddingTop',
+      'paddingRight',
+      'paddingBottom',
+      'paddingLeft',
+      'borderTopWidth',
+      'borderRightWidth',
+      'borderBottomWidth',
+      'borderLeftWidth',
+      'fontStyle',
+      'fontVariant',
+      'fontWeight',
+      'fontStretch',
+      'fontSize',
+      'fontFamily',
+      'lineHeight',
+      'letterSpacing',
+      'wordSpacing',
+      'textAlign',
+      'textTransform',
+      'textIndent',
+      'textDecoration'
+    ] as const
+
+    properties.forEach(property => {
+      this.renderer.setStyle(this.highlightElement, property, styles[property])
+    })
+  }
+
+  private updateHighlight(): void {
+    if (!this.highlightElement) {
+      return
+    }
+
+    this.highlightElement.innerHTML = this.buildHighlightHtml(this.host.nativeElement.value)
+    this.syncHighlightScroll()
+  }
+
+  private syncHighlightScroll(): void {
+    if (!this.highlightElement) {
+      return
+    }
+
+    const textarea = this.host.nativeElement
+    this.highlightElement.scrollTop = textarea.scrollTop
+    this.highlightElement.scrollLeft = textarea.scrollLeft
+  }
+
+  private buildHighlightHtml(value: string): string {
+    if (!value) {
+      return ''
+    }
+
+    const parts = value.split(/(@[a-zA-Z0-9._-]+)/)
+
+    return parts
+      .map(part => {
+        const escaped = this.escapeHtml(part)
+
+        if (MentionAutocompleteDirective.mentionTokenExact.test(part)) {
+          return `<span class="mention-field__token">${escaped}</span>`
+        }
+
+        return escaped
+      })
+      .join('')
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
   }
 
   private closeDropdown(): void {

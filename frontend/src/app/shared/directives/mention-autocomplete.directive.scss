@@ -1,3 +1,42 @@
+.mention-field {
+  position: relative;
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.mention-field__highlight {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+}
+
+.mention-field__token {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.mention-field__input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: transparent !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--color-text-primary);
+
+  &::selection {
+    background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
 .mention-autocomplete {
   max-height: 220px;
   overflow-y: auto;
