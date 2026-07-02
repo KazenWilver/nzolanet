@@ -1,4 +1,8 @@
-<div class="admin-page">
+<div
+  class="admin-page"
+  [class.admin-page--anim-subtil]="modoAnimacao === 'subtil'"
+  [class.admin-page--anim-intenso]="modoAnimacao === 'intenso'"
+>
   <section id="secao-visao-geral" class="admin-page__hero">
     <div>
       <p class="admin-page__subtitle">Admin NzolaNet · tempo real</p>
@@ -96,6 +100,14 @@
           <option *ngFor="let motivo of obterMotivosDenunciaDisponiveis()" [value]="motivo.toLowerCase()">
             {{ motivo }}
           </option>
+        </select>
+      </label>
+
+      <label class="admin-page__quick-field">
+        Intensidade animação
+        <select [ngModel]="modoAnimacao" (ngModelChange)="alterarModoAnimacao($event)">
+          <option value="subtil">Subtil</option>
+          <option value="intenso">Intenso</option>
         </select>
       </label>
     </div>

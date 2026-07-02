@@ -18,6 +18,7 @@ type AdminTipoMediaPublicacao = 'all' | 'texto' | 'com-media' | 'imagem' | 'vide
 type AdminOrdenacaoDenuncias = 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas'
 type AdminOrdenacaoHashtags = 'usos-desc' | 'usos-asc' | 'nome-asc' | 'nome-desc'
 type AdminOrdenacaoPerfis = 'seguidores-desc' | 'seguidores-asc' | 'nome-asc' | 'nome-desc'
+type AdminModoAnimacao = 'subtil' | 'intenso'
 
 interface AdminFiltrosPersistidos {
   filtroVistaRapida: AdminFiltroVistaRapida
@@ -34,6 +35,7 @@ interface AdminFiltrosPersistidos {
   paginaPerfis: number
   tamanhoPaginaTabela: number
   periodoRanking: AdminRankingPeriod
+  modoAnimacao: AdminModoAnimacao
 }
 
 @Component({
@@ -115,6 +117,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
   tamanhoPaginaTabela = 5
   estadoRealtime: AdminRealtimeConnectionState = 'offline'
   periodoRanking: AdminRankingPeriod = '30d'
+  modoAnimacao: AdminModoAnimacao = 'intenso'
 
   ngOnInit(): void {
     this.hidratarEstadoFiltros()
@@ -477,6 +480,11 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     })
   }
 
+  alterarModoAnimacao(valor: string): void {
+    this.modoAnimacao = valor === 'subtil' ? 'subtil' : 'intenso'
+    this.persistirEstadoFiltros()
+  }
+
   avancarPaginaHashtags(): void {
     this.paginaHashtags = Math.min(this.totalPaginasHashtags(), this.paginaHashtags + 1)
     this.persistirEstadoFiltros()
@@ -746,8 +754,9 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     const inicio = { ...this.metricsAnimadas }
     const fim = { ...dados }
     const inicioMs = performance.now()
-    const duracaoBaseMs = 760
-    const staggerMs = 58
+    const duracaoBaseMs = this.modoAnimacao === 'subtil' ? 980 : 760
+    const staggerMs = this.modoAnimacao === 'subtil' ? 44 : 58
+    const intensidadeElastic = this.modoAnimacao === 'subtil' ? 0.52 : 1
     const campos = Object.keys(fim) as Array<keyof AdminMetrics>
     const indicePorCampo = new Map<keyof AdminMetrics, number>()
     this.ordemAnimacaoMetricas.forEach((campo, indice) => {
@@ -776,7 +785,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         const categoriaCampo = this.categoriasVelocidade[String(campo)] ?? 'normal'
         const duracaoCampoMs = duracaoBaseMs * this.multiplicadorVelocidade[categoriaCampo]
         const progressoLocal = this.normalizarProgresso((tempoDecorridoMs - atrasoCampoMs) / duracaoCampoMs)
-        const easingLocal = this.elasticSnapOut(progressoLocal)
+        const elastic = this.elasticSnapOut(progressoLocal)
+        const easingLocal = progressoLocal + ((elastic - progressoLocal) * intensidadeElastic)
         const valorInterpolado = valorInicial + (valorFinal - valorInicial) * easingLocal
         proximoMutavel[campo] = Number(valorInterpolado.toFixed(2))
       })
@@ -842,6 +852,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
       this.paginaPerfis = this.normalizarNumero(parsed.paginaPerfis, 1, 999, 1)
       this.tamanhoPaginaTabela = this.normalizarNumero(parsed.tamanhoPaginaTabela, 3, 10, 5)
       this.periodoRanking = this.normalizarPeriodoRanking(parsed.periodoRanking)
+      this.modoAnimacao = this.normalizarModoAnimacao(parsed.modoAnimacao)
     } catch {
       window.localStorage.removeItem(this.filtrosStorageKey)
     }
@@ -866,7 +877,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
       paginaHashtags: this.paginaHashtags,
       paginaPerfis: this.paginaPerfis,
       tamanhoPaginaTabela: this.tamanhoPaginaTabela,
-      periodoRanking: this.periodoRanking
+      periodoRanking: this.periodoRanking,
+      modoAnimacao: this.modoAnimacao
     }
 
     window.localStorage.setItem(this.filtrosStorageKey, JSON.stringify(estado))
@@ -922,6 +934,10 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     return '30d'
+  }
+
+  private normalizarModoAnimacao(valor: unknown): AdminModoAnimacao {
+    return valor === 'subtil' ? 'subtil' : 'intenso'
   }
 
   private normalizarNumero(valor: unknown, min: number, max: number, fallback: number): number {

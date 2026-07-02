@@ -2,9 +2,57 @@
 @use '../../../styles/mixins' as mixins;
 
 .admin-page {
+  --admin-hover-translate-y: -4px;
+  --admin-hover-tilt: 2deg;
+  --admin-hover-shadow: 0 20px 36px rgba(12, 10, 40, 0.15);
+  --admin-card-pulse-duration: 4.6s;
+  --admin-card-pulse-scale: 1.16;
+  --admin-card-pulse-opacity: 0.78;
+  --admin-orbit-duration: 9s;
+  --admin-shape-duration: 7s;
+  --admin-shape-float-y: -8px;
+  --admin-shape-float-rotate: -8deg;
+  --admin-donut-duration: 12s;
+  --admin-bar-rise-duration: 0.9s;
+  --admin-reconnect-spin-duration: 0.8s;
+  --admin-reconnect-pulse-duration: 1.2s;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.admin-page--anim-subtil {
+  --admin-hover-translate-y: -2px;
+  --admin-hover-tilt: 0.8deg;
+  --admin-hover-shadow: 0 14px 24px rgba(12, 10, 40, 0.1);
+  --admin-card-pulse-duration: 6.3s;
+  --admin-card-pulse-scale: 1.08;
+  --admin-card-pulse-opacity: 0.62;
+  --admin-orbit-duration: 14s;
+  --admin-shape-duration: 10s;
+  --admin-shape-float-y: -4px;
+  --admin-shape-float-rotate: -4deg;
+  --admin-donut-duration: 18s;
+  --admin-bar-rise-duration: 1.2s;
+  --admin-reconnect-spin-duration: 1.1s;
+  --admin-reconnect-pulse-duration: 1.8s;
+}
+
+.admin-page--anim-intenso {
+  --admin-hover-translate-y: -5px;
+  --admin-hover-tilt: 2.4deg;
+  --admin-hover-shadow: 0 24px 42px rgba(12, 10, 40, 0.2);
+  --admin-card-pulse-duration: 4.2s;
+  --admin-card-pulse-scale: 1.2;
+  --admin-card-pulse-opacity: 0.84;
+  --admin-orbit-duration: 7.8s;
+  --admin-shape-duration: 6.2s;
+  --admin-shape-float-y: -10px;
+  --admin-shape-float-rotate: -10deg;
+  --admin-donut-duration: 10.5s;
+  --admin-bar-rise-duration: 0.82s;
+  --admin-reconnect-spin-duration: 0.72s;
+  --admin-reconnect-pulse-duration: 1.05s;
 }
 
 #secao-visao-geral,
@@ -111,7 +159,7 @@
   border-radius: 50%;
   border: 2px solid rgba(217, 119, 6, 0.28);
   border-top-color: currentColor;
-  animation: admin-realtime-spinner 0.8s linear infinite, admin-realtime-pulse 1.2s ease-in-out infinite;
+  animation: admin-realtime-spinner var(--admin-reconnect-spin-duration) linear infinite, admin-realtime-pulse var(--admin-reconnect-pulse-duration) ease-in-out infinite;
 }
 
 .admin-page__btn {
@@ -344,13 +392,13 @@
     border-radius: 50%;
     background: color-mix(in srgb, var(--color-accent) 22%, transparent);
     filter: blur(1px);
-    animation: admin-card-pulse 4.6s ease-in-out infinite;
+    animation: admin-card-pulse var(--admin-card-pulse-duration) ease-in-out infinite;
   }
 
   &:hover {
-    transform: translateY(-4px) rotate3d(1, -1, 0, 2deg);
+    transform: translateY(var(--admin-hover-translate-y)) rotate3d(1, -1, 0, var(--admin-hover-tilt));
     box-shadow:
-      0 20px 36px rgba(12, 10, 40, 0.15),
+      var(--admin-hover-shadow),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
@@ -433,7 +481,7 @@
     right: -44px;
     border-radius: 50%;
     background: radial-gradient(circle, color-mix(in srgb, var(--color-accent-purple) 34%, transparent), transparent 70%);
-    animation: admin-orb-rotate 9s linear infinite;
+    animation: admin-orb-rotate var(--admin-orbit-duration) linear infinite;
   }
 
   &--compact {
@@ -489,7 +537,7 @@
     height: 110px;
     border-radius: 56% 44% 62% 38%;
     background: linear-gradient(145deg, color-mix(in srgb, var(--color-accent) 20%, transparent), transparent);
-    animation: admin-shape-float 7s ease-in-out infinite;
+    animation: admin-shape-float var(--admin-shape-duration) ease-in-out infinite;
   }
 
   &--stack::before {
@@ -551,7 +599,7 @@
   display: grid;
   place-items: center;
   box-shadow: 0 12px 24px rgba(16, 12, 38, 0.14);
-  animation: admin-donut-rotate 12s linear infinite;
+  animation: admin-donut-rotate var(--admin-donut-duration) linear infinite;
 }
 
 .admin-page__donut-center {
@@ -634,7 +682,7 @@
       linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 85%, #fff), color-mix(in srgb, var(--color-accent-purple) 76%, var(--color-accent)));
     box-shadow: 0 8px 12px color-mix(in srgb, var(--color-accent) 26%, transparent);
     transition: height 0.45s ease;
-    animation: admin-bar-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: admin-bar-rise var(--admin-bar-rise-duration) cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   small {
@@ -872,8 +920,8 @@
   }
 
   50% {
-    transform: scale(1.16);
-    opacity: 0.78;
+    transform: scale(var(--admin-card-pulse-scale));
+    opacity: var(--admin-card-pulse-opacity);
   }
 }
 
@@ -894,7 +942,7 @@
   }
 
   50% {
-    transform: translateY(-8px) rotate(-8deg);
+    transform: translateY(var(--admin-shape-float-y)) rotate(var(--admin-shape-float-rotate));
   }
 }
 
