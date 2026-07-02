@@ -3,6 +3,29 @@
   [class.admin-page--anim-subtil]="modoAnimacao === 'subtil'"
   [class.admin-page--anim-intenso]="modoAnimacao === 'intenso'"
 >
+  <section *ngIf="mostrarEcraBoasVindasAdmin()" class="admin-page__welcome" aria-live="polite" aria-busy="true">
+    <div class="admin-page__welcome-surface">
+      <div class="admin-page__welcome-brand">
+        <img
+          src="/nzolanet-logo-128.png"
+          width="132"
+          height="132"
+          alt="Logotipo da NzolaNet"
+          class="admin-page__welcome-logo"
+        />
+        <h1 class="admin-page__welcome-title">Bem-vindo ao painel admin NzolaNet</h1>
+        <p class="admin-page__welcome-copy">{{ fraseInspiradoraAdmin }}</p>
+        <p class="admin-page__welcome-subtitle">Estamos a preparar as métricas, denúncias e sinais em tempo real.</p>
+      </div>
+
+      <div class="admin-page__welcome-loader" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </section>
+
   <section id="secao-visao-geral" class="admin-page__hero">
     <div>
       <p class="admin-page__subtitle">Admin NzolaNet · tempo real</p>

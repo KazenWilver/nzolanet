@@ -15,6 +15,7 @@ import { ThemeService } from '../../../core/services/theme.service';
   styleUrl: './admin-login.component.scss'
 })
 export class AdminLoginComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly adminWelcomeFlagKey = 'nzolanet.admin.show-welcome-once'
   @ViewChild('gradientOrbA') gradientOrbA?: ElementRef<HTMLDivElement>;
   @ViewChild('gradientOrbB') gradientOrbB?: ElementRef<HTMLDivElement>;
   @ViewChild('gradientOrbC') gradientOrbC?: ElementRef<HTMLDivElement>;
@@ -99,6 +100,7 @@ export class AdminLoginComponent implements OnInit, AfterViewInit, OnDestroy {
     }).subscribe({
       next: (resposta) => {
         localStorage.setItem('admin_token', resposta.token);
+        localStorage.setItem(this.adminWelcomeFlagKey, '1');
         this.router.navigate(['/admin-portal-9f3b1c']);
       },
       error: (err) => {
@@ -137,6 +139,7 @@ export class AdminLoginComponent implements OnInit, AfterViewInit, OnDestroy {
     }).subscribe({
       next: resposta => {
         localStorage.setItem('admin_token', resposta.token);
+        localStorage.setItem(this.adminWelcomeFlagKey, '1');
         this.mensagemSucesso = 'Administrador registado com sucesso.';
         this.router.navigate(['/admin-portal-9f3b1c']);
       },

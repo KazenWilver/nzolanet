@@ -47,6 +47,7 @@ interface AdminFiltrosPersistidos {
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
   private readonly filtrosStorageKey = 'nzolanet.admin.dashboard.filtros.v1'
+  private readonly adminWelcomeFlagKey = 'nzolanet.admin.show-welcome-once'
   private readonly ordemAnimacaoMetricas: Array<keyof AdminMetrics> = [
     'totalUtilizadores',
     'totalUtilizadoresOnline',
@@ -118,9 +119,12 @@ export class AdminPageComponent implements OnInit, OnDestroy {
   estadoRealtime: AdminRealtimeConnectionState = 'offline'
   periodoRanking: AdminRankingPeriod = '30d'
   modoAnimacao: AdminModoAnimacao = 'intenso'
+  mostrarBoasVindasAdmin = false
+  fraseInspiradoraAdmin = 'Grandes plataformas constroem-se com decisões corajosas e consistentes.'
 
   ngOnInit(): void {
     this.hidratarEstadoFiltros()
+    this.prepararBoasVindasAdmin()
     this.atualizarDashboard()
     this.ligarAtualizacaoSignalR()
   }
@@ -214,6 +218,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.carregandoMetrics = false
+          this.atualizarEstadoBoasVindasAdmin()
           onDone?.();
         }
       });
@@ -234,6 +239,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.carregandoComentarios = false
+          this.atualizarEstadoBoasVindasAdmin()
         }
       });
   }
@@ -253,8 +259,17 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         },
         complete: () => {
           this.carregandoPublicacoes = false
+          this.atualizarEstadoBoasVindasAdmin()
         }
       });
+  }
+
+  mostrarEcraBoasVindasAdmin(): boolean {
+    if (!this.mostrarBoasVindasAdmin) {
+      return false
+    }
+
+    return this.carregandoMetrics || this.carregandoComentarios || this.carregandoPublicacoes
   }
 
   confirmarRemoverComentario(comentario: ComentarioReportado): void {
@@ -886,6 +901,32 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
   private podeUsarStorage(): boolean {
     return typeof window !== 'undefined' && !!window.localStorage
+  }
+
+  private prepararBoasVindasAdmin(): void {
+    if (!this.podeUsarStorage()) {
+      return
+    }
+
+    const deveMostrar = window.localStorage.getItem(this.adminWelcomeFlagKey) === '1'
+    if (!deveMostrar) {
+      return
+    }
+
+    this.mostrarBoasVindasAdmin = true
+    window.localStorage.removeItem(this.adminWelcomeFlagKey)
+  }
+
+  private atualizarEstadoBoasVindasAdmin(): void {
+    if (!this.mostrarBoasVindasAdmin) {
+      return
+    }
+
+    if (this.carregandoMetrics || this.carregandoComentarios || this.carregandoPublicacoes) {
+      return
+    }
+
+    this.mostrarBoasVindasAdmin = false
   }
 
   private normalizarFiltroVistaRapida(valor: unknown): AdminFiltroVistaRapida {

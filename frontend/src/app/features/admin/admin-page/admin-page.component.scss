@@ -55,6 +55,96 @@
   --admin-reconnect-pulse-duration: 1.05s;
 }
 
+.admin-page__welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--color-accent) 20%, transparent), transparent 46%),
+    radial-gradient(circle at 78% 72%, color-mix(in srgb, var(--color-accent-purple) 16%, transparent), transparent 52%),
+    color-mix(in srgb, var(--color-bg-modal) 88%, #07070f);
+  backdrop-filter: blur(10px);
+}
+
+.admin-page__welcome-surface {
+  width: min(720px, 100%);
+  border-radius: 30px 18px 34px 16px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+  padding: clamp(22px, 5vw, 42px);
+  background:
+    radial-gradient(circle at 85% -12%, color-mix(in srgb, var(--color-accent) 24%, transparent), transparent 56%),
+    radial-gradient(circle at 0% 110%, color-mix(in srgb, var(--color-accent-purple) 22%, transparent), transparent 48%),
+    color-mix(in srgb, var(--color-bg-secondary) 92%, transparent);
+  box-shadow:
+    0 24px 60px rgba(5, 7, 22, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  animation: admin-welcome-pop 0.62s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.admin-page__welcome-brand {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.admin-page__welcome-logo {
+  width: clamp(90px, 16vw, 132px);
+  height: clamp(90px, 16vw, 132px);
+  object-fit: contain;
+  filter: drop-shadow(0 16px 34px rgba(18, 10, 46, 0.4));
+  animation: admin-welcome-logo-glow 2.6s ease-in-out infinite;
+}
+
+.admin-page__welcome-title {
+  margin: 16px 0 8px;
+  font-size: clamp(1.4rem, 4vw, 2.05rem);
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.admin-page__welcome-copy {
+  margin: 0;
+  max-width: 34ch;
+  font-size: clamp(1rem, 2.7vw, 1.12rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.admin-page__welcome-subtitle {
+  margin: 12px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+}
+
+.admin-page__welcome-loader {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-accent) 76%, #fff);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 40%, transparent);
+    animation: admin-welcome-dot 1.2s ease-in-out infinite;
+  }
+
+  span:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  span:nth-child(3) {
+    animation-delay: 0.24s;
+  }
+}
+
 #secao-visao-geral,
 #secao-metricas,
 #secao-rankings,
@@ -987,6 +1077,44 @@
   50% {
     opacity: 1;
     box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.08);
+  }
+}
+
+@keyframes admin-welcome-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes admin-welcome-logo-glow {
+  0%,
+  100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 16px 34px rgba(18, 10, 46, 0.4));
+  }
+
+  50% {
+    transform: translateY(-4px);
+    filter: drop-shadow(0 18px 42px rgba(57, 30, 120, 0.46));
+  }
+}
+
+@keyframes admin-welcome-dot {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translateY(-6px) scale(1.08);
+    opacity: 1;
   }
 }
 
