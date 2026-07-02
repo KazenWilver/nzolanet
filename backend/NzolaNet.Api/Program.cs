@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NzolaNet.Domain.Entities;
@@ -138,46 +139,27 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IMediaAccessService, MediaAccessService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 
-var fimbuSettings = builder.Configuration.GetSection(FimbuSettings.SectionName).Get<FimbuSettings>() ?? new FimbuSettings();
-fimbuSettings.OpenRouterApiKey = ResolveSecret("NZOLANET_FIMBU_OPENROUTER_KEY", fimbuSettings.OpenRouterApiKey);
-fimbuSettings.GoogleAiApiKey = ResolveSecret("NZOLANET_FIMBU_GOOGLE_AI_KEY", fimbuSettings.GoogleAiApiKey);
-fimbuSettings.GroqApiKey = ResolveSecret("NZOLANET_FIMBU_GROQ_KEY", fimbuSettings.GroqApiKey);
-fimbuSettings.NvidiaApiKey = ResolveSecret("NZOLANET_FIMBU_NVIDIA_KEY", fimbuSettings.NvidiaApiKey);
+// 4.1. Fimbu — vincula a secção inteira do appsettings de uma vez (apanha
+// automaticamente qualquer propriedade nova de FimbuSettings, sem precisar de
+// a copiar manualmente aqui), e só depois sobrepõe as chaves de API vindas de
+// variáveis de ambiente com PostConfigure. Isto evita o bug de propriedades
+// configuradas em appsettings.json serem silenciosamente ignoradas por não
+// terem sido incluídas numa lista de cópia manual.
+builder.Services.Configure<FimbuSettings>(
+    builder.Configuration.GetSection(FimbuSettings.SectionName));
 
-var configuredFimbuProviders = new[]
+builder.Services.PostConfigure<FimbuSettings>(options =>
 {
-    string.IsNullOrWhiteSpace(fimbuSettings.OpenRouterApiKey) ? null : "OpenRouter",
-    string.IsNullOrWhiteSpace(fimbuSettings.GoogleAiApiKey) ? null : "Google AI Studio",
-    string.IsNullOrWhiteSpace(fimbuSettings.GroqApiKey) ? null : "Groq",
-    string.IsNullOrWhiteSpace(fimbuSettings.NvidiaApiKey) ? null : "NVIDIA"
-}.Count(provider => provider is not null);
-
-if (configuredFimbuProviders == 0)
-{
-    Console.WriteLine("AVISO Fimbu: nenhuma chave API configurada. Preenche a secção Fimbu em appsettings.Development.json ou define NZOLANET_FIMBU_*.");
-}
-else
-{
-    Console.WriteLine($"Fimbu: {configuredFimbuProviders} fornecedor(es) API configurado(s).");
-}
-
-builder.Services.Configure<FimbuSettings>(options =>
-{
-    options.OpenRouterApiKey = fimbuSettings.OpenRouterApiKey;
-    options.GoogleAiApiKey = fimbuSettings.GoogleAiApiKey;
-    options.GroqApiKey = fimbuSettings.GroqApiKey;
-    options.NvidiaApiKey = fimbuSettings.NvidiaApiKey;
-    options.OpenRouterModel = fimbuSettings.OpenRouterModel;
-    options.GoogleAiModel = fimbuSettings.GoogleAiModel;
-    options.GroqModel = fimbuSettings.GroqModel;
-    options.NvidiaModel = fimbuSettings.NvidiaModel;
-    options.MaxHistoryMessages = fimbuSettings.MaxHistoryMessages;
-    options.ProviderCooldownSeconds = fimbuSettings.ProviderCooldownSeconds;
-    options.RequestTimeoutSeconds = fimbuSettings.RequestTimeoutSeconds;
+    options.OpenRouterApiKey = ResolveSecret("NZOLANET_FIMBU_OPENROUTER_KEY", options.OpenRouterApiKey);
+    options.GoogleAiApiKey = ResolveSecret("NZOLANET_FIMBU_GOOGLE_AI_KEY", options.GoogleAiApiKey);
+    options.GroqApiKey = ResolveSecret("NZOLANET_FIMBU_GROQ_KEY", options.GroqApiKey);
+    options.NvidiaApiKey = ResolveSecret("NZOLANET_FIMBU_NVIDIA_KEY", options.NvidiaApiKey);
 });
-builder.Services.AddHttpClient("FimbuLlm", client =>
+
+builder.Services.AddHttpClient("FimbuLlm", (sp, client) =>
 {
-    client.Timeout = TimeSpan.FromSeconds(Math.Max(30, fimbuSettings.RequestTimeoutSeconds));
+    var fimbuOptions = sp.GetRequiredService<IOptions<FimbuSettings>>().Value;
+    client.Timeout = TimeSpan.FromSeconds(Math.Max(30, fimbuOptions.RequestTimeoutSeconds));
 });
 builder.Services.AddSingleton<IFimbuLexiconService, FimbuLexiconService>();
 builder.Services.AddSingleton<IFimbuMoodService, FimbuMoodService>();
@@ -278,6 +260,27 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+// Diagnóstico de arranque da Fimbu — lido directamente do container de DI
+// (já com appsettings + variáveis de ambiente combinados), em vez de repetir
+// a lógica de resolução de segredos aqui.
+var fimbuOptions = app.Services.GetRequiredService<IOptions<FimbuSettings>>().Value;
+var configuredFimbuProviders = new[]
+{
+    string.IsNullOrWhiteSpace(fimbuOptions.OpenRouterApiKey) ? null : "OpenRouter",
+    string.IsNullOrWhiteSpace(fimbuOptions.GoogleAiApiKey) ? null : "Google AI Studio",
+    string.IsNullOrWhiteSpace(fimbuOptions.GroqApiKey) ? null : "Groq",
+    string.IsNullOrWhiteSpace(fimbuOptions.NvidiaApiKey) ? null : "NVIDIA"
+}.Count(provider => provider is not null);
+
+if (configuredFimbuProviders == 0)
+{
+    Console.WriteLine("AVISO Fimbu: nenhuma chave API configurada. Preenche a secção Fimbu em appsettings.Development.json ou define NZOLANET_FIMBU_*.");
+}
+else
+{
+    Console.WriteLine($"Fimbu: {configuredFimbuProviders} fornecedor(es) API configurado(s).");
+}
 
 var webRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
 Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "profiles"));

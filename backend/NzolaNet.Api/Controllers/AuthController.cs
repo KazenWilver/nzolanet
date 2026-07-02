@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Auth;
 using NzolaNet.Application.Interfaces;
+using NzolaNet.Application.Services.Fimbu;
 
 namespace NzolaNet.Api.Controllers;
 
@@ -11,10 +12,12 @@ namespace NzolaNet.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IFimbuMoodService _fimbuMoodService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IFimbuMoodService fimbuMoodService)
     {
         _authService = authService;
+        _fimbuMoodService = fimbuMoodService;
     }
 
     [HttpPost("register")]
@@ -26,6 +29,11 @@ public class AuthController : ControllerBase
         }
 
         var response = await _authService.RegisterAsync(registerDto);
+
+        // Novo utilizador = primeira sessão = sorteia já a personalidade da
+        // Fimbu para quando ele abrir o chat pela primeira vez.
+        _fimbuMoodService.AssignNewSessionMood(response.User.Id);
+
         return CreatedAtAction(nameof(Register), new { id = response.User.Id }, response);
     }
 
@@ -38,6 +46,14 @@ public class AuthController : ControllerBase
         }
 
         var response = await _authService.LoginAsync(loginDto);
+
+        // Cada login bem-sucedido força uma personalidade nova da Fimbu para
+        // esta sessão, diferente da anterior. Feito aqui em vez de num
+        // endpoint de logout porque, com JWT, o logout é normalmente só o
+        // frontend a apagar o token — nada garante que o backend seja
+        // avisado. Fazer o sorteio no login garante que funciona sempre.
+        _fimbuMoodService.AssignNewSessionMood(response.User.Id);
+
         return Ok(response);
     }
 

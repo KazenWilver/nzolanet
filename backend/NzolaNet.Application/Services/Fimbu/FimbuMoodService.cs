@@ -1,16 +1,18 @@
 using System.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
-using NzolaNet.Application.Interfaces;
 
 namespace NzolaNet.Application.Services.Fimbu;
 
 /// <summary>
-/// Sorteia e mantém o traço dominante da Fimbu por utilizador até novo login.
+/// Sorteia e persiste a combinação de personalidade da Fimbu por utilizador.
+/// A combinação é atribuída uma vez por sessão (no primeiro pedido após login)
+/// e mantém-se estável até ao logout, quando é removida via
+/// <see cref="ClearSessionMood"/> — o próximo login sorteia outra, diferente
+/// da anterior.
 /// </summary>
 public sealed class FimbuMoodService : IFimbuMoodService
 {
     private static readonly string[] Traits =
-    [
+    {
         "irritada", "triste", "alegre", "séria", "brincalhona", "amuada",
         "preguiçosa", "proativa", "frontal", "malvada", "humilde", "fingida",
         "fofoqueira", "amigável", "verdadeira", "honesta", "espantada",
@@ -21,33 +23,88 @@ public sealed class FimbuMoodService : IFimbuMoodService
         "ganhadora", "amadora", "amante", "profissional", "phd",
         "business man", "poor man", "impaciente", "paciente", "chorona",
         "mimosa", "durona", "heroína", "medrosa", "medonha", "corajosa",
-        "exemplar", "péssimo exemplo", "arrogante"
-    ];
+        "exemplar", "péssimo exemplo"
+    };
 
-    private readonly ConcurrentDictionary<Guid, string> _sessionTraits = new();
-    private readonly ILogger<FimbuMoodService> _logger;
-    private readonly Random _random = new();
-
-    public FimbuMoodService(ILogger<FimbuMoodService> logger)
+    private static readonly string[] EnergyLevels =
     {
-        _logger = logger;
+        "baixa — cansada, fala pouco, frases curtas",
+        "média — normal, equilibrada",
+        "alta — eufórica, fala muito, cheia de exclamações",
+        "instável — muda de energia a meio da resposta, sem aviso"
+    };
+
+    private static readonly string[] VerbalTics =
+    {
+        "termina frases com 'mano, é assim mesmo'",
+        "começa respostas com um suspiro tipo 'ehh...' antes de responder",
+        "repete a palavra 'bué' com frequência exagerada",
+        "faz uma pergunta retórica no meio da resposta",
+        "usa 'tás a ver' como muleta de discurso",
+        "comenta o próprio calor de Luanda a espaços",
+        "finge estar ocupada com outra coisa antes de responder",
+        "usa 'mbora' para mudar de assunto abruptamente",
+        "chama toda a gente de 'campeão/campeã' independentemente do contexto",
+        "faz uma piada sobre kandengues sempre que pode",
+        "insere um provérbio angolano inventado no meio da conversa",
+        "responde sempre com uma contra-pergunta antes da resposta real"
+    };
+
+    private readonly ConcurrentDictionary<Guid, FimbuSessionMood> _activeMoods = new();
+
+    public FimbuSessionMood GetOrAssignSessionMood(Guid userId)
+    {
+        return _activeMoods.GetOrAdd(userId, _ => Sortear(previous: null));
     }
 
-    public string GetOrAssignSessionTrait(Guid userId) =>
-        _sessionTraits.GetOrAdd(userId, _ => DrawTrait());
-
-    public string AssignSessionTrait(Guid userId)
+    public void ClearSessionMood(Guid userId)
     {
-        var trait = DrawTrait();
-        _sessionTraits[userId] = trait;
-        _logger.LogInformation("Fimbu traço de sessão atribuído ao utilizador {UserId}: {Trait}", userId, trait);
-        return trait;
+        _activeMoods.TryRemove(userId, out _);
     }
 
-    public void ClearSessionTrait(Guid userId)
+    private static FimbuSessionMood Sortear(FimbuSessionMood? previous)
     {
-        _sessionTraits.TryRemove(userId, out _);
+        var random = Random.Shared;
+        FimbuSessionMood combinacao;
+        var tentativas = 0;
+
+        // Evita sortear exactamente a mesma combinação da sessão anterior deste
+        // utilizador. Limite de tentativas para nunca entrar em loop infinito.
+        do
+        {
+            combinacao = new FimbuSessionMood(
+                PrimaryTrait: Traits[random.Next(Traits.Length)],
+                SecondaryTrait: Traits[random.Next(Traits.Length)],
+                EnergyLevel: EnergyLevels[random.Next(EnergyLevels.Length)],
+                VerbalTic: VerbalTics[random.Next(VerbalTics.Length)],
+                Temperature: SortearTemperatura(random)
+            );
+            tentativas++;
+        }
+        while (previous is not null
+               && combinacao.Equals(previous.Value)
+               && tentativas < 5);
+
+        return combinacao;
     }
 
-    private string DrawTrait() => Traits[_random.Next(Traits.Length)];
+    /// <summary>
+    /// Intervalo entre 0.85 e 1.15 — variação perceptível a nível textual da
+    /// própria chamada à API, sem comprometer a coerência das respostas.
+    /// </summary>
+    private static double SortearTemperatura(Random random)
+    {
+        return 0.85 + (random.NextDouble() * 0.30);
+    }
 }
+
+/// <summary>
+/// Representa a combinação de personalidade sorteada para uma sessão,
+/// incluindo a temperatura sugerida para a chamada ao modelo.
+/// </summary>
+public readonly record struct FimbuSessionMood(
+    string PrimaryTrait,
+    string SecondaryTrait,
+    string EnergyLevel,
+    string VerbalTic,
+    double Temperature);
