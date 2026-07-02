@@ -911,26 +911,42 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     }
 
     if (conversation.otherUserLastSeenAt) {
-      const lastSeen = new Date(conversation.otherUserLastSeenAt)
-      const diffMs = Date.now() - lastSeen.getTime()
-      const diffMinutes = Math.floor(diffMs / 60000)
-
-      if (diffMinutes < 1) {
-        return 'Visto há instantes'
+      const lastSeenMs = this.parseUtcTimestamp(conversation.otherUserLastSeenAt)
+      if (!Number.isNaN(lastSeenMs)) {
+        return this.formatLastSeen(lastSeenMs)
       }
-      if (diffMinutes < 60) {
-        return `Visto há ${diffMinutes} min`
-      }
-
-      const diffHours = Math.floor(diffMinutes / 60)
-      if (diffHours < 24) {
-        return `Visto há ${diffHours}h`
-      }
-
-      return `Visto ${lastSeen.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' })}`
     }
 
     return conversation.otherUsername ? `@${conversation.otherUsername}` : ''
+  }
+
+  private formatLastSeen(lastSeenMs: number): string {
+    const now = new Date()
+    const lastSeen = new Date(lastSeenMs)
+    const diffMs = now.getTime() - lastSeenMs
+
+    if (diffMs < 60_000) {
+      return 'Visto por último há instantes'
+    }
+
+    const time = lastSeen.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const startOfLastSeenDay = new Date(lastSeen.getFullYear(), lastSeen.getMonth(), lastSeen.getDate()).getTime()
+    const dayDiff = Math.round((startOfToday - startOfLastSeenDay) / 86_400_000)
+
+    if (dayDiff <= 0) {
+      return `Visto por último hoje às ${time}`
+    }
+    if (dayDiff === 1) {
+      return `Visto por último ontem às ${time}`
+    }
+
+    const date = lastSeen.toLocaleDateString('pt-PT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: lastSeen.getFullYear() === now.getFullYear() ? undefined : 'numeric'
+    })
+    return `Visto por último em ${date} às ${time}`
   }
 
   getReadStatusLabel(status?: MessageReadStatus): string {
