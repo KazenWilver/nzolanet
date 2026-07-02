@@ -23,6 +23,7 @@ import { LinkifyTextPipe } from '../../shared/pipes/linkify-text.pipe'
 import { TPipe } from '../../core/i18n/translate.pipe'
 import { LocaleService } from '../../core/i18n/locale.service'
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component'
+import { MobileAccountButtonComponent } from '../../shared/components/mobile-account-button/mobile-account-button.component'
 import { resolveMediaDownloadUrl } from '../../core/helpers/media-url.helper'
 
 export interface MessageDayGroup {
@@ -49,7 +50,8 @@ export interface MessageDayGroup {
     MentionAutocompleteDirective,
     LinkifyTextPipe,
     TPipe,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    MobileAccountButtonComponent
   ],
   templateUrl: './messages-page.component.html',
   styleUrl: './messages-page.component.scss'

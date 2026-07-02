@@ -1,79 +1,68 @@
 @if (visibleOnMobile) {
-  <header class="topbar" [class.topbar--menu-open]="accountMenuOpen">
+  <header class="topbar" [class.topbar--menu-open]="accountMenuOpen" [class.topbar--title]="topbarMode === 'title'">
     <div class="topbar__row">
-      <button
-        type="button"
-        class="topbar__theme-btn"
-        (click)="handleToggleTheme()"
-        [attr.aria-label]="themeService.isDarkMode() ? 'Activar modo claro' : 'Activar modo escuro'"
-        [title]="themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro'"
-      >
-        @if (themeService.isDarkMode()) {
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <circle cx="12" cy="12" r="5"></circle>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
-          </svg>
-        } @else {
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        }
-      </button>
-
-      <a class="topbar__brand" routerLink="/feed" aria-label="NzolaNet">
-        <img src="/nzolanet-logo-64.png" alt="NzolaNet" class="topbar__brand-icon" width="40" height="40" />
-        <span class="topbar__brand-name">NzolaNet</span>
-      </a>
-
       @if (currentUser) {
-        <div class="topbar__account">
-          <button
-            #accountMenuTrigger
-            type="button"
-            class="topbar__account-trigger"
-            (click)="handleToggleAccountMenu(accountMenuTrigger)"
-            [attr.aria-expanded]="accountMenuOpen"
-            aria-haspopup="menu"
-            [attr.aria-label]="'Menu de ' + currentUser.username"
-          >
-            <app-avatar
-              [src]="currentUser.profilePhotoUrl"
-              [username]="currentUser.username"
-              size="sm"
-            />
-          </button>
-        </div>
+        <button
+          #accountMenuTrigger
+          type="button"
+          class="topbar__account-trigger"
+          (click)="handleToggleAccountMenu(accountMenuTrigger)"
+          [attr.aria-expanded]="accountMenuOpen"
+          aria-haspopup="dialog"
+          [attr.aria-label]="'Menu de ' + currentUser.username"
+        >
+          <app-avatar
+            [src]="currentUser.profilePhotoUrl"
+            [username]="currentUser.username"
+            size="sm"
+          />
+        </button>
+      } @else {
+        <span class="topbar__side-spacer" aria-hidden="true"></span>
       }
+
+      @if (topbarMode === 'feed') {
+        <a class="topbar__brand" routerLink="/feed" aria-label="NzolaNet">
+          <img src="/nzolanet-logo-64.png" alt="" class="topbar__brand-icon" width="40" height="40" />
+          <span class="topbar__brand-name">NzolaNet</span>
+        </a>
+      } @else if (topbarMode === 'title' && pageTitleKey) {
+        <h1 class="topbar__page-title">{{ pageTitleKey | t }}</h1>
+      }
+
+      <span class="topbar__side-spacer topbar__side-spacer--end" aria-hidden="true"></span>
     </div>
 
-    <nav
-      #feedTabs
-      class="topbar__feed-tabs"
-      role="tablist"
-      aria-label="Tipo de feed"
-    >
-      <button
-        type="button"
-        class="topbar__feed-tab"
-        [class.topbar__feed-tab--active]="activeFeedTab === 'para-ti'"
-        [attr.aria-selected]="activeFeedTab === 'para-ti'"
-        role="tab"
-        appPressScale
-        (click)="setFeedTab('para-ti')"
+    @if (topbarMode === 'feed') {
+      <nav
+        #feedTabs
+        class="topbar__feed-tabs"
+        role="tablist"
+        [attr.aria-label]="'nav.feed' | t"
       >
-        Para ti
-      </button>
-      <button
-        type="button"
-        class="topbar__feed-tab"
-        [class.topbar__feed-tab--active]="activeFeedTab === 'a-seguir'"
-        [attr.aria-selected]="activeFeedTab === 'a-seguir'"
-        role="tab"
-        appPressScale
-        (click)="setFeedTab('a-seguir')"
-      >
-        A seguir
-      </button>
-    </nav>
+        <button
+          type="button"
+          class="topbar__feed-tab"
+          [class.topbar__feed-tab--active]="activeFeedTab === 'para-ti'"
+          [attr.aria-selected]="activeFeedTab === 'para-ti'"
+          role="tab"
+          appPressScale
+          (click)="setFeedTab('para-ti')"
+        >
+          Para ti
+        </button>
+        <button
+          type="button"
+          class="topbar__feed-tab"
+          [class.topbar__feed-tab--active]="activeFeedTab === 'a-seguir'"
+          [attr.aria-selected]="activeFeedTab === 'a-seguir'"
+          role="tab"
+          appPressScale
+          (click)="setFeedTab('a-seguir')"
+        >
+          A seguir
+        </button>
+      </nav>
+    }
   </header>
 }

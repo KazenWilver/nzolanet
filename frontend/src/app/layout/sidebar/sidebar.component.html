@@ -143,54 +143,47 @@
   </div>
 
   <nav class="sidebar__mobile" aria-label="Navegação mobile">
-    <a class="sidebar__mobile-link" appPressScale routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)" aria-label="Início">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)" [attr.aria-label]="'nav.home' | t">
       <span class="sidebar__icon" data-icon="home" aria-hidden="true"></span>
-      <span class="sr-only">Início</span>
+      <span class="sr-only">{{ 'nav.home' | t }}</span>
     </a>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')" aria-label="Pesquisar">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')" [attr.aria-label]="'nav.search' | t">
       <span class="sidebar__icon" data-icon="search" aria-hidden="true"></span>
-      <span class="sr-only">Pesquisar</span>
+      <span class="sr-only">{{ 'nav.search' | t }}</span>
     </a>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/messages" [class.sidebar__mobile-link--active]="isActive('/messages')" aria-label="Mensagens">
-      <span class="sidebar__icon-wrap">
-        <span class="sidebar__icon" data-icon="mail" aria-hidden="true"></span>
-        @if (unreadMessagesCount > 0) {
-          <span class="sidebar__badge" aria-label="{{ unreadMessagesCount }} mensagens por ler">
-            {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
-          </span>
-        }
-      </span>
-      <span class="sr-only">Mensagens</span>
-    </a>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/fimbu" [class.sidebar__mobile-link--active]="isActive('/fimbu')" aria-label="Fimbu">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/fimbu" [class.sidebar__mobile-link--active]="isActive('/fimbu')" [attr.aria-label]="'nav.fimbu' | t">
       <span class="sidebar__icon" data-icon="sparkles" aria-hidden="true"></span>
-      <span class="sr-only">Fimbu</span>
+      <span class="sr-only">{{ 'nav.fimbu' | t }}</span>
     </a>
-    <button type="button" class="sidebar__mobile-publish" appPressScale (click)="handleOpenPublishModal()" aria-label="Publicar">
-      <span class="sidebar__publish-icon" aria-hidden="true">+</span>
-    </button>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/bookmarks" [class.sidebar__mobile-link--active]="isActive('/bookmarks')" aria-label="Guardados">
-      <span class="sidebar__icon" data-icon="bookmark" aria-hidden="true"></span>
-      <span class="sr-only">Guardados</span>
-    </a>
-    <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')" aria-label="Notificações">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')" [attr.aria-label]="'nav.notifications' | t">
       <span class="sidebar__icon-wrap">
         <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>
         @if (unreadCount > 0) {
-          <span class="sidebar__badge" aria-label="{{ unreadCount }} notificações por ler">
-            {{ unreadCount > 99 ? '99+' : unreadCount }}
-          </span>
+          <span class="sidebar__badge sidebar__badge--dot" [attr.aria-label]="unreadCount + ' notificações por ler'"></span>
         }
       </span>
-      <span class="sr-only">Notificações</span>
+      <span class="sr-only">{{ 'nav.notifications' | t }}</span>
     </a>
-    <a class="sidebar__mobile-link" appPressScale [routerLink]="profileRoute" [class.sidebar__mobile-link--active]="isActive(profileRoute)" aria-label="Perfil">
-      @if (currentUser) {
-        <app-avatar [src]="currentUser.profilePhotoUrl" [username]="currentUser.username" size="xs" />
-      } @else {
-        <span class="sidebar__icon" data-icon="user" aria-hidden="true"></span>
-      }
-      <span class="sr-only">Perfil</span>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/messages" [class.sidebar__mobile-link--active]="isActive('/messages')" [attr.aria-label]="'nav.messages' | t">
+      <span class="sidebar__icon-wrap">
+        <span class="sidebar__icon" data-icon="mail" aria-hidden="true"></span>
+        @if (unreadMessagesCount > 0) {
+          <span class="sidebar__badge sidebar__badge--dot" [attr.aria-label]="unreadMessagesCount + ' mensagens por ler'"></span>
+        }
+      </span>
+      <span class="sr-only">{{ 'nav.messages' | t }}</span>
     </a>
   </nav>
+
+  @if (showMobileFab) {
+    <button
+      type="button"
+      class="sidebar__mobile-fab"
+      appPressScale
+      (click)="handleOpenPublishModal()"
+      [attr.aria-label]="'nav.publish' | t"
+    >
+      <span class="sidebar__publish-icon" aria-hidden="true">+</span>
+    </button>
+  }
 </aside>

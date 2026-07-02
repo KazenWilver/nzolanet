@@ -15,8 +15,11 @@ import { RouteTransitionService } from '../../core/services/route-transition.ser
 import { FocusTrapService } from '../../core/services/focus-trap.service';
 import { PublicationMediaOverlayService } from '../../core/services/publication-media-overlay.service';
 import { ScrollLockService } from '../../core/services/scroll-lock.service';
+import { ThemeService } from '../../core/services/theme.service';
 import type { User } from '../../core/models/user.model';
 import type { Publication } from '../../core/models/publication.model';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { TPipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-main-layout',
@@ -28,7 +31,9 @@ import type { Publication } from '../../core/models/publication.model';
     AsideComponent,
     ModalComponent,
     CreatePostComponent,
-    PublicationThreadModalComponent
+    PublicationThreadModalComponent,
+    AvatarComponent,
+    TPipe
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
@@ -42,12 +47,15 @@ export class MainLayoutComponent {
   readonly publishModal = inject(PublishModalService);
   readonly accountMenu = inject(AccountMenuService);
   readonly mediaOverlay = inject(PublicationMediaOverlayService);
+  readonly themeService = inject(ThemeService);
   private readonly scrollLock = inject(ScrollLockService);
 
   @ViewChild('accountMenuNav') accountMenuNavRef?: ElementRef<HTMLElement>;
 
   currentUser: User | null = null;
   showMobileTopbar = false;
+  showMobileFeedTabs = false;
+  hideMobilePageHeader = false;
   isMessagesRoute = false;
   isFullWidthChatRoute = false;
   private initialNavigation = true;
@@ -121,6 +129,10 @@ export class MainLayoutComponent {
     return this.currentUser ? `/profile/${this.currentUser.id}` : '/profile/me';
   }
 
+  get displayName(): string {
+    return this.currentUser?.displayName ?? this.currentUser?.username ?? 'Utilizador';
+  }
+
   handleClosePublishModal(): void {
     this.publishModal.close();
   }
@@ -151,6 +163,17 @@ export class MainLayoutComponent {
     this.accountMenu.close();
   }
 
+  handleToggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+
+  handleLogout(): void {
+    this.focusTrap.deactivate();
+    this.accountMenu.close();
+    this.authService.logout();
+    void this.router.navigate(['/login']);
+  }
+
   handleAccountMenuOpened(): void {
     requestAnimationFrame(() => {
       const menu = this.accountMenuNavRef?.nativeElement;
@@ -158,7 +181,9 @@ export class MainLayoutComponent {
         return;
       }
 
-      const firstItem = menu.querySelector<HTMLElement>('[role="menuitem"]');
+      const firstItem = menu.querySelector<HTMLElement>(
+        'a.account-drawer__item, button.account-drawer__item'
+      );
       this.focusTrap.activate(menu, firstItem ?? undefined);
     });
   }
@@ -174,9 +199,9 @@ export class MainLayoutComponent {
       return;
     }
 
-    const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]')).filter(
-      item => item.offsetParent !== null
-    );
+    const items = Array.from(
+      menu.querySelectorAll<HTMLElement>('a.account-drawer__item, button.account-drawer__item')
+    ).filter(item => item.offsetParent !== null);
 
     if (items.length === 0) {
       return;
@@ -212,7 +237,20 @@ export class MainLayoutComponent {
 
   private updateMobileTopbar(url: string): void {
     const path = url.split('?')[0];
-    this.showMobileTopbar = path === '/feed';
+    const isFeed = path === '/feed';
+    const shellRoutes = [
+      '/feed',
+      '/search',
+      '/notifications',
+      '/bookmarks',
+      '/settings',
+      '/profile'
+    ];
+    const isShellRoute = shellRoutes.some(route => path === route || path.startsWith(`${route}/`));
+
+    this.showMobileTopbar = isShellRoute;
+    this.showMobileFeedTabs = isFeed;
+    this.hideMobilePageHeader = isShellRoute;
   }
 
   private syncFullWidthChatRoute(path: string): void {

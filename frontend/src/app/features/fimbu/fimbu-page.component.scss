@@ -47,10 +47,13 @@
   min-height: auto;
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .fimbu-page__title {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.03em;

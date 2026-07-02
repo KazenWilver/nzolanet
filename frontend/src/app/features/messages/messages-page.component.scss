@@ -43,13 +43,15 @@
 .messages-page__inbox-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--spacing-sm);
   padding: 4px 20px 12px;
   min-height: auto;
 }
 
 .messages-page__inbox-title {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.03em;

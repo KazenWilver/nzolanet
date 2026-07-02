@@ -1,7 +1,8 @@
 import { Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import type { User } from '../../core/models/user.model';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -73,6 +74,7 @@ export class SidebarComponent {
   unreadCount = 0;
   unreadMessagesCount = 0;
   accountMenuOpen = false;
+  showMobileFab = true;
 
   readonly primaryNavItems: SidebarItem[] = [
     { type: 'link', id: 'feed', label: 'Feed', labelKey: 'nav.feed', route: '/feed', exact: true, icon: 'home' },
@@ -121,6 +123,17 @@ export class SidebarComponent {
 
         this.conversationService.incrementUnreadLocally(1);
         this.notificationService.incrementUnreadCount(1);
+      });
+
+    this.syncMobileFab(this.router.url);
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(event => {
+        this.syncMobileFab(event.urlAfterRedirects);
       });
   }
 
@@ -171,5 +184,10 @@ export class SidebarComponent {
     }
 
     return this.router.url.startsWith(route);
+  }
+
+  private syncMobileFab(url: string): void {
+    const path = url.split('?')[0];
+    this.showMobileFab = !path.startsWith('/messages') && !path.startsWith('/fimbu');
   }
 }

@@ -7,12 +7,13 @@ import { FimbuService } from '../../core/services/fimbu.service'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component'
 import { TPipe } from '../../core/i18n/translate.pipe'
 import { FimbuMessageTextPipe } from '../../shared/pipes/fimbu-message-text.pipe'
+import { MobileAccountButtonComponent } from '../../shared/components/mobile-account-button/mobile-account-button.component'
 import type { FimbuMessage } from '../../core/models/fimbu.model'
 
 @Component({
   selector: 'app-fimbu-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LoadingSpinnerComponent, TPipe, FimbuMessageTextPipe],
+  imports: [CommonModule, ReactiveFormsModule, LoadingSpinnerComponent, TPipe, FimbuMessageTextPipe, MobileAccountButtonComponent],
   templateUrl: './fimbu-page.component.html',
   styleUrl: './fimbu-page.component.scss'
 })
