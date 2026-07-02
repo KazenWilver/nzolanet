@@ -412,6 +412,10 @@
   display: none;
 }
 
+.sidebar__mobile-fab {
+  display: none;
+}
+
 @media (max-width: 500px) {
   .sidebar__desktop {
     display: none;
