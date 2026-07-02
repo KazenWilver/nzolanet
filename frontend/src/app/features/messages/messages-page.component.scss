@@ -525,25 +525,25 @@
     }
 
     .messages-page__read-status {
-      color: var(--color-text-secondary);
+      color: rgba(255, 255, 255, 0.72);
 
       &--delivered {
-        color: var(--color-text-secondary);
+        color: rgba(255, 255, 255, 0.72);
       }
 
       &--read {
-        color: var(--color-accent);
+        color: #c7d2fe;
       }
     }
 
     :deep(.messages-page__bubble-text a.linkify__mention) {
-      color: var(--color-accent) !important;
-      -webkit-text-fill-color: var(--color-accent) !important;
+      color: #e0e7ff !important;
+      -webkit-text-fill-color: #e0e7ff !important;
       font-weight: 700;
     }
 
     .messages-page__read-more {
-      color: var(--color-accent);
+      color: #e0e7ff;
     }
   }
 
@@ -566,8 +566,9 @@
     }
 
     :deep(.messages-page__bubble-text a.linkify__mention) {
-      color: #a5b4fc !important;
-      -webkit-text-fill-color: #a5b4fc !important;
+      color: #6366f1 !important;
+      -webkit-text-fill-color: #6366f1 !important;
+      font-weight: 700;
     }
   }
 
@@ -883,7 +884,6 @@
   margin-bottom: 4px;
   font-size: 0.78rem;
   font-weight: 800;
-  color: #a5b4fc;
   text-decoration: none;
 
   &:hover {
@@ -892,7 +892,7 @@
 }
 
 .messages-page__bubble--mine .messages-page__sender-in-bubble {
-  color: var(--color-accent);
+  color: #e0e7ff;
 }
 
 .messages-page__bubble-text {

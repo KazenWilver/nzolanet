@@ -277,6 +277,7 @@
                       @if (!message.isMine && activeConversation.isGroup) {
                         <a
                           class="messages-page__sender-in-bubble"
+                          [style.color]="getGroupSenderColor(message.senderId)"
                           [routerLink]="['/profile/by-username', message.senderUsername]"
                         >
                           @{{ message.senderUsername }}

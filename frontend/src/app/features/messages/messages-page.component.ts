@@ -74,6 +74,16 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   private static readonly MESSAGE_EDIT_DELETE_WINDOW_MS = 15 * 60 * 1000
   private static readonly MAX_COLLAPSED_MESSAGE_LINES = 12
   private static readonly MAX_COLLAPSED_MESSAGE_CHARS = 480
+  private static readonly GROUP_SENDER_COLORS = [
+    '#3B82F6',
+    '#10B981',
+    '#EC4899',
+    '#8B5CF6',
+    '#14B8A6',
+    '#F472B6',
+    '#F59E0B',
+    '#06B6D4'
+  ] as const
 
   conversations: ConversationListItem[] = []
   messages: ChatMessage[] = []
@@ -559,6 +569,19 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   getReplyAuthorName(reply: MessageReplyPreview | ChatMessage): string {
     return reply.senderDisplayName ?? reply.senderUsername
+  }
+
+  getGroupSenderColor(senderId: string): string {
+    if (!senderId) {
+      return MessagesPageComponent.GROUP_SENDER_COLORS[0]
+    }
+
+    let hash = 0
+    for (let index = 0; index < senderId.length; index += 1) {
+      hash = (hash + senderId.charCodeAt(index) * (index + 1)) % MessagesPageComponent.GROUP_SENDER_COLORS.length
+    }
+
+    return MessagesPageComponent.GROUP_SENDER_COLORS[hash] ?? MessagesPageComponent.GROUP_SENDER_COLORS[0]
   }
 
   getDeletedForEveryoneLabel(message: ChatMessage): string {
