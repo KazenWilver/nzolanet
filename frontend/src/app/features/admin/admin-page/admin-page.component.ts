@@ -77,6 +77,11 @@ export class AdminPageComponent implements OnInit, OnDestroy {
   cardsMorphState = false
   filtroVistaRapida: 'all' | 'metricas' | 'rankings' | 'denuncias' = 'all'
   filtroDenuncias: 'all' | 'criticas' = 'all'
+  buscaDenuncias = ''
+  filtroMotivoDenuncia = 'all'
+  filtroTipoMediaPublicacao: 'all' | 'texto' | 'com-media' | 'imagem' | 'video' = 'all'
+  ordenacaoPublicacoes: 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas' = 'reports-desc'
+  ordenacaoComentarios: 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas' = 'reports-desc'
   buscaRanking = ''
   ordenacaoHashtags: 'usos-desc' | 'usos-asc' | 'nome-asc' | 'nome-desc' = 'usos-desc'
   ordenacaoPerfis: 'seguidores-desc' | 'seguidores-asc' | 'nome-asc' | 'nome-desc' = 'seguidores-desc'
@@ -349,6 +354,41 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     this.filtroDenuncias = filtro === 'criticas' ? 'criticas' : 'all'
   }
 
+  alterarBuscaDenuncias(valor: string): void {
+    this.buscaDenuncias = valor.trim().toLowerCase()
+  }
+
+  alterarMotivoDenuncia(valor: string): void {
+    this.filtroMotivoDenuncia = valor?.trim().toLowerCase() || 'all'
+  }
+
+  alterarTipoMediaPublicacao(valor: string): void {
+    if (valor === 'texto' || valor === 'com-media' || valor === 'imagem' || valor === 'video') {
+      this.filtroTipoMediaPublicacao = valor
+      return
+    }
+
+    this.filtroTipoMediaPublicacao = 'all'
+  }
+
+  alterarOrdenacaoPublicacoes(valor: string): void {
+    if (valor === 'reports-asc' || valor === 'recentes' || valor === 'antigas') {
+      this.ordenacaoPublicacoes = valor
+      return
+    }
+
+    this.ordenacaoPublicacoes = 'reports-desc'
+  }
+
+  alterarOrdenacaoComentarios(valor: string): void {
+    if (valor === 'reports-asc' || valor === 'recentes' || valor === 'antigas') {
+      this.ordenacaoComentarios = valor
+      return
+    }
+
+    this.ordenacaoComentarios = 'reports-desc'
+  }
+
   atualizarBuscaRanking(valor: string): void {
     this.buscaRanking = valor.trim().toLowerCase()
     this.paginaHashtags = 1
@@ -435,19 +475,85 @@ export class AdminPageComponent implements OnInit, OnDestroy {
   }
 
   obterPublicacoesFiltradas(): PublicacaoDenunciada[] {
+    let itens = [...this.publicacoes]
+
     if (this.filtroDenuncias === 'criticas') {
-      return this.publicacoes.filter(publicacao => publicacao.reportsCount >= 3)
+      itens = itens.filter(publicacao => publicacao.reportsCount >= 3)
     }
 
-    return this.publicacoes
+    if (this.filtroTipoMediaPublicacao === 'texto') {
+      itens = itens.filter(publicacao => !publicacao.imagemUrl && !publicacao.videoUrl)
+    } else if (this.filtroTipoMediaPublicacao === 'com-media') {
+      itens = itens.filter(publicacao => !!publicacao.imagemUrl || !!publicacao.videoUrl)
+    } else if (this.filtroTipoMediaPublicacao === 'imagem') {
+      itens = itens.filter(publicacao => !!publicacao.imagemUrl)
+    } else if (this.filtroTipoMediaPublicacao === 'video') {
+      itens = itens.filter(publicacao => !!publicacao.videoUrl)
+    }
+
+    if (this.filtroMotivoDenuncia !== 'all') {
+      itens = itens.filter(publicacao =>
+        publicacao.reports.some(report => report.motivo.toLowerCase() === this.filtroMotivoDenuncia))
+    }
+
+    if (this.buscaDenuncias) {
+      itens = itens.filter(publicacao => {
+        const alvo = `${publicacao.texto} ${publicacao.donoNome} ${publicacao.donoNomeUtilizador}`.toLowerCase()
+        const reporters = publicacao.reports
+          .map(report => `${report.reporterNome} ${report.reporterNomeUtilizador} ${report.motivo} ${report.descricao ?? ''}`.toLowerCase())
+          .join(' ')
+        return alvo.includes(this.buscaDenuncias) || reporters.includes(this.buscaDenuncias)
+      })
+    }
+
+    return this.ordenarItensDenunciados(itens, this.ordenacaoPublicacoes)
   }
 
   obterComentariosFiltrados(): ComentarioReportado[] {
+    let itens = [...this.comentarios]
+
     if (this.filtroDenuncias === 'criticas') {
-      return this.comentarios.filter(comentario => comentario.reportsCount >= 3)
+      itens = itens.filter(comentario => comentario.reportsCount >= 3)
     }
 
-    return this.comentarios
+    if (this.filtroMotivoDenuncia !== 'all') {
+      itens = itens.filter(comentario =>
+        comentario.reports.some(report => report.motivo.toLowerCase() === this.filtroMotivoDenuncia))
+    }
+
+    if (this.buscaDenuncias) {
+      itens = itens.filter(comentario => {
+        const alvo = `${comentario.texto} ${comentario.autorNome} ${comentario.autorNomeUtilizador}`.toLowerCase()
+        const reporters = comentario.reports
+          .map(report => `${report.reporterNome} ${report.reporterNomeUtilizador} ${report.motivo} ${report.descricao ?? ''}`.toLowerCase())
+          .join(' ')
+        return alvo.includes(this.buscaDenuncias) || reporters.includes(this.buscaDenuncias)
+      })
+    }
+
+    return this.ordenarItensDenunciados(itens, this.ordenacaoComentarios)
+  }
+
+  obterMotivosDenunciaDisponiveis(): string[] {
+    const motivos = new Set<string>()
+
+    this.publicacoes.forEach(publicacao => {
+      publicacao.reports.forEach(report => {
+        if (report.motivo?.trim()) {
+          motivos.add(report.motivo.trim())
+        }
+      })
+    })
+
+    this.comentarios.forEach(comentario => {
+      comentario.reports.forEach(report => {
+        if (report.motivo?.trim()) {
+          motivos.add(report.motivo.trim())
+        }
+      })
+    })
+
+    return [...motivos].sort((a, b) => a.localeCompare(b))
   }
 
   obterGradienteDonut(): string {
@@ -642,6 +748,27 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     this.metricsAnimationFrame = requestAnimationFrame(animar)
+  }
+
+  private ordenarItensDenunciados<T extends { reportsCount: number; criadoEm: string }>(
+    itens: T[],
+    ordenacao: 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas'
+  ): T[] {
+    return itens.sort((a, b) => {
+      if (ordenacao === 'reports-asc') {
+        return a.reportsCount - b.reportsCount
+      }
+
+      if (ordenacao === 'recentes') {
+        return new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
+      }
+
+      if (ordenacao === 'antigas') {
+        return new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime()
+      }
+
+      return b.reportsCount - a.reportsCount
+    })
   }
 
   private normalizarProgresso(valor: number): number {

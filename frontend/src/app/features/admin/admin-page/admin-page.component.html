@@ -82,6 +82,21 @@
           <option value="30d">Últimos 30 dias</option>
         </select>
       </label>
+
+      <label class="admin-page__quick-field">
+        Procurar denúncias
+        <input type="text" [ngModel]="buscaDenuncias" (ngModelChange)="alterarBuscaDenuncias($event)" placeholder="autor, texto, motivo, denunciante" />
+      </label>
+
+      <label class="admin-page__quick-field">
+        Motivo da denúncia
+        <select [ngModel]="filtroMotivoDenuncia" (ngModelChange)="alterarMotivoDenuncia($event)">
+          <option value="all">Todos</option>
+          <option *ngFor="let motivo of obterMotivosDenunciaDisponiveis()" [value]="motivo.toLowerCase()">
+            {{ motivo }}
+          </option>
+        </select>
+      </label>
     </div>
   </section>
 
@@ -309,9 +324,30 @@
         <h2>Publicações denunciadas</h2>
         <p>Com conteúdo completo, autor, denunciantes e ações de moderação.</p>
       </div>
-      <button class="admin-page__btn admin-page__btn--ghost" type="button" (click)="carregarPublicacoesDenunciadas()" [disabled]="carregandoPublicacoes">
-        Recarregar publicações
-      </button>
+      <div class="admin-page__reports-filters">
+        <label class="admin-page__quick-field">
+          Tipo de conteúdo
+          <select [ngModel]="filtroTipoMediaPublicacao" (ngModelChange)="alterarTipoMediaPublicacao($event)">
+            <option value="all">Todos</option>
+            <option value="texto">Só texto</option>
+            <option value="com-media">Com media</option>
+            <option value="imagem">Com imagem</option>
+            <option value="video">Com vídeo</option>
+          </select>
+        </label>
+        <label class="admin-page__quick-field">
+          Ordenar
+          <select [ngModel]="ordenacaoPublicacoes" (ngModelChange)="alterarOrdenacaoPublicacoes($event)">
+            <option value="reports-desc">Mais denúncias</option>
+            <option value="reports-asc">Menos denúncias</option>
+            <option value="recentes">Mais recentes</option>
+            <option value="antigas">Mais antigas</option>
+          </select>
+        </label>
+        <button class="admin-page__btn admin-page__btn--ghost" type="button" (click)="carregarPublicacoesDenunciadas()" [disabled]="carregandoPublicacoes">
+          Recarregar publicações
+        </button>
+      </div>
     </div>
 
     <p *ngIf="!obterPublicacoesFiltradas().length && !carregandoPublicacoes" class="admin-page__empty-state">
@@ -362,9 +398,20 @@
         <h2>Comentários denunciados</h2>
         <p>Fila adicional de moderação para comentários em publicações.</p>
       </div>
-      <button class="admin-page__btn admin-page__btn--ghost" type="button" (click)="carregarComentariosDenunciados()" [disabled]="carregandoComentarios">
-        Recarregar comentários
-      </button>
+      <div class="admin-page__reports-filters">
+        <label class="admin-page__quick-field">
+          Ordenar
+          <select [ngModel]="ordenacaoComentarios" (ngModelChange)="alterarOrdenacaoComentarios($event)">
+            <option value="reports-desc">Mais denúncias</option>
+            <option value="reports-asc">Menos denúncias</option>
+            <option value="recentes">Mais recentes</option>
+            <option value="antigas">Mais antigas</option>
+          </select>
+        </label>
+        <button class="admin-page__btn admin-page__btn--ghost" type="button" (click)="carregarComentariosDenunciados()" [disabled]="carregandoComentarios">
+          Recarregar comentários
+        </button>
+      </div>
     </div>
 
     <p *ngIf="!obterComentariosFiltrados().length && !carregandoComentarios" class="admin-page__empty-state">

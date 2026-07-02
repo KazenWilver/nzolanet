@@ -253,6 +253,13 @@
   }
 }
 
+.admin-page__reports-filters {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .admin-page__badge {
   display: inline-flex;
   align-items: center;
@@ -940,6 +947,10 @@
 
   .admin-page__hero-actions {
     align-items: flex-start;
+    width: 100%;
+  }
+
+  .admin-page__reports-filters {
     width: 100%;
   }
 }
