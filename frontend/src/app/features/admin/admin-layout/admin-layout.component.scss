@@ -75,6 +75,13 @@
     background: vars.$color-gray-hover;
     color: vars.$color-text;
   }
+
+  &--active {
+    border-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-text-primary);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 14%, transparent);
+  }
 }
 
 .admin-layout__actions {

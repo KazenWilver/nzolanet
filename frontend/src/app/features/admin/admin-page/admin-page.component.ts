@@ -12,6 +12,30 @@ import {
 import { AdminRealtimeConnectionState, AdminRealtimeService } from '../../../core/services/admin-realtime.service';
 import { resolveMediaUrl } from '../../../core/helpers/media-url.helper';
 
+type AdminFiltroVistaRapida = 'all' | 'metricas' | 'rankings' | 'denuncias'
+type AdminFiltroDenuncias = 'all' | 'criticas'
+type AdminTipoMediaPublicacao = 'all' | 'texto' | 'com-media' | 'imagem' | 'video'
+type AdminOrdenacaoDenuncias = 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas'
+type AdminOrdenacaoHashtags = 'usos-desc' | 'usos-asc' | 'nome-asc' | 'nome-desc'
+type AdminOrdenacaoPerfis = 'seguidores-desc' | 'seguidores-asc' | 'nome-asc' | 'nome-desc'
+
+interface AdminFiltrosPersistidos {
+  filtroVistaRapida: AdminFiltroVistaRapida
+  filtroDenuncias: AdminFiltroDenuncias
+  buscaDenuncias: string
+  filtroMotivoDenuncia: string
+  filtroTipoMediaPublicacao: AdminTipoMediaPublicacao
+  ordenacaoPublicacoes: AdminOrdenacaoDenuncias
+  ordenacaoComentarios: AdminOrdenacaoDenuncias
+  buscaRanking: string
+  ordenacaoHashtags: AdminOrdenacaoHashtags
+  ordenacaoPerfis: AdminOrdenacaoPerfis
+  paginaHashtags: number
+  paginaPerfis: number
+  tamanhoPaginaTabela: number
+  periodoRanking: AdminRankingPeriod
+}
+
 @Component({
   selector: 'app-admin-page',
   standalone: true,
@@ -20,6 +44,7 @@ import { resolveMediaUrl } from '../../../core/helpers/media-url.helper';
   styleUrls: ['./admin-page.component.scss']
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
+  private readonly filtrosStorageKey = 'nzolanet.admin.dashboard.filtros.v1'
   private readonly ordemAnimacaoMetricas: Array<keyof AdminMetrics> = [
     'totalUtilizadores',
     'totalUtilizadoresOnline',
@@ -75,16 +100,16 @@ export class AdminPageComponent implements OnInit, OnDestroy {
   comentarios: ComentarioReportado[] = [];
   publicacoes: PublicacaoDenunciada[] = [];
   cardsMorphState = false
-  filtroVistaRapida: 'all' | 'metricas' | 'rankings' | 'denuncias' = 'all'
-  filtroDenuncias: 'all' | 'criticas' = 'all'
+  filtroVistaRapida: AdminFiltroVistaRapida = 'all'
+  filtroDenuncias: AdminFiltroDenuncias = 'all'
   buscaDenuncias = ''
   filtroMotivoDenuncia = 'all'
-  filtroTipoMediaPublicacao: 'all' | 'texto' | 'com-media' | 'imagem' | 'video' = 'all'
-  ordenacaoPublicacoes: 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas' = 'reports-desc'
-  ordenacaoComentarios: 'reports-desc' | 'reports-asc' | 'recentes' | 'antigas' = 'reports-desc'
+  filtroTipoMediaPublicacao: AdminTipoMediaPublicacao = 'all'
+  ordenacaoPublicacoes: AdminOrdenacaoDenuncias = 'reports-desc'
+  ordenacaoComentarios: AdminOrdenacaoDenuncias = 'reports-desc'
   buscaRanking = ''
-  ordenacaoHashtags: 'usos-desc' | 'usos-asc' | 'nome-asc' | 'nome-desc' = 'usos-desc'
-  ordenacaoPerfis: 'seguidores-desc' | 'seguidores-asc' | 'nome-asc' | 'nome-desc' = 'seguidores-desc'
+  ordenacaoHashtags: AdminOrdenacaoHashtags = 'usos-desc'
+  ordenacaoPerfis: AdminOrdenacaoPerfis = 'seguidores-desc'
   paginaHashtags = 1
   paginaPerfis = 1
   tamanhoPaginaTabela = 5
@@ -92,6 +117,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
   periodoRanking: AdminRankingPeriod = '30d'
 
   ngOnInit(): void {
+    this.hidratarEstadoFiltros()
     this.atualizarDashboard()
     this.ligarAtualizacaoSignalR()
   }
@@ -346,53 +372,64 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     return (this.metricsAnimadas ?? this.metrics)?.topPerfisMaisSeguidos ?? []
   }
 
-  alterarFiltroVistaRapida(filtro: 'all' | 'metricas' | 'rankings' | 'denuncias'): void {
+  alterarFiltroVistaRapida(filtro: AdminFiltroVistaRapida): void {
     this.filtroVistaRapida = filtro
+    this.persistirEstadoFiltros()
   }
 
   alterarFiltroDenuncias(filtro: string): void {
     this.filtroDenuncias = filtro === 'criticas' ? 'criticas' : 'all'
+    this.persistirEstadoFiltros()
   }
 
   alterarBuscaDenuncias(valor: string): void {
     this.buscaDenuncias = valor.trim().toLowerCase()
+    this.persistirEstadoFiltros()
   }
 
   alterarMotivoDenuncia(valor: string): void {
     this.filtroMotivoDenuncia = valor?.trim().toLowerCase() || 'all'
+    this.persistirEstadoFiltros()
   }
 
   alterarTipoMediaPublicacao(valor: string): void {
     if (valor === 'texto' || valor === 'com-media' || valor === 'imagem' || valor === 'video') {
       this.filtroTipoMediaPublicacao = valor
+      this.persistirEstadoFiltros()
       return
     }
 
     this.filtroTipoMediaPublicacao = 'all'
+    this.persistirEstadoFiltros()
   }
 
   alterarOrdenacaoPublicacoes(valor: string): void {
     if (valor === 'reports-asc' || valor === 'recentes' || valor === 'antigas') {
       this.ordenacaoPublicacoes = valor
+      this.persistirEstadoFiltros()
       return
     }
 
     this.ordenacaoPublicacoes = 'reports-desc'
+    this.persistirEstadoFiltros()
   }
 
   alterarOrdenacaoComentarios(valor: string): void {
     if (valor === 'reports-asc' || valor === 'recentes' || valor === 'antigas') {
       this.ordenacaoComentarios = valor
+      this.persistirEstadoFiltros()
       return
     }
 
     this.ordenacaoComentarios = 'reports-desc'
+    this.persistirEstadoFiltros()
   }
 
   atualizarBuscaRanking(valor: string): void {
     this.buscaRanking = valor.trim().toLowerCase()
     this.paginaHashtags = 1
     this.paginaPerfis = 1
+    this.persistirEstadoFiltros()
   }
 
   alterarOrdenacaoHashtags(valor: string): void {
@@ -403,6 +440,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     this.paginaHashtags = 1
+    this.persistirEstadoFiltros()
   }
 
   alterarOrdenacaoPerfis(valor: string): void {
@@ -413,6 +451,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     this.paginaPerfis = 1
+    this.persistirEstadoFiltros()
   }
 
   alterarTamanhoPagina(valor: number | string): void {
@@ -420,6 +459,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     this.tamanhoPaginaTabela = Math.max(3, Math.min(10, Number.isFinite(numero) ? numero : 5))
     this.paginaHashtags = 1
     this.paginaPerfis = 1
+    this.persistirEstadoFiltros()
   }
 
   alterarPeriodoRanking(valor: string): void {
@@ -431,6 +471,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
     this.paginaHashtags = 1
     this.paginaPerfis = 1
+    this.persistirEstadoFiltros()
     this.carregarMetrics(() => {
       this.ultimaAtualizacao = new Date()
     })
@@ -438,18 +479,22 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
   avancarPaginaHashtags(): void {
     this.paginaHashtags = Math.min(this.totalPaginasHashtags(), this.paginaHashtags + 1)
+    this.persistirEstadoFiltros()
   }
 
   recuarPaginaHashtags(): void {
     this.paginaHashtags = Math.max(1, this.paginaHashtags - 1)
+    this.persistirEstadoFiltros()
   }
 
   avancarPaginaPerfis(): void {
     this.paginaPerfis = Math.min(this.totalPaginasPerfis(), this.paginaPerfis + 1)
+    this.persistirEstadoFiltros()
   }
 
   recuarPaginaPerfis(): void {
     this.paginaPerfis = Math.max(1, this.paginaPerfis - 1)
+    this.persistirEstadoFiltros()
   }
 
   totalPaginasHashtags(): number {
@@ -769,6 +814,123 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
       return b.reportsCount - a.reportsCount
     })
+  }
+
+  private hidratarEstadoFiltros(): void {
+    if (!this.podeUsarStorage()) {
+      return
+    }
+
+    const raw = window.localStorage.getItem(this.filtrosStorageKey)
+    if (!raw) {
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<AdminFiltrosPersistidos>
+      this.filtroVistaRapida = this.normalizarFiltroVistaRapida(parsed.filtroVistaRapida)
+      this.filtroDenuncias = parsed.filtroDenuncias === 'criticas' ? 'criticas' : 'all'
+      this.buscaDenuncias = typeof parsed.buscaDenuncias === 'string' ? parsed.buscaDenuncias : ''
+      this.filtroMotivoDenuncia = typeof parsed.filtroMotivoDenuncia === 'string' ? parsed.filtroMotivoDenuncia : 'all'
+      this.filtroTipoMediaPublicacao = this.normalizarTipoMedia(parsed.filtroTipoMediaPublicacao)
+      this.ordenacaoPublicacoes = this.normalizarOrdenacaoDenuncias(parsed.ordenacaoPublicacoes)
+      this.ordenacaoComentarios = this.normalizarOrdenacaoDenuncias(parsed.ordenacaoComentarios)
+      this.buscaRanking = typeof parsed.buscaRanking === 'string' ? parsed.buscaRanking : ''
+      this.ordenacaoHashtags = this.normalizarOrdenacaoHashtags(parsed.ordenacaoHashtags)
+      this.ordenacaoPerfis = this.normalizarOrdenacaoPerfis(parsed.ordenacaoPerfis)
+      this.paginaHashtags = this.normalizarNumero(parsed.paginaHashtags, 1, 999, 1)
+      this.paginaPerfis = this.normalizarNumero(parsed.paginaPerfis, 1, 999, 1)
+      this.tamanhoPaginaTabela = this.normalizarNumero(parsed.tamanhoPaginaTabela, 3, 10, 5)
+      this.periodoRanking = this.normalizarPeriodoRanking(parsed.periodoRanking)
+    } catch {
+      window.localStorage.removeItem(this.filtrosStorageKey)
+    }
+  }
+
+  private persistirEstadoFiltros(): void {
+    if (!this.podeUsarStorage()) {
+      return
+    }
+
+    const estado: AdminFiltrosPersistidos = {
+      filtroVistaRapida: this.filtroVistaRapida,
+      filtroDenuncias: this.filtroDenuncias,
+      buscaDenuncias: this.buscaDenuncias,
+      filtroMotivoDenuncia: this.filtroMotivoDenuncia,
+      filtroTipoMediaPublicacao: this.filtroTipoMediaPublicacao,
+      ordenacaoPublicacoes: this.ordenacaoPublicacoes,
+      ordenacaoComentarios: this.ordenacaoComentarios,
+      buscaRanking: this.buscaRanking,
+      ordenacaoHashtags: this.ordenacaoHashtags,
+      ordenacaoPerfis: this.ordenacaoPerfis,
+      paginaHashtags: this.paginaHashtags,
+      paginaPerfis: this.paginaPerfis,
+      tamanhoPaginaTabela: this.tamanhoPaginaTabela,
+      periodoRanking: this.periodoRanking
+    }
+
+    window.localStorage.setItem(this.filtrosStorageKey, JSON.stringify(estado))
+  }
+
+  private podeUsarStorage(): boolean {
+    return typeof window !== 'undefined' && !!window.localStorage
+  }
+
+  private normalizarFiltroVistaRapida(valor: unknown): AdminFiltroVistaRapida {
+    if (valor === 'metricas' || valor === 'rankings' || valor === 'denuncias') {
+      return valor
+    }
+
+    return 'all'
+  }
+
+  private normalizarTipoMedia(valor: unknown): AdminTipoMediaPublicacao {
+    if (valor === 'texto' || valor === 'com-media' || valor === 'imagem' || valor === 'video') {
+      return valor
+    }
+
+    return 'all'
+  }
+
+  private normalizarOrdenacaoDenuncias(valor: unknown): AdminOrdenacaoDenuncias {
+    if (valor === 'reports-asc' || valor === 'recentes' || valor === 'antigas') {
+      return valor
+    }
+
+    return 'reports-desc'
+  }
+
+  private normalizarOrdenacaoHashtags(valor: unknown): AdminOrdenacaoHashtags {
+    if (valor === 'usos-asc' || valor === 'nome-asc' || valor === 'nome-desc') {
+      return valor
+    }
+
+    return 'usos-desc'
+  }
+
+  private normalizarOrdenacaoPerfis(valor: unknown): AdminOrdenacaoPerfis {
+    if (valor === 'seguidores-asc' || valor === 'nome-asc' || valor === 'nome-desc') {
+      return valor
+    }
+
+    return 'seguidores-desc'
+  }
+
+  private normalizarPeriodoRanking(valor: unknown): AdminRankingPeriod {
+    if (valor === '24h' || valor === '7d' || valor === '30d') {
+      return valor
+    }
+
+    return '30d'
+  }
+
+  private normalizarNumero(valor: unknown, min: number, max: number, fallback: number): number {
+    const numero = typeof valor === 'number' ? valor : Number(valor)
+    if (!Number.isFinite(numero)) {
+      return fallback
+    }
+
+    return Math.max(min, Math.min(max, Math.floor(numero)))
   }
 
   private normalizarProgresso(valor: number): number {

@@ -6,11 +6,16 @@
     </div>
 
     <nav class="admin-layout__nav" aria-label="Navegação do painel admin">
-      <a class="admin-layout__nav-link" href="#secao-visao-geral">Visão geral</a>
-      <a class="admin-layout__nav-link" href="#secao-metricas">Métricas</a>
-      <a class="admin-layout__nav-link" href="#secao-rankings">Rankings</a>
-      <a class="admin-layout__nav-link" href="#secao-publicacoes-denunciadas">Denúncias de publicações</a>
-      <a class="admin-layout__nav-link" href="#secao-comentarios-denunciados">Denúncias de comentários</a>
+      <a
+        *ngFor="let item of navigationItems"
+        class="admin-layout__nav-link"
+        [class.admin-layout__nav-link--active]="isSecaoAtiva(item.id)"
+        [attr.aria-current]="isSecaoAtiva(item.id) ? 'true' : null"
+        [href]="'#' + item.id"
+        (click)="handleIrParaSecao(item.id)"
+      >
+        {{ item.label }}
+      </a>
     </nav>
 
     <div class="admin-layout__actions admin-layout__actions--sidebar">
