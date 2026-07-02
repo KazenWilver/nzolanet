@@ -47,6 +47,7 @@ interface AdminFiltrosPersistidos {
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
   private readonly filtrosStorageKey = 'nzolanet.admin.dashboard.filtros.v1'
+  private readonly filtrosAtualizadosEventName = 'nzolanet-admin-filtros-atualizados'
   private readonly adminWelcomeFlagKey = 'nzolanet.admin.show-welcome-once'
   private readonly ordemAnimacaoMetricas: Array<keyof AdminMetrics> = [
     'totalUtilizadores',
@@ -868,6 +869,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
       this.tamanhoPaginaTabela = this.normalizarNumero(parsed.tamanhoPaginaTabela, 3, 10, 5)
       this.periodoRanking = this.normalizarPeriodoRanking(parsed.periodoRanking)
       this.modoAnimacao = this.normalizarModoAnimacao(parsed.modoAnimacao)
+      this.emitirAtualizacaoFiltros()
     } catch {
       window.localStorage.removeItem(this.filtrosStorageKey)
     }
@@ -897,6 +899,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
 
     window.localStorage.setItem(this.filtrosStorageKey, JSON.stringify(estado))
+    this.emitirAtualizacaoFiltros()
   }
 
   private podeUsarStorage(): boolean {
@@ -979,6 +982,14 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
   private normalizarModoAnimacao(valor: unknown): AdminModoAnimacao {
     return valor === 'subtil' ? 'subtil' : 'intenso'
+  }
+
+  private emitirAtualizacaoFiltros(): void {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.dispatchEvent(new CustomEvent(this.filtrosAtualizadosEventName))
   }
 
   private normalizarNumero(valor: unknown, min: number, max: number, fallback: number): number {

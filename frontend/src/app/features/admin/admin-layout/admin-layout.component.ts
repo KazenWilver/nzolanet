@@ -12,6 +12,8 @@ import { ThemeService } from '../../../core/services/theme.service';
   styleUrl: './admin-layout.component.scss'
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
+  private readonly filtrosStorageKey = 'nzolanet.admin.dashboard.filtros.v1'
+  private readonly filtrosAtualizadosEventName = 'nzolanet-admin-filtros-atualizados'
   readonly navigationItems = [
     { id: 'secao-visao-geral', label: 'Visão geral' },
     { id: 'secao-metricas', label: 'Métricas' },
@@ -20,9 +22,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     { id: 'secao-comentarios-denunciados', label: 'Denúncias de comentários' }
   ]
   secaoAtiva = 'secao-visao-geral'
+  periodoRankingAtivo: '24h' | '7d' | '30d' = '30d'
   private scrollSpyRaf: number | null = null
   private readonly handleScrollSpy = () => {
     this.executarScrollSpy()
+  }
+  private readonly handleFiltrosAtualizados = () => {
+    this.atualizarPeriodoRankingAtivo()
   }
 
   constructor(
@@ -38,6 +44,9 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     window.addEventListener('scroll', this.handleScrollSpy, { passive: true })
     window.addEventListener('resize', this.handleScrollSpy, { passive: true })
     window.addEventListener('hashchange', this.handleScrollSpy)
+    window.addEventListener(this.filtrosAtualizadosEventName, this.handleFiltrosAtualizados)
+    window.addEventListener('storage', this.handleFiltrosAtualizados)
+    this.atualizarPeriodoRankingAtivo()
     this.executarScrollSpy()
   }
 
@@ -49,6 +58,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     window.removeEventListener('scroll', this.handleScrollSpy)
     window.removeEventListener('resize', this.handleScrollSpy)
     window.removeEventListener('hashchange', this.handleScrollSpy)
+    window.removeEventListener(this.filtrosAtualizadosEventName, this.handleFiltrosAtualizados)
+    window.removeEventListener('storage', this.handleFiltrosAtualizados)
     if (this.scrollSpyRaf !== null) {
       cancelAnimationFrame(this.scrollSpyRaf)
       this.scrollSpyRaf = null
@@ -115,5 +126,32 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   private isElementoVisivel(element: HTMLElement): boolean {
     const style = window.getComputedStyle(element)
     return style.display !== 'none' && style.visibility !== 'hidden'
+  }
+
+  private atualizarPeriodoRankingAtivo(): void {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const raw = window.localStorage.getItem(this.filtrosStorageKey)
+    if (!raw) {
+      this.periodoRankingAtivo = '30d'
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as { periodoRanking?: unknown }
+      this.periodoRankingAtivo = this.normalizarPeriodoRanking(parsed.periodoRanking)
+    } catch {
+      this.periodoRankingAtivo = '30d'
+    }
+  }
+
+  private normalizarPeriodoRanking(valor: unknown): '24h' | '7d' | '30d' {
+    if (valor === '24h' || valor === '7d' || valor === '30d') {
+      return valor
+    }
+
+    return '30d'
   }
 }
