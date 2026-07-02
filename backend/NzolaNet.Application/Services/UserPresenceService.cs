@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using NzolaNet.Application.Interfaces;
 
 namespace NzolaNet.Application.Services;
@@ -45,6 +46,42 @@ public class UserPresenceService : IUserPresenceService
     public bool IsOnline(Guid userId)
     {
         return _connections.TryGetValue(userId, out var connections) && connections.Count > 0;
+    }
+
+    public int GetOnlineUsersCount()
+    {
+        var count = 0;
+
+        foreach (var (_, connections) in _connections)
+        {
+            lock (connections)
+            {
+                if (connections.Count > 0)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    public IReadOnlyCollection<Guid> GetOnlineUserIds()
+    {
+        var onlineUsers = new List<Guid>();
+
+        foreach (var (userId, connections) in _connections)
+        {
+            lock (connections)
+            {
+                if (connections.Count > 0)
+                {
+                    onlineUsers.Add(userId);
+                }
+            }
+        }
+
+        return onlineUsers;
     }
 
     public DateTime? GetLastSeenUtc(Guid userId)

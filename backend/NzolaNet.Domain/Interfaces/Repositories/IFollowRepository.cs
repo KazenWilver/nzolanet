@@ -20,4 +20,14 @@ public interface IFollowRepository
     Task<bool> UpdateFollowAsync(Follow follow);
     Task<bool> IsFollowPendingAsync(Guid followerId, Guid followedId);
     Task<bool> HasIncomingFollowRequestAsync(Guid recipientId, Guid requesterId);
+    Task<IReadOnlyList<TopFollowedProfileEntry>> GetTopFollowedProfilesAsync(int limit, DateTime? sinceUtc = null);
+}
+
+public sealed class TopFollowedProfileEntry
+{
+    public Guid UserId { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string NomeUtilizador { get; set; } = string.Empty;
+    public string? FotoPerfil { get; set; }
+    public int TotalSeguidores { get; set; }
 }

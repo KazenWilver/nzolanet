@@ -1,17 +1,34 @@
 <div class="admin-layout">
-  <header class="admin-layout__header">
+  <aside class="admin-layout__sidebar">
     <div>
       <p class="admin-layout__eyebrow">Área exclusiva de administração</p>
       <h1 class="admin-layout__title">Painel do Administrador NzolaNet</h1>
     </div>
 
-    <div class="admin-layout__actions">
+    <nav class="admin-layout__nav" aria-label="Navegação do painel admin">
+      <a class="admin-layout__nav-link" href="#secao-visao-geral">Visão geral</a>
+      <a class="admin-layout__nav-link" href="#secao-metricas">Métricas</a>
+      <a class="admin-layout__nav-link" href="#secao-rankings">Rankings</a>
+      <a class="admin-layout__nav-link" href="#secao-publicacoes-denunciadas">Denúncias de publicações</a>
+      <a class="admin-layout__nav-link" href="#secao-comentarios-denunciados">Denúncias de comentários</a>
+    </nav>
+
+    <div class="admin-layout__actions admin-layout__actions--sidebar">
       <a routerLink="/feed" class="admin-layout__btn admin-layout__btn--ghost">Voltar ao Feed</a>
+      <button type="button" class="admin-layout__btn admin-layout__btn--ghost" (click)="handleToggleTheme()">
+        {{ themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro' }}
+      </button>
       <button type="button" class="admin-layout__btn admin-layout__btn--primary" (click)="handleLogout()">Terminar sessão</button>
     </div>
-  </header>
+  </aside>
 
-  <main class="admin-layout__main">
-    <router-outlet />
-  </main>
+  <div class="admin-layout__content">
+    <header class="admin-layout__header">
+      <p class="admin-layout__header-text">Controlo em tempo real, moderação e análise de plataforma</p>
+    </header>
+
+    <main class="admin-layout__main">
+      <router-outlet />
+    </main>
+  </div>
 </div>

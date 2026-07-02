@@ -489,6 +489,37 @@ public class ConversationRepository : IConversationRepository
             .FirstOrDefaultAsync();
     }
 
+    public Task<int> GetTotalGroupsCountAsync()
+    {
+        return _context.Conversations.CountAsync(conversation => conversation.IsGroup);
+    }
+
+    public Task<int> GetTotalMessagesCountAsync()
+    {
+        return _context.Messages.CountAsync();
+    }
+
+    public async Task<long> GetTotalMessageDeliveriesCountAsync()
+    {
+        var participantCountsPerConversation = _context.ConversationParticipants
+            .AsNoTracking()
+            .GroupBy(participant => participant.ConversationId)
+            .Select(group => new
+            {
+                ConversationId = group.Key,
+                ParticipantCount = group.Count()
+            });
+
+        var deliveries = await (
+            from message in _context.Messages.AsNoTracking()
+            join participants in participantCountsPerConversation
+                on message.ConversationId equals participants.ConversationId
+            select participants.ParticipantCount > 1 ? participants.ParticipantCount - 1 : 0
+        ).SumAsync();
+
+        return deliveries;
+    }
+
     public async Task<bool> DeleteConversationAsync(Guid conversationId)
     {
         var conversation = await _context.Conversations

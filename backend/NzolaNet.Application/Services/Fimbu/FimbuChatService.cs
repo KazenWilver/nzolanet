@@ -34,6 +34,8 @@ public sealed partial class FimbuChatService : IFimbuChatService
     private readonly FimbuSettings _settings;
     private readonly IFimbuLexiconService _lexiconService;
     private readonly IFimbuMoodService _moodService;
+    private readonly IAdminAnalyticsStore _adminAnalyticsStore;
+    private readonly IAdminRealtimeNotifier _adminRealtimeNotifier;
     private readonly ILogger<FimbuChatService> _logger;
     private readonly ConcurrentDictionary<Guid, UserSession> _sessions = new();
     private readonly ProviderRotator _rotator;
@@ -47,12 +49,16 @@ public sealed partial class FimbuChatService : IFimbuChatService
         IOptions<FimbuSettings> settings,
         IFimbuLexiconService lexiconService,
         IFimbuMoodService moodService,
+        IAdminAnalyticsStore adminAnalyticsStore,
+        IAdminRealtimeNotifier adminRealtimeNotifier,
         ILogger<FimbuChatService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _settings = settings.Value;
         _lexiconService = lexiconService;
         _moodService = moodService;
+        _adminAnalyticsStore = adminAnalyticsStore;
+        _adminRealtimeNotifier = adminRealtimeNotifier;
         _logger = logger;
         _rotator = new ProviderRotator(_settings.ProviderCooldownSeconds);
     }
@@ -145,6 +151,9 @@ public sealed partial class FimbuChatService : IFimbuChatService
                 session.LastActivity = timestamp;
                 TrimHistory(session.Messages);
             }
+
+            _adminAnalyticsStore.RecordFimbuInteraction(userId, assistantMessageCreated: true);
+            await _adminRealtimeNotifier.NotifyMetricsChangedAsync(cancellationToken);
 
             return new FimbuChatResponseDto
             {

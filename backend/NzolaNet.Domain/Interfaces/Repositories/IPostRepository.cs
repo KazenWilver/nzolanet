@@ -36,4 +36,12 @@ public interface IPostRepository
     Task<bool> UpdateAsync(Post post);
     Task<bool> DeleteAsync(Post post);
     Task<int> GetTotalCountAsync();
+    Task<int> GetTotalCreatedHashtagsAsync(DateTime? sinceUtc = null);
+    Task<IReadOnlyList<PostHashtagUsageEntry>> GetTopUsedHashtagsAsync(int limit, DateTime? sinceUtc = null);
+}
+
+public sealed class PostHashtagUsageEntry
+{
+    public string Hashtag { get; set; } = string.Empty;
+    public int Usos { get; set; }
 }

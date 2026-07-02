@@ -18,6 +18,7 @@ public class PostService : IPostService
     private readonly IBookmarkRepository _bookmarkRepository;
     private readonly IStorageService _storageService;
     private readonly INotificationService _notificationService;
+    private readonly IAdminRealtimeNotifier _adminRealtimeNotifier;
 
     public PostService(
         IPostRepository postRepository,
@@ -29,7 +30,8 @@ public class PostService : IPostService
         IRepostRepository repostRepository,
         IBookmarkRepository bookmarkRepository,
         IStorageService storageService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IAdminRealtimeNotifier adminRealtimeNotifier)
     {
         _postRepository = postRepository;
         _userRepository = userRepository;
@@ -41,6 +43,7 @@ public class PostService : IPostService
         _bookmarkRepository = bookmarkRepository;
         _storageService = storageService;
         _notificationService = notificationService;
+        _adminRealtimeNotifier = adminRealtimeNotifier;
     }
 
     public async Task<PublicationResponseDto> CreateAsync(Guid userId, CreatePublicationDto createDto)
@@ -104,6 +107,7 @@ public class PostService : IPostService
 
         post.User = user;
         await NotifyMentionedUsersAsync(userId, post.Id, createDto.Text);
+        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
         return MapToDto(post, userId);
     }
 
@@ -166,6 +170,7 @@ public class PostService : IPostService
             throw new ArgumentException("Não foi possível atualizar a publicação.");
         }
 
+        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
         return MapToDto(post, userId);
     }
 
@@ -199,6 +204,8 @@ public class PostService : IPostService
         {
             throw new ArgumentException("Não foi possível eliminar a publicação.");
         }
+
+        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
     }
 
     public async Task<IEnumerable<PublicationResponseDto>> GetAllAsync(Guid? currentUserId = null)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NzolaNet.Domain.Entities;
@@ -11,6 +12,10 @@ namespace NzolaNet.Infrastructure.Repositories;
 
 public class PostRepository : IPostRepository
 {
+    private static readonly Regex HashtagRegex = new(
+        @"#([A-Za-z0-9_\u00C0-\u024F]+)",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private readonly ApplicationDbContext _context;
 
     public PostRepository(ApplicationDbContext context)
@@ -222,6 +227,78 @@ public class PostRepository : IPostRepository
     public Task<int> GetTotalCountAsync()
     {
         return _context.Posts.CountAsync();
+    }
+
+    public async Task<int> GetTotalCreatedHashtagsAsync(DateTime? sinceUtc = null)
+    {
+        var query = _context.Posts
+            .AsNoTracking()
+            .Where(post => !string.IsNullOrWhiteSpace(post.Text))
+            .Select(post => new { post.Text, post.CreatedAt });
+
+        if (sinceUtc.HasValue)
+        {
+            query = query.Where(post => post.CreatedAt >= sinceUtc.Value);
+        }
+
+        var postTexts = await query.Select(post => post.Text).ToListAsync();
+
+        var uniqueHashtags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var text in postTexts)
+        {
+            foreach (Match match in HashtagRegex.Matches(text))
+            {
+                var hashtag = match.Groups[1].Value.Trim();
+                if (!string.IsNullOrWhiteSpace(hashtag))
+                {
+                    uniqueHashtags.Add(hashtag);
+                }
+            }
+        }
+
+        return uniqueHashtags.Count;
+    }
+
+    public async Task<IReadOnlyList<PostHashtagUsageEntry>> GetTopUsedHashtagsAsync(int limit, DateTime? sinceUtc = null)
+    {
+        var safeLimit = Math.Clamp(limit, 1, 20);
+        var query = _context.Posts
+            .AsNoTracking()
+            .Where(post => !string.IsNullOrWhiteSpace(post.Text))
+            .Select(post => new { post.Text, post.CreatedAt });
+
+        if (sinceUtc.HasValue)
+        {
+            query = query.Where(post => post.CreatedAt >= sinceUtc.Value);
+        }
+
+        var postTexts = await query.Select(post => post.Text).ToListAsync();
+
+        var hashtagUsage = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var text in postTexts)
+        {
+            foreach (Match match in HashtagRegex.Matches(text))
+            {
+                var hashtag = match.Groups[1].Value.Trim();
+                if (string.IsNullOrWhiteSpace(hashtag))
+                {
+                    continue;
+                }
+
+                hashtagUsage[hashtag] = hashtagUsage.GetValueOrDefault(hashtag) + 1;
+            }
+        }
+
+        return hashtagUsage
+            .OrderByDescending(entry => entry.Value)
+            .ThenBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(safeLimit)
+            .Select(entry => new PostHashtagUsageEntry
+            {
+                Hashtag = entry.Key,
+                Usos = entry.Value
+            })
+            .ToList();
     }
 
     private static IQueryable<Post> ApplyVisibilityFilter(

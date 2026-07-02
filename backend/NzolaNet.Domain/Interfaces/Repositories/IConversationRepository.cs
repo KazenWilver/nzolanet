@@ -33,5 +33,8 @@ public interface IConversationRepository
     Task<Conversation?> GetByImagePathAsync(string imagePath);
     Task<Message?> GetByMediaPathAsync(string mediaPath);
     Task<Guid?> GetGroupCreatorUserIdAsync(Guid conversationId);
+    Task<int> GetTotalGroupsCountAsync();
+    Task<int> GetTotalMessagesCountAsync();
+    Task<long> GetTotalMessageDeliveriesCountAsync();
     Task<bool> DeleteConversationAsync(Guid conversationId);
 }

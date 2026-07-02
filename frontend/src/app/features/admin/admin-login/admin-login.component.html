@@ -1,70 +1,155 @@
-<div class="admin-login">
-  <div class="admin-login__container">
-    <div class="admin-login__box">
-      <div class="admin-login__header">
-        <h1 class="admin-login__titulo">Painel do Administrador</h1>
-        <p class="admin-login__subtitulo">Acesso Restrito</p>
+<div class="admin-auth">
+  <button type="button" class="admin-auth__theme" (click)="alternarTema()">
+    {{ themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro' }}
+  </button>
+
+  <div class="admin-auth__card">
+    <section class="admin-auth__visual">
+      <div class="admin-auth__orb admin-auth__orb--a" #gradientOrbA aria-hidden="true"></div>
+      <div class="admin-auth__orb admin-auth__orb--b" #gradientOrbB aria-hidden="true"></div>
+      <div class="admin-auth__orb admin-auth__orb--c" #gradientOrbC aria-hidden="true"></div>
+      <div class="admin-auth__grain" aria-hidden="true"></div>
+
+      <div class="admin-auth__visual-copy">
+        <p>Painel seguro NzolaNet</p>
+        <h2>Gestão administrativa com visibilidade total em tempo real</h2>
+      </div>
+    </section>
+
+    <section class="admin-auth__form-panel">
+      <div class="admin-auth__brand">*</div>
+      <h1 #titleRef>{{ modo === 'login' ? 'Entrar como administrador' : 'Registar administrador' }}</h1>
+      <p #descriptionRef class="admin-auth__description">
+        {{ modo === 'login'
+          ? 'Acesso exclusivo para gestão da plataforma.'
+          : 'Cria uma conta administrativa com permissões de moderação e dashboard.' }}
+      </p>
+
+      <div class="admin-auth__tabs">
+        <button type="button" class="admin-auth__tab" [class.admin-auth__tab--active]="modo === 'login'" (click)="alternarModo('login')">
+          Login
+        </button>
+        <button type="button" class="admin-auth__tab" [class.admin-auth__tab--active]="modo === 'register'" (click)="alternarModo('register')">
+          Registo
+        </button>
       </div>
 
-      <form class="admin-login__form" (ngSubmit)="entrar()">
-        <div class="admin-login__grupo">
-          <label class="admin-login__label" for="admin-login-email">Email de Administrador</label>
+      <form #authFormRoot class="admin-auth__form" (ngSubmit)="submeter()">
+        <div
+          #registerFields
+          class="admin-auth__register-fields"
+          [class.admin-auth__register-fields--active]="modo === 'register'"
+          [attr.aria-hidden]="modo === 'login'"
+        >
+          <div class="admin-auth__field admin-auth__field--register">
+            <label class="admin-auth__label" for="admin-display-name">Nome completo</label>
+            <input
+              id="admin-display-name"
+              class="admin-auth__input"
+              type="text"
+              [(ngModel)]="nome"
+              name="nome"
+              [disabled]="carregando || modo !== 'register'"
+              placeholder="Ex.: Ana Administração"
+            />
+          </div>
+
+          <div class="admin-auth__field admin-auth__field--register">
+            <label class="admin-auth__label" for="admin-username">Nome de utilizador</label>
+            <input
+              id="admin-username"
+              class="admin-auth__input"
+              type="text"
+              [(ngModel)]="nomeUtilizador"
+              name="nomeUtilizador"
+              [disabled]="carregando || modo !== 'register'"
+              placeholder="Ex.: ana.admin"
+            />
+          </div>
+
+          <div class="admin-auth__field admin-auth__field--register">
+            <label class="admin-auth__label" for="admin-password-confirm">Confirmar senha</label>
+            <div class="admin-auth__password-wrap">
+              <input
+                id="admin-password-confirm"
+                class="admin-auth__input"
+                [type]="mostrarConfirmarSenha ? 'text' : 'password'"
+                [(ngModel)]="confirmarSenha"
+                name="confirmarSenha"
+                [disabled]="carregando || modo !== 'register'"
+                placeholder="Repete a senha"
+              />
+              <button type="button" class="admin-auth__toggle-password" (click)="alternarMostrarConfirmarSenha()" [disabled]="carregando || modo !== 'register'">
+                {{ mostrarConfirmarSenha ? 'Ocultar' : 'Mostrar' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-auth__field admin-auth__field--register">
+            <label class="admin-auth__label" for="admin-invite">Código de convite (opcional)</label>
+            <input
+              id="admin-invite"
+              class="admin-auth__input"
+              type="text"
+              [(ngModel)]="codigoConvite"
+              name="codigoConvite"
+              [disabled]="carregando || modo !== 'register'"
+              placeholder="Só necessário se configurado no servidor"
+            />
+          </div>
+        </div>
+
+        <div class="admin-auth__field admin-auth__field--shared">
+          <label class="admin-auth__label" for="admin-email">Email admin</label>
           <input
-            id="admin-login-email"
+            id="admin-email"
+            class="admin-auth__input"
             type="email"
-            class="admin-login__input"
             [(ngModel)]="email"
             name="email"
-            placeholder="Insira seu email de admin"
             [disabled]="carregando"
+            placeholder="admin@nzolanet.app"
           />
         </div>
 
-        <div class="admin-login__grupo">
-          <label class="admin-login__label" for="admin-login-password">Senha</label>
-          <div class="admin-login__senha-grupo">
+        <div class="admin-auth__field admin-auth__field--shared">
+          <label class="admin-auth__label" for="admin-password">Senha</label>
+          <div class="admin-auth__password-wrap">
             <input
-              id="admin-login-password"
+              id="admin-password"
+              class="admin-auth__input"
               [type]="mostrarSenha ? 'text' : 'password'"
-              class="admin-login__input"
               [(ngModel)]="senha"
               name="senha"
-              placeholder="Insira sua senha de admin"
               [disabled]="carregando"
+              placeholder="Mínimo 6 caracteres"
             />
-            <button
-              type="button"
-              class="admin-login__toggle-senha"
-              (click)="alternarMostrarSenha()"
-              [disabled]="carregando"
-            >
-              {{ mostrarSenha ? '🙈' : '👁️' }}
+            <button type="button" class="admin-auth__toggle-password" (click)="alternarMostrarSenha()" [disabled]="carregando">
+              {{ mostrarSenha ? 'Ocultar' : 'Mostrar' }}
             </button>
           </div>
         </div>
 
-        <div *ngIf="mensagemErro" class="admin-login__erro">
-          {{ mensagemErro }}
-        </div>
+        @if (mensagemErro) {
+          <p class="admin-auth__feedback admin-auth__feedback--error">{{ mensagemErro }}</p>
+        }
 
-        <button
-          type="submit"
-          class="admin-login__btn"
-          [disabled]="carregando"
-        >
-          {{ carregando ? 'A fazer login...' : 'Entrar' }}
+        @if (mensagemSucesso) {
+          <p class="admin-auth__feedback admin-auth__feedback--success">{{ mensagemSucesso }}</p>
+        }
+
+        <button type="submit" class="admin-auth__submit" [disabled]="carregando">
+          {{
+            carregando
+              ? (modo === 'login' ? 'A autenticar...' : 'A registar...')
+              : (modo === 'login' ? 'Entrar no painel' : 'Criar administrador')
+          }}
         </button>
       </form>
 
-      <div class="admin-login__footer">
-        <button
-          type="button"
-          class="admin-login__link-voltar"
-          (click)="voltarParaApp()"
-        >
-          ← Voltar à aplicação
-        </button>
+      <div class="admin-auth__footer">
+        <button type="button" (click)="voltarParaApp()">Voltar à aplicação</button>
       </div>
-    </div>
+    </section>
   </div>
 </div>

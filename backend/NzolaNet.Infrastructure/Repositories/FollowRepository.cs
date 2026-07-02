@@ -103,4 +103,41 @@ public class FollowRepository : IFollowRepository
         return await _context.Follows.AnyAsync(
             f => f.FollowerId == requesterId && f.FollowedId == recipientId && !f.IsApproved);
     }
+
+    public async Task<IReadOnlyList<TopFollowedProfileEntry>> GetTopFollowedProfilesAsync(int limit, DateTime? sinceUtc = null)
+    {
+        var safeLimit = Math.Clamp(limit, 1, 20);
+        var query = _context.Follows
+            .AsNoTracking()
+            .Where(follow => follow.IsApproved);
+
+        if (sinceUtc.HasValue)
+        {
+            query = query.Where(follow => follow.CreatedAt >= sinceUtc.Value);
+        }
+
+        return await query
+            .GroupBy(follow => follow.FollowedId)
+            .Select(group => new
+            {
+                UserId = group.Key,
+                TotalSeguidores = group.Count()
+            })
+            .OrderByDescending(item => item.TotalSeguidores)
+            .ThenBy(item => item.UserId)
+            .Take(safeLimit)
+            .Join(
+                _context.Users.AsNoTracking(),
+                grouped => grouped.UserId,
+                user => user.Id,
+                (grouped, user) => new TopFollowedProfileEntry
+                {
+                    UserId = user.Id,
+                    Nome = user.DisplayName ?? user.UserName ?? "Utilizador",
+                    NomeUtilizador = user.UserName ?? "utilizador",
+                    FotoPerfil = user.ProfilePhoto,
+                    TotalSeguidores = grouped.TotalSeguidores
+                })
+            .ToListAsync();
+    }
 }

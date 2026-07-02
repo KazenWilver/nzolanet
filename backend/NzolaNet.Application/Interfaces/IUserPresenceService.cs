@@ -11,5 +11,9 @@ public interface IUserPresenceService
 
     bool IsOnline(Guid userId);
 
+    int GetOnlineUsersCount();
+
+    IReadOnlyCollection<Guid> GetOnlineUserIds();
+
     DateTime? GetLastSeenUtc(Guid userId);
 }
