@@ -416,22 +416,22 @@
                       @if (message.forwardedFromMessageId) {
                         <span class="messages-page__forwarded-label">Encaminhada</span>
                       }
-                      <footer class="messages-page__bubble-meta">
-                        <time [dateTime]="message.createdAt">
-                          {{ message.createdAt | date:'HH:mm' }}
-                        </time>
-                        @if (message.isMine) {
-                          <span
-                            class="messages-page__read-status"
-                            [class.messages-page__read-status--delivered]="message.readStatus === 'delivered'"
-                            [class.messages-page__read-status--read]="message.readStatus === 'read'"
-                            [attr.aria-label]="getReadStatusLabel(message.readStatus)"
-                          >
-                            {{ getReadStatusSymbol(message.readStatus) }}
-                          </span>
-                        }
-                      </footer>
                     </div>
+                    <footer class="messages-page__bubble-meta">
+                      <time [dateTime]="message.createdAt">
+                        {{ message.createdAt | date:'HH:mm' }}
+                      </time>
+                      @if (message.isMine) {
+                        <span
+                          class="messages-page__read-status"
+                          [class.messages-page__read-status--delivered]="message.readStatus === 'delivered'"
+                          [class.messages-page__read-status--read]="message.readStatus === 'read'"
+                          [attr.aria-label]="getReadStatusLabel(message.readStatus)"
+                        >
+                          {{ getReadStatusSymbol(message.readStatus) }}
+                        </span>
+                      }
+                    </footer>
                   </article>
 
                   @if (message.reactions.length > 0) {
