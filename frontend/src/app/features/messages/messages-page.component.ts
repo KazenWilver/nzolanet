@@ -1616,6 +1616,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       }
 
       textarea.value = ''
+      textarea.dispatchEvent(new Event('input', { bubbles: true }))
       textarea.style.height = 'auto'
       textarea.scrollTop = 0
       this.resizeComposerTextarea()

@@ -163,8 +163,20 @@
   top: 0;
   height: 100vh;
   height: 100dvh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: var(--spacing-md) var(--spacing-lg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+  }
 
   @media (min-width: 1536px) {
     padding: var(--spacing-lg) var(--spacing-xl);

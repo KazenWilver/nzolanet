@@ -94,48 +94,163 @@ public static class DbSeeder
         ILogger logger)
     {
         var testUserPattern = new Regex(@"^(audit|fix|feed)A?\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var automatedUsers = userManager.Users
+            .ToList()
+            .Where(user =>
+            {
+                var username = user.UserName ?? string.Empty;
+                return
+                    testUserPattern.IsMatch(username) ||
+                    username.StartsWith("smokeuser", StringComparison.OrdinalIgnoreCase) ||
+                    (user.Email?.EndsWith("@test.local", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    user.DisplayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" or "Smoke Test User" ||
+                    (user.DisplayName?.StartsWith("Smoke Test", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (user.DisplayName?.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (user.DisplayName?.StartsWith("Alice ", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (user.DisplayName?.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase) ?? false);
+            })
+            .ToList();
 
-        foreach (var user in userManager.Users.ToList())
+        if (automatedUsers.Count == 0)
         {
-            var username = user.UserName ?? string.Empty;
-            var isAutomatedTestUser =
-                testUserPattern.IsMatch(username) ||
-                username.StartsWith("smokeuser", StringComparison.OrdinalIgnoreCase) ||
-                (user.Email?.EndsWith("@test.local", StringComparison.OrdinalIgnoreCase) ?? false) ||
-                user.DisplayName is "Alice Audit" or "Alice FixTest" or "Feed Alice" or "Smoke Test User" ||
-                (user.DisplayName?.StartsWith("Smoke Test", StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (user.DisplayName?.StartsWith("Feed Alice", StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (user.DisplayName?.StartsWith("Alice ", StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (user.DisplayName?.StartsWith("Alice Fix", StringComparison.OrdinalIgnoreCase) ?? false);
+            return;
+        }
 
-            if (!isAutomatedTestUser)
-            {
-                continue;
-            }
+        var automatedUserIds = automatedUsers.Select(user => user.Id).ToHashSet();
+        var automatedPostIds = await dbContext.Posts
+            .Where(post => automatedUserIds.Contains(post.UserId))
+            .Select(post => post.Id)
+            .ToListAsync();
 
-            var userId = user.Id;
-            var relatedNotifications = await dbContext.Notifications
-                .Where(notification => notification.ActorId == userId || notification.RecipientId == userId)
-                .ToListAsync();
+        var automatedCommentIds = await dbContext.Comments
+            .Where(comment => automatedUserIds.Contains(comment.UserId) || automatedPostIds.Contains(comment.PostId))
+            .Select(comment => comment.Id)
+            .ToListAsync();
 
-            if (relatedNotifications.Count > 0)
-            {
-                dbContext.Notifications.RemoveRange(relatedNotifications);
-                await dbContext.SaveChangesAsync();
-            }
+        var removableConversationIds = await dbContext.ConversationParticipants
+            .GroupBy(participant => participant.ConversationId)
+            .Where(group => group.Any(participant => automatedUserIds.Contains(participant.UserId))
+                && group.All(participant => automatedUserIds.Contains(participant.UserId)))
+            .Select(group => group.Key)
+            .ToListAsync();
 
+        var automatedMessageIds = await dbContext.Messages
+            .Where(message => automatedUserIds.Contains(message.SenderId) || removableConversationIds.Contains(message.ConversationId))
+            .Select(message => message.Id)
+            .ToListAsync();
+
+        var notificationsToRemove = await dbContext.Notifications
+            .Where(notification =>
+                automatedUserIds.Contains(notification.ActorId) ||
+                automatedUserIds.Contains(notification.RecipientId) ||
+                (notification.PublicationId.HasValue && automatedPostIds.Contains(notification.PublicationId.Value)) ||
+                (notification.CommentId.HasValue && automatedCommentIds.Contains(notification.CommentId.Value)) ||
+                (notification.ConversationId.HasValue && removableConversationIds.Contains(notification.ConversationId.Value)) ||
+                (notification.MessageId.HasValue && automatedMessageIds.Contains(notification.MessageId.Value)))
+            .ToListAsync();
+
+        var reportsToRemove = await dbContext.ContentReports
+            .Where(report =>
+                automatedUserIds.Contains(report.ReporterId) ||
+                automatedPostIds.Contains(report.TargetId) ||
+                automatedCommentIds.Contains(report.TargetId) ||
+                automatedMessageIds.Contains(report.TargetId))
+            .ToListAsync();
+
+        var messageReactionsToRemove = await dbContext.MessageReactions
+            .Where(reaction =>
+                automatedUserIds.Contains(reaction.UserId) ||
+                automatedMessageIds.Contains(reaction.MessageId))
+            .ToListAsync();
+
+        var hiddenMessagesToRemove = await dbContext.MessageUserHides
+            .Where(hidden =>
+                automatedUserIds.Contains(hidden.UserId) ||
+                automatedMessageIds.Contains(hidden.MessageId))
+            .ToListAsync();
+
+        var likesToRemove = await dbContext.Likes
+            .Where(like =>
+                automatedUserIds.Contains(like.UserId) ||
+                automatedPostIds.Contains(like.PostId))
+            .ToListAsync();
+
+        var repostsToRemove = await dbContext.Reposts
+            .Where(repost =>
+                automatedUserIds.Contains(repost.UserId) ||
+                automatedPostIds.Contains(repost.PostId))
+            .ToListAsync();
+
+        var bookmarksToRemove = await dbContext.Bookmarks
+            .Where(bookmark =>
+                automatedUserIds.Contains(bookmark.UserId) ||
+                automatedPostIds.Contains(bookmark.PostId))
+            .ToListAsync();
+
+        var followsToRemove = await dbContext.Follows
+            .Where(follow =>
+                automatedUserIds.Contains(follow.FollowerId) ||
+                automatedUserIds.Contains(follow.FollowedId))
+            .ToListAsync();
+
+        var participantsToRemove = await dbContext.ConversationParticipants
+            .Where(participant =>
+                automatedUserIds.Contains(participant.UserId) ||
+                removableConversationIds.Contains(participant.ConversationId))
+            .ToListAsync();
+
+        var messagesToRemove = await dbContext.Messages
+            .Where(message => automatedMessageIds.Contains(message.Id))
+            .ToListAsync();
+
+        var commentsToRemove = await dbContext.Comments
+            .Where(comment =>
+                automatedUserIds.Contains(comment.UserId) ||
+                automatedPostIds.Contains(comment.PostId))
+            .ToListAsync();
+
+        var postsToRemove = await dbContext.Posts
+            .Where(post => automatedPostIds.Contains(post.Id))
+            .ToListAsync();
+
+        var conversationsToRemove = await dbContext.Conversations
+            .Where(conversation => removableConversationIds.Contains(conversation.Id))
+            .ToListAsync();
+
+        var fimbuActivitiesToRemove = await dbContext.FimbuUserActivities
+            .Where(activity => automatedUserIds.Contains(activity.UserId))
+            .ToListAsync();
+
+        dbContext.Notifications.RemoveRange(notificationsToRemove);
+        dbContext.ContentReports.RemoveRange(reportsToRemove);
+        dbContext.MessageReactions.RemoveRange(messageReactionsToRemove);
+        dbContext.MessageUserHides.RemoveRange(hiddenMessagesToRemove);
+        dbContext.Messages.RemoveRange(messagesToRemove);
+        dbContext.ConversationParticipants.RemoveRange(participantsToRemove);
+        dbContext.Conversations.RemoveRange(conversationsToRemove);
+        dbContext.Likes.RemoveRange(likesToRemove);
+        dbContext.Reposts.RemoveRange(repostsToRemove);
+        dbContext.Bookmarks.RemoveRange(bookmarksToRemove);
+        dbContext.Follows.RemoveRange(followsToRemove);
+        dbContext.Comments.RemoveRange(commentsToRemove);
+        dbContext.Posts.RemoveRange(postsToRemove);
+        dbContext.FimbuUserActivities.RemoveRange(fimbuActivitiesToRemove);
+
+        await dbContext.SaveChangesAsync();
+
+        foreach (var user in automatedUsers)
+        {
             var result = await userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
-                logger.LogInformation("Utilizador de teste automático removido: {Username}.", username);
+                logger.LogInformation("Utilizador de teste automático removido: {Username}.", user.UserName);
+                continue;
             }
-            else
-            {
-                logger.LogWarning(
-                    "Não foi possível remover o utilizador de teste {Username}: {Errors}",
-                    username,
-                    string.Join(", ", result.Errors.Select(error => error.Description)));
-            }
+
+            logger.LogWarning(
+                "Não foi possível remover o utilizador de teste {Username}: {Errors}",
+                user.UserName,
+                string.Join(", ", result.Errors.Select(error => error.Description)));
         }
     }
 }

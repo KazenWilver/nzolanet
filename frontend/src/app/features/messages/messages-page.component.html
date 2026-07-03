@@ -224,50 +224,6 @@
                   (touchend)="handleMessageTouchEnd()"
                   (touchcancel)="handleMessageTouchEnd()"
                 >
-                  <div class="messages-page__bubble-actions">
-                    <button
-                      type="button"
-                      class="messages-page__bubble-action"
-                      aria-label="Responder"
-                      (click)="handleReplyToMessage(message)"
-                    >
-                      ↩
-                    </button>
-                    <button
-                      type="button"
-                      class="messages-page__bubble-action"
-                      aria-label="Mais ações"
-                      (click)="handleOpenActionsMenu(message.id, $event)"
-                    >
-                      ⋯
-                    </button>
-                  </div>
-
-                  @if (actionMenuMessageId === message.id) {
-                    <div class="messages-page__message-actions-menu">
-                      <button type="button" (click)="handleReplyToMessage(message)">Responder</button>
-                      <button type="button" (click)="handleOpenReactionPicker(message.id, $event)">Reagir</button>
-                      @if (message.isMine && !message.isDeletedForEveryone && canEditForEveryone(message)) {
-                        <button type="button" (click)="handleEditMessage(message)">Editar</button>
-                      }
-                      @if (message.isMine && !message.isDeletedForEveryone && canDeleteForEveryone(message)) {
-                        <button type="button" (click)="handleDeleteMessage(message, 'everyone')">Apagar para todos</button>
-                      }
-                      <button type="button" (click)="handleDeleteMessage(message, 'self')">Apagar para mim</button>
-                      <button type="button" (click)="handleOpenForwardModal(message)">Encaminhar</button>
-                    </div>
-                  }
-
-                  @if (reactionPickerMessageId === message.id) {
-                    <div class="messages-page__reaction-picker">
-                      <app-chat-emoji-picker
-                        mode="reaction"
-                        (emojiSelected)="handleReactionSelected(message, $event)"
-                        (closed)="reactionPickerMessageId = null"
-                      />
-                    </div>
-                  }
-
                   <article
                     class="messages-page__bubble"
                     [class.messages-page__bubble--mine]="message.isMine"
@@ -418,21 +374,67 @@
                       }
                     </div>
                     <footer class="messages-page__bubble-meta">
-                      <time [dateTime]="message.createdAt">
-                        {{ message.createdAt | date:'HH:mm' }}
-                      </time>
-                      @if (message.isMine) {
-                        <span
-                          class="messages-page__read-status"
-                          [class.messages-page__read-status--delivered]="message.readStatus === 'delivered'"
-                          [class.messages-page__read-status--read]="message.readStatus === 'read'"
-                          [attr.aria-label]="getReadStatusLabel(message.readStatus)"
+                      <div class="messages-page__bubble-meta-main">
+                        <time [dateTime]="message.createdAt">
+                          {{ message.createdAt | date:'HH:mm' }}
+                        </time>
+                        @if (message.isMine) {
+                          <span
+                            class="messages-page__read-status"
+                            [class.messages-page__read-status--delivered]="message.readStatus === 'delivered'"
+                            [class.messages-page__read-status--read]="message.readStatus === 'read'"
+                            [attr.aria-label]="getReadStatusLabel(message.readStatus)"
+                          >
+                            {{ getReadStatusSymbol(message.readStatus) }}
+                          </span>
+                        }
+                      </div>
+                      <div class="messages-page__bubble-meta-actions">
+                        <button
+                          type="button"
+                          class="messages-page__bubble-meta-btn"
+                          aria-label="Responder"
+                          (click)="handleReplyToMessage(message)"
                         >
-                          {{ getReadStatusSymbol(message.readStatus) }}
-                        </span>
-                      }
+                          ↩
+                        </button>
+                        <button
+                          type="button"
+                          class="messages-page__bubble-meta-btn"
+                          aria-label="Mais ações"
+                          [attr.aria-expanded]="actionMenuMessageId === message.id"
+                          (click)="handleOpenActionsMenu(message.id, $event)"
+                        >
+                          ⋯
+                        </button>
+                      </div>
                     </footer>
                   </article>
+
+                  @if (actionMenuMessageId === message.id) {
+                    <div class="messages-page__message-actions-menu">
+                      <button type="button" (click)="handleReplyToMessage(message)">Responder</button>
+                      <button type="button" (click)="handleOpenReactionPicker(message.id, $event)">Reagir</button>
+                      @if (message.isMine && !message.isDeletedForEveryone && canEditForEveryone(message)) {
+                        <button type="button" (click)="handleEditMessage(message)">Editar</button>
+                      }
+                      @if (message.isMine && !message.isDeletedForEveryone && canDeleteForEveryone(message)) {
+                        <button type="button" (click)="handleDeleteMessage(message, 'everyone')">Apagar para todos</button>
+                      }
+                      <button type="button" (click)="handleDeleteMessage(message, 'self')">Apagar para mim</button>
+                      <button type="button" (click)="handleOpenForwardModal(message)">Encaminhar</button>
+                    </div>
+                  }
+
+                  @if (reactionPickerMessageId === message.id) {
+                    <div class="messages-page__reaction-picker">
+                      <app-chat-emoji-picker
+                        mode="reaction"
+                        (emojiSelected)="handleReactionSelected(message, $event)"
+                        (closed)="reactionPickerMessageId = null"
+                      />
+                    </div>
+                  }
 
                   @if (message.reactions.length > 0) {
                     <div class="messages-page__reactions" [class.messages-page__reactions--mine]="message.isMine">

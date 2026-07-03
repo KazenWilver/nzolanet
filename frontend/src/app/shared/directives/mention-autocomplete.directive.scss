@@ -14,12 +14,14 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: anywhere;
-  color: var(--color-text-primary);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .mention-field__token {
   color: var(--color-accent);
-  font-weight: inherit;
+  -webkit-text-fill-color: var(--color-accent);
+  font-weight: 700;
 }
 
 .mention-field__input {
@@ -28,10 +30,8 @@
   width: 100%;
   box-sizing: border-box;
   background: transparent !important;
-  // O texto real fica invisível: quem se vê é a camada de highlight por baixo,
-  // que colore as menções. O caret continua visível via caret-color. Usa-se
-  // !important porque os estilos do componente (textarea) têm mais especificidade.
-  color: transparent !important;
+  color: var(--color-text-primary) !important;
+  -webkit-text-fill-color: currentColor;
   caret-color: var(--color-text-primary);
 
   &::placeholder {
@@ -42,7 +42,7 @@
 
   &::selection {
     background: color-mix(in srgb, var(--color-accent) 28%, transparent);
-    color: transparent;
+    color: inherit;
   }
 }
 
