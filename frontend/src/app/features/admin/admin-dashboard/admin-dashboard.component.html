@@ -206,6 +206,7 @@
         } @else if (reportedComments.length === 0) {
           <p class="panel__state">Não há comentários denunciados. Bom trabalho!</p>
         } @else {
+          <div class="report-list">
           @for (comment of reportedComments; track comment.id) {
             <article class="report-card">
               <div class="report-card__head">
@@ -256,6 +257,7 @@
               </div>
             </article>
           }
+          </div>
         }
       </div>
     }
@@ -267,6 +269,7 @@
         } @else if (reportedPublications.length === 0) {
           <p class="panel__state">Não há publicações denunciadas.</p>
         } @else {
+          <div class="report-list">
           @for (publication of reportedPublications; track publication.id) {
             <article class="report-card">
               <div class="report-card__head">
@@ -325,6 +328,7 @@
               </div>
             </article>
           }
+          </div>
         }
       </div>
     }

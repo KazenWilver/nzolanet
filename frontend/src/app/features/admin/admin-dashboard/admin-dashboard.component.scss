@@ -318,6 +318,23 @@
   }
 }
 
+.report-list {
+  display: grid;
+  gap: 1rem;
+  max-height: 34rem;
+  overflow-y: auto;
+  padding-right: 0.35rem;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.28);
+    border-radius: 999px;
+  }
+}
+
 .report-card {
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid rgba(148, 163, 184, 0.12);
