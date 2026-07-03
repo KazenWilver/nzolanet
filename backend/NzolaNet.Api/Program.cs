@@ -170,6 +170,7 @@ builder.Services.AddSingleton<IFimbuChatService, FimbuChatService>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IUserPresenceService, UserPresenceService>();
 builder.Services.AddSingleton<IChatRealtimeNotifier, SignalRChatRealtimeNotifier>();
+builder.Services.AddSingleton<IAdminMetricsBroadcaster, SignalRAdminMetricsBroadcaster>();
 
 // 4.5. Configura a política de CORS para o frontend Angular
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>()
@@ -332,6 +333,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<AdminHub>("/hubs/admin");
 
 app.Run();
 

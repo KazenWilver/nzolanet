@@ -12,13 +12,16 @@ public class ChatHub : Hub
 {
     private readonly IConversationRepository _conversationRepository;
     private readonly IUserPresenceService _presenceService;
+    private readonly IAdminMetricsBroadcaster _adminMetricsBroadcaster;
 
     public ChatHub(
         IConversationRepository conversationRepository,
-        IUserPresenceService presenceService)
+        IUserPresenceService presenceService,
+        IAdminMetricsBroadcaster adminMetricsBroadcaster)
     {
         _conversationRepository = conversationRepository;
         _presenceService = presenceService;
+        _adminMetricsBroadcaster = adminMetricsBroadcaster;
     }
 
     public override async Task OnConnectedAsync()
@@ -31,6 +34,7 @@ public class ChatHub : Hub
             IsOnline = true,
             LastSeenAt = (DateTime?)null
         });
+        await _adminMetricsBroadcaster.BroadcastPresenceMetricsAsync();
         await base.OnConnectedAsync();
     }
 
@@ -46,6 +50,7 @@ public class ChatHub : Hub
                 IsOnline = false,
                 LastSeenAt = _presenceService.GetLastSeenUtc(userId)
             });
+            await _adminMetricsBroadcaster.BroadcastPresenceMetricsAsync();
         }
 
         await base.OnDisconnectedAsync(exception);

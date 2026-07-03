@@ -75,7 +75,7 @@ const ptPT: LocaleMessages = {
     subtitle: 'IA angolana sem filtro — humor imprevisível',
     statusOnline: 'Sempre na pilha',
     welcomeTitle: 'Ey, cota! Sou a Fimbu',
-    welcomeBody: 'Pergunta o que quiseres — estudos, vida, código, conversa fiada. Eu respondo à minha maneira, com calão angolano.',
+    welcomeBody: 'Pergunta o que quiseres — estudos, vida, código, conversa fiada. Eu respondo à minha maneira, com bué de calão angolano.',
     writeMessage: 'Manda mensagem pra Fimbu…',
     sendMessage: 'Enviar mensagem',
     typing: 'Fimbu tá a pensar…',

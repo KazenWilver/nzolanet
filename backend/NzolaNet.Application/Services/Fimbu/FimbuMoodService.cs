@@ -561,12 +561,11 @@ public sealed class FimbuMoodService : IFimbuMoodService
     }
 
     /// <summary>
-    /// Intervalo entre 0.85 e 1.15 — variação perceptível a nível textual da
-    /// própria chamada à API, sem comprometer a coerência das respostas.
+    /// Intervalo entre 1.05 e 1.38 — personalidade mais variada e menos robótica.
     /// </summary>
     private static double SortearTemperatura(Random random)
     {
-        return 0.85 + (random.NextDouble() * 0.30);
+        return 1.05 + (random.NextDouble() * 0.33);
     }
 }
 

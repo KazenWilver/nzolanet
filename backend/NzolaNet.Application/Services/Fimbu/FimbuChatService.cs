@@ -116,6 +116,7 @@ public sealed partial class FimbuChatService : IFimbuChatService
             int messageIndex;
             string systemPrompt;
             double temperature;
+            FimbuSessionMood sessionMood;
 
             lock (session.Sync)
             {
@@ -125,14 +126,16 @@ public sealed partial class FimbuChatService : IFimbuChatService
                 TrimHistory(session.Messages);
                 historySnapshot = session.Messages.Select(m => m with { }).ToList();
 
-                var sessionMood = _moodService.GetOrAssignSessionMood(userId);
+                sessionMood = _moodService.GetOrAssignSessionMood(userId);
                 var lexiconContext = _lexiconService.BuildLexiconContext(trimmed, userId, messageIndex);
+                var lengthDirective = FimbuResponseLengthAdvisor.BuildDirective(trimmed, sessionMood.EnergyLevel);
                 systemPrompt = FimbuSystemPrompt.Build(
                     sessionMood.PrimaryTrait,
                     sessionMood.SecondaryTrait,
                     sessionMood.EnergyLevel,
                     sessionMood.VerbalTic,
-                    lexiconContext);
+                    lexiconContext,
+                    lengthDirective);
                 temperature = sessionMood.Temperature;
             }
 
@@ -289,9 +292,29 @@ public sealed partial class FimbuChatService : IFimbuChatService
         }
     }
 
+    /// <summary>
+    /// Ordem de prioridade dos fornecedores LLM para o estilo Fimbu (PT-PT + calão angolano):
+    /// 1. Google Gemini — melhor aderência ao português europeu e seguimento de prompts complexos.
+    /// 2. OpenRouter (DeepSeek) — bom em personagem e instruções detalhadas.
+    /// 3. NVIDIA Nemotron — alternativa sólida quando os anteriores falham.
+    /// 4. Groq — último recurso; tende mais para português brasileiro.
+    /// </summary>
     private List<LlmProvider> BuildProviders()
     {
         var list = new List<LlmProvider>();
+
+        if (!string.IsNullOrWhiteSpace(_settings.GoogleAiApiKey))
+        {
+            list.Add(new LlmProvider(
+                "google",
+                "Google AI Studio",
+                _settings.GoogleAiApiKey,
+                _settings.GoogleAiModel,
+                $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.GoogleAiModel}:generateContent",
+                ProviderKind.GoogleGemini,
+                null,
+                null));
+        }
 
         if (!string.IsNullOrWhiteSpace(_settings.OpenRouterApiKey))
         {
@@ -313,17 +336,20 @@ public sealed partial class FimbuChatService : IFimbuChatService
                 }));
         }
 
-        if (!string.IsNullOrWhiteSpace(_settings.GoogleAiApiKey))
+        if (!string.IsNullOrWhiteSpace(_settings.NvidiaApiKey))
         {
             list.Add(new LlmProvider(
-                "google",
-                "Google AI Studio",
-                _settings.GoogleAiApiKey,
-                _settings.GoogleAiModel,
-                $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.GoogleAiModel}:generateContent",
-                ProviderKind.GoogleGemini,
+                "nvidia",
+                "NVIDIA NIM",
+                _settings.NvidiaApiKey,
+                _settings.NvidiaModel,
+                "https://integrate.api.nvidia.com/v1/chat/completions",
+                ProviderKind.OpenAiCompatible,
                 null,
-                null));
+                new Dictionary<string, object>
+                {
+                    ["chat_template_kwargs"] = new Dictionary<string, object> { ["enable_thinking"] = false }
+                }));
         }
 
         if (!string.IsNullOrWhiteSpace(_settings.GroqApiKey))
@@ -339,22 +365,6 @@ public sealed partial class FimbuChatService : IFimbuChatService
                 new Dictionary<string, object>
                 {
                     ["reasoning_effort"] = "low"
-                }));
-        }
-
-        if (!string.IsNullOrWhiteSpace(_settings.NvidiaApiKey))
-        {
-            list.Add(new LlmProvider(
-                "nvidia",
-                "NVIDIA NIM",
-                _settings.NvidiaApiKey,
-                _settings.NvidiaModel,
-                "https://integrate.api.nvidia.com/v1/chat/completions",
-                ProviderKind.OpenAiCompatible,
-                null,
-                new Dictionary<string, object>
-                {
-                    ["chat_template_kwargs"] = new Dictionary<string, object> { ["enable_thinking"] = false }
                 }));
         }
 

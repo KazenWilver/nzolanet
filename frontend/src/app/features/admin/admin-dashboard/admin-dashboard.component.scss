@@ -34,10 +34,60 @@
     font-weight: 600;
     cursor: pointer;
 
-    &:hover {
+    &:hover:not(:disabled) {
       border-color: rgba(248, 113, 113, 0.4);
       background: rgba(248, 113, 113, 0.1);
     }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+  }
+
+  &__updated {
+    display: inline-block;
+    margin-left: 0.5rem;
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+
+  &__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    border-radius: 0.8rem;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  &__nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1rem;
+    border: none;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: #94a3b8;
+    font-weight: 600;
+    cursor: pointer;
+
+    &--active {
+      background: rgba(248, 113, 113, 0.14);
+      color: #fecaca;
+    }
+  }
+
+  &__nav-badge {
+    min-width: 1.35rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(248, 113, 113, 0.2);
+    color: #fecaca;
+    font-size: 0.75rem;
+    text-align: center;
   }
 
   &__toast {
