@@ -25,6 +25,7 @@ public class AdminService : IAdminService
     private readonly IContentReportRepository _contentReportRepository;
     private readonly IConversationRepository _conversationRepository;
     private readonly IPlatformCounterRepository _platformCounterRepository;
+    private readonly IFimbuActivityRepository _fimbuActivityRepository;
     private readonly IUserPresenceService _userPresenceService;
     private readonly IPostService _postService;
     private readonly ICommentService _commentService;
@@ -43,6 +44,7 @@ public class AdminService : IAdminService
         IContentReportRepository contentReportRepository,
         IConversationRepository conversationRepository,
         IPlatformCounterRepository platformCounterRepository,
+        IFimbuActivityRepository fimbuActivityRepository,
         IUserPresenceService userPresenceService,
         IPostService postService,
         ICommentService commentService,
@@ -60,6 +62,7 @@ public class AdminService : IAdminService
         _contentReportRepository = contentReportRepository;
         _conversationRepository = conversationRepository;
         _platformCounterRepository = platformCounterRepository;
+        _fimbuActivityRepository = fimbuActivityRepository;
         _userPresenceService = userPresenceService;
         _postService = postService;
         _commentService = commentService;
@@ -145,6 +148,7 @@ public class AdminService : IAdminService
 
         var topHashtags = await _postRepository.GetTopUsedHashtagsAsync(10);
         var topSeguidos = await _followRepository.GetTopFollowedProfilesAsync(10);
+        var topFimbu = await _fimbuActivityRepository.GetTopInteractingUsersAsync(10);
 
         return new AdminMetricsDto
         {
@@ -181,6 +185,16 @@ public class AdminService : IAdminService
                     NomeUtilizador = entry.NomeUtilizador,
                     FotoPerfil = entry.FotoPerfil,
                     TotalSeguidores = entry.TotalSeguidores
+                })
+                .ToList(),
+            TopUtilizadoresFimbu = topFimbu
+                .Select(entry => new AdminTopFimbuUserDto
+                {
+                    Id = entry.UserId,
+                    Nome = entry.Nome,
+                    NomeUtilizador = entry.NomeUtilizador,
+                    FotoPerfil = entry.FotoPerfil,
+                    TotalInteracoes = entry.TotalInteracoes
                 })
                 .ToList()
         };

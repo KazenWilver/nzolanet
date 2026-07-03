@@ -14,13 +14,16 @@ public class FimbuController : ControllerBase
 {
     private readonly IFimbuChatService _fimbuChatService;
     private readonly IPlatformCounterRepository _platformCounterRepository;
+    private readonly IFimbuActivityRepository _fimbuActivityRepository;
 
     public FimbuController(
         IFimbuChatService fimbuChatService,
-        IPlatformCounterRepository platformCounterRepository)
+        IPlatformCounterRepository platformCounterRepository,
+        IFimbuActivityRepository fimbuActivityRepository)
     {
         _fimbuChatService = fimbuChatService;
         _platformCounterRepository = platformCounterRepository;
+        _fimbuActivityRepository = fimbuActivityRepository;
     }
 
     [HttpGet("history")]
@@ -43,6 +46,7 @@ public class FimbuController : ControllerBase
         {
             var userId = AuthClaimsHelper.GetUserId(User);
             await _platformCounterRepository.IncrementAsync(IPlatformCounterRepository.Keys.FimbuInteractions);
+            await _fimbuActivityRepository.RegisterInteractionAsync(userId);
             var response = await _fimbuChatService.SendMessageAsync(userId, dto.Message, cancellationToken);
             await _platformCounterRepository.IncrementAsync(IPlatformCounterRepository.Keys.FimbuMessages);
             return Ok(response);

@@ -29,4 +29,5 @@ public class AdminMetricsDto
 
     public IReadOnlyList<AdminTopHashtagDto> TopHashtags { get; set; } = new List<AdminTopHashtagDto>();
     public IReadOnlyList<AdminTopFollowedDto> TopPerfisSeguidos { get; set; } = new List<AdminTopFollowedDto>();
+    public IReadOnlyList<AdminTopFimbuUserDto> TopUtilizadoresFimbu { get; set; } = new List<AdminTopFimbuUserDto>();
 }

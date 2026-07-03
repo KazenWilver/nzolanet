@@ -134,6 +134,34 @@
           </ol>
         }
       </article>
+
+      <article class="ranking">
+        <h2 class="ranking__title">Top 10 utilizadores mais ativos com a Fimbu</h2>
+        @if (metrics.topUtilizadoresFimbu.length === 0) {
+          <p class="ranking__empty">Ainda não há interações com a Fimbu.</p>
+        } @else {
+          <ol class="ranking__list">
+            @for (perfil of metrics.topUtilizadoresFimbu; track perfil.id) {
+              <li class="ranking__row">
+                <span class="ranking__profile">
+                  @if (perfil.fotoPerfil) {
+                    <img class="ranking__avatar" [src]="perfil.fotoPerfil" [alt]="perfil.nome" />
+                  } @else {
+                    <span class="ranking__avatar ranking__avatar--placeholder">
+                      {{ (perfil.nome || perfil.nomeUtilizador).charAt(0).toUpperCase() }}
+                    </span>
+                  }
+                  <span class="ranking__names">
+                    <span class="ranking__label">{{ perfil.nome || perfil.nomeUtilizador }}</span>
+                    <span class="ranking__handle">&#64;{{ perfil.nomeUtilizador }}</span>
+                  </span>
+                </span>
+                <span class="ranking__value">{{ perfil.totalInteracoes }} interação(ões)</span>
+              </li>
+            }
+          </ol>
+        }
+      </article>
     </div>
   }
 

@@ -122,6 +122,7 @@ builder.Services.AddScoped<IRepostRepository, RepostRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<IContentReportRepository, ContentReportRepository>();
 builder.Services.AddScoped<IPlatformCounterRepository, PlatformCounterRepository>();
+builder.Services.AddScoped<IFimbuActivityRepository, FimbuActivityRepository>();
 
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IEmailService, EmailService>();

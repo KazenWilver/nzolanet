@@ -26,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<MessageUserHide> MessageUserHides { get; set; } = null!;
     public DbSet<ContentReport> ContentReports { get; set; } = null!;
     public DbSet<PlatformCounter> PlatformCounters { get; set; } = null!;
+    public DbSet<FimbuUserActivity> FimbuUserActivities { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -289,6 +290,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
         {
             entity.HasKey(counter => counter.Key);
             entity.Property(counter => counter.Key).HasMaxLength(80);
+        });
+
+        builder.Entity<FimbuUserActivity>(entity =>
+        {
+            entity.HasKey(activity => activity.UserId);
+            entity.HasIndex(activity => activity.Interactions);
         });
     }
 }

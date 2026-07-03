@@ -18,6 +18,14 @@ export interface AdminTopFollowed {
   totalSeguidores: number
 }
 
+export interface AdminTopFimbuUser {
+  id: string
+  nome: string
+  nomeUtilizador: string
+  fotoPerfil?: string
+  totalInteracoes: number
+}
+
 export interface AdminMetrics {
   totalUtilizadores: number
   totalUtilizadoresComuns: number
@@ -39,6 +47,7 @@ export interface AdminMetrics {
   totalMensagensFimbu: number
   topHashtags: AdminTopHashtag[]
   topPerfisSeguidos: AdminTopFollowed[]
+  topUtilizadoresFimbu: AdminTopFimbuUser[]
 }
 
 export interface AdminReportEntry {
@@ -111,6 +120,10 @@ export class AdminService {
       .pipe(map(metrics => ({
         ...metrics,
         topPerfisSeguidos: (metrics.topPerfisSeguidos ?? []).map(perfil => ({
+          ...perfil,
+          fotoPerfil: resolveMediaUrl(perfil.fotoPerfil),
+        })),
+        topUtilizadoresFimbu: (metrics.topUtilizadoresFimbu ?? []).map(perfil => ({
           ...perfil,
           fotoPerfil: resolveMediaUrl(perfil.fotoPerfil),
         })),
