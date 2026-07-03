@@ -20,6 +20,8 @@ export interface AdminTopFollowed {
 
 export interface AdminMetrics {
   totalUtilizadores: number
+  totalUtilizadoresComuns: number
+  totalAdministradores: number
   totalUtilizadoresOnline: number
   totalUtilizadoresOffline: number
   totalPublicacoes: number

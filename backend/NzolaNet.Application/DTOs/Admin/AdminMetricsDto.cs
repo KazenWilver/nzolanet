@@ -6,6 +6,8 @@ namespace NzolaNet.Application.DTOs.Admin;
 public class AdminMetricsDto
 {
     public int TotalUtilizadores { get; set; }
+    public int TotalUtilizadoresComuns { get; set; }
+    public int TotalAdministradores { get; set; }
     public int TotalUtilizadoresOnline { get; set; }
     public int TotalUtilizadoresOffline { get; set; }
     public int TotalPublicacoes { get; set; }

@@ -134,6 +134,8 @@ public class AdminService : IAdminService
     public async Task<AdminMetricsDto> GetMetricsAsync()
     {
         var totalUtilizadores = await _userRepository.GetTotalCountAsync();
+        var totalAdministradores = (await _userManager.GetUsersInRoleAsync(AdminRoleName)).Count;
+        var totalComuns = Math.Max(0, totalUtilizadores - totalAdministradores);
         var totalOnline = Math.Min(_userPresenceService.GetOnlineUsersCount(), totalUtilizadores);
 
         var fotografias = await _postRepository.GetTotalWithImageAsync()
@@ -147,6 +149,8 @@ public class AdminService : IAdminService
         return new AdminMetricsDto
         {
             TotalUtilizadores = totalUtilizadores,
+            TotalUtilizadoresComuns = totalComuns,
+            TotalAdministradores = totalAdministradores,
             TotalUtilizadoresOnline = totalOnline,
             TotalUtilizadoresOffline = totalUtilizadores - totalOnline,
             TotalPublicacoes = await _postRepository.GetTotalCountAsync(),

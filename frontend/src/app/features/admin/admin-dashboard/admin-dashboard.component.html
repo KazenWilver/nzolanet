@@ -20,7 +20,11 @@
     } @else if (metrics) {
       <article class="metric">
         <span class="metric__label">Utilizadores</span>
-        <span class="metric__value">{{ metrics.totalUtilizadores }}</span>
+        <span class="metric__value">{{ metrics.totalUtilizadoresComuns }}</span>
+      </article>
+      <article class="metric">
+        <span class="metric__label">Administradores</span>
+        <span class="metric__value">{{ metrics.totalAdministradores }}</span>
       </article>
       <article class="metric metric--online">
         <span class="metric__label">Contas online</span>
