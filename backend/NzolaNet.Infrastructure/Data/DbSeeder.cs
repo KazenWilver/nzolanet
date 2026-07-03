@@ -9,7 +9,8 @@ using NzolaNet.Domain.Entities;
 namespace NzolaNet.Infrastructure.Data;
 
 /// <summary>
-/// Seeds default Identity roles and an optional admin user from configuration.
+/// Seeds default Identity roles (Admin and User) and a default administrator
+/// account so the administrator dashboard is usable on a fresh database.
 /// </summary>
 public static class DbSeeder
 {
@@ -34,51 +35,57 @@ public static class DbSeeder
             await roleManager.CreateAsync(new IdentityRole<Guid>(UserRoleName));
         }
 
+        await SeedDefaultAdminAsync(userManager, configuration, logger);
         await CleanupAutomatedTestUsersAsync(dbContext, userManager, logger);
+    }
 
+    private static async Task SeedDefaultAdminAsync(
+        UserManager<User> userManager,
+        IConfiguration configuration,
+        ILogger logger)
+    {
         var seedSection = configuration.GetSection("SeedAdmin");
-        var adminEmail = seedSection["Email"];
-        var adminUsername = seedSection["Username"];
-        var adminPassword = seedSection["Password"];
+        var email = seedSection["Email"];
+        var password = seedSection["Password"];
 
-        if (string.IsNullOrWhiteSpace(adminEmail) ||
-            string.IsNullOrWhiteSpace(adminUsername) ||
-            string.IsNullOrWhiteSpace(adminPassword))
+        // Only seed when both an email and a password are configured. This keeps
+        // production safe: no admin is created unless it is explicitly requested.
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             return;
         }
 
-        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-        if (existingAdmin != null)
+        var existing = await userManager.FindByEmailAsync(email);
+        if (existing != null)
         {
-            if (!await userManager.IsInRoleAsync(existingAdmin, AdminRoleName))
+            if (!await userManager.IsInRoleAsync(existing, AdminRoleName))
             {
-                await userManager.AddToRoleAsync(existingAdmin, AdminRoleName);
+                await userManager.AddToRoleAsync(existing, AdminRoleName);
             }
 
             return;
         }
 
-        var adminUser = new User
+        var admin = new User
         {
-            UserName = adminUsername,
-            Email = adminEmail,
-            DisplayName = "Administrador",
+            UserName = seedSection["Username"] ?? "admin",
+            Email = email,
             EmailConfirmed = true,
+            DisplayName = seedSection["DisplayName"] ?? "Administrador",
             CreatedAt = DateTime.UtcNow
         };
 
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
-        if (!result.Succeeded)
+        var created = await userManager.CreateAsync(admin, password);
+        if (!created.Succeeded)
         {
             logger.LogWarning(
-                "Não foi possível criar o utilizador admin de seed: {Errors}",
-                string.Join(", ", result.Errors.Select(e => e.Description)));
+                "Não foi possível criar o administrador inicial: {Errors}",
+                string.Join(", ", created.Errors.Select(error => error.Description)));
             return;
         }
 
-        await userManager.AddToRoleAsync(adminUser, AdminRoleName);
-        logger.LogInformation("Utilizador admin de seed criado com sucesso.");
+        await userManager.AddToRoleAsync(admin, AdminRoleName);
+        logger.LogInformation("Administrador inicial criado: {Email}.", email);
     }
 
     private static async Task CleanupAutomatedTestUsersAsync(

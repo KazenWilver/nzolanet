@@ -1,6 +1,10 @@
 namespace NzolaNet.Application.DTOs.Admin;
 
-public class AdminReportedPublicationDto
+/// <summary>
+/// A reported publication together with the reports filed against it, shown in
+/// the moderation queue of the administrator dashboard.
+/// </summary>
+public class ReportedPublicationDto
 {
     public Guid Id { get; set; }
     public Guid DonoId { get; set; }
@@ -13,5 +17,5 @@ public class AdminReportedPublicationDto
     public DateTime CriadoEm { get; set; }
     public DateTime? AtualizadoEm { get; set; }
     public int ReportsCount { get; set; }
-    public IReadOnlyList<AdminReportEntryDto> Reports { get; set; } = Array.Empty<AdminReportEntryDto>();
+    public IReadOnlyList<AdminReportEntryDto> Reports { get; set; } = new List<AdminReportEntryDto>();
 }

@@ -2,10 +2,38 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { adminGuestGuard } from './core/guards/admin-guest.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
 
 export const routes: Routes = [
+  {
+    path: 'admin/login',
+    canActivate: [adminGuestGuard],
+    loadComponent: () =>
+      import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
+  },
+  {
+    path: 'admin/register',
+    canActivate: [adminGuestGuard],
+    loadComponent: () =>
+      import('./features/admin/admin-register/admin-register.component').then(m => m.AdminRegisterComponent)
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/admin/admin-dashboard/admin-dashboard.component').then(
+            m => m.AdminDashboardComponent
+          )
+      }
+    ]
+  },
   {
     path: '',
     component: PublicLayoutComponent,
@@ -128,24 +156,6 @@ export const routes: Routes = [
     path: 'auth/recuperar-senha',
     redirectTo: 'forgot-password',
     pathMatch: 'full'
-  },
-  {
-    path: 'admin-login',
-    loadComponent: () =>
-      import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
-  },
-  {
-    path: 'admin-portal-9f3b1c',
-    loadComponent: () =>
-      import('./features/admin/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
-    canActivate: [adminGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/admin/admin-page/admin-page.component').then(m => m.AdminPageComponent)
-      }
-    ]
   },
   { path: '**', redirectTo: '/feed' }
 ];

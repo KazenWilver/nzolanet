@@ -6,7 +6,7 @@ public interface IPostService
 {
     Task<PublicationResponseDto> CreateAsync(Guid userId, CreatePublicationDto createDto);
     Task<PublicationResponseDto> UpdateAsync(Guid userId, Guid postId, UpdatePublicationDto updateDto);
-    Task DeleteAsync(Guid userId, Guid postId);
+    Task DeleteAsync(Guid userId, Guid postId, bool isAdmin = false);
     Task<IEnumerable<PublicationResponseDto>> GetAllAsync(Guid? currentUserId = null);
     Task<PaginatedPublicationsResponseDto> GetAllPagedAsync(Guid? currentUserId, int page, int pageSize);
     Task<IEnumerable<PublicationResponseDto>> GetFollowingFeedAsync(Guid userId);

@@ -9,18 +9,15 @@ public class ReportService : IReportService
     private readonly IContentReportRepository _contentReportRepository;
     private readonly IPostRepository _postRepository;
     private readonly ICommentRepository _commentRepository;
-    private readonly IAdminRealtimeNotifier _adminRealtimeNotifier;
 
     public ReportService(
         IContentReportRepository contentReportRepository,
         IPostRepository postRepository,
-        ICommentRepository commentRepository,
-        IAdminRealtimeNotifier adminRealtimeNotifier)
+        ICommentRepository commentRepository)
     {
         _contentReportRepository = contentReportRepository;
         _postRepository = postRepository;
         _commentRepository = commentRepository;
-        _adminRealtimeNotifier = adminRealtimeNotifier;
     }
 
     public Task ReportPostAsync(Guid reporterId, Guid postId, string reason, string? details = null)
@@ -80,8 +77,5 @@ public class ReportService : IReportService
         {
             throw new InvalidOperationException("Não foi possível registar a denúncia.");
         }
-
-        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
-        await _adminRealtimeNotifier.NotifyReportsChangedAsync();
     }
 }

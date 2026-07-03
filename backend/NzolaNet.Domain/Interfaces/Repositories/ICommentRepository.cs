@@ -11,6 +11,8 @@ public interface ICommentRepository
     Task<IEnumerable<Comment>> GetByPostIdAsync(Guid postId);
     Task<IEnumerable<Comment>> GetAllAsync();
     Task<int> GetTotalCountAsync();
+    Task<int> GetTotalWithImageAsync();
+    Task<int> GetTotalWithVideoAsync();
     Task<bool> CreateAsync(Comment comment);
     Task<bool> UpdateAsync(Comment comment);
     Task<bool> DeleteAsync(Comment comment);

@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Bookmark> Bookmarks { get; set; } = null!;
     public DbSet<MessageUserHide> MessageUserHides { get; set; } = null!;
     public DbSet<ContentReport> ContentReports { get; set; } = null!;
+    public DbSet<PlatformCounter> PlatformCounters { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -282,6 +283,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
             entity.HasIndex(report => new { report.ReporterId, report.TargetType, report.TargetId }).IsUnique();
             entity.HasIndex(report => new { report.TargetType, report.TargetId });
+        });
+
+        builder.Entity<PlatformCounter>(entity =>
+        {
+            entity.HasKey(counter => counter.Key);
+            entity.Property(counter => counter.Key).HasMaxLength(80);
         });
     }
 }

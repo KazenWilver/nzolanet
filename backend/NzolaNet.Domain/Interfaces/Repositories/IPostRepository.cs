@@ -36,6 +36,8 @@ public interface IPostRepository
     Task<bool> UpdateAsync(Post post);
     Task<bool> DeleteAsync(Post post);
     Task<int> GetTotalCountAsync();
+    Task<int> GetTotalWithImageAsync();
+    Task<int> GetTotalWithVideoAsync();
     Task<int> GetTotalCreatedHashtagsAsync(DateTime? sinceUtc = null);
     Task<IReadOnlyList<PostHashtagUsageEntry>> GetTopUsedHashtagsAsync(int limit, DateTime? sinceUtc = null);
 }

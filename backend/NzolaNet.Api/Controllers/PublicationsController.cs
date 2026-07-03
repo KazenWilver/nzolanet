@@ -190,7 +190,7 @@ public class PublicationsController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = AuthClaimsHelper.GetUserId(User);
-        await _postService.DeleteAsync(userId, id);
+        await _postService.DeleteAsync(userId, id, AuthClaimsHelper.IsAdmin(User));
         return NoContent();
     }
 

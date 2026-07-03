@@ -12,23 +12,19 @@ public class ChatHub : Hub
 {
     private readonly IConversationRepository _conversationRepository;
     private readonly IUserPresenceService _presenceService;
-    private readonly IAdminRealtimeNotifier _adminRealtimeNotifier;
 
     public ChatHub(
         IConversationRepository conversationRepository,
-        IUserPresenceService presenceService,
-        IAdminRealtimeNotifier adminRealtimeNotifier)
+        IUserPresenceService presenceService)
     {
         _conversationRepository = conversationRepository;
         _presenceService = presenceService;
-        _adminRealtimeNotifier = adminRealtimeNotifier;
     }
 
     public override async Task OnConnectedAsync()
     {
         var userId = AuthClaimsHelper.GetUserId(Context.User!);
         _presenceService.UserConnected(userId, Context.ConnectionId);
-        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
         await Clients.Others.SendAsync("PresenceChanged", new
         {
             UserId = userId.ToString(),
@@ -44,7 +40,6 @@ public class ChatHub : Hub
         var wentOffline = _presenceService.UserDisconnected(userId, Context.ConnectionId);
         if (wentOffline)
         {
-            await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
             await Clients.Others.SendAsync("PresenceChanged", new
             {
                 UserId = userId.ToString(),

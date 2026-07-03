@@ -47,6 +47,16 @@ public class CommentRepository : ICommentRepository
         return await _context.Comments.CountAsync();
     }
 
+    public Task<int> GetTotalWithImageAsync()
+    {
+        return _context.Comments.CountAsync(comment => comment.ImagePath != null && comment.ImagePath != "");
+    }
+
+    public Task<int> GetTotalWithVideoAsync()
+    {
+        return _context.Comments.CountAsync(comment => comment.VideoPath != null && comment.VideoPath != "");
+    }
+
     public async Task<bool> CreateAsync(Comment comment)
     {
         _context.Comments.Add(comment);

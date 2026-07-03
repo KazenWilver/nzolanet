@@ -494,6 +494,11 @@ public class ConversationRepository : IConversationRepository
         return _context.Conversations.CountAsync(conversation => conversation.IsGroup);
     }
 
+    public Task<int> GetTotalDirectConversationsCountAsync()
+    {
+        return _context.Conversations.CountAsync(conversation => !conversation.IsGroup);
+    }
+
     public Task<int> GetTotalMessagesCountAsync()
     {
         return _context.Messages.CountAsync();

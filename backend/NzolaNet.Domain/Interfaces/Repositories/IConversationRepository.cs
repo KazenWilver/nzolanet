@@ -34,6 +34,7 @@ public interface IConversationRepository
     Task<Message?> GetByMediaPathAsync(string mediaPath);
     Task<Guid?> GetGroupCreatorUserIdAsync(Guid conversationId);
     Task<int> GetTotalGroupsCountAsync();
+    Task<int> GetTotalDirectConversationsCountAsync();
     Task<int> GetTotalMessagesCountAsync();
     Task<long> GetTotalMessageDeliveriesCountAsync();
     Task<bool> DeleteConversationAsync(Guid conversationId);

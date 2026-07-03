@@ -229,6 +229,16 @@ public class PostRepository : IPostRepository
         return _context.Posts.CountAsync();
     }
 
+    public Task<int> GetTotalWithImageAsync()
+    {
+        return _context.Posts.CountAsync(post => post.ImagePath != null && post.ImagePath != "");
+    }
+
+    public Task<int> GetTotalWithVideoAsync()
+    {
+        return _context.Posts.CountAsync(post => post.VideoPath != null && post.VideoPath != "");
+    }
+
     public async Task<int> GetTotalCreatedHashtagsAsync(DateTime? sinceUtc = null)
     {
         var query = _context.Posts

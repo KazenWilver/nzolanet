@@ -1,30 +1,29 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { catchError, map } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { inject } from '@angular/core'
+import { CanActivateFn, Router } from '@angular/router'
+import { map } from 'rxjs/operators'
+import { AdminAuthService } from '../services/admin-auth.service'
 
+/**
+ * Protects the administrator area: requires a valid administrator token and
+ * confirms with the backend that the caller still holds the Admin role.
+ */
 export const adminGuard: CanActivateFn = () => {
-  const router = inject(Router);
-  const http = inject(HttpClient);
+  const adminAuth = inject(AdminAuthService)
+  const router = inject(Router)
 
-  // Verificar se existe um token separado de administrador
-  const adminToken = localStorage.getItem('admin_token');
-  if (!adminToken) {
-    router.navigate(['/admin-login']);
-    return false;
+  if (!adminAuth.isAuthenticated()) {
+    void router.navigate(['/admin/login'])
+    return false
   }
 
-  // Verificação server-side: endpoint que retorna 200 apenas para admins autenticados com admin_token
-  const headers = { Authorization: `Bearer ${adminToken}` };
-  return http.get(`${environment.apiUrl}/admin/verify-access`, { headers }).pipe(
-    map(() => true),
-    catchError(() => {
-      localStorage.removeItem('admin_token');
-      router.navigate(['/admin-login']);
-      return of(false);
-    })
-  );
-};
+  return adminAuth.verifyAccess().pipe(
+    map(hasAccess => {
+      if (hasAccess) {
+        return true
+      }
 
+      void router.navigate(['/admin/login'])
+      return false
+    }),
+  )
+}

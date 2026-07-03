@@ -2,7 +2,7 @@ SET NOCOUNT ON;
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 
--- Full reset: removes all users and content. Restart the API to seed a new admin from appsettings SeedAdmin.
+-- Full reset: removes all users and content. Restart the API to re-seed default Identity roles.
 BEGIN TRANSACTION;
 
 DELETE FROM Likes;

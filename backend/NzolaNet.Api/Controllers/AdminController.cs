@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Admin;
 using NzolaNet.Application.Interfaces;
 
 namespace NzolaNet.Api.Controllers;
 
+/// <summary>
+/// Exposes the administrator authentication and moderation endpoints. Every
+/// endpoint other than login and registration requires the caller to hold the
+/// <c>Admin</c> role.
+/// </summary>
 [ApiController]
 [Route("api/admin")]
 public class AdminController : ControllerBase
@@ -17,6 +21,7 @@ public class AdminController : ControllerBase
         _adminService = adminService;
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] AdminLoginDto loginDto)
     {
@@ -26,9 +31,10 @@ public class AdminController : ControllerBase
         }
 
         var response = await _adminService.LoginAsync(loginDto);
-        return Ok(new { token = response.Token });
+        return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] AdminRegisterDto registerDto)
     {
@@ -37,22 +43,22 @@ public class AdminController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var response = await _adminService.RegisterAdminAsync(registerDto);
-        return Ok(new { token = response.Token });
+        var response = await _adminService.RegisterAsync(registerDto);
+        return Ok(response);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("verify-access")]
     public IActionResult VerifyAccess()
     {
-        return Ok(new { message = "Acesso autorizado." });
+        return Ok(new { message = "Acesso de administrador confirmado." });
     }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("metrics")]
-    public async Task<IActionResult> GetMetrics([FromQuery] string periodoRanking = "30d")
+    public async Task<IActionResult> GetMetrics()
     {
-        var metrics = await _adminService.GetMetricsAsync(periodoRanking);
+        var metrics = await _adminService.GetMetricsAsync();
         return Ok(metrics);
     }
 
@@ -74,19 +80,25 @@ public class AdminController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("comments/{id}")]
-    public async Task<IActionResult> DeleteComment(Guid id)
+    public async Task<IActionResult> RemoveComment(Guid id)
     {
-        var adminUserId = AuthClaimsHelper.GetUserId(User);
-        await _adminService.DeleteCommentAsync(adminUserId, id);
+        await _adminService.RemoveCommentAsync(id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("comments/{id}/dismiss")]
+    public async Task<IActionResult> DismissCommentReports(Guid id)
+    {
+        await _adminService.DismissCommentReportsAsync(id);
         return NoContent();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("publications/{id}")]
-    public async Task<IActionResult> DeletePublication(Guid id)
+    public async Task<IActionResult> RemovePublication(Guid id)
     {
-        var adminUserId = AuthClaimsHelper.GetUserId(User);
-        await _adminService.DeletePublicationAsync(adminUserId, id);
+        await _adminService.RemovePublicationAsync(id);
         return NoContent();
     }
 
@@ -94,8 +106,15 @@ public class AdminController : ControllerBase
     [HttpPost("publications/{id}/dismiss")]
     public async Task<IActionResult> DismissPublicationReports(Guid id)
     {
-        var adminUserId = AuthClaimsHelper.GetUserId(User);
-        await _adminService.DismissPublicationReportsAsync(adminUserId, id);
+        await _adminService.DismissPublicationReportsAsync(id);
         return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _adminService.GetUsersAsync();
+        return Ok(users);
     }
 }

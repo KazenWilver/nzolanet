@@ -1,155 +1,80 @@
 <div class="admin-auth">
-  <button type="button" class="admin-auth__theme" (click)="alternarTema()">
-    {{ themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro' }}
-  </button>
+  <div class="admin-auth__panel admin-auth__panel--brand">
+    <div class="admin-auth__brand">
+      <span class="admin-auth__logo">NzolaNet</span>
+      <span class="admin-auth__badge">Painel de Administração</span>
+    </div>
+    <h1 class="admin-auth__headline">Modera a comunidade com confiança.</h1>
+    <p class="admin-auth__subtitle">
+      Acompanha indicadores em tempo real, revê denúncias e mantém a NzolaNet um
+      espaço saudável e respeitoso.
+    </p>
+    <ul class="admin-auth__features">
+      <li>Indicadores da plataforma</li>
+      <li>Moderação de comentários e publicações</li>
+      <li>Gestão de utilizadores</li>
+    </ul>
+  </div>
 
-  <div class="admin-auth__card">
-    <section class="admin-auth__visual">
-      <div class="admin-auth__orb admin-auth__orb--a" #gradientOrbA aria-hidden="true"></div>
-      <div class="admin-auth__orb admin-auth__orb--b" #gradientOrbB aria-hidden="true"></div>
-      <div class="admin-auth__orb admin-auth__orb--c" #gradientOrbC aria-hidden="true"></div>
-      <div class="admin-auth__grain" aria-hidden="true"></div>
+  <div class="admin-auth__panel admin-auth__panel--form">
+    <form class="admin-form" [formGroup]="loginForm" (ngSubmit)="handleSubmit()" novalidate>
+      <header class="admin-form__header">
+        <h2>Iniciar sessão</h2>
+        <p>Área reservada a administradores da NzolaNet.</p>
+      </header>
 
-      <div class="admin-auth__visual-copy">
-        <p>Painel seguro NzolaNet</p>
-        <h2>Gestão administrativa com visibilidade total em tempo real</h2>
+      @if (errorMessage) {
+        <div class="admin-form__alert" role="alert">{{ errorMessage }}</div>
+      }
+
+      <div class="admin-form__field">
+        <label for="admin-email">Email</label>
+        <input
+          id="admin-email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="admin@nzolanet.ao"
+          [class.admin-form__input--error]="isInvalid('email')"
+        />
+        @if (isInvalid('email')) {
+          <span class="admin-form__error">Introduz um email válido.</span>
+        }
       </div>
-    </section>
 
-    <section class="admin-auth__form-panel">
-      <div class="admin-auth__brand">*</div>
-      <h1 #titleRef>{{ modo === 'login' ? 'Entrar como administrador' : 'Registar administrador' }}</h1>
-      <p #descriptionRef class="admin-auth__description">
-        {{ modo === 'login'
-          ? 'Acesso exclusivo para gestão da plataforma.'
-          : 'Cria uma conta administrativa com permissões de moderação e dashboard.' }}
-      </p>
-
-      <div class="admin-auth__tabs">
-        <button type="button" class="admin-auth__tab" [class.admin-auth__tab--active]="modo === 'login'" (click)="alternarModo('login')">
-          Login
-        </button>
-        <button type="button" class="admin-auth__tab" [class.admin-auth__tab--active]="modo === 'register'" (click)="alternarModo('register')">
-          Registo
-        </button>
-      </div>
-
-      <form #authFormRoot class="admin-auth__form" (ngSubmit)="submeter()">
-        <div
-          #registerFields
-          class="admin-auth__register-fields"
-          [class.admin-auth__register-fields--active]="modo === 'register'"
-          [attr.aria-hidden]="modo === 'login'"
-        >
-          <div class="admin-auth__field admin-auth__field--register">
-            <label class="admin-auth__label" for="admin-display-name">Nome completo</label>
-            <input
-              id="admin-display-name"
-              class="admin-auth__input"
-              type="text"
-              [(ngModel)]="nome"
-              name="nome"
-              [disabled]="carregando || modo !== 'register'"
-              placeholder="Ex.: Ana Administração"
-            />
-          </div>
-
-          <div class="admin-auth__field admin-auth__field--register">
-            <label class="admin-auth__label" for="admin-username">Nome de utilizador</label>
-            <input
-              id="admin-username"
-              class="admin-auth__input"
-              type="text"
-              [(ngModel)]="nomeUtilizador"
-              name="nomeUtilizador"
-              [disabled]="carregando || modo !== 'register'"
-              placeholder="Ex.: ana.admin"
-            />
-          </div>
-
-          <div class="admin-auth__field admin-auth__field--register">
-            <label class="admin-auth__label" for="admin-password-confirm">Confirmar senha</label>
-            <div class="admin-auth__password-wrap">
-              <input
-                id="admin-password-confirm"
-                class="admin-auth__input"
-                [type]="mostrarConfirmarSenha ? 'text' : 'password'"
-                [(ngModel)]="confirmarSenha"
-                name="confirmarSenha"
-                [disabled]="carregando || modo !== 'register'"
-                placeholder="Repete a senha"
-              />
-              <button type="button" class="admin-auth__toggle-password" (click)="alternarMostrarConfirmarSenha()" [disabled]="carregando || modo !== 'register'">
-                {{ mostrarConfirmarSenha ? 'Ocultar' : 'Mostrar' }}
-              </button>
-            </div>
-          </div>
-
-          <div class="admin-auth__field admin-auth__field--register">
-            <label class="admin-auth__label" for="admin-invite">Código de convite (opcional)</label>
-            <input
-              id="admin-invite"
-              class="admin-auth__input"
-              type="text"
-              [(ngModel)]="codigoConvite"
-              name="codigoConvite"
-              [disabled]="carregando || modo !== 'register'"
-              placeholder="Só necessário se configurado no servidor"
-            />
-          </div>
-        </div>
-
-        <div class="admin-auth__field admin-auth__field--shared">
-          <label class="admin-auth__label" for="admin-email">Email admin</label>
+      <div class="admin-form__field">
+        <label for="admin-password">Palavra-passe</label>
+        <div class="admin-form__password">
           <input
-            id="admin-email"
-            class="admin-auth__input"
-            type="email"
-            [(ngModel)]="email"
-            name="email"
-            [disabled]="carregando"
-            placeholder="admin@nzolanet.app"
+            id="admin-password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            [class.admin-form__input--error]="isInvalid('password')"
           />
+          <button
+            type="button"
+            class="admin-form__toggle"
+            (click)="handleTogglePassword()"
+            [attr.aria-label]="showPassword ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'"
+          >
+            {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
         </div>
-
-        <div class="admin-auth__field admin-auth__field--shared">
-          <label class="admin-auth__label" for="admin-password">Senha</label>
-          <div class="admin-auth__password-wrap">
-            <input
-              id="admin-password"
-              class="admin-auth__input"
-              [type]="mostrarSenha ? 'text' : 'password'"
-              [(ngModel)]="senha"
-              name="senha"
-              [disabled]="carregando"
-              placeholder="Mínimo 6 caracteres"
-            />
-            <button type="button" class="admin-auth__toggle-password" (click)="alternarMostrarSenha()" [disabled]="carregando">
-              {{ mostrarSenha ? 'Ocultar' : 'Mostrar' }}
-            </button>
-          </div>
-        </div>
-
-        @if (mensagemErro) {
-          <p class="admin-auth__feedback admin-auth__feedback--error">{{ mensagemErro }}</p>
+        @if (isInvalid('password')) {
+          <span class="admin-form__error">A palavra-passe deve ter pelo menos 6 caracteres.</span>
         }
-
-        @if (mensagemSucesso) {
-          <p class="admin-auth__feedback admin-auth__feedback--success">{{ mensagemSucesso }}</p>
-        }
-
-        <button type="submit" class="admin-auth__submit" [disabled]="carregando">
-          {{
-            carregando
-              ? (modo === 'login' ? 'A autenticar...' : 'A registar...')
-              : (modo === 'login' ? 'Entrar no painel' : 'Criar administrador')
-          }}
-        </button>
-      </form>
-
-      <div class="admin-auth__footer">
-        <button type="button" (click)="voltarParaApp()">Voltar à aplicação</button>
       </div>
-    </section>
+
+      <button type="submit" class="admin-form__submit" [disabled]="isLoading">
+        {{ isLoading ? 'A entrar…' : 'Entrar no painel' }}
+      </button>
+
+      <p class="admin-form__footer">
+        Ainda não tens conta de administrador?
+        <a routerLink="/admin/register">Criar conta</a>
+      </p>
+    </form>
   </div>
 </div>

@@ -21,8 +21,6 @@ public class ConversationService : IConversationService
     private readonly IStorageService _storageService;
     private readonly INotificationService _notificationService;
     private readonly IUserPresenceService _presenceService;
-    private readonly IAdminAnalyticsStore _adminAnalyticsStore;
-    private readonly IAdminRealtimeNotifier _adminRealtimeNotifier;
 
     public ConversationService(
         IConversationRepository conversationRepository,
@@ -31,9 +29,7 @@ public class ConversationService : IConversationService
         IFollowRepository followRepository,
         IStorageService storageService,
         INotificationService notificationService,
-        IUserPresenceService presenceService,
-        IAdminAnalyticsStore adminAnalyticsStore,
-        IAdminRealtimeNotifier adminRealtimeNotifier)
+        IUserPresenceService presenceService)
     {
         _conversationRepository = conversationRepository;
         _messageReactionRepository = messageReactionRepository;
@@ -42,8 +38,6 @@ public class ConversationService : IConversationService
         _storageService = storageService;
         _notificationService = notificationService;
         _presenceService = presenceService;
-        _adminAnalyticsStore = adminAnalyticsStore;
-        _adminRealtimeNotifier = adminRealtimeNotifier;
     }
 
     public async Task<IEnumerable<ConversationListItemDto>> GetConversationsAsync(Guid userId)
@@ -237,9 +231,6 @@ public class ConversationService : IConversationService
         {
             throw new ArgumentException("Não foi possível apagar o grupo.");
         }
-
-        _adminAnalyticsStore.RecordGroupDeleted();
-        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
     }
 
     public async Task<IEnumerable<MessageResponseDto>> GetMessagesAsync(
@@ -401,7 +392,6 @@ public class ConversationService : IConversationService
                 preview);
         }
 
-        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
         return response;
     }
 
@@ -582,7 +572,6 @@ public class ConversationService : IConversationService
             }
         }
 
-        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
         return response;
     }
 

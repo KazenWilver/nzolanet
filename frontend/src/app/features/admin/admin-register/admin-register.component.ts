@@ -7,21 +7,24 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AdminAuthService } from '../../../core/services/admin-auth.service';
 
 @Component({
-  selector: 'app-admin-login',
+  selector: 'app-admin-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin-login.component.html',
-  styleUrl: './admin-login.component.scss'
+  templateUrl: './admin-register.component.html',
+  styleUrls: ['../admin-login/admin-login.component.scss', './admin-register.component.scss']
 })
-export class AdminLoginComponent {
+export class AdminRegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly adminAuth = inject(AdminAuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly loginForm = this.formBuilder.nonNullable.group({
+  readonly registerForm = this.formBuilder.nonNullable.group({
+    displayName: ['', [Validators.required, Validators.minLength(2)]],
+    username: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    adminCode: ['', [Validators.required]]
   });
 
   isLoading = false;
@@ -33,18 +36,18 @@ export class AdminLoginComponent {
   }
 
   handleSubmit(): void {
-    this.loginForm.markAllAsTouched();
+    this.registerForm.markAllAsTouched();
     this.errorMessage = '';
 
-    if (this.loginForm.invalid) {
+    if (this.registerForm.invalid) {
       return;
     }
 
     this.isLoading = true;
-    const { email, password } = this.loginForm.getRawValue();
+    const { displayName, username, email, password, adminCode } = this.registerForm.getRawValue();
 
     this.adminAuth
-      .login({ email, password })
+      .register({ displayName, username, email, password, adminCode })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -58,20 +61,28 @@ export class AdminLoginComponent {
       });
   }
 
-  isInvalid(controlName: 'email' | 'password'): boolean {
-    const control = this.loginForm.controls[controlName];
+  isInvalid(controlName: 'displayName' | 'username' | 'email' | 'password' | 'adminCode'): boolean {
+    const control = this.registerForm.controls[controlName];
     return control.invalid && control.touched;
   }
 
   private resolveError(error: HttpErrorResponse): string {
-    if (error.status === 401) {
-      return error.error?.message ?? 'Credenciais inválidas ou sem privilégios de administrador.';
+    if (error.status === 403) {
+      return error.error?.message ?? 'Código de administrador inválido.';
+    }
+
+    if (error.status === 409) {
+      return error.error?.message ?? 'Já existe uma conta com este email ou nome de utilizador.';
+    }
+
+    if (error.status === 400) {
+      return error.error?.message ?? 'Verifica os dados introduzidos.';
     }
 
     if (error.status === 0) {
       return 'Não foi possível contactar o servidor. Tenta novamente.';
     }
 
-    return 'Ocorreu um erro ao iniciar sessão. Tenta novamente.';
+    return 'Ocorreu um erro ao criar a conta. Tenta novamente.';
   }
 }

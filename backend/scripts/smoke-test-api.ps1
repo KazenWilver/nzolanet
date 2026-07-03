@@ -23,16 +23,22 @@ Test-Step "GET publications (empty after cleanup)" {
   if ($r.Count -ne 0) { throw "Expected 0 publications, got $($r.Count)" }
 }
 
-Test-Step "Admin login" {
-  $body = @{ email = "admin@nzolanet.app"; password = "NzolaAdmin@2026" } | ConvertTo-Json
-  $script:login = Invoke-RestMethod -Uri "$base/auth/login" -Method POST -Body $body -ContentType "application/json"
+Test-Step "Register primary user" {
+  $script:primaryUsername = "smokemain$(Get-Random)"
+  $body = @{
+    email = "$($script:primaryUsername)@test.local"
+    password = "Test@123456"
+    username = $script:primaryUsername
+    displayName = "Smoke Primary User"
+  } | ConvertTo-Json
+  $script:login = Invoke-RestMethod -Uri "$base/auth/register" -Method POST -Body $body -ContentType "application/json"
   if (-not $script:login.token) { throw "No token returned" }
   $script:headers = @{ Authorization = "Bearer $($script:login.token)" }
 }
 
 Test-Step "GET auth/me" {
   $me = Invoke-RestMethod -Uri "$base/auth/me" -Method GET -Headers $script:headers
-  if ($me.username -ne "nzolaadmin") { throw "Wrong user: $($me.username)" }
+  if ($me.username -ne $script:primaryUsername) { throw "Wrong user: $($me.username)" }
 }
 
 Test-Step "Register temp user" {
@@ -108,18 +114,18 @@ Test-Step "Delete comment" {
   Invoke-RestMethod -Uri "$base/comments/$($script:comment.id)" -Method DELETE -Headers $script:user2Headers | Out-Null
 }
 
-Test-Step "Follow user (user2 follows admin)" {
-  $adminId = $script:login.user.id
-  Invoke-RestMethod -Uri "$base/users/$adminId/follow" -Method POST -Headers $script:user2Headers | Out-Null
+Test-Step "Follow user (user2 follows primary user)" {
+  $primaryId = $script:login.user.id
+  Invoke-RestMethod -Uri "$base/users/$primaryId/follow" -Method POST -Headers $script:user2Headers | Out-Null
 }
 
 Test-Step "Unfollow user" {
-  $adminId = $script:login.user.id
-  Invoke-RestMethod -Uri "$base/users/$adminId/follow" -Method DELETE -Headers $script:user2Headers | Out-Null
+  $primaryId = $script:login.user.id
+  Invoke-RestMethod -Uri "$base/users/$primaryId/follow" -Method DELETE -Headers $script:user2Headers | Out-Null
 }
 
 Test-Step "User search" {
-  $r = Invoke-RestMethod -Uri "$base/users/search?q=admin" -Method GET -Headers $script:headers
+  $r = Invoke-RestMethod -Uri "$base/users/search?q=smoke" -Method GET -Headers $script:headers
   if ($r.Count -lt 1) { throw "No search results" }
 }
 

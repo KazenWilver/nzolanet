@@ -144,10 +144,6 @@ export class AuthService {
     this.currentUserSubject.next(normalized);
   }
 
-  estaAdmin(): boolean {
-    return this.getCurrentUser()?.role === 'Admin';
-  }
-
   private mapAuthResponse(response: BackendAuthResponseDto): AuthResponse {
     return {
       token: response.token,

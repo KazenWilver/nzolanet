@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Fimbu;
 using NzolaNet.Application.Interfaces;
+using NzolaNet.Domain.Interfaces.Repositories;
 
 namespace NzolaNet.Api.Controllers;
 
@@ -12,10 +13,14 @@ namespace NzolaNet.Api.Controllers;
 public class FimbuController : ControllerBase
 {
     private readonly IFimbuChatService _fimbuChatService;
+    private readonly IPlatformCounterRepository _platformCounterRepository;
 
-    public FimbuController(IFimbuChatService fimbuChatService)
+    public FimbuController(
+        IFimbuChatService fimbuChatService,
+        IPlatformCounterRepository platformCounterRepository)
     {
         _fimbuChatService = fimbuChatService;
+        _platformCounterRepository = platformCounterRepository;
     }
 
     [HttpGet("history")]
@@ -37,7 +42,9 @@ public class FimbuController : ControllerBase
         try
         {
             var userId = AuthClaimsHelper.GetUserId(User);
+            await _platformCounterRepository.IncrementAsync(IPlatformCounterRepository.Keys.FimbuInteractions);
             var response = await _fimbuChatService.SendMessageAsync(userId, dto.Message, cancellationToken);
+            await _platformCounterRepository.IncrementAsync(IPlatformCounterRepository.Keys.FimbuMessages);
             return Ok(response);
         }
         catch (ArgumentException ex)

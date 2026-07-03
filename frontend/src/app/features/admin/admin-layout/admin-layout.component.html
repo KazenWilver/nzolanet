@@ -1,45 +1,29 @@
-<div class="admin-layout">
-  <aside class="admin-layout__sidebar">
-    <div>
-      <p class="admin-layout__eyebrow">Área exclusiva de administração</p>
-      <h1 class="admin-layout__title">Painel do Administrador NzolaNet</h1>
-      <p class="admin-layout__context-pill">
-        Período ativo: <strong>{{ periodoRankingAtivo }}</strong>
-      </p>
+<div class="admin-shell">
+  <header class="admin-shell__topbar">
+    <div class="admin-shell__brand">
+      <span class="admin-shell__logo">NzolaNet</span>
+      <span class="admin-shell__tag">Admin</span>
     </div>
 
-    <nav class="admin-layout__nav" aria-label="Navegação do painel admin">
-      <a
-        *ngFor="let item of navigationItems"
-        class="admin-layout__nav-link"
-        [class.admin-layout__nav-link--active]="isSecaoAtiva(item.id)"
-        [attr.aria-current]="isSecaoAtiva(item.id) ? 'true' : null"
-        [href]="'#' + item.id"
-        (click)="handleIrParaSecao(item.id)"
-      >
-        {{ item.label }}
-      </a>
-    </nav>
-
-    <div class="admin-layout__actions admin-layout__actions--sidebar">
-      <a routerLink="/feed" class="admin-layout__btn admin-layout__btn--ghost">Voltar ao Feed</a>
-      <button type="button" class="admin-layout__btn admin-layout__btn--ghost" (click)="handleToggleTheme()">
-        {{ themeService.isDarkMode() ? 'Modo claro' : 'Modo escuro' }}
-      </button>
-      <button type="button" class="admin-layout__btn admin-layout__btn--primary" (click)="handleLogout()">Terminar sessão</button>
+    <div class="admin-shell__user">
+      @if (admin$ | async; as admin) {
+        <div class="admin-shell__identity">
+          <span class="admin-shell__name">{{ admin.displayName || admin.username }}</span>
+          <span class="admin-shell__email">{{ admin.email }}</span>
+        </div>
+        @if (admin.profilePhotoUrl) {
+          <img class="admin-shell__avatar" [src]="admin.profilePhotoUrl" [alt]="admin.username" />
+        } @else {
+          <span class="admin-shell__avatar admin-shell__avatar--placeholder">
+            {{ (admin.displayName || admin.username || 'A').charAt(0).toUpperCase() }}
+          </span>
+        }
+      }
+      <button type="button" class="admin-shell__logout" (click)="handleLogout()">Sair</button>
     </div>
-  </aside>
+  </header>
 
-  <div class="admin-layout__content">
-    <header class="admin-layout__header">
-      <p class="admin-layout__header-text">Controlo em tempo real, moderação e análise de plataforma</p>
-      <p class="admin-layout__header-periodo">
-        Período ativo global: <strong>{{ periodoRankingAtivo }}</strong>
-      </p>
-    </header>
-
-    <main class="admin-layout__main">
-      <router-outlet />
-    </main>
-  </div>
+  <main class="admin-shell__content">
+    <router-outlet />
+  </main>
 </div>

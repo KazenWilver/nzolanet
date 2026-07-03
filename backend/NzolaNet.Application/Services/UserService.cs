@@ -19,22 +19,19 @@ public class UserService : IUserService
     private readonly IFollowRepository _followRepository;
     private readonly INotificationService _notificationService;
     private readonly IEmailService _emailService;
-    private readonly IAdminRealtimeNotifier _adminRealtimeNotifier;
 
     public UserService(
         IUserRepository userRepository, 
         IStorageService storageService, 
         IFollowRepository followRepository,
         INotificationService notificationService,
-        IEmailService emailService,
-        IAdminRealtimeNotifier adminRealtimeNotifier)
+        IEmailService emailService)
     {
         _userRepository = userRepository;
         _storageService = storageService;
         _followRepository = followRepository;
         _notificationService = notificationService;
         _emailService = emailService;
-        _adminRealtimeNotifier = adminRealtimeNotifier;
     }
 
     public async Task<UserResponseDto> GetUserResponseAsync(Guid userId, Guid? currentUserId = null)
@@ -264,10 +261,6 @@ public class UserService : IUserService
             return;
         }
 
-        if (follow.IsApproved)
-        {
-            await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
-        }
     }
 
     public async Task UnfollowUserAsync(Guid followerId, Guid followedId)
@@ -292,8 +285,6 @@ public class UserService : IUserService
         {
             throw new ArgumentException("Não foi possível deixar de seguir o utilizador.");
         }
-
-        await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
     }
 
     public async Task<IEnumerable<FollowRequestDto>> GetPendingRequestsAsync(Guid userId)
@@ -323,7 +314,6 @@ public class UserService : IUserService
             await _notificationService.CleanupFollowRequestNotificationsAsync(followedId, followerId);
             await _notificationService.TryCreateFollowNotificationAsync(followerId, followedId);
             await _notificationService.TryCreateFollowAcceptedNotificationAsync(followedId, followerId);
-            await _adminRealtimeNotifier.NotifyMetricsChangedAsync();
         }
 
         return updated;

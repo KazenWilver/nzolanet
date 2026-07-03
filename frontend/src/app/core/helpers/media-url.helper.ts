@@ -1,6 +1,7 @@
 import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'nzolanet_token';
+const ADMIN_TOKEN_KEY = 'admin_token';
 
 const hasAccessToken = (url: string): boolean => {
   try {
@@ -20,7 +21,9 @@ const appendAccessToken = (url: string): string => {
     return url;
   }
 
-  const token = localStorage.getItem(TOKEN_KEY);
+  // Prefer the regular user token; fall back to the administrator token so the
+  // moderation dashboard can also render protected media (author photos, etc.).
+  const token = localStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(ADMIN_TOKEN_KEY);
   if (!token) {
     return url;
   }

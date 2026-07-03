@@ -1,8 +1,11 @@
 namespace NzolaNet.Application.DTOs.Admin;
 
-public class AdminTopFollowedProfileDto
+/// <summary>
+/// A profile together with its follower count, for the most-followed ranking.
+/// </summary>
+public class AdminTopFollowedDto
 {
-    public Guid UserId { get; set; }
+    public Guid Id { get; set; }
     public string Nome { get; set; } = string.Empty;
     public string NomeUtilizador { get; set; } = string.Empty;
     public string? FotoPerfil { get; set; }

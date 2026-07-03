@@ -1,5 +1,8 @@
 namespace NzolaNet.Application.DTOs.Admin;
 
+/// <summary>
+/// Represents a single report (denúncia) filed against a piece of content.
+/// </summary>
 public class AdminReportEntryDto
 {
     public Guid ReporterId { get; set; }
