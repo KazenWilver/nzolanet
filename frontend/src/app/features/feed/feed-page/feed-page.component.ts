@@ -99,6 +99,24 @@ export class FeedPageComponent implements OnInit {
     this.publicationService.reposted$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(publication => this.handleReposted(publication));
+
+    this.publicationService.repostState$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(change => {
+        const removedIds = new Set(change.removedQuotedPublicationIds)
+
+        this.publications = this.publications
+          .filter(publication => !removedIds.has(publication.id))
+          .map(publication =>
+            publication.id === change.sourcePublicationId
+              ? {
+                  ...publication,
+                  hasReposted: change.hasReposted,
+                  repostsCount: change.repostsCount
+                }
+              : publication
+          )
+      })
   }
 
   get isFollowingTab(): boolean {

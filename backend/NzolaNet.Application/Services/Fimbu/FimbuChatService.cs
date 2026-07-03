@@ -21,6 +21,18 @@ public sealed partial class FimbuChatService : IFimbuChatService
     [GeneratedRegex(@"<think>[\s\S]*?</think>", RegexOptions.IgnoreCase)]
     private static partial Regex ThinkBlockRegex();
 
+    [GeneratedRegex(@"<SPECIAL_[^>]+>|_ERR[\w-]*|ANNAME|subsys", RegexOptions.IgnoreCase)]
+    private static partial Regex CorruptionMarkerRegex();
+
+    [GeneratedRegex(@"[\u0400-\u052F\u0600-\u06FF\u0B80-\u0BFF\u3040-\u30FF\u4E00-\u9FFF]")]
+    private static partial Regex ForeignScriptRegex();
+
+    [GeneratedRegex(@"\b(você|a gente|celular|bacana|cara|moça|moço|galera|legal|tudo bem)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex BrazilianMarkerRegex();
+
+    [GeneratedRegex(@"<[^>]+>")]
+    private static partial Regex GenericTagRegex();
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -243,6 +255,34 @@ public sealed partial class FimbuChatService : IFimbuChatService
             try
             {
                 var reply = await CallProviderAsync(provider, history, systemPrompt, temperature, cancellationToken);
+                if (!TryValidateReply(reply, out var validationReason))
+                {
+                    var retryTemperature = Math.Max(0.45, temperature - 0.18);
+                    if (Math.Abs(retryTemperature - temperature) > 0.001)
+                    {
+                        var retryReply = await CallProviderAsync(
+                            provider,
+                            history,
+                            systemPrompt,
+                            retryTemperature,
+                            cancellationToken);
+
+                        if (TryValidateReply(retryReply, out _))
+                        {
+                            _rotator.MarkSuccess(provider.Id);
+                            return retryReply;
+                        }
+                    }
+
+                    _logger.LogWarning(
+                        "Fimbu: resposta inválida de {Provider}. Motivo: {Reason}",
+                        provider.Name,
+                        validationReason);
+                    _rotator.MarkRateLimited(provider.Id);
+                    errors.Add($"{provider.Name}: resposta inválida ({validationReason})");
+                    continue;
+                }
+
                 _rotator.MarkSuccess(provider.Id);
                 return reply;
             }
@@ -528,6 +568,10 @@ public sealed partial class FimbuChatService : IFimbuChatService
         }
 
         var cleaned = ThinkBlockRegex().Replace(raw, string.Empty);
+        cleaned = CorruptionMarkerRegex().Replace(cleaned, string.Empty);
+        cleaned = GenericTagRegex().Replace(cleaned, string.Empty);
+        cleaned = cleaned.Replace("\uFFFD", string.Empty, StringComparison.Ordinal);
+        cleaned = Regex.Replace(cleaned, @"[\u0000-\u0008\u000B\u000C\u000E-\u001F]", string.Empty);
 
         var openIndex = cleaned.IndexOf("<think>", StringComparison.OrdinalIgnoreCase);
         if (openIndex >= 0)
@@ -535,7 +579,53 @@ public sealed partial class FimbuChatService : IFimbuChatService
             cleaned = cleaned[..openIndex];
         }
 
+        cleaned = Regex.Replace(cleaned, @"[ \t]{2,}", " ");
+        cleaned = Regex.Replace(cleaned, @"\n{3,}", "\n\n");
         return cleaned.Trim();
+    }
+
+    private static bool TryValidateReply(string reply, out string reason)
+    {
+        if (string.IsNullOrWhiteSpace(reply))
+        {
+            reason = "vazia";
+            return false;
+        }
+
+        if (reply.Length < 3)
+        {
+            reason = "demasiado curta";
+            return false;
+        }
+
+        if (CorruptionMarkerRegex().IsMatch(reply))
+        {
+            reason = "marcadores corrompidos";
+            return false;
+        }
+
+        if (ForeignScriptRegex().IsMatch(reply))
+        {
+            reason = "mistura de alfabetos";
+            return false;
+        }
+
+        var letters = reply.Count(char.IsLetter);
+        if (letters < 3)
+        {
+            reason = "sem texto suficiente";
+            return false;
+        }
+
+        var brazilianMarkers = BrazilianMarkerRegex().Matches(reply).Count;
+        if (brazilianMarkers >= 2)
+        {
+            reason = "português do brasil";
+            return false;
+        }
+
+        reason = string.Empty;
+        return true;
     }
 
     private static List<OpenAiMessage> BuildOpenAiMessages(IReadOnlyList<LlmMessage> history, string systemPrompt)
@@ -626,7 +716,6 @@ public sealed partial class FimbuChatService : IFimbuChatService
     private sealed class ProviderRotator
     {
         private readonly int _cooldownSeconds;
-        private int _cursor;
         private readonly ConcurrentDictionary<string, DateTime> _cooldowns = new();
 
         public ProviderRotator(int cooldownSeconds)
@@ -643,9 +732,8 @@ public sealed partial class FimbuChatService : IFimbuChatService
 
             var now = DateTime.UtcNow;
 
-            for (var offset = 0; offset < providers.Count; offset++)
+            for (var index = 0; index < providers.Count; index++)
             {
-                var index = (_cursor + offset) % providers.Count;
                 var provider = providers[index];
 
                 if (_cooldowns.TryGetValue(provider.Id, out var until) && until > now)
@@ -653,7 +741,6 @@ public sealed partial class FimbuChatService : IFimbuChatService
                     continue;
                 }
 
-                _cursor = (index + 1) % providers.Count;
                 return provider;
             }
 

@@ -248,11 +248,11 @@ public class PublicationsController : ControllerBase
         try
         {
             var userId = AuthClaimsHelper.GetUserId(User);
-            var (isReposted, repostsCount, quotedPublication) = await _repostService.RepostAsync(
+            var (isReposted, repostsCount, quotedPublication, removedQuotedPublicationIds) = await _repostService.RepostAsync(
                 userId,
                 id,
                 dto?.Text);
-            return Ok(new { hasReposted = isReposted, repostsCount, quotedPublication });
+            return Ok(new { hasReposted = isReposted, repostsCount, quotedPublication, removedQuotedPublicationIds });
         }
         catch (ArgumentException ex)
         {

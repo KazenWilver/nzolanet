@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import * as signalR from '@microsoft/signalr'
-import { Subject } from 'rxjs'
+import { ReplaySubject } from 'rxjs'
 import { AdminAuthService } from './admin-auth.service'
 import { environment } from '../../../environments/environment'
 
@@ -15,7 +15,7 @@ export class AdminRealtimeService {
 
   private connection?: signalR.HubConnection
   private connectPromise: Promise<void> | null = null
-  private readonly presenceMetricsSubject = new Subject<AdminPresenceMetricsEvent>()
+  private readonly presenceMetricsSubject = new ReplaySubject<AdminPresenceMetricsEvent>(1)
 
   readonly presenceMetrics$ = this.presenceMetricsSubject.asObservable()
 

@@ -8,6 +8,9 @@ export interface BackendMessageReplyPreviewDto {
   text: string
   imageUrl?: string
   videoUrl?: string
+  audioUrl?: string
+  documentUrl?: string
+  documentFileName?: string
   isGif: boolean
 }
 
@@ -83,6 +86,9 @@ export interface MessageReplyPreview {
   text: string
   imageUrl?: string
   videoUrl?: string
+  audioUrl?: string
+  documentUrl?: string
+  documentFileName?: string
   isGif: boolean
 }
 
@@ -160,6 +166,9 @@ const mapReplyPreview = (dto: BackendMessageReplyPreviewDto): MessageReplyPrevie
   text: dto.text,
   imageUrl: resolveMediaUrl(dto.imageUrl),
   videoUrl: resolveMediaUrl(dto.videoUrl),
+  audioUrl: resolveMediaUrl(dto.audioUrl),
+  documentUrl: resolveMediaUrl(dto.documentUrl),
+  documentFileName: dto.documentFileName,
   isGif: dto.isGif ?? false
 })
 

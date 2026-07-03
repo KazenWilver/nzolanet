@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import * as signalR from '@microsoft/signalr'
 import { BehaviorSubject, Subject } from 'rxjs'
+import { distinctUntilChanged } from 'rxjs/operators'
 import { AuthService } from './auth.service'
 import { environment } from '../../../environments/environment'
 import type { ChatMessage, MessageReactionSummary, MessageReadStatus } from '../models/conversation.model'
@@ -20,7 +21,6 @@ export interface ChatReadReceiptEvent {
 }
 
 export interface ChatPresenceChangedEvent {
-  conversationId: string
   userId: string
   isOnline: boolean
   lastSeenAt?: string
@@ -91,6 +91,16 @@ export class ChatRealtimeService {
   readonly messageDeleted$ = this.messageDeletedSubject.asObservable()
   readonly messageEdited$ = this.messageEditedSubject.asObservable()
   readonly presence$ = this.presenceSubject.asObservable()
+
+  constructor() {
+    this.authService.currentUser$
+      .pipe(distinctUntilChanged((previous, current) => previous?.id === current?.id))
+      .subscribe(user => {
+        if (!user) {
+          void this.disconnect()
+        }
+      })
+  }
 
   async connect(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -231,7 +241,6 @@ export class ChatRealtimeService {
 
     this.connection.on('PresenceChanged', (payload: ChatPresenceChangedEvent) => {
       this.presenceSubject.next({
-        conversationId: String(payload.conversationId),
         userId: String(payload.userId),
         isOnline: payload.isOnline,
         lastSeenAt: payload.lastSeenAt

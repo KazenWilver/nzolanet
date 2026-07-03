@@ -206,6 +206,17 @@ public class PostRepository : IPostRepository
         return (items, totalCount);
     }
 
+    public async Task<IReadOnlyList<Post>> GetQuotedPostsByUserAndSourceAsync(Guid userId, Guid quotedPostId)
+    {
+        return await _context.Posts
+            .Include(post => post.User)
+            .Include(post => post.QuotedPost!)
+                .ThenInclude(quoted => quoted.User)
+            .Where(post => post.UserId == userId && post.QuotedPostId == quotedPostId)
+            .OrderByDescending(post => post.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<bool> CreateAsync(Post post)
     {
         _context.Posts.Add(post);

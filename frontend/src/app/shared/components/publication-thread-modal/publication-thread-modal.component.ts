@@ -74,6 +74,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   @ViewChild('threadOverlay') threadOverlayRef?: ElementRef<HTMLElement>;
   @ViewChild('threadShell') threadShellRef?: ElementRef<HTMLElement>;
   @ViewChild('likeButton') likeButtonRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('replyTextarea') replyTextareaRef?: ElementRef<HTMLTextAreaElement>;
 
   comments: Comment[] = [];
   loading = true;
@@ -378,6 +379,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     this.newCommentText = '';
     this.removeMedia();
     this.submitError = '';
+    this.resetReplyTextarea();
   }
 
   private clearMediaPreview(): void {
@@ -442,5 +444,18 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
       this.publication.commentsCount = nextCount;
     }
     this.countChange.emit(nextCount);
+  }
+
+  private resetReplyTextarea(): void {
+    requestAnimationFrame(() => {
+      const textarea = this.replyTextareaRef?.nativeElement;
+      if (!textarea) {
+        return;
+      }
+
+      textarea.value = '';
+      textarea.style.height = 'auto';
+      textarea.scrollTop = 0;
+    });
   }
 }

@@ -1,7 +1,9 @@
 import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { RouterModule } from '@angular/router'
+import { debounceTime } from 'rxjs/operators'
 import { SearchService } from '../../../core/services/search.service'
+import { PublicationService } from '../../../core/services/publication.service'
 import { AnimationService } from '../../../core/services/animation.service'
 
 /**
@@ -16,6 +18,7 @@ import { AnimationService } from '../../../core/services/animation.service'
 })
 export class TrendsPanelComponent implements OnInit {
   private readonly searchService = inject(SearchService)
+  private readonly publicationService = inject(PublicationService)
   private readonly animationService = inject(AnimationService)
   private readonly destroyRef = inject(DestroyRef)
 
@@ -27,6 +30,23 @@ export class TrendsPanelComponent implements OnInit {
   loading = true
 
   ngOnInit(): void {
+    this.loadTrendingHashtags(true)
+
+    this.publicationService.trendsRefresh$
+      .pipe(
+        debounceTime(150),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.loadTrendingHashtags(false)
+      })
+  }
+
+  private loadTrendingHashtags(showLoader: boolean): void {
+    if (showLoader) {
+      this.loading = true
+    }
+
     this.searchService
       .getTrendingHashtags(this.limit)
       .pipe(takeUntilDestroyed(this.destroyRef))

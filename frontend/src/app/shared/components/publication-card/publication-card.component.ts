@@ -321,6 +321,12 @@ export class PublicationCardComponent implements OnChanges {
     if (this.repostingInProgress) {
       return
     }
+
+    if (this.publication.hasReposted) {
+      this.handleRepostConfirm('')
+      return
+    }
+
     this.repostError = ''
     this.repostDialogOpen = true
   }
@@ -334,13 +340,11 @@ export class PublicationCardComponent implements OnChanges {
       return
     }
 
-    const previousReposted = this.publication.hasReposted ?? false
-    const previousCount = this.publication.repostsCount ?? 0
     this.repostingInProgress = true
     this.repostError = ''
 
     this.publicationService
-      .repost(this.publication.id, quoteText)
+      .toggleRepost(this.publication.id, quoteText)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => {
@@ -356,11 +360,6 @@ export class PublicationCardComponent implements OnChanges {
           }
         },
         error: () => {
-          this.publication = {
-            ...this.publication,
-            hasReposted: previousReposted,
-            repostsCount: previousCount
-          }
           this.repostError = 'Não foi possível repartilhar.'
           this.repostingInProgress = false
           this.repostDialogOpen = false

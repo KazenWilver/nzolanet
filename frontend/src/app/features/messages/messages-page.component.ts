@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core'
+import { Component, DestroyRef, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule, DatePipe } from '@angular/common'
 import { ActivatedRoute, Router, RouterModule } from '@angular/router'
@@ -71,6 +71,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   @ViewChild('messagesScroll') messagesScroll?: ElementRef<HTMLElement>
   @ViewChild('typingIndicator') typingIndicator?: ElementRef<HTMLElement>
   @ViewChild('composerTextarea') composerTextarea?: ElementRef<HTMLTextAreaElement>
+  @ViewChild('pendingCaptionTextarea') pendingCaptionTextarea?: ElementRef<HTMLTextAreaElement>
 
   private static readonly MAX_COMPOSER_LINES = 8
   private static readonly MESSAGE_EDIT_DELETE_WINDOW_MS = 15 * 60 * 1000
@@ -210,7 +211,49 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     })
     this.audioPlayers.clear()
     this.clearPendingMedia()
+    this.clearLongPressTimer()
     void this.chatRealtime.setActiveConversation(null)
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent): void {
+    const target = event.target
+    if (!(target instanceof HTMLElement)) {
+      return
+    }
+
+    const insideComposerEmoji = !!target.closest('.messages-page__emoji-anchor--composer')
+    const insidePendingEmoji = !!target.closest('.messages-page__emoji-anchor--pending')
+    const insideEmojiPicker = !!target.closest('.chat-emoji-picker')
+    const insideBubbleWrap = !!target.closest('.messages-page__bubble-wrap')
+    const insideAttachMenu = !!target.closest('.messages-page__attach-card')
+    const insideAttachButton = !!target.closest('.messages-page__attach-btn')
+
+    if (!insideEmojiPicker && !insideComposerEmoji) {
+      this.composerEmojiOpen = false
+    }
+
+    if (!insideEmojiPicker && !insidePendingEmoji) {
+      this.pendingMediaEmojiOpen = false
+    }
+
+    if (!insideBubbleWrap) {
+      this.reactionPickerMessageId = null
+      this.actionMenuMessageId = null
+    }
+
+    if (!insideAttachMenu && !insideAttachButton) {
+      this.composerAttachOpen = false
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscapeKey(): void {
+    this.composerEmojiOpen = false
+    this.pendingMediaEmojiOpen = false
+    this.reactionPickerMessageId = null
+    this.actionMenuMessageId = null
+    this.composerAttachOpen = false
   }
 
   get visibleConversations(): ConversationListItem[] {
@@ -318,7 +361,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           this.composerEmojiOpen = false
           this.pendingMediaEmojiOpen = false
           this.upsertMessage(message)
-          this.messageForm.reset()
+          this.resetComposerText()
           this.sendingMessage = false
           this.updateConversationPreview(message)
           this.scrollMessagesToBottom()
@@ -350,7 +393,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
   handleCancelEdit(): void {
     this.editingMessage = null
-    this.messageForm.controls.text.setValue('')
+    this.resetComposerText()
   }
 
   handleDeleteMessage(message: ChatMessage, scope: 'self' | 'everyone'): void {
@@ -509,26 +552,37 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   }
 
   handleComposerEmojiSelected(emoji: string): void {
-    const control = this.messageForm.controls.text
-    control.setValue(`${control.value}${emoji}`)
-    this.composerEmojiOpen = false
+    this.insertTextAtCursor(emoji, this.composerTextarea)
   }
 
   handleToggleComposerEmoji(): void {
     this.composerEmojiOpen = !this.composerEmojiOpen
     this.pendingMediaEmojiOpen = false
     this.reactionPickerMessageId = null
+    this.actionMenuMessageId = null
+    this.composerAttachOpen = false
   }
 
   handlePendingMediaEmojiSelected(emoji: string): void {
-    const control = this.messageForm.controls.text
-    control.setValue(`${control.value}${emoji}`)
-    this.pendingMediaEmojiOpen = false
+    this.insertTextAtCursor(emoji, this.pendingCaptionTextarea)
   }
 
   handleTogglePendingMediaEmoji(): void {
     this.pendingMediaEmojiOpen = !this.pendingMediaEmojiOpen
     this.composerEmojiOpen = false
+    this.reactionPickerMessageId = null
+    this.actionMenuMessageId = null
+  }
+
+  handleComposerTextareaClick(): void {
+    this.composerEmojiOpen = false
+    this.reactionPickerMessageId = null
+    this.actionMenuMessageId = null
+    this.composerAttachOpen = false
+  }
+
+  handlePendingCaptionClick(): void {
+    this.pendingMediaEmojiOpen = false
   }
 
   isMessageExpandable(message: ChatMessage): boolean {
@@ -559,6 +613,12 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   getReplyPreviewLabel(reply: MessageReplyPreview | ChatMessage): string {
     if (reply.text?.trim()) {
       return reply.text.trim()
+    }
+    if (reply.audioUrl) {
+      return 'Áudio'
+    }
+    if (reply.documentUrl) {
+      return reply.documentFileName?.trim() || 'Documento'
     }
     if (reply.videoUrl) {
       return 'Vídeo'
@@ -763,18 +823,14 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   }
 
   handleMessageTouchStart(messageId: string): void {
+    this.clearLongPressTimer()
     this.longPressTimeoutId = setTimeout(() => {
       this.actionMenuMessageId = messageId
     }, 500)
   }
 
   handleMessageTouchEnd(): void {
-    if (!this.longPressTimeoutId) {
-      return
-    }
-
-    clearTimeout(this.longPressTimeoutId)
-    this.longPressTimeoutId = undefined
+    this.clearLongPressTimer()
   }
 
   handleMessagesScroll(): void {
@@ -1185,7 +1241,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.chatRealtime.presence$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(event => {
-        if (!this.activeConversation || event.conversationId !== this.activeConversation.id) {
+        if (!this.activeConversation || this.activeConversation.isGroup) {
           return
         }
 
@@ -1400,6 +1456,10 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
 
     const mediaLabel = message.videoUrl
       ? 'Vídeo'
+      : message.audioUrl
+        ? 'Áudio'
+        : message.documentUrl
+          ? message.documentFileName?.trim() || 'Documento'
       : message.imageUrl
         ? message.isGif
           ? 'GIF'
@@ -1541,6 +1601,70 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     this.pendingAudio = null
     this.pendingAudioPreview = ''
     this.pendingMediaEmojiOpen = false
+  }
+
+  private resetComposerText(): void {
+    this.messageForm.controls.text.setValue('')
+    this.messageForm.markAsPristine()
+    this.messageForm.markAsUntouched()
+    this.messageForm.updateValueAndValidity()
+
+    requestAnimationFrame(() => {
+      const textarea = this.composerTextarea?.nativeElement
+      if (!textarea) {
+        return
+      }
+
+      textarea.value = ''
+      textarea.style.height = 'auto'
+      textarea.scrollTop = 0
+      this.resizeComposerTextarea()
+    })
+  }
+
+  private insertTextAtCursor(emoji: string, textareaRef?: ElementRef<HTMLTextAreaElement>): void {
+    const textarea = textareaRef?.nativeElement
+    const control = this.messageForm.controls.text
+
+    if (!textarea) {
+      control.setValue(`${control.value}${emoji}`)
+      return
+    }
+
+    const value = control.value ?? ''
+    const selectionStart = textarea.selectionStart ?? value.length
+    const selectionEnd = textarea.selectionEnd ?? value.length
+    const nextValue = `${value.slice(0, selectionStart)}${emoji}${value.slice(selectionEnd)}`
+    const nextCaret = selectionStart + emoji.length
+
+    control.setValue(nextValue)
+
+    requestAnimationFrame(() => {
+      textarea.focus()
+      textarea.setSelectionRange(nextCaret, nextCaret)
+      this.resizeTextareaElement(textarea)
+    })
+  }
+
+  private clearLongPressTimer(): void {
+    if (!this.longPressTimeoutId) {
+      return
+    }
+
+    clearTimeout(this.longPressTimeoutId)
+    this.longPressTimeoutId = undefined
+  }
+
+  private resizeTextareaElement(textarea: HTMLTextAreaElement): void {
+    textarea.style.height = 'auto'
+    const styles = window.getComputedStyle(textarea)
+    const lineHeight = Number.parseFloat(styles.lineHeight) || 22
+    const paddingTop = Number.parseFloat(styles.paddingTop) || 0
+    const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0
+    const maxHeight = lineHeight * MessagesPageComponent.MAX_COMPOSER_LINES + paddingTop + paddingBottom
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight)
+    textarea.style.height = `${nextHeight}px`
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden'
   }
 
   private setupPushNotifications(): void {

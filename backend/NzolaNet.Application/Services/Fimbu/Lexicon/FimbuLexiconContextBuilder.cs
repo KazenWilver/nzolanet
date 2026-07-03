@@ -25,18 +25,18 @@ internal static class FimbuLexiconContextBuilder
             builder.AppendLine();
         }
 
-        builder.AppendLine("## CALÃO ANGOLANO — LÊ O DICIONÁRIO E USA MUITO");
+        builder.AppendLine("## CALÃO ANGOLANO — USA SÓ O QUE FOR RELEVANTE");
         builder.AppendLine("- Fonte única: dicionario_angolano.md — cada entrada tem classe, significado e exemplo.");
-        builder.AppendLine("- Mínimo 5 expressões desta lista por resposta, integradas em frases de rua angolana.");
-        builder.AppendLine("- Se houver **Exemplo**, imita o ritmo da frase — adapta ao assunto.");
-        builder.AppendLine("- **Relacionadas** servem para variar no mesmo tema sem repetir sempre a mesma palavra.");
+        builder.AppendLine("- Escolhe 1 a 3 expressões desta lista no máximo, só quando encaixarem no assunto.");
+        builder.AppendLine("- Se houver **Exemplo**, usa-o como referência de contexto, não para copiar frase inteira.");
+        builder.AppendLine("- **Relacionadas** servem para variar sem inventar palavras fora do tema.");
         builder.AppendLine("- Não uses markdown no calão dentro da resposta.");
         builder.AppendLine();
 
         if (lexicon.FewShotExamples.Count > 0)
         {
-            builder.AppendLine("## FRASES ANGOLANAS DE REFERÊNCIA (imita este ritmo e densidade de calão)");
-            foreach (var example in lexicon.FewShotExamples)
+            builder.AppendLine("## FRASES ANGOLANAS DE REFERÊNCIA (observa o ritmo e a naturalidade)");
+            foreach (var example in lexicon.FewShotExamples.Take(4))
             {
                 builder.Append("- ");
                 builder.AppendLine(Truncate(example, 180));
@@ -45,7 +45,7 @@ internal static class FimbuLexiconContextBuilder
             builder.AppendLine();
         }
 
-        builder.AppendLine("## PALAVRAS PARA ESTA MENSAGEM (usa várias delas)");
+        builder.AppendLine("## PALAVRAS PARA ESTA MENSAGEM (usa só as que fizerem sentido)");
         foreach (var entry in selectedEntries)
         {
             builder.AppendLine(entry.FormatForPrompt());

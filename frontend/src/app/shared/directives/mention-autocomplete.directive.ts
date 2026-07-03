@@ -9,6 +9,7 @@ import {
   Renderer2,
   inject
 } from '@angular/core'
+import { NgControl } from '@angular/forms'
 import { Subject, Subscription, of } from 'rxjs'
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators'
 import { SearchService } from '../../core/services/search.service'
@@ -36,6 +37,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
   private readonly animationService = inject(AnimationService)
   private readonly localeService = inject(LocaleService)
   private readonly ngZone = inject(NgZone)
+  private readonly ngControl = inject(NgControl, { optional: true, self: true })
 
   private readonly mentionQuery$ = new Subject<MentionQuery>()
   private readonly subscription = new Subscription()
@@ -51,6 +53,14 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
   private static readonly mentionTokenExact = /^@[a-zA-Z0-9._-]+$/
 
   constructor() {
+    if (this.ngControl?.valueChanges) {
+      this.subscription.add(
+        this.ngControl.valueChanges.subscribe(() => {
+          this.syncFromControlValue()
+        })
+      )
+    }
+
     this.subscription.add(
       this.mentionQuery$
         .pipe(
@@ -73,7 +83,7 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.setupHighlightLayer()
-    this.updateHighlight()
+    this.syncFromControlValue()
     this.observeTextareaResize()
   }
 
@@ -462,6 +472,18 @@ export class MentionAutocompleteDirective implements AfterViewInit, OnDestroy {
     this.syncHighlightStyles()
     this.highlightElement.innerHTML = this.buildHighlightHtml(this.host.nativeElement.value)
     this.syncHighlightScroll()
+  }
+
+  private syncFromControlValue(): void {
+    this.ngZone.runOutsideAngular(() => {
+      queueMicrotask(() => {
+        this.updateHighlight()
+
+        if (!this.host.nativeElement.value) {
+          this.closeDropdown()
+        }
+      })
+    })
   }
 
   private syncHighlightScroll(): void {

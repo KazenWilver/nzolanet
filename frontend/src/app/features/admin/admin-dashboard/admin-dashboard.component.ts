@@ -45,6 +45,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   errorMessage = ''
   successMessage = ''
   lastUpdatedAt: Date | null = null
+  private latestPresenceMetrics: { totalUtilizadoresOnline: number; totalUtilizadoresOffline: number } | null = null
 
   get regularUsers(): AdminUserRow[] {
     return this.users.filter(user => user.role !== 'Admin')
@@ -61,16 +62,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.adminRealtime.presenceMetrics$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(event => {
-        if (!this.metrics) {
-          return
-        }
-
-        this.metrics = {
-          ...this.metrics,
-          totalUtilizadoresOnline: event.totalUtilizadoresOnline,
-          totalUtilizadoresOffline: event.totalUtilizadoresOffline
-        }
-        this.lastUpdatedAt = new Date()
+        this.latestPresenceMetrics = event
+        this.applyPresenceMetrics(event)
       })
   }
 
@@ -118,6 +111,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.reportedComments = comments
           this.reportedPublications = publications
           this.users = users
+          this.applyPresenceMetrics(this.latestPresenceMetrics)
           this.lastUpdatedAt = new Date()
         },
         error: () => {
@@ -207,6 +201,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: metrics => {
           this.metrics = metrics
+          this.applyPresenceMetrics(this.latestPresenceMetrics)
           this.lastUpdatedAt = new Date()
         }
       })
@@ -226,5 +221,20 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private failAction(message: string): void {
     this.processingId = null
     this.errorMessage = message
+  }
+
+  private applyPresenceMetrics(
+    metrics: { totalUtilizadoresOnline: number; totalUtilizadoresOffline: number } | null
+  ): void {
+    if (!this.metrics || !metrics) {
+      return
+    }
+
+    this.metrics = {
+      ...this.metrics,
+      totalUtilizadoresOnline: metrics.totalUtilizadoresOnline,
+      totalUtilizadoresOffline: metrics.totalUtilizadoresOffline
+    }
+    this.lastUpdatedAt = new Date()
   }
 }

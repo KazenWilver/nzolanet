@@ -145,6 +145,33 @@ export class ProfilePageComponent implements OnInit {
           followingCount: updated.followingCount ?? this.profile.followingCount
         };
       });
+
+    this.publicationService.repostState$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(change => {
+        const removedIds = new Set(change.removedQuotedPublicationIds)
+        const patchRepostState = (publication: Publication): Publication =>
+          publication.id === change.sourcePublicationId
+            ? {
+                ...publication,
+                hasReposted: change.hasReposted,
+                repostsCount: change.repostsCount
+              }
+            : publication
+
+        this.publications = this.publications
+          .filter(publication => !removedIds.has(publication.id))
+          .map(patchRepostState)
+        this.mediaPublications = this.mediaPublications
+          .filter(publication => !removedIds.has(publication.id))
+          .map(patchRepostState)
+        this.likedPublications = this.likedPublications
+          .filter(publication => !removedIds.has(publication.id))
+          .map(patchRepostState)
+        this.repostPublications = this.repostPublications
+          .filter(publication => !removedIds.has(publication.id))
+          .map(patchRepostState)
+      });
   }
 
   get isOwnProfile(): boolean {

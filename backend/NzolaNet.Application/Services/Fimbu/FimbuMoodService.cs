@@ -561,11 +561,11 @@ public sealed class FimbuMoodService : IFimbuMoodService
     }
 
     /// <summary>
-    /// Intervalo entre 1.05 e 1.38 — personalidade mais variada e menos robótica.
+    /// Intervalo entre 0.68 e 0.86 — mantém personalidade, mas reduz nonsense.
     /// </summary>
     private static double SortearTemperatura(Random random)
     {
-        return 1.05 + (random.NextDouble() * 0.33);
+        return 0.68 + (random.NextDouble() * 0.18);
     }
 }
 

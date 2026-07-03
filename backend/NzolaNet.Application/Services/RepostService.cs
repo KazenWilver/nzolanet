@@ -24,7 +24,7 @@ public class RepostService : IRepostService
         _notificationService = notificationService;
     }
 
-    public async Task<(bool IsReposted, int RepostsCount, PublicationResponseDto? QuotedPublication)> RepostAsync(
+    public async Task<(bool IsReposted, int RepostsCount, PublicationResponseDto? QuotedPublication, IReadOnlyList<Guid> RemovedQuotedPublicationIds)> RepostAsync(
         Guid userId,
         Guid postId,
         string? quoteText)
@@ -40,9 +40,25 @@ public class RepostService : IRepostService
             throw new ArgumentException("Não podes repartilhar a tua própria publicação.");
         }
 
-        var hasReposted = await _repostRepository.HasUserRepostedAsync(userId, postId);
+        var existingQuotedPosts = await _postRepository.GetQuotedPostsByUserAndSourceAsync(userId, postId);
+        var hasReposted = await _repostRepository.HasUserRepostedAsync(userId, postId) || existingQuotedPosts.Count > 0;
         PublicationResponseDto? quotedPublication = null;
         var trimmedQuote = quoteText?.Trim();
+        var removedQuotedPublicationIds = new List<Guid>();
+
+        if (hasReposted)
+        {
+            await _repostRepository.DeleteAsync(userId, postId);
+
+            foreach (var quotedPost in existingQuotedPosts)
+            {
+                removedQuotedPublicationIds.Add(quotedPost.Id);
+                await _postRepository.DeleteAsync(quotedPost);
+            }
+
+            var currentCount = await _repostRepository.GetRepostCountAsync(postId);
+            return (false, currentCount, null, removedQuotedPublicationIds);
+        }
 
         if (!string.IsNullOrWhiteSpace(trimmedQuote))
         {
@@ -69,23 +85,20 @@ public class RepostService : IRepostService
             quotedPublication = MapToDto(quotedPost, post, author);
         }
 
-        if (!hasReposted)
+        await _repostRepository.CreateAsync(new Repost
         {
-            await _repostRepository.CreateAsync(new Repost
-            {
-                UserId = userId,
-                PostId = postId,
-                CreatedAt = DateTime.UtcNow
-            });
+            UserId = userId,
+            PostId = postId,
+            CreatedAt = DateTime.UtcNow
+        });
 
-            var preview = string.IsNullOrWhiteSpace(post.Text)
-                ? "repartilhou a tua publicação"
-                : post.Text;
-            await _notificationService.TryCreateRepostNotificationAsync(userId, postId, post.UserId, preview);
-        }
+        var preview = string.IsNullOrWhiteSpace(post.Text)
+            ? "repartilhou a tua publicação"
+            : post.Text;
+        await _notificationService.TryCreateRepostNotificationAsync(userId, postId, post.UserId, preview);
 
         var count = await _repostRepository.GetRepostCountAsync(postId);
-        return (true, count, quotedPublication);
+        return (true, count, quotedPublication, removedQuotedPublicationIds);
     }
 
     private static PublicationResponseDto MapToDto(Post post, Post quotedSource, User author)

@@ -39,6 +39,7 @@ export class CreatePostComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('composerForm') composerFormRef?: ElementRef<HTMLFormElement>;
+  @ViewChild('publicationTextarea') publicationTextareaRef?: ElementRef<HTMLTextAreaElement>;
 
   @Input() modoModal = false;
   @Output() postCriado = new EventEmitter<Publication>();
@@ -138,6 +139,7 @@ export class CreatePostComponent implements OnInit {
     this.removeMedia();
     this.error = '';
     this.publishing = false;
+    this.resetTextareaUi();
   }
 
   selectFile(event: Event, type: 'image' | 'video'): void {
@@ -234,5 +236,18 @@ export class CreatePostComponent implements OnInit {
     const nextHeight = Math.min(element.scrollHeight, this.maxTextareaHeight);
     element.style.height = `${nextHeight}px`;
     element.style.overflowY = element.scrollHeight > this.maxTextareaHeight ? 'auto' : 'hidden';
+  }
+
+  private resetTextareaUi(): void {
+    requestAnimationFrame(() => {
+      const textarea = this.publicationTextareaRef?.nativeElement;
+      if (!textarea) {
+        return;
+      }
+
+      textarea.value = '';
+      textarea.style.height = 'auto';
+      textarea.scrollTop = 0;
+    });
   }
 }

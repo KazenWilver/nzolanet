@@ -45,7 +45,7 @@ public class UserPresenceService : IUserPresenceService
 
     public bool IsOnline(Guid userId)
     {
-        return _connections.TryGetValue(userId, out var connections) && connections.Count > 0;
+        return _connections.TryGetValue(userId, out var connections) && HasActiveConnections(connections);
     }
 
     public int GetOnlineUsersCount()
@@ -54,12 +54,9 @@ public class UserPresenceService : IUserPresenceService
 
         foreach (var (_, connections) in _connections)
         {
-            lock (connections)
+            if (HasActiveConnections(connections))
             {
-                if (connections.Count > 0)
-                {
-                    count++;
-                }
+                count++;
             }
         }
 
@@ -72,12 +69,9 @@ public class UserPresenceService : IUserPresenceService
 
         foreach (var (userId, connections) in _connections)
         {
-            lock (connections)
+            if (HasActiveConnections(connections))
             {
-                if (connections.Count > 0)
-                {
-                    onlineUsers.Add(userId);
-                }
+                onlineUsers.Add(userId);
             }
         }
 
@@ -92,5 +86,13 @@ public class UserPresenceService : IUserPresenceService
         }
 
         return _lastSeenUtc.TryGetValue(userId, out var lastSeen) ? lastSeen : null;
+    }
+
+    private static bool HasActiveConnections(HashSet<string> connections)
+    {
+        lock (connections)
+        {
+            return connections.Count > 0;
+        }
     }
 }

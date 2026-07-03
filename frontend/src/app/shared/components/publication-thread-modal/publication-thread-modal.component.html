@@ -137,6 +137,7 @@
           A responder a <strong>@{{ publication.authorUsername }}</strong>
         </p>
         <textarea
+          #replyTextarea
           class="thread-modal__reply-input"
           appMentionAutocomplete
           [(ngModel)]="newCommentText"

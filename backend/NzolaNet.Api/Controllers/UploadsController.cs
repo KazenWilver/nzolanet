@@ -63,7 +63,7 @@ public class UploadsController : ControllerBase
             return NotFound();
         }
 
-        var contentType = GetContentType(physicalPath);
+        var contentType = GetContentType(physicalPath, normalizedPath);
 
         if (download)
         {
@@ -107,7 +107,7 @@ public class UploadsController : ControllerBase
         return null;
     }
 
-    private static string GetContentType(string filePath)
+    private static string GetContentType(string filePath, string requestPath)
     {
         var extension = Path.GetExtension(filePath).ToLowerInvariant();
 
@@ -118,7 +118,9 @@ public class UploadsController : ControllerBase
             ".gif" => "image/gif",
             ".webp" => "image/webp",
             ".mp4" => "video/mp4",
-            ".webm" => "video/webm",
+            ".webm" => requestPath.Contains("/uploads/messages/", StringComparison.OrdinalIgnoreCase)
+                ? "audio/webm"
+                : "video/webm",
             ".mov" => "video/quicktime",
             ".pdf" => "application/pdf",
             ".txt" => "text/plain",

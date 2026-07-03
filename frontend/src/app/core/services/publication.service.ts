@@ -12,13 +12,25 @@ import type {
   UpdatePublicationDto
 } from '../models/publication.model';
 
+export interface RepostStateChange {
+  sourcePublicationId: string
+  hasReposted: boolean
+  repostsCount: number
+  quotedPublication?: Publication
+  removedQuotedPublicationIds: string[]
+}
+
 @Injectable({ providedIn: 'root' })
 export class PublicationService {
   private readonly baseUrl = `${environment.apiUrl}/publications`;
   private readonly createdSubject = new Subject<Publication>();
   private readonly repostedSubject = new Subject<Publication>();
+  private readonly repostStateSubject = new Subject<RepostStateChange>();
+  private readonly trendsRefreshSubject = new Subject<void>();
   readonly created$ = this.createdSubject.asObservable();
   readonly reposted$ = this.repostedSubject.asObservable();
+  readonly repostState$ = this.repostStateSubject.asObservable();
+  readonly trendsRefresh$ = this.trendsRefreshSubject.asObservable();
   readonly defaultPageSize = 20;
 
   constructor(private readonly http: HttpClient) {}
@@ -103,18 +115,26 @@ export class PublicationService {
       .post<BackendPublicationDto>(this.baseUrl, formData)
       .pipe(
         map(publication => this.mapPublication(publication)),
-        tap(publication => this.createdSubject.next(publication))
+        tap(publication => {
+          this.createdSubject.next(publication)
+          this.trendsRefreshSubject.next()
+        })
       );
   }
 
   update(id: string, dto: UpdatePublicationDto): Observable<Publication> {
     return this.http
       .put<BackendPublicationDto>(`${this.baseUrl}/${id}`, { text: dto.text })
-      .pipe(map(publication => this.mapPublication(publication)));
+      .pipe(
+        map(publication => this.mapPublication(publication)),
+        tap(() => this.trendsRefreshSubject.next())
+      );
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http
+      .delete<void>(`${this.baseUrl}/${id}`)
+      .pipe(tap(() => this.trendsRefreshSubject.next()));
   }
 
   like(id: string): Observable<void> {
@@ -125,29 +145,34 @@ export class PublicationService {
     return this.http.delete<void>(`${this.baseUrl}/${id}/like`);
   }
 
-  toggleRepost(id: string): Observable<{ hasReposted: boolean; repostsCount: number }> {
-    return this.repost(id)
+  toggleRepost(id: string, text = ''): Observable<RepostStateChange> {
+    return this.repost(id, text)
   }
 
   repost(
     id: string,
     text = ''
-  ): Observable<{ hasReposted: boolean; repostsCount: number; quotedPublication?: Publication }> {
+  ): Observable<RepostStateChange> {
     return this.http
       .post<{
         hasReposted: boolean
         repostsCount: number
         quotedPublication?: BackendPublicationDto
+        removedQuotedPublicationIds?: string[]
       }>(`${this.baseUrl}/${id}/repost`, { text: text || null })
       .pipe(
         map(response => ({
+          sourcePublicationId: id,
           hasReposted: response.hasReposted,
           repostsCount: response.repostsCount,
           quotedPublication: response.quotedPublication
             ? this.mapPublication(response.quotedPublication)
-            : undefined
+            : undefined,
+          removedQuotedPublicationIds: response.removedQuotedPublicationIds ?? []
         })),
         tap(response => {
+          this.repostStateSubject.next(response)
+          this.trendsRefreshSubject.next()
           if (response.quotedPublication) {
             this.repostedSubject.next(response.quotedPublication);
           }

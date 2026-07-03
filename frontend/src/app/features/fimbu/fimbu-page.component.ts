@@ -78,7 +78,7 @@ export class FimbuPageComponent implements OnInit {
     }
 
     this.messages = [...this.messages, optimistic]
-    this.composerForm.reset()
+    this.resetComposer()
     this.sendError = ''
     this.sending = true
     this.scrollToBottom()
@@ -170,6 +170,25 @@ export class FimbuPageComponent implements OnInit {
       textarea.style.height = 'auto'
       const maxHeight = 160
       textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
+    })
+  }
+
+  private resetComposer(): void {
+    this.composerForm.controls.message.setValue('')
+    this.composerForm.markAsPristine()
+    this.composerForm.markAsUntouched()
+    this.composerForm.updateValueAndValidity()
+
+    requestAnimationFrame(() => {
+      const textarea = this.composerTextarea?.nativeElement
+      if (!textarea) {
+        return
+      }
+
+      textarea.value = ''
+      textarea.style.height = 'auto'
+      textarea.scrollTop = 0
+      this.resizeComposer()
     })
   }
 }

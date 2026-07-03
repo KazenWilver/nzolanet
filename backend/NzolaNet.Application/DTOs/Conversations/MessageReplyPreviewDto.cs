@@ -9,5 +9,8 @@ public class MessageReplyPreviewDto
     public string Text { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
     public string? VideoUrl { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? DocumentUrl { get; set; }
+    public string? DocumentFileName { get; set; }
     public bool IsGif { get; set; }
 }

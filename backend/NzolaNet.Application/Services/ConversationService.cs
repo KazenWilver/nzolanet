@@ -808,6 +808,9 @@ public class ConversationService : IConversationService
             Text = message.Text,
             ImageUrl = message.RemoteImageUrl ?? message.ImagePath,
             VideoUrl = message.VideoPath,
+            AudioUrl = message.AudioPath,
+            DocumentUrl = message.DocumentPath,
+            DocumentFileName = message.DocumentFileName,
             IsGif = IsGifPath(message.RemoteImageUrl ?? message.ImagePath)
         };
     }

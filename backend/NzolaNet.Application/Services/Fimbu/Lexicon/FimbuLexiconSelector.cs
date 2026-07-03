@@ -8,7 +8,7 @@ namespace NzolaNet.Application.Services.Fimbu.Lexicon;
 /// </summary>
 internal static partial class FimbuLexiconSelector
 {
-    private const int MaxEntriesPerMessage = 20;
+    private const int MaxEntriesPerMessage = 8;
     private const int MaxRelatedPerMatch = 3;
 
     public static IReadOnlyList<FimbuLexiconEntry> Select(
@@ -69,62 +69,6 @@ internal static partial class FimbuLexiconSelector
             }
         }
 
-        var remaining = MaxEntriesPerMessage - result.Count;
-        if (remaining > 0)
-        {
-            var seed = HashCode.Combine(userId, messageIndex, DateTime.UtcNow.DayOfYear);
-            var random = new Random(seed);
-            var fillers = ReservoirSample(
-                lexicon.Entries.Where(e => e.UsageExamples.Count > 0).ToList(),
-                remaining,
-                seen,
-                random);
-
-            if (fillers.Count < remaining)
-            {
-                fillers.AddRange(ReservoirSample(lexicon.Entries, remaining - fillers.Count, seen, random));
-            }
-
-            foreach (var filler in fillers)
-            {
-                AddEntry(filler);
-            }
-        }
-
         return result;
-    }
-
-    private static List<FimbuLexiconEntry> ReservoirSample(
-        IReadOnlyList<FimbuLexiconEntry> source,
-        int count,
-        HashSet<string> excluded,
-        Random random)
-    {
-        var reservoir = new List<FimbuLexiconEntry>(count);
-        var seenCount = 0;
-
-        foreach (var item in source)
-        {
-            if (excluded.Contains(item.Word))
-            {
-                continue;
-            }
-
-            seenCount++;
-
-            if (reservoir.Count < count)
-            {
-                reservoir.Add(item);
-                continue;
-            }
-
-            var j = random.Next(seenCount);
-            if (j < count)
-            {
-                reservoir[j] = item;
-            }
-        }
-
-        return reservoir;
     }
 }
