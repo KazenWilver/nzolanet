@@ -57,6 +57,20 @@ public class RepostRepository : IRepostRepository
         return reposted.ToHashSet();
     }
 
+    public async Task<IReadOnlyList<Repost>> GetUserRepostsAsync(Guid userId)
+    {
+        return await _context.Reposts
+            .AsNoTracking()
+            .Include(repost => repost.Post)
+                .ThenInclude(post => post.User)
+            .Include(repost => repost.Post)
+                .ThenInclude(post => post.QuotedPost!)
+                    .ThenInclude(quotedPost => quotedPost.User)
+            .Where(repost => repost.UserId == userId)
+            .OrderByDescending(repost => repost.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<Repost> CreateAsync(Repost repost)
     {
         _context.Reposts.Add(repost);

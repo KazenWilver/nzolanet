@@ -387,10 +387,52 @@ public class PostService : IPostService
     {
         await EnsureCanViewUserPostsAsync(targetUserId, currentUserId);
 
-        var (items, totalCount) = await _postRepository.GetQuotedRepostsByUserPagedAsync(targetUserId, page, pageSize);
-        var itemList = items.ToList();
-        var dtos = (await MapPostsToDtosAsync(itemList, currentUserId)).ToList();
-        return BuildPaginatedResponse(dtos, page, pageSize, totalCount);
+        var quotedReposts = await _postRepository.GetQuotedRepostsByUserAsync(targetUserId);
+        var quotedSourceIds = quotedReposts
+            .Where(post => post.QuotedPostId.HasValue)
+            .Select(post => post.QuotedPostId!.Value)
+            .ToHashSet();
+
+        var directReposts = (await _repostRepository.GetUserRepostsAsync(targetUserId))
+            .Where(repost => !quotedSourceIds.Contains(repost.PostId))
+            .ToList();
+
+        var quotedDtos = (await MapPostsToDtosAsync(quotedReposts, currentUserId)).ToList();
+
+        var directSourcePosts = directReposts
+            .Select(repost => repost.Post)
+            .Where(post => post != null)
+            .Cast<Post>()
+            .ToList();
+
+        var mappedDirectDtos = (await MapPostsToDtosAsync(directSourcePosts, currentUserId))
+            .ToDictionary(dto => dto.Id);
+
+        var directDtos = directReposts
+            .Select(repost =>
+            {
+                if (!mappedDirectDtos.TryGetValue(repost.PostId, out var dto))
+                {
+                    return null;
+                }
+
+                return ClonePublicationWithTimestamp(dto, repost.CreatedAt);
+            })
+            .Where(dto => dto != null)
+            .Cast<PublicationResponseDto>();
+
+        var merged = quotedDtos
+            .Concat(directDtos)
+            .OrderByDescending(publication => publication.CreatedAt)
+            .ToList();
+
+        var totalCount = merged.Count;
+        var pagedItems = merged
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return BuildPaginatedResponse(pagedItems, page, pageSize, totalCount);
     }
 
     public async Task<IReadOnlyList<TrendingHashtagDto>> GetTrendingHashtagsAsync(int limit = 5)
@@ -585,6 +627,35 @@ public class PostService : IPostService
             AuthorUsername = quotedPost.User?.UserName ?? string.Empty,
             AuthorDisplayName = quotedPost.User?.DisplayName,
             AuthorPhotoUrl = quotedPost.User?.ProfilePhoto
+        };
+    }
+
+    private static PublicationResponseDto ClonePublicationWithTimestamp(
+        PublicationResponseDto source,
+        DateTime createdAt)
+    {
+        return new PublicationResponseDto
+        {
+            Id = source.Id,
+            Text = source.Text,
+            ImageUrl = source.ImageUrl,
+            VideoUrl = source.VideoUrl,
+            CreatedAt = createdAt,
+            UpdatedAt = source.UpdatedAt,
+            AuthorId = source.AuthorId,
+            AuthorUsername = source.AuthorUsername,
+            AuthorDisplayName = source.AuthorDisplayName,
+            AuthorPhotoUrl = source.AuthorPhotoUrl,
+            LikesCount = source.LikesCount,
+            CommentsCount = source.CommentsCount,
+            RepostsCount = source.RepostsCount,
+            BookmarksCount = source.BookmarksCount,
+            HasLiked = source.HasLiked,
+            HasReposted = source.HasReposted,
+            HasBookmarked = source.HasBookmarked,
+            QuotedPublication = source.QuotedPublication == null
+                ? null
+                : ClonePublicationWithTimestamp(source.QuotedPublication, source.QuotedPublication.CreatedAt)
         };
     }
 }

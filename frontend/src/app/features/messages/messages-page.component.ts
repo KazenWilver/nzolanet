@@ -421,6 +421,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           }
 
           this.applyDeletedForEveryoneState(message.id)
+          this.updateDeletedConversationPreview(message.id)
         },
         error: (error: HttpErrorResponse) => {
           this.sendError = error.error?.message ?? 'Não foi possível apagar a mensagem.'
@@ -1454,20 +1455,7 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       return
     }
 
-    const mediaLabel = message.videoUrl
-      ? 'Vídeo'
-      : message.audioUrl
-        ? 'Áudio'
-        : message.documentUrl
-          ? message.documentFileName?.trim() || 'Documento'
-      : message.imageUrl
-        ? message.isGif
-          ? 'GIF'
-          : 'Imagem'
-        : ''
-    const replyPrefix = message.replyTo ? '↩ ' : ''
-    const content = message.text || mediaLabel || 'Mensagem'
-    const preview = message.isMine ? `Tu: ${replyPrefix}${content}` : `${replyPrefix}${content}`
+    const preview = this.buildConversationPreview(message)
 
     this.activeConversation = {
       ...this.activeConversation,
@@ -1580,6 +1568,56 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
           }
         : existing
     )
+  }
+
+  private updateDeletedConversationPreview(messageId: string): void {
+    if (!this.activeConversation) {
+      return
+    }
+
+    const latestVisibleMessage = [...this.messages]
+      .reverse()
+      .find(existing => !existing.isDeletedForEveryone)
+
+    const preview = latestVisibleMessage
+      ? this.buildConversationPreview(latestVisibleMessage)
+      : 'Iniciar conversa'
+
+    const previewTimestamp = latestVisibleMessage?.createdAt ?? this.activeConversation.lastMessageAt
+
+    this.activeConversation = {
+      ...this.activeConversation,
+      lastMessageText: preview,
+      lastMessageAt: previewTimestamp
+    }
+
+    this.conversations = this.conversations.map(conversation =>
+      conversation.id === this.activeConversation?.id
+        ? {
+            ...conversation,
+            lastMessageText: preview,
+            lastMessageAt: previewTimestamp
+          }
+        : conversation
+    )
+  }
+
+  private buildConversationPreview(message: ChatMessage): string {
+    const mediaLabel = message.videoUrl
+      ? 'Vídeo'
+      : message.audioUrl
+        ? 'Áudio'
+        : message.documentUrl
+          ? message.documentFileName?.trim() || 'Documento'
+          : message.imageUrl
+            ? message.isGif
+              ? 'GIF'
+              : 'Imagem'
+            : ''
+
+    const replyPrefix = message.replyTo ? '↩ ' : ''
+    const content = message.text || mediaLabel || 'Mensagem'
+    return message.isMine ? `Tu: ${replyPrefix}${content}` : `${replyPrefix}${content}`
   }
 
   private clearPendingMedia(): void {

@@ -206,6 +206,18 @@ public class PostRepository : IPostRepository
         return (items, totalCount);
     }
 
+    public async Task<IReadOnlyList<Post>> GetQuotedRepostsByUserAsync(Guid userId)
+    {
+        return await _context.Posts
+            .AsNoTracking()
+            .Include(post => post.User)
+            .Include(post => post.QuotedPost!)
+                .ThenInclude(quoted => quoted.User)
+            .Where(post => post.UserId == userId && post.QuotedPostId != null)
+            .OrderByDescending(post => post.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<Post>> GetQuotedPostsByUserAndSourceAsync(Guid userId, Guid quotedPostId)
     {
         return await _context.Posts

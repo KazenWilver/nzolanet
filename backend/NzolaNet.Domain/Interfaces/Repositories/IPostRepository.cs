@@ -32,6 +32,7 @@ public interface IPostRepository
         Guid userId,
         int page,
         int pageSize);
+    Task<IReadOnlyList<Post>> GetQuotedRepostsByUserAsync(Guid userId);
     Task<IReadOnlyList<Post>> GetQuotedPostsByUserAndSourceAsync(Guid userId, Guid quotedPostId);
     Task<bool> CreateAsync(Post post);
     Task<bool> UpdateAsync(Post post);

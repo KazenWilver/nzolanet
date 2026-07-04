@@ -60,30 +60,27 @@ public class RepostService : IRepostService
             return (false, currentCount, null, removedQuotedPublicationIds);
         }
 
-        if (!string.IsNullOrWhiteSpace(trimmedQuote))
+        var author = await _userRepository.GetByIdAsync(userId);
+        if (author == null)
         {
-            var author = await _userRepository.GetByIdAsync(userId);
-            if (author == null)
-            {
-                throw new ArgumentException("Utilizador não encontrado.");
-            }
-
-            var quotedPost = new Post
-            {
-                UserId = userId,
-                Text = trimmedQuote,
-                QuotedPostId = postId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            var created = await _postRepository.CreateAsync(quotedPost);
-            if (!created)
-            {
-                throw new ArgumentException("Não foi possível republicar com comentário.");
-            }
-
-            quotedPublication = MapToDto(quotedPost, post, author);
+            throw new ArgumentException("Utilizador não encontrado.");
         }
+
+        var repostWrapperPost = new Post
+        {
+            UserId = userId,
+            Text = trimmedQuote ?? string.Empty,
+            QuotedPostId = postId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var created = await _postRepository.CreateAsync(repostWrapperPost);
+        if (!created)
+        {
+            throw new ArgumentException("Não foi possível repartilhar a publicação.");
+        }
+
+        quotedPublication = MapToDto(repostWrapperPost, post, author);
 
         await _repostRepository.CreateAsync(new Repost
         {
