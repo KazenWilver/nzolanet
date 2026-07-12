@@ -77,6 +77,8 @@ public class UserRepository : IUserRepository
         tracked.IsPrivate = user.IsPrivate;
         tracked.ProfilePhoto = user.ProfilePhoto;
         tracked.CoverPhoto = user.CoverPhoto;
+        tracked.IsDeactivated = user.IsDeactivated;
+        tracked.IsBanned = user.IsBanned;
         tracked.UpdatedAt = user.UpdatedAt;
 
         return await _context.SaveChangesAsync() > 0;
@@ -141,6 +143,116 @@ public class UserRepository : IUserRepository
 
         var roles = await _userManager.GetRolesAsync(user);
         return roles.ToList();
+    }
+
+    public async Task<bool> DeleteAccountAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return false;
+        }
+
+        var postIds = await _context.Posts
+            .Where(post => post.UserId == userId)
+            .Select(post => post.Id)
+            .ToListAsync();
+
+        var commentIds = await _context.Comments
+            .Where(comment => comment.UserId == userId || postIds.Contains(comment.PostId))
+            .Select(comment => comment.Id)
+            .ToListAsync();
+
+        var participantRows = await _context.ConversationParticipants
+            .Where(participant => participant.UserId == userId)
+            .ToListAsync();
+        var conversationIds = participantRows.Select(row => row.ConversationId).Distinct().ToList();
+
+        var messagesFromUser = await _context.Messages
+            .Where(message => message.SenderId == userId)
+            .ToListAsync();
+        var messageIds = messagesFromUser.Select(message => message.Id).ToList();
+
+        var repliesToDeleted = await _context.Messages
+            .Where(message => message.ReplyToMessageId.HasValue && messageIds.Contains(message.ReplyToMessageId.Value))
+            .ToListAsync();
+        foreach (var reply in repliesToDeleted)
+        {
+            reply.ReplyToMessageId = null;
+        }
+
+        _context.Notifications.RemoveRange(await _context.Notifications
+            .Where(notification =>
+                notification.ActorId == userId ||
+                notification.RecipientId == userId ||
+                (notification.PublicationId.HasValue && postIds.Contains(notification.PublicationId.Value)) ||
+                (notification.CommentId.HasValue && commentIds.Contains(notification.CommentId.Value)) ||
+                (notification.MessageId.HasValue && messageIds.Contains(notification.MessageId.Value)))
+            .ToListAsync());
+
+        _context.ContentReports.RemoveRange(await _context.ContentReports
+            .Where(report =>
+                report.ReporterId == userId ||
+                postIds.Contains(report.TargetId) ||
+                commentIds.Contains(report.TargetId) ||
+                messageIds.Contains(report.TargetId))
+            .ToListAsync());
+
+        _context.MessageReactions.RemoveRange(await _context.MessageReactions
+            .Where(reaction => reaction.UserId == userId || messageIds.Contains(reaction.MessageId))
+            .ToListAsync());
+
+        _context.MessageUserHides.RemoveRange(await _context.MessageUserHides
+            .Where(hidden => hidden.UserId == userId || messageIds.Contains(hidden.MessageId))
+            .ToListAsync());
+
+        _context.Messages.RemoveRange(messagesFromUser);
+        _context.ConversationParticipants.RemoveRange(participantRows);
+        await _context.SaveChangesAsync();
+
+        var orphanConversations = await _context.Conversations
+            .Where(conversation => conversationIds.Contains(conversation.Id)
+                && !_context.ConversationParticipants.Any(participant => participant.ConversationId == conversation.Id))
+            .ToListAsync();
+        _context.Conversations.RemoveRange(orphanConversations);
+
+        _context.Likes.RemoveRange(await _context.Likes
+            .Where(like => like.UserId == userId || postIds.Contains(like.PostId))
+            .ToListAsync());
+        _context.Reposts.RemoveRange(await _context.Reposts
+            .Where(repost => repost.UserId == userId || postIds.Contains(repost.PostId))
+            .ToListAsync());
+        _context.Bookmarks.RemoveRange(await _context.Bookmarks
+            .Where(bookmark => bookmark.UserId == userId || postIds.Contains(bookmark.PostId))
+            .ToListAsync());
+        _context.Follows.RemoveRange(await _context.Follows
+            .Where(follow => follow.FollowerId == userId || follow.FollowedId == userId)
+            .ToListAsync());
+        _context.Comments.RemoveRange(await _context.Comments
+            .Where(comment => commentIds.Contains(comment.Id))
+            .ToListAsync());
+
+        // Clear quoted-post references pointing at posts about to be deleted
+        var postsToDelete = await _context.Posts
+            .Where(post => postIds.Contains(post.Id))
+            .ToListAsync();
+        var quotingPosts = await _context.Posts
+            .Where(post => post.QuotedPostId.HasValue && postIds.Contains(post.QuotedPostId.Value))
+            .ToListAsync();
+        foreach (var quotingPost in quotingPosts)
+        {
+            quotingPost.QuotedPostId = null;
+        }
+
+        _context.Posts.RemoveRange(postsToDelete);
+        _context.FimbuUserActivities.RemoveRange(await _context.FimbuUserActivities
+            .Where(activity => activity.UserId == userId)
+            .ToListAsync());
+
+        await _context.SaveChangesAsync();
+
+        var deleteResult = await _userManager.DeleteAsync(user);
+        return deleteResult.Succeeded;
     }
 
     public async Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query)

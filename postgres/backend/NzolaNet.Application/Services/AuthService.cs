@@ -90,6 +90,16 @@ public class AuthService : IAuthService
             throw new InvalidCredentialsException();
         }
 
+        if (user.IsBanned)
+        {
+            throw new UnauthorizedAccessException("Esta conta foi banida por um administrador.");
+        }
+
+        if (user.IsDeactivated)
+        {
+            throw new UnauthorizedAccessException("Esta conta está desactivada.");
+        }
+
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
         if (!result.Succeeded)
         {

@@ -23,6 +23,7 @@ public interface IUserRepository
         string? coverPhoto = null);
     Task AddToRoleAsync(User user, string role);
     Task<IReadOnlyList<string>> GetRolesAsync(Guid userId);
+    Task<bool> DeleteAccountAsync(Guid userId);
     Task<System.Collections.Generic.IEnumerable<User>> SearchAsync(string query);
     Task<System.Collections.Generic.IEnumerable<User>> GetSuggestionsAsync(
         Guid currentUserId,

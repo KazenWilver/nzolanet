@@ -51,6 +51,10 @@ public class ExceptionMiddleware
                 statusCode = HttpStatusCode.Forbidden;
                 message = unauthorizedEx.Message;
                 break;
+            case KeyNotFoundException notFoundEx:
+                statusCode = HttpStatusCode.NotFound;
+                message = notFoundEx.Message;
+                break;
             case ArgumentException argEx:
                 if (argEx.Message.Contains("não encontrado", StringComparison.OrdinalIgnoreCase) ||
                     argEx.Message.Contains("não encontrada", StringComparison.OrdinalIgnoreCase))

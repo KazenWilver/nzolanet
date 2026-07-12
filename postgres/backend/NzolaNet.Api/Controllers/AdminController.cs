@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Api.Helpers;
 using NzolaNet.Application.DTOs.Admin;
 using NzolaNet.Application.Interfaces;
 
@@ -116,5 +117,45 @@ public class AdminController : ControllerBase
     {
         var users = await _adminService.GetUsersAsync();
         return Ok(users);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("users/{id:guid}/deactivate")]
+    public async Task<IActionResult> DeactivateUser(Guid id)
+    {
+        await _adminService.DeactivateUserAsync(AuthClaimsHelper.GetUserId(User), id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("users/{id:guid}/reactivate")]
+    public async Task<IActionResult> ReactivateUser(Guid id)
+    {
+        await _adminService.ReactivateUserAsync(AuthClaimsHelper.GetUserId(User), id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("users/{id:guid}/ban")]
+    public async Task<IActionResult> BanUser(Guid id)
+    {
+        await _adminService.BanUserAsync(AuthClaimsHelper.GetUserId(User), id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("users/{id:guid}/unban")]
+    public async Task<IActionResult> UnbanUser(Guid id)
+    {
+        await _adminService.UnbanUserAsync(AuthClaimsHelper.GetUserId(User), id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("users/{id:guid}")]
+    public async Task<IActionResult> DeleteUser(Guid id)
+    {
+        await _adminService.DeleteUserAsync(AuthClaimsHelper.GetUserId(User), id);
+        return NoContent();
     }
 }

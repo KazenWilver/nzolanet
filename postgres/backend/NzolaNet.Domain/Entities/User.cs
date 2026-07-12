@@ -11,6 +11,16 @@ public class User : IdentityUser<Guid>
     public string? CoverPhoto { get; set; }
     public bool IsPrivate { get; set; } = false;
     public string? Bio { get; set; }
+
+    /// <summary>
+    /// Conta desactivada por um administrador. Pode ser reactivada.
+    /// </summary>
+    public bool IsDeactivated { get; set; }
+
+    /// <summary>
+    /// Conta banida por um administrador. Pode ser desbanida.
+    /// </summary>
+    public bool IsBanned { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }

@@ -58,4 +58,29 @@ public interface IAdminService
     /// Lists every user registered on the platform.
     /// </summary>
     Task<IReadOnlyList<AdminUserDto>> GetUsersAsync();
+
+    /// <summary>
+    /// Deactivates a regular user account. The account can be reactivated later.
+    /// </summary>
+    Task DeactivateUserAsync(Guid actorAdminId, Guid targetUserId);
+
+    /// <summary>
+    /// Reactivates a previously deactivated account.
+    /// </summary>
+    Task ReactivateUserAsync(Guid actorAdminId, Guid targetUserId);
+
+    /// <summary>
+    /// Bans a regular user account. The account can be unbanned later.
+    /// </summary>
+    Task BanUserAsync(Guid actorAdminId, Guid targetUserId);
+
+    /// <summary>
+    /// Removes a ban from a user account.
+    /// </summary>
+    Task UnbanUserAsync(Guid actorAdminId, Guid targetUserId);
+
+    /// <summary>
+    /// Permanently deletes a regular user account and related data.
+    /// </summary>
+    Task DeleteUserAsync(Guid actorAdminId, Guid targetUserId);
 }

@@ -81,6 +81,8 @@ public class AdminService : IAdminService
             throw new InvalidCredentialsException();
         }
 
+        EnsureAccountIsAccessible(user);
+
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
         if (!result.Succeeded)
         {
@@ -328,13 +330,76 @@ public class AdminService : IAdminService
                 FollowersCount = followersCount,
                 FollowingCount = followingCount,
                 PublicacoesCount = posts.Count(),
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                IsDeactivated = user.IsDeactivated,
+                IsBanned = user.IsBanned
             });
         }
 
         return result
             .OrderByDescending(user => user.CreatedAt)
             .ToList();
+    }
+
+    public async Task DeactivateUserAsync(Guid actorAdminId, Guid targetUserId)
+    {
+        var target = await EnsureModerableUserAsync(actorAdminId, targetUserId);
+        target.IsDeactivated = true;
+        target.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(target);
+    }
+
+    public async Task ReactivateUserAsync(Guid actorAdminId, Guid targetUserId)
+    {
+        var target = await EnsureModerableUserAsync(actorAdminId, targetUserId);
+        target.IsDeactivated = false;
+        target.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(target);
+    }
+
+    public async Task BanUserAsync(Guid actorAdminId, Guid targetUserId)
+    {
+        var target = await EnsureModerableUserAsync(actorAdminId, targetUserId);
+        target.IsBanned = true;
+        target.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(target);
+    }
+
+    public async Task UnbanUserAsync(Guid actorAdminId, Guid targetUserId)
+    {
+        var target = await EnsureModerableUserAsync(actorAdminId, targetUserId);
+        target.IsBanned = false;
+        target.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(target);
+    }
+
+    public async Task DeleteUserAsync(Guid actorAdminId, Guid targetUserId)
+    {
+        await EnsureModerableUserAsync(actorAdminId, targetUserId);
+        var deleted = await _userRepository.DeleteAccountAsync(targetUserId);
+        if (!deleted)
+        {
+            throw new InvalidOperationException("Não foi possível apagar a conta do utilizador.");
+        }
+    }
+
+    private async Task<User> EnsureModerableUserAsync(Guid actorAdminId, Guid targetUserId)
+    {
+        if (actorAdminId == targetUserId)
+        {
+            throw new UnauthorizedAccessException("Não podes aplicar esta acção à tua própria conta.");
+        }
+
+        var target = await _userManager.FindByIdAsync(targetUserId.ToString())
+            ?? throw new KeyNotFoundException("Utilizador não encontrado.");
+
+        var roles = await _userManager.GetRolesAsync(target);
+        if (roles.Contains(AdminRoleName))
+        {
+            throw new UnauthorizedAccessException("Não é permitido moderar contas de administrador.");
+        }
+
+        return target;
     }
 
     private async Task<AuthResponseDto> BuildAuthResponseAsync(User user)
@@ -371,5 +436,18 @@ public class AdminService : IAdminService
         }
 
         return _configuration["AdminSettings:RegistrationCode"];
+    }
+
+    private static void EnsureAccountIsAccessible(User user)
+    {
+        if (user.IsBanned)
+        {
+            throw new UnauthorizedAccessException("Esta conta foi banida por um administrador.");
+        }
+
+        if (user.IsDeactivated)
+        {
+            throw new UnauthorizedAccessException("Esta conta está desactivada.");
+        }
     }
 }

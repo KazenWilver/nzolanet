@@ -194,6 +194,107 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       })
   }
 
+  handleDeactivateUser(user: AdminUserRow): void {
+    const confirmed = window.confirm(
+      `Desactivar a conta de @${user.username}? O utilizador deixa de conseguir entrar, mas a conta pode ser reactivada.`
+    )
+    if (!confirmed) {
+      return
+    }
+
+    this.startAction(user.id)
+    this.adminService
+      .desactivarUtilizador(user.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.patchUser(user.id, { isDeactivated: true })
+          this.finishAction(`Conta @${user.username} desactivada.`)
+        },
+        error: error => this.failAction(this.readError(error, 'Não foi possível desactivar a conta.'))
+      })
+  }
+
+  handleReactivateUser(user: AdminUserRow): void {
+    this.startAction(user.id)
+    this.adminService
+      .reactivarUtilizador(user.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.patchUser(user.id, { isDeactivated: false })
+          this.finishAction(`Conta @${user.username} reactivada.`)
+        },
+        error: error => this.failAction(this.readError(error, 'Não foi possível reactivar a conta.'))
+      })
+  }
+
+  handleBanUser(user: AdminUserRow): void {
+    const confirmed = window.confirm(
+      `Banir a conta de @${user.username}? O utilizador deixa de conseguir entrar até ser desbanido.`
+    )
+    if (!confirmed) {
+      return
+    }
+
+    this.startAction(user.id)
+    this.adminService
+      .banirUtilizador(user.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.patchUser(user.id, { isBanned: true })
+          this.finishAction(`Conta @${user.username} banida.`)
+        },
+        error: error => this.failAction(this.readError(error, 'Não foi possível banir a conta.'))
+      })
+  }
+
+  handleUnbanUser(user: AdminUserRow): void {
+    this.startAction(user.id)
+    this.adminService
+      .desbanirUtilizador(user.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.patchUser(user.id, { isBanned: false })
+          this.finishAction(`Conta @${user.username} desbanida.`)
+        },
+        error: error => this.failAction(this.readError(error, 'Não foi possível desbanir a conta.'))
+      })
+  }
+
+  handleDeleteUser(user: AdminUserRow): void {
+    const confirmed = window.confirm(
+      `Apagar definitivamente a conta de @${user.username}? Esta acção não pode ser anulada.`
+    )
+    if (!confirmed) {
+      return
+    }
+
+    this.startAction(user.id)
+    this.adminService
+      .apagarUtilizador(user.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.users = this.users.filter(item => item.id !== user.id)
+          this.finishAction(`Conta @${user.username} apagada.`)
+          this.loadMetricsOnly()
+        },
+        error: error => this.failAction(this.readError(error, 'Não foi possível apagar a conta.'))
+      })
+  }
+
+  private patchUser(userId: string, patch: Partial<AdminUserRow>): void {
+    this.users = this.users.map(user => (user.id === userId ? { ...user, ...patch } : user))
+  }
+
+  private readError(error: unknown, fallback: string): string {
+    const apiMessage = (error as { error?: { message?: string } })?.error?.message
+    return apiMessage?.trim() || fallback
+  }
+
   private loadMetricsOnly(): void {
     this.adminService
       .obterMetricas()

@@ -100,6 +100,8 @@ export interface AdminUserRow {
   followingCount: number
   publicacoesCount: number
   createdAt: string
+  isDeactivated: boolean
+  isBanned: boolean
 }
 
 /**
@@ -161,6 +163,8 @@ export class AdminService {
       })
       .pipe(map(users => users.map(user => ({
         ...user,
+        isDeactivated: !!user.isDeactivated,
+        isBanned: !!user.isBanned,
         profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl),
       }))))
   }
@@ -185,6 +189,36 @@ export class AdminService {
 
   ignorarDenunciasPublicacao(id: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/publications/${id}/dismiss`, {}, {
+      headers: this.adminAuth.authHeaders(),
+    })
+  }
+
+  desactivarUtilizador(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/users/${id}/deactivate`, {}, {
+      headers: this.adminAuth.authHeaders(),
+    })
+  }
+
+  reactivarUtilizador(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/users/${id}/reactivate`, {}, {
+      headers: this.adminAuth.authHeaders(),
+    })
+  }
+
+  banirUtilizador(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/users/${id}/ban`, {}, {
+      headers: this.adminAuth.authHeaders(),
+    })
+  }
+
+  desbanirUtilizador(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/users/${id}/unban`, {}, {
+      headers: this.adminAuth.authHeaders(),
+    })
+  }
+
+  apagarUtilizador(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/users/${id}`, {
       headers: this.adminAuth.authHeaders(),
     })
   }

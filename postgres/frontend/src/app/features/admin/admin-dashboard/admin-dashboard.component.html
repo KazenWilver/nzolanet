@@ -412,15 +412,17 @@
                           <tr>
                             <th>Utilizador</th>
                             <th>Email</th>
+                            <th>Estado</th>
                             <th>Perfil</th>
                             <th class="table__num">Seguidores</th>
                             <th class="table__num">Publicações</th>
                             <th>Registo</th>
+                            <th>Acções</th>
                           </tr>
                         </thead>
                         <tbody>
                           @for (user of regularUsers; track user.id) {
-                            <tr>
+                            <tr [class.table__row--muted]="user.isDeactivated || user.isBanned">
                               <td>
                                 <div class="table__user">
                                   @if (user.profilePhotoUrl) {
@@ -437,10 +439,73 @@
                                 </div>
                               </td>
                               <td>{{ user.email }}</td>
+                              <td>
+                                <div class="table__status">
+                                  @if (user.isBanned) {
+                                    <span class="status-pill status-pill--banned">Banida</span>
+                                  }
+                                  @if (user.isDeactivated) {
+                                    <span class="status-pill status-pill--deactivated">Desactivada</span>
+                                  }
+                                  @if (!user.isBanned && !user.isDeactivated) {
+                                    <span class="status-pill status-pill--active">Activa</span>
+                                  }
+                                </div>
+                              </td>
                               <td>{{ user.isPrivate ? 'Privado' : 'Público' }}</td>
                               <td class="table__num">{{ user.followersCount }}</td>
                               <td class="table__num">{{ user.publicacoesCount }}</td>
                               <td>{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                              <td>
+                                <div class="table__actions">
+                                  @if (user.isDeactivated) {
+                                    <button
+                                      type="button"
+                                      class="btn btn--ghost"
+                                      [disabled]="processingId === user.id"
+                                      (click)="handleReactivateUser(user)"
+                                    >
+                                      Reactivar
+                                    </button>
+                                  } @else {
+                                    <button
+                                      type="button"
+                                      class="btn btn--ghost"
+                                      [disabled]="processingId === user.id"
+                                      (click)="handleDeactivateUser(user)"
+                                    >
+                                      Desactivar
+                                    </button>
+                                  }
+                                  @if (user.isBanned) {
+                                    <button
+                                      type="button"
+                                      class="btn btn--ghost"
+                                      [disabled]="processingId === user.id"
+                                      (click)="handleUnbanUser(user)"
+                                    >
+                                      Desbanir
+                                    </button>
+                                  } @else {
+                                    <button
+                                      type="button"
+                                      class="btn btn--warn"
+                                      [disabled]="processingId === user.id"
+                                      (click)="handleBanUser(user)"
+                                    >
+                                      Banir
+                                    </button>
+                                  }
+                                  <button
+                                    type="button"
+                                    class="btn btn--danger"
+                                    [disabled]="processingId === user.id"
+                                    (click)="handleDeleteUser(user)"
+                                  >
+                                    Apagar
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
                           }
                         </tbody>
