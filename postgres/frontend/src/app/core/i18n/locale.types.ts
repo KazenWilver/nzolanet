@@ -10,15 +10,10 @@ export interface LocaleMessages {
     bookmarks: string
     profile: string
     settings: string
-    about: string
     publish: string
     themeLight: string
     themeDark: string
     home: string
-  }
-  about: {
-    title: string
-    team: string
   }
   auth: {
     loginTitle: string
@@ -107,6 +102,7 @@ export interface LocaleMessages {
     account: string
     privacy: string
     password: string
+    about: string
     language: string
     languageDescription: string
     saveChanges: string

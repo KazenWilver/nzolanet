@@ -1,10 +1,14 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Routes, Router } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { adminGuestGuard } from './core/guards/admin-guest.guard';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
+
+const redirectAboutToSettings = () =>
+  inject(Router).createUrlTree(['/settings'], { queryParams: { section: 'about' } });
 
 export const routes: Routes = [
   {
@@ -91,11 +95,19 @@ export const routes: Routes = [
       },
       {
         path: 'about',
-        loadComponent: () =>
-          import('./features/about/about-page.component').then(m => m.AboutPageComponent)
+        canActivate: [redirectAboutToSettings],
+        loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
       },
-      { path: 'sobre', redirectTo: 'about', pathMatch: 'full' },
-      { path: 'sobre-nos', redirectTo: 'about', pathMatch: 'full' },
+      {
+        path: 'sobre',
+        canActivate: [redirectAboutToSettings],
+        loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'sobre-nos',
+        canActivate: [redirectAboutToSettings],
+        loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
+      },
       {
         path: 'search',
         loadComponent: () =>

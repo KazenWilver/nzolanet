@@ -381,3 +381,36 @@
     background: rgba(29, 155, 240, 0.1);
   }
 }
+
+.settings__about-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: vars.$color-text;
+  }
+}
+
+.settings__about-mvp {
+  padding: 12px 14px;
+  border-left: 3px solid vars.$color-primary;
+  background: var(--color-bg-hover);
+  border-radius: 0 8px 8px 0;
+}
+
+.settings__about-team-title {
+  margin: 0.5rem 0 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: vars.$color-text;
+}
+
+.settings__about-tagline {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: vars.$color-text-secondary;
+}

@@ -197,6 +197,36 @@
           </button>
         </section>
       }
+
+      @if (activeSection === 'about') {
+        <section class="settings__panel settings__panel--about" aria-labelledby="settings-about-title">
+          <h2 id="settings-about-title" class="settings__panel-title">{{ 'settings.about' | t }}</h2>
+
+          <div class="settings__about-copy">
+            <p>
+              O NzolaNet é uma rede social pensada para ambientes académicos e corporativos.
+              Foi feito pelo Grupo LODA, na cadeira de Aplicações Web do ISPTEC, com orientação
+              do docente Sediangani Sofrimento.
+            </p>
+            <p>
+              Quisemos juntar num só sítio publicações, mensagens em tempo real, moderação e a
+              Fimbu, uma assistente de IA com tom angolano. Tudo isto numa interface que
+              funcione bem no telemóvel e no computador.
+            </p>
+            <p class="settings__about-mvp">
+              Isto é apenas um protótipo de rede social. Em concreto, um MVP
+              (Minimum Viable Product, ou Produto Mínimo Viável). Não é um produto completo
+              nem algo já afinado de ponta a ponta.
+            </p>
+            <h3 class="settings__about-team-title">Equipa</h3>
+            <p>
+              Desenvolvido por <strong>Willfredy Vieira Dias</strong> e
+              <strong>Manuel Sulo</strong>.
+            </p>
+            <p class="settings__about-tagline" lang="en">May The Code Be With You.</p>
+          </div>
+        </section>
+      }
     </div>
   </div>
 </section>

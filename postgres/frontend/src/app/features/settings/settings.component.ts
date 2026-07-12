@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { translateApiMessage } from '../../core/helpers/translate-api-message.helper';
@@ -9,7 +10,7 @@ import type { User } from '../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TPipe } from '../../core/i18n/translate.pipe';
 
-type SettingsSection = 'account' | 'privacy' | 'password';
+type SettingsSection = 'account' | 'privacy' | 'password' | 'about';
 
 @Component({
   selector: 'app-settings',
@@ -22,12 +23,14 @@ export class SettingsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
 
   readonly maxBioLength = 160;
   readonly sections: Array<{ id: SettingsSection; label: string }> = [
     { id: 'account', label: 'Conta' },
     { id: 'privacy', label: 'Privacidade' },
-    { id: 'password', label: 'Palavra-passe' }
+    { id: 'password', label: 'Palavra-passe' },
+    { id: 'about', label: 'Sobre nós' }
   ];
 
   activeSection: SettingsSection = 'account';
@@ -50,6 +53,15 @@ export class SettingsComponent implements OnInit {
   passwordSuccess = false;
 
   ngOnInit(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        const section = params.get('section');
+        if (section === 'about' || section === 'account' || section === 'privacy' || section === 'password') {
+          this.activeSection = section;
+        }
+      });
+
     this.authService.currentUser$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(user => {
