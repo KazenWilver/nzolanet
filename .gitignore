@@ -121,3 +121,9 @@ palavras_angolanas/dicionario_angolano_train.jsonl
 palavras_angolanas/dicionario_angolano_full.jsonl
 palavras_angolanas/cache_words.jsonpostgres/supabase-initial.sql
 postgres/supabase-apply.sql
+
+# Vercel MCP deploy leftovers
+postgres/frontend/.vercel-*
+postgres/frontend/source.part*.b64
+postgres/frontend/source.parts.json
+
