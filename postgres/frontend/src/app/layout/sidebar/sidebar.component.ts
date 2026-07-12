@@ -86,6 +86,7 @@ export class SidebarComponent {
   ];
 
   readonly secondaryNavItems: SidebarItem[] = [
+    { type: 'link', id: 'about', label: 'Sobre nós', labelKey: 'nav.about', route: '/about', icon: 'info' },
     { type: 'link', id: 'settings', label: 'Definições', labelKey: 'nav.settings', route: '/settings', icon: 'settings' }
   ];
 

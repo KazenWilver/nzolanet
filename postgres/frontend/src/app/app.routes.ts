@@ -90,6 +90,13 @@ export const routes: Routes = [
         loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
       },
       {
+        path: 'about',
+        loadComponent: () =>
+          import('./features/about/about-page.component').then(m => m.AboutPageComponent)
+      },
+      { path: 'sobre', redirectTo: 'about', pathMatch: 'full' },
+      { path: 'sobre-nos', redirectTo: 'about', pathMatch: 'full' },
+      {
         path: 'search',
         loadComponent: () =>
           import('./features/search/search-page.component').then(m => m.SearchPageComponent)

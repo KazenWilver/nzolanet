@@ -11,10 +11,15 @@ const ptPT: LocaleMessages = {
     bookmarks: 'Guardados',
     profile: 'Perfil',
     settings: 'Definições',
+    about: 'Sobre nós',
     publish: 'Publicar',
     themeLight: 'Modo claro',
     themeDark: 'Modo escuro',
     home: 'Início'
+  },
+  about: {
+    title: 'Sobre nós',
+    team: 'Equipa'
   },
   auth: {
     loginTitle: 'Entrar no NzolaNet',
