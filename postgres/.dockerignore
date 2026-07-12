@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.angular/
+**/dist/
+**/wwwroot/uploads/
+**/.env
+**/appsettings.Development.json
+**/*.user
+supabase-initial.sql
+supabase-apply.sql

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <title>NzolaNet</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/png" sizes="192x192" href="nzolanet-favicon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="nzolanet-favicon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      var saved = localStorage.getItem('nzolanet_theme');
+      var isDark = saved === 'dark';
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+      if (!isDark) {
+        document.documentElement.classList.add('light-theme-init');
+      }
+    })();
+  </script>
+</head>
+<body class="light-theme">
+  <app-root></app-root>
+</body>
+</html>

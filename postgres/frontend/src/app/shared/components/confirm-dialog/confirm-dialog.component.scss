@@ -1,0 +1,91 @@
+@use '../../../styles/variables' as vars;
+
+.dialogo-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-dialog, 1300);
+}
+
+.dialogo {
+  background-color: vars.$color-background;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: dialogo-scale 0.2s ease-out;
+}
+
+.dialogo__mensagem {
+  font-size: 16px;
+  font-weight: 700;
+  color: vars.$color-text;
+  line-height: 1.4;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.dialogo__acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialogo__btn {
+  width: 100%;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+
+  &--confirmar {
+    background-color: vars.$color-like;
+    color: var(--color-text-inverse);
+
+    &:hover {
+      background-color: var(--color-danger-strong);
+    }
+  }
+
+  &--cancelar {
+    background-color: transparent;
+    border: 1px solid vars.$color-border;
+    color: vars.$color-text;
+
+    &:hover {
+      background-color: vars.$color-gray-hover;
+    }
+  }
+}
+
+@keyframes dialogo-scale {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialogo {
+    animation: none;
+  }
+}

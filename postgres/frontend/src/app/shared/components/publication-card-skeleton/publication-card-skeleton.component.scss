@@ -1,0 +1,87 @@
+@use '../../../styles/mixins' as mixins;
+
+@keyframes publication-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.publication-skeleton {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.publication-skeleton__grid {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 12px;
+}
+
+.publication-skeleton__avatar,
+.publication-skeleton__line,
+.publication-skeleton__media,
+.publication-skeleton__pill {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-bg-hover) 50%,
+    var(--color-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: publication-skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--border-radius-md);
+}
+
+.publication-skeleton__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-full);
+}
+
+.publication-skeleton__line {
+  height: 14px;
+  margin-bottom: 8px;
+
+  &--meta {
+    width: 55%;
+  }
+
+  &--text {
+    width: 92%;
+  }
+
+  &--short {
+    width: 70%;
+  }
+}
+
+.publication-skeleton__media {
+  height: 180px;
+  margin: 8px 0 12px;
+  border-radius: var(--border-radius-lg);
+}
+
+.publication-skeleton__actions {
+  display: flex;
+  gap: 16px;
+}
+
+.publication-skeleton__pill {
+  width: 48px;
+  height: 28px;
+  border-radius: var(--border-radius-full);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .publication-skeleton__avatar,
+  .publication-skeleton__line,
+  .publication-skeleton__media,
+  .publication-skeleton__pill {
+    animation: none;
+    background: var(--color-bg-hover);
+  }
+}

@@ -1,0 +1,110 @@
+<div class="feed-page">
+  <div class="feed-page__sticky-top">
+    <app-page-header title="Início" [showBack]="false" />
+
+    <nav class="feed-page__tabs" role="tablist" aria-label="Tipo de feed">
+      <button
+        type="button"
+        class="feed-page__tab"
+        id="feed-tab-para-ti"
+        [class.feed-page__tab--active]="activeTab === 'para-ti'"
+        [attr.aria-selected]="activeTab === 'para-ti'"
+        aria-controls="feed-panel"
+        role="tab"
+        appPressScale
+        (click)="setTab('para-ti')"
+      >
+        Para ti
+      </button>
+      <button
+        type="button"
+        class="feed-page__tab"
+        id="feed-tab-a-seguir"
+        [class.feed-page__tab--active]="activeTab === 'a-seguir'"
+        [attr.aria-selected]="activeTab === 'a-seguir'"
+        aria-controls="feed-panel"
+        role="tab"
+        appPressScale
+        (click)="setTab('a-seguir')"
+      >
+        A seguir
+      </button>
+    </nav>
+  </div>
+
+  <div id="feed-panel" role="tabpanel" [attr.aria-labelledby]="activeTab === 'a-seguir' ? 'feed-tab-a-seguir' : 'feed-tab-para-ti'">
+  <section class="feed-page__mobile-explore" aria-label="Explorar">
+    <app-trends-panel />
+  </section>
+
+  <app-create-post (postCriado)="handleCreated($event)" />
+
+  @if (loading) {
+    @for (_ of [1, 2, 3]; track $index) {
+      <app-publication-card-skeleton />
+    }
+  }
+
+  @if (error) {
+    <div class="feed-page__error">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>Não foi possível carregar o feed. Tenta novamente.</p>
+      <button type="button" class="feed-page__retry" appPressScale (click)="loadFeed(true)">Tentar novamente</button>
+    </div>
+  }
+
+  @if (!loading && !error && publications.length === 0) {
+    <div class="feed-page__empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <p>{{ emptyMessage }}</p>
+    </div>
+  }
+
+  @for (publication of publications; track trackById($index, publication)) {
+    @if ($index === 5 && activeTab === 'para-ti' && !loading) {
+      <app-who-to-follow variant="feed" [count]="3" />
+    }
+
+    <div [id]="'publication-' + publication.id" appEnterAnimation [enterIndex]="$index">
+      <app-publication-card
+        [publication]="publication"
+        [currentUserId]="currentUserId"
+        (deleted)="handleDeleted($event)"
+        (updated)="handleUpdated($event)"
+      />
+    </div>
+  }
+
+  @if (loadingMore) {
+    <app-publication-card-skeleton />
+  }
+
+  @if (loadMoreError) {
+    <div class="feed-page__load-more-error">
+      <p>Não foi possível carregar mais publicações.</p>
+      <button type="button" class="feed-page__retry" appPressScale (click)="loadMoreError = false; loadMore()">
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  @if (!loading && hasMore && !loadMoreError) {
+    <div
+      appInfiniteScroll
+      [infiniteScrollDisabled]="loadingMore"
+      (appInfiniteScroll)="loadMore()"
+      class="feed-page__scroll-sentinel"
+      aria-hidden="true"
+    ></div>
+  }
+  </div>
+</div>

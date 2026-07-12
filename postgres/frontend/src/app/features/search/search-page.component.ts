@@ -1,0 +1,275 @@
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { merge, of, type Observable } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  filter,
+  finalize,
+  map,
+  switchMap,
+  tap
+} from 'rxjs/operators';
+import { AuthService } from '../../core/services/auth.service';
+import { SearchService } from '../../core/services/search.service';
+import { UserService } from '../../core/services/user.service';
+import type { User } from '../../core/models/user.model';
+import type { Publication } from '../../core/models/publication.model';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { FollowButtonComponent } from '../../shared/components/follow-button/follow-button.component';
+import { PublicationCardComponent } from '../../shared/components/publication-card/publication-card.component';
+import { TrendsPanelComponent } from '../../shared/components/trends-panel/trends-panel.component';
+import { WhoToFollowComponent } from '../../shared/components/who-to-follow/who-to-follow.component';
+
+@Component({
+  selector: 'app-search-page',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AvatarComponent,
+    LoadingSpinnerComponent,
+    PageHeaderComponent,
+    FollowButtonComponent,
+    PublicationCardComponent,
+    TrendsPanelComponent,
+    WhoToFollowComponent
+  ],
+  templateUrl: './search-page.component.html',
+  styleUrl: './search-page.component.scss'
+})
+export class SearchPageComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly searchService = inject(SearchService);
+  private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly searchControl = new FormControl('', { nonNullable: true });
+
+  results: User[] = [];
+  publicationResults: Publication[] = [];
+  loading = false;
+  error = false;
+  togglingUserId: string | null = null;
+  currentUserId?: string;
+  searchMode: 'users' | 'publications' = 'users';
+
+  ngOnInit(): void {
+    this.currentUserId = this.authService.getCurrentUser()?.id;
+
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        tap(query => {
+          this.syncQueryParam(query);
+          this.error = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
+
+    const routeQuery$ = this.route.queryParamMap.pipe(
+      map(params => this.resolveSearchQueryFromRoute(params.get('q')))
+    );
+
+    const navigationQuery$ = this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      filter(event => event.urlAfterRedirects.startsWith('/search')),
+      map(() => this.resolveSearchQueryFromRoute(this.route.snapshot.queryParamMap.get('q')))
+    );
+
+    merge(routeQuery$, navigationQuery$)
+      .pipe(
+        tap(query => {
+          if (query !== this.searchControl.value) {
+            this.searchControl.setValue(query, { emitEvent: false });
+          }
+        }),
+        switchMap(query => this.runSearch(query)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(users => {
+        this.results = users;
+      });
+  }
+
+  get hasQuery(): boolean {
+    const trimmed = this.searchControl.value.trim()
+    if (trimmed.startsWith('#')) {
+      return trimmed.length >= 2
+    }
+
+    return trimmed.length >= 2
+  }
+
+  get isHashtagQuery(): boolean {
+    return this.searchControl.value.trim().startsWith('#');
+  }
+
+  get currentQuery(): string {
+    return this.searchControl.value.trim();
+  }
+
+  getDisplayName(user: User): string {
+    return user.displayName ?? user.username;
+  }
+
+  getFollowLabel(user: User): string {
+    if (user.isFollowing) {
+      return 'A seguir';
+    }
+    if (user.isPending) {
+      return 'Pendente';
+    }
+    return 'Seguir';
+  }
+
+  navigateToProfile(userId: string): void {
+    void this.router.navigate(['/profile', userId]);
+  }
+
+  handleProfileKeydown(userId: string, event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.navigateToProfile(userId);
+    }
+  }
+
+  toggleFollow(user: User, event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (!this.currentUserId || user.id === this.currentUserId || this.togglingUserId) {
+      return;
+    }
+
+    this.togglingUserId = user.id;
+    const wasFollowing = user.isFollowing === true;
+    const wasPending = user.isPending === true;
+
+    const request$ =
+      wasFollowing || wasPending
+        ? this.userService.unfollow(user.id)
+        : this.userService.follow(user.id);
+
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+      next: () => {
+        if (wasFollowing || wasPending) {
+          user.isFollowing = false;
+          user.isPending = false;
+        } else if (user.isPrivate) {
+          user.isFollowing = false;
+          user.isPending = true;
+        } else {
+          user.isFollowing = true;
+          user.isPending = false;
+        }
+        this.togglingUserId = null;
+      },
+      error: () => {
+        this.togglingUserId = null;
+      }
+    });
+  }
+
+  trackById(_: number, user: User): string {
+    return user.id;
+  }
+
+  retrySearch(): void {
+    this.error = false;
+    this.runSearch(this.searchControl.value)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(users => {
+        this.results = users;
+      });
+  }
+
+  private runSearch(query: string): Observable<User[]> {
+    const trimmed = query.trim();
+
+    if (trimmed.startsWith('#')) {
+      if (trimmed.length < 2) {
+        this.loading = false;
+        this.publicationResults = [];
+        this.results = [];
+        return of([]);
+      }
+
+      this.loading = true;
+      this.searchMode = 'publications';
+      this.results = [];
+
+      return this.searchService.searchPublicationsByHashtag(trimmed).pipe(
+        map(publications => {
+          this.publicationResults = publications;
+          return [];
+        }),
+        catchError(() => {
+          this.error = true;
+          this.publicationResults = [];
+          return of([]);
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      );
+    }
+
+    if (trimmed.length < 2) {
+      this.loading = false;
+      this.publicationResults = [];
+      this.results = [];
+      return of([]);
+    }
+
+    this.loading = true;
+    const userQuery = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+    this.searchMode = 'users';
+    this.publicationResults = [];
+
+    return this.searchService.searchUsers(userQuery).pipe(
+      catchError(() => {
+        this.error = true;
+        return of([]);
+      }),
+      finalize(() => {
+        this.loading = false;
+      })
+    );
+  }
+
+  private syncQueryParam(query: string): void {
+    const trimmed = query.trim();
+    const current = this.resolveSearchQueryFromRoute(this.route.snapshot.queryParamMap.get('q'));
+
+    if (trimmed === current) {
+      return;
+    }
+
+    void this.router.navigate(['/search'], {
+      queryParams: trimmed ? { q: trimmed } : {},
+      replaceUrl: true
+    });
+  }
+
+  private resolveSearchQueryFromRoute(raw: string | null): string {
+    if (!raw) {
+      return '';
+    }
+
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  }
+}

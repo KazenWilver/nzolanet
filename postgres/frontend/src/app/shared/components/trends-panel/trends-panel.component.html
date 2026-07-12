@@ -1,0 +1,33 @@
+<section
+  class="trends-panel"
+  [class.trends-panel--compact]="compact"
+  aria-labelledby="trends-panel-title"
+>
+  <h2 id="trends-panel-title" class="trends-panel__title">Tendências</h2>
+
+  @if (loading) {
+    <p class="trends-panel__message">A carregar tendências…</p>
+  } @else if (trendsError) {
+    <p class="trends-panel__message">Não foi possível carregar tendências.</p>
+  } @else if (trendingHashtags.length === 0) {
+    <p class="trends-panel__message">Sem tendências por agora.</p>
+  } @else {
+    <ol class="trends-panel__list">
+      @for (item of trendingHashtags; track item.tag; let i = $index) {
+        <li class="trends-panel__item">
+          <a
+            [routerLink]="['/search']"
+            [queryParams]="{ q: '#' + item.tag }"
+            class="trends-panel__link"
+          >
+            <span class="trends-panel__rank">{{ i + 1 }}.</span>
+            <span class="trends-panel__body">
+              <span class="trends-panel__tag">#{{ item.tag }}</span>
+              <span class="trends-panel__count">{{ item.count }} publicações</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ol>
+  }
+</section>

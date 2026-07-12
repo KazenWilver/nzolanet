@@ -1,0 +1,135 @@
+<div #formRoot class="auth-form">
+  @if (!showForgotPassword) {
+    <header class="auth-form__header">
+      <h1 class="auth-form__title">{{ 'auth.loginTitle' | t }}</h1>
+      <p class="auth-form__subtitle">{{ 'auth.loginSubtitle' | t }}</p>
+    </header>
+
+    @if (sessionExpiredMessage) {
+      <p class="auth-form__info" role="status">{{ sessionExpiredMessage }}</p>
+    }
+
+    @if (errorMessage) {
+      <p class="auth-form__error" role="alert">{{ errorMessage }}</p>
+    }
+
+    <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="handleSubmit()" novalidate>
+      <div class="auth-form__field">
+        <label class="auth-form__label" for="login-email">{{ 'auth.email' | t }}</label>
+        <input
+          id="login-email"
+          name="email"
+          class="auth-form__input"
+          [class.auth-form__input--invalid]="isInvalid('email')"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          [placeholder]="'auth.enterEmail' | t"
+        />
+        @if (getEmailError()) {
+          <span class="auth-form__field-error" role="alert">{{ getEmailError() }}</span>
+        }
+      </div>
+
+      <div class="auth-form__field">
+        <label class="auth-form__label" for="login-password">{{ 'auth.password' | t }}</label>
+        <div class="auth-form__input-wrap">
+          <input
+            id="login-password"
+            name="password"
+            class="auth-form__input"
+            [class.auth-form__input--invalid]="isInvalid('password')"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            [placeholder]="'auth.enterPassword' | t"
+          />
+          <button
+            type="button"
+            class="auth-form__toggle"
+            (click)="handleTogglePassword()"
+            [attr.aria-label]="showPassword ? ('auth.hidePassword' | t) : ('auth.showPassword' | t)"
+          >
+            @if (showPassword) {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path>
+                <path d="M1 1l22 22"></path>
+                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path>
+              </svg>
+            } @else {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (getPasswordError()) {
+          <span class="auth-form__field-error" role="alert">{{ getPasswordError() }}</span>
+        }
+      </div>
+
+      <button type="button" class="auth-form__link" (click)="handleShowForgotPassword()">
+        {{ 'auth.forgotPassword' | t }}
+      </button>
+
+      <button type="submit" class="auth-form__submit" [disabled]="loginForm.invalid || isLoading">
+        @if (isLoading) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          <span>{{ 'auth.login' | t }}</span>
+        }
+      </button>
+    </form>
+
+    <p class="auth-form__footer">
+      {{ 'auth.registerPrompt' | t }}
+      <a routerLink="/register">{{ 'auth.registerLink' | t }}</a>
+    </p>
+  } @else {
+    <header class="auth-form__header">
+      <h1 class="auth-form__title">{{ 'auth.recoverTitle' | t }}</h1>
+      <p class="auth-form__subtitle">{{ 'auth.recoverSubtitle' | t }}</p>
+    </header>
+
+    @if (forgotSuccessMessage) {
+      <p class="auth-form__success" role="status">{{ forgotSuccessMessage }}</p>
+    }
+    @if (devResetLink) {
+      <p class="auth-form__info">
+        Link de recuperação (desenvolvimento):
+        <a [href]="devResetLink" class="auth-form__link">Redefinir palavra-passe</a>
+      </p>
+    }
+
+    <form class="auth-form" [formGroup]="forgotForm" (ngSubmit)="handleForgotPassword()" novalidate>
+      <div class="auth-form__field">
+        <label class="auth-form__label" for="forgot-email">{{ 'auth.email' | t }}</label>
+        <input
+          id="forgot-email"
+          name="forgotEmail"
+          class="auth-form__input"
+          [class.auth-form__input--invalid]="isForgotInvalid()"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          [placeholder]="'auth.enterEmail' | t"
+        />
+        @if (isForgotInvalid()) {
+          <span class="auth-form__field-error" role="alert">{{ 'auth.emailInvalid' | t }}</span>
+        }
+      </div>
+
+      <button type="submit" class="auth-form__submit" [disabled]="forgotForm.invalid || isForgotLoading">
+        @if (isForgotLoading) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          <span>{{ 'auth.sendInstructions' | t }}</span>
+        }
+      </button>
+    </form>
+
+    <button type="button" class="auth-form__link" (click)="handleBackToLogin()">{{ 'auth.backToLogin' | t }}</button>
+  }
+</div>

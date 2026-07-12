@@ -1,0 +1,570 @@
+@use '../../../styles/mixins' as mixins;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.fimbu-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+.fimbu-page__layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.fimbu-page__contacts {
+  flex: 0 0 min(388px, 36vw);
+  width: min(388px, 36vw);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
+  min-height: 0;
+  background: var(--color-bg-primary);
+  padding-top: 12px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.fimbu-page__contacts-header {
+  padding: 4px 20px 12px;
+  min-height: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.fimbu-page__title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.fimbu-page__contact-list {
+  padding: 0;
+}
+
+.fimbu-page__contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 16px);
+  margin: 0 8px 4px;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  text-align: left;
+  cursor: default;
+  color: inherit;
+  transition: background-color 0.15s ease;
+
+  &--active {
+    background: var(--chat-inbox-active);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+}
+
+.fimbu-page__contact-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fimbu-page__contact-name {
+  font-size: 0.95rem;
+}
+
+.fimbu-page__contact-status,
+.fimbu-page__presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+
+  &--online {
+    color: var(--color-success);
+    font-weight: 600;
+  }
+}
+
+.fimbu-page__presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-success);
+  flex-shrink: 0;
+}
+
+.fimbu-page__contact-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  @include mixins.brand-gradient-button;
+}
+
+.fimbu-page__avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--gradient-brand);
+  color: var(--color-text-inverse);
+  font-weight: 800;
+  font-size: 1.1rem;
+
+  &--sm {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  &--xs {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    align-self: flex-end;
+  }
+}
+
+.fimbu-page__avatar-glow {
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: var(--gradient-brand);
+  opacity: 0.35;
+  filter: blur(6px);
+  z-index: 0;
+}
+
+.fimbu-page__avatar-letter {
+  position: relative;
+  z-index: 1;
+}
+
+.fimbu-page__avatar-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.fimbu-page__chat {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fimbu-page__chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  min-height: 53px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fimbu-page__chat-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.fimbu-page__chat-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.fimbu-page__chat-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.fimbu-page__chat-header .fimbu-page__presence {
+  margin: 2px 0 0;
+}
+
+.fimbu-page__clear-btn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.fimbu-page__messages-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fimbu-page__messages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+  background: var(--chat-messages-bg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+  }
+}
+
+.fimbu-page__loading,
+.fimbu-page__state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.fimbu-page__pill-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  @include mixins.brand-gradient-button;
+}
+
+.fimbu-page__welcome {
+  margin: auto;
+  max-width: 420px;
+  text-align: center;
+  padding: 24px 16px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-hover));
+
+  h3 {
+    margin: 8px 0 6px;
+    font-size: 1.15rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+}
+
+.fimbu-page__welcome-icon {
+  font-size: 2rem;
+}
+
+.fimbu-page__bubble-wrap {
+  display: flex;
+  width: fit-content;
+  max-width: min(68%, 520px);
+  position: relative;
+  gap: 4px;
+
+  &--user {
+    flex-direction: column;
+    align-self: flex-end;
+    align-items: flex-end;
+    margin-left: auto;
+  }
+
+  &--assistant {
+    flex-direction: row;
+    align-self: flex-start;
+    align-items: flex-end;
+    margin-right: auto;
+    gap: 8px;
+    max-width: min(72%, 560px);
+  }
+}
+
+.fimbu-page__bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
+  width: fit-content;
+  flex-shrink: 0;
+
+  &--user {
+    align-self: flex-end;
+
+    .fimbu-page__bubble-content {
+      background: var(--chat-bubble-mine);
+      color: var(--chat-bubble-mine-text);
+      border-radius: 20px 20px 4px 20px;
+      box-shadow: 0 1px 2px rgba(15, 14, 23, 0.06);
+    }
+
+    .fimbu-page__bubble-meta {
+      justify-content: flex-end;
+    }
+  }
+
+  &--assistant {
+    align-self: flex-start;
+
+    .fimbu-page__bubble-content {
+      background: var(--chat-bubble-fimbu);
+      color: var(--chat-bubble-fimbu-text);
+      border-radius: 20px 20px 20px 4px;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.22);
+    }
+
+    .fimbu-page__bubble-meta {
+      justify-content: flex-start;
+    }
+
+    .fimbu-page__bubble-text strong {
+      color: inherit;
+    }
+  }
+}
+
+.fimbu-page__bubble-content {
+  display: inline-block;
+  max-width: 100%;
+  min-width: 0;
+  padding: 12px 16px;
+  vertical-align: top;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.fimbu-page__bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+
+  time {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.01em;
+  }
+}
+
+.fimbu-page__bubble-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+
+  strong {
+    font-weight: 800;
+  }
+}
+
+.fimbu-page__bubble-time {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  opacity: 0.75;
+  text-align: right;
+}
+
+.fimbu-page__typing {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  align-self: flex-start;
+  max-width: min(72%, 560px);
+}
+
+.fimbu-page__typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 20px 20px 20px 4px;
+  background: var(--chat-bubble-fimbu);
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.18);
+
+  span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--chat-bubble-fimbu-text) 70%, transparent);
+    animation: fimbu-dot 1.2s infinite ease-in-out;
+
+    &:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+  }
+}
+
+@keyframes fimbu-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.fimbu-page__error {
+  margin: 0 16px 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-accent-red) 12%, transparent);
+  color: var(--color-accent-red);
+  font-size: 0.85rem;
+}
+
+.fimbu-page__composer {
+  position: relative;
+  flex-shrink: 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--color-border);
+  background: var(--chat-messages-bg);
+}
+
+.fimbu-page__composer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  position: relative;
+}
+
+.fimbu-page__composer-pill {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--chat-composer-pill-border);
+  background: var(--chat-composer-pill-bg);
+  box-shadow: 0 1px 3px rgba(15, 14, 23, 0.04);
+}
+
+.fimbu-page__composer-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 160px;
+  border: none;
+  background: transparent;
+  resize: none;
+  overflow-y: auto;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  line-height: 1.45;
+  padding: 8px 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: var(--color-text-secondary);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.fimbu-page__send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 9999px;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  @include mixins.brand-gradient-button;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}

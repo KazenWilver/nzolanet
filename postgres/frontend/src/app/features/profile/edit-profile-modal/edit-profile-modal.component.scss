@@ -1,0 +1,151 @@
+@use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
+
+.edit-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.edit-profile__cover {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+}
+
+.edit-profile__cover-preview {
+  height: 120px;
+  background-color: var(--color-bg-cover);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &--empty {
+    background-image: none !important;
+  }
+}
+
+.edit-profile__cover-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(15, 20, 25, 0.75);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(15, 20, 25, 0.9);
+  }
+}
+
+.edit-profile__photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 1;
+}
+
+.edit-profile__photo-btn {
+  color: vars.$color-primary;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.edit-profile__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: vars.$color-text;
+
+  input,
+  textarea {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    border: 1px solid vars.$color-border;
+    border-radius: 8px;
+    padding: 12px;
+    color: vars.$color-text;
+    background: transparent;
+
+    &:focus {
+      outline: 2px solid vars.$color-primary;
+      outline-offset: 0;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.edit-profile__counter {
+  align-self: flex-end;
+  font-size: 13px;
+  font-weight: 500;
+  color: vars.$color-text-secondary;
+
+  &--warn {
+    color: vars.$color-like;
+  }
+}
+
+.edit-profile__error {
+  color: vars.$color-like;
+  font-size: 14px;
+  margin: 0;
+}
+
+.edit-profile__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.edit-profile__btn-secondary,
+.edit-profile__btn-primary {
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+
+.edit-profile__btn-secondary {
+  border: 1px solid vars.$color-border;
+  background: transparent;
+  color: vars.$color-text;
+}
+
+.edit-profile__btn-primary {
+  border: none;
+  color: var(--color-text-inverse);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  @include mixins.brand-gradient-button;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

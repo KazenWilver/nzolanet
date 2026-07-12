@@ -1,0 +1,315 @@
+<article class="publication-card" [class.publication-card--highlighted]="highlighted">
+  <div class="publication-card__grid">
+    <div class="publication-card__avatar-col">
+      <button
+        type="button"
+        class="publication-card__avatar-btn"
+        (click)="handleAvatarClick($event)"
+        (keydown)="handleAvatarKeydown($event)"
+        [attr.aria-label]="'Ver perfil de ' + authorName"
+      >
+        <app-avatar
+          [src]="publication.authorPhotoUrl"
+          [username]="publication.authorUsername"
+          size="md"
+        />
+      </button>
+    </div>
+
+    <div class="publication-card__content">
+      <div class="publication-card__top-row">
+        <div class="publication-card__author-line">
+          <a class="publication-card__name" [routerLink]="['/profile', publication.authorId]" (click)="$event.stopPropagation()">
+            {{ authorName }}
+          </a>
+          <span class="publication-card__handle">@{{ publication.authorUsername }}</span>
+          <span class="publication-card__time">· {{ publication.createdAt | tempoAtras : relativeTime.tick() }}</span>
+          @if (publication.updatedAt && publication.updatedAt !== publication.createdAt) {
+            <span class="publication-card__edited">Editado</span>
+          }
+        </div>
+
+        <div class="publication-card__menu-wrap">
+          <button
+            #menuButton
+            type="button"
+            class="publication-card__menu-btn"
+            (click)="toggleMenu($event)"
+            aria-label="Opções da publicação"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuOpen"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="12" cy="5" r="1.5"></circle>
+              <circle cx="12" cy="12" r="1.5"></circle>
+              <circle cx="12" cy="19" r="1.5"></circle>
+            </svg>
+          </button>
+
+          @if (menuOpen) {
+            <div
+              class="publication-card__menu"
+              [class.publication-card__menu--fixed]="menuFixed"
+              [style.top.px]="menuTop"
+              [style.left.px]="menuLeft"
+              role="menu"
+            >
+              @if (isAuthor) {
+                <button type="button" class="publication-card__menu-item" role="menuitem" (click)="startEdit()">
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  class="publication-card__menu-item publication-card__menu-item--danger"
+                  role="menuitem"
+                  (click)="confirmDelete()"
+                >
+                  Apagar
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="publication-card__menu-item publication-card__menu-item--danger"
+                  role="menuitem"
+                  (click)="openReportDialog()"
+                >
+                  {{ 'report.button' | t }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div
+        class="publication-card__body"
+        [class.publication-card__body--clickable]="!editing"
+        (click)="handleBodyClick($event)"
+      >
+        @if (editing) {
+          <div class="publication-card__edit">
+            <textarea
+              id="publication-edit-text"
+              class="publication-card__edit-textarea"
+              [(ngModel)]="editText"
+              name="editPublication"
+              rows="3"
+              maxlength="280"
+              aria-label="Editar publicação"
+            ></textarea>
+            @if (editError) {
+              <p class="publication-card__error">{{ editError }}</p>
+            }
+            <div class="publication-card__edit-actions">
+              <button type="button" class="publication-card__btn-secondary" (click)="cancelEdit()">
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="publication-card__btn-primary"
+                [disabled]="(!editText.trim() && !publication.imageUrl && !publication.videoUrl) || savingEdit"
+                (click)="saveEdit()"
+              >
+                @if (savingEdit) {
+                  <app-loading-spinner tamanho="sm" />
+                } @else {
+                  Guardar
+                }
+              </button>
+            </div>
+          </div>
+        } @else {
+          @if (publication.text) {
+            <p class="publication-card__text" [innerHTML]="publication.text | linkifyText"></p>
+          }
+
+          @if (publication.imageUrl) {
+            <div class="publication-card__media publication-card__media--clickable" (click)="handleMediaClick($event)">
+              @if (imageLoadFailed) {
+                <p class="publication-card__media-fallback" role="status">Imagem indisponível</p>
+              } @else {
+                <img
+                  [src]="publication.imageUrl"
+                  alt="Imagem da publicação"
+                  loading="lazy"
+                  (error)="handleImageError()"
+                />
+              }
+            </div>
+          }
+
+          @if (publication.videoUrl) {
+        <div
+          class="publication-card__media publication-card__media--clickable publication-card__media--video"
+          (click)="handleMediaClick($event)"
+        >
+              @if (videoLoadFailed) {
+                <p class="publication-card__media-fallback" role="status">Vídeo indisponível</p>
+              } @else {
+                <video
+                  #cardVideo
+                  [src]="publication.videoUrl"
+                  controls
+                  preload="metadata"
+                  (click)="handleVideoClick($event)"
+                  (error)="handleVideoError()"
+                ></video>
+              }
+            </div>
+          }
+
+          @if (publication.quotedPublication; as quoted) {
+            <article class="publication-card__quoted" aria-label="Publicação citada">
+              <div class="publication-card__quoted-header">
+                <strong>{{ quoted.authorDisplayName ?? quoted.authorUsername }}</strong>
+                <span>@{{ quoted.authorUsername }}</span>
+              </div>
+              @if (quoted.text) {
+                <p class="publication-card__quoted-text" [innerHTML]="quoted.text | linkifyText"></p>
+              }
+              @if (quoted.imageUrl) {
+                <img [src]="quoted.imageUrl" alt="" class="publication-card__quoted-media" loading="lazy" />
+              }
+              @if (quoted.videoUrl) {
+                <video [src]="quoted.videoUrl" class="publication-card__quoted-media" controls preload="metadata"></video>
+              }
+            </article>
+          }
+        }
+      </div>
+
+      <footer class="publication-card__footer">
+        <button
+          type="button"
+          class="publication-card__action publication-card__action--comment"
+          aria-label="Comentários"
+          (click)="toggleComments($event)"
+        >
+          <span class="publication-card__action-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+            </svg>
+          </span>
+          <span class="publication-card__action-count">{{ publication.commentsCount }}</span>
+        </button>
+
+        <button
+          #likeButton
+          type="button"
+          class="publication-card__action publication-card__action--like"
+          [class.publication-card__action--liked]="publication.hasLiked"
+          [disabled]="likingInProgress"
+          (click)="toggleLike($event)"
+          [attr.aria-pressed]="publication.hasLiked"
+          aria-label="Baze"
+        >
+          <span class="publication-card__action-icon" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              [attr.fill]="publication.hasLiked ? 'currentColor' : 'none'"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M19.5 12.6 12 20l-7.5-7.4A5 5 0 0 1 12 6a5 5 0 0 1 7.5 6.6Z"></path>
+            </svg>
+          </span>
+          <span class="publication-card__action-count">{{ publication.likesCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="publication-card__action publication-card__action--repost"
+          [class.publication-card__action--reposted]="publication.hasReposted"
+          [disabled]="repostingInProgress"
+          (click)="toggleRepost($event)"
+          [attr.aria-pressed]="publication.hasReposted"
+          aria-label="Repartilhar publicação"
+        >
+          <span class="publication-card__action-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 1l4 4-4 4"></path>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <path d="M7 23l-4-4 4-4"></path>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+          </span>
+          <span class="publication-card__action-count">{{ publication.repostsCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="publication-card__action publication-card__action--bookmark"
+          [class.publication-card__action--bookmarked]="publication.hasBookmarked"
+          [disabled]="bookmarkingInProgress"
+          (click)="toggleBookmark($event)"
+          [attr.aria-pressed]="publication.hasBookmarked"
+          aria-label="Guardar publicação"
+        >
+          <span class="publication-card__action-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="publication.hasBookmarked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path>
+            </svg>
+          </span>
+          <span class="publication-card__action-count">{{ publication.bookmarksCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="publication-card__action publication-card__action--share"
+          aria-label="Partilhar ligação"
+          (click)="handleShare($event)"
+        >
+          <span class="publication-card__action-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+              <polyline points="16 6 12 2 8 6"></polyline>
+              <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+          </span>
+        </button>
+
+        @if (repostError) {
+          <span class="publication-card__like-error">{{ repostError }}</span>
+        }
+
+        @if (shareFeedback) {
+          <span class="publication-card__share-feedback" role="status">{{ shareFeedback }}</span>
+        }
+
+        @if (likeError) {
+          <span class="publication-card__like-error">{{ likeError }}</span>
+        }
+
+        @if (bookmarkError) {
+          <span class="publication-card__like-error">{{ bookmarkError }}</span>
+        }
+      </footer>
+    </div>
+  </div>
+</article>
+
+@if (deleteDialogOpen) {
+  <app-confirm-dialog
+    [mensagem]="deleteConfirmMessage"
+    (confirmado)="deletePublication()"
+    (cancelado)="handleCancelDelete()"
+  />
+}
+
+@if (reportDialogOpen) {
+  <app-report-dialog
+    targetType="publication"
+    [targetId]="publication.id"
+    (closed)="reportDialogOpen = false"
+  />
+}
+
+@if (repostDialogOpen) {
+  <app-repost-dialog
+    [publication]="publication"
+    (closed)="handleRepostDialogClose()"
+    (confirmed)="handleRepostConfirm($event)"
+  />
+}

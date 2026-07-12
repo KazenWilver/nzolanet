@@ -1,0 +1,68 @@
+@if (visibleOnMobile) {
+  <header class="topbar" [class.topbar--menu-open]="accountMenuOpen" [class.topbar--title]="topbarMode === 'title'">
+    <div class="topbar__row">
+      @if (currentUser) {
+        <button
+          #accountMenuTrigger
+          type="button"
+          class="topbar__account-trigger"
+          (click)="handleToggleAccountMenu(accountMenuTrigger)"
+          [attr.aria-expanded]="accountMenuOpen"
+          aria-haspopup="dialog"
+          [attr.aria-label]="'Menu de ' + currentUser.username"
+        >
+          <app-avatar
+            [src]="currentUser.profilePhotoUrl"
+            [username]="currentUser.username"
+            size="sm"
+          />
+        </button>
+      } @else {
+        <span class="topbar__side-spacer" aria-hidden="true"></span>
+      }
+
+      @if (topbarMode === 'feed') {
+        <a class="topbar__brand" routerLink="/feed" aria-label="NzolaNet">
+          <img src="/nzolanet-logo-64.png" alt="" class="topbar__brand-icon" width="40" height="40" />
+          <span class="topbar__brand-name">NzolaNet</span>
+        </a>
+      } @else if (topbarMode === 'title' && pageTitleKey) {
+        <h1 class="topbar__page-title">{{ pageTitleKey | t }}</h1>
+      }
+
+      <span class="topbar__side-spacer topbar__side-spacer--end" aria-hidden="true"></span>
+    </div>
+
+    @if (topbarMode === 'feed') {
+      <nav
+        #feedTabs
+        class="topbar__feed-tabs"
+        role="tablist"
+        [attr.aria-label]="'nav.feed' | t"
+      >
+        <button
+          type="button"
+          class="topbar__feed-tab"
+          [class.topbar__feed-tab--active]="activeFeedTab === 'para-ti'"
+          [attr.aria-selected]="activeFeedTab === 'para-ti'"
+          role="tab"
+          appPressScale
+          (click)="setFeedTab('para-ti')"
+        >
+          Para ti
+        </button>
+        <button
+          type="button"
+          class="topbar__feed-tab"
+          [class.topbar__feed-tab--active]="activeFeedTab === 'a-seguir'"
+          [attr.aria-selected]="activeFeedTab === 'a-seguir'"
+          role="tab"
+          appPressScale
+          (click)="setFeedTab('a-seguir')"
+        >
+          A seguir
+        </button>
+      </nav>
+    }
+  </header>
+}

@@ -1,0 +1,26 @@
+# Render Blueprint — NzolaNet API (Postgres variant)
+# Docs: https://render.com/docs/blueprint-spec
+# Uso: Dashboard Render → New → Blueprint → repo GitHub com root na pasta postgres/
+# OU cola este ficheiro como render.yaml na raiz do repo após merge.
+
+services:
+  - type: web
+    name: nzolanet-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: NZOLANET_JWT_KEY
+        generateValue: true
+      - key: CORS_EXTRA_ORIGINS
+        sync: false
+      - key: Frontend__BaseUrl
+        sync: false
+      - key: AdminSettings__RegistrationCode
+        value: NZOLA-ADMIN-2026

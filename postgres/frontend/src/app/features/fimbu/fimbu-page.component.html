@@ -1,0 +1,166 @@
+<div class="fimbu-page">
+  <div class="fimbu-page__layout">
+    <aside class="fimbu-page__contacts" aria-label="Assistentes de IA">
+      <header class="fimbu-page__contacts-header">
+        <app-mobile-account-button />
+        <h1 class="fimbu-page__title">{{ 'fimbu.title' | t }}</h1>
+      </header>
+
+      <div class="fimbu-page__contact-list">
+        <button
+          type="button"
+          class="fimbu-page__contact fimbu-page__contact--active"
+          aria-current="true"
+        >
+          <span class="fimbu-page__avatar" aria-hidden="true">
+            <span class="fimbu-page__avatar-glow"></span>
+            <img class="fimbu-page__avatar-img" src="/fimbu-photo.png" alt="Fimbu" />
+          </span>
+          <span class="fimbu-page__contact-body">
+            <strong class="fimbu-page__contact-name">Fimbu</strong>
+            <span class="fimbu-page__presence fimbu-page__presence--online">
+              <span class="fimbu-page__presence-dot" aria-hidden="true"></span>
+              {{ 'fimbu.statusOnline' | t }}
+            </span>
+          </span>
+          <span class="fimbu-page__contact-badge" aria-hidden="true">IA</span>
+        </button>
+      </div>
+    </aside>
+
+    <section class="fimbu-page__chat" aria-label="Conversa com Fimbu">
+      <header class="fimbu-page__chat-header">
+        <div class="fimbu-page__chat-header-main">
+          <span class="fimbu-page__avatar fimbu-page__avatar--sm" aria-hidden="true">
+            <span class="fimbu-page__avatar-glow"></span>
+            <img class="fimbu-page__avatar-img" src="/fimbu-photo.png" alt="Fimbu" />
+          </span>
+          <div>
+            <h2 class="fimbu-page__chat-title">Fimbu</h2>
+            <p class="fimbu-page__presence fimbu-page__presence--online">
+              <span class="fimbu-page__presence-dot" aria-hidden="true"></span>
+              {{ 'fimbu.subtitle' | t }}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="fimbu-page__clear-btn"
+          [disabled]="clearing || sending || messages.length === 0"
+          (click)="handleClearHistory()"
+          [attr.aria-label]="'fimbu.clearChat' | t"
+        >
+          {{ 'fimbu.clearChat' | t }}
+        </button>
+      </header>
+
+      <div class="fimbu-page__messages-wrap">
+        @if (loadingHistory) {
+          <div class="fimbu-page__loading">
+            <app-loading-spinner tamanho="md" />
+          </div>
+        } @else if (loadError) {
+          <div class="fimbu-page__state">
+            <p>{{ loadError | t }}</p>
+            <button type="button" class="fimbu-page__pill-btn" (click)="loadHistory()">
+              {{ 'fimbu.retry' | t }}
+            </button>
+          </div>
+        } @else {
+          <div #messagesScroll class="fimbu-page__messages" role="log" aria-live="polite" aria-relevant="additions">
+            @if (messages.length === 0) {
+              <div class="fimbu-page__welcome">
+                <span class="fimbu-page__welcome-icon" aria-hidden="true">✨</span>
+                <h3>{{ 'fimbu.welcomeTitle' | t }}</h3>
+                <p>{{ 'fimbu.welcomeBody' | t }}</p>
+              </div>
+            }
+
+            @for (message of messages; track $index) {
+              <article
+                class="fimbu-page__bubble-wrap"
+                [class.fimbu-page__bubble-wrap--user]="isUserMessage(message)"
+                [class.fimbu-page__bubble-wrap--assistant]="!isUserMessage(message)"
+              >
+                @if (!isUserMessage(message)) {
+                  <span class="fimbu-page__avatar fimbu-page__avatar--xs" aria-hidden="true">
+                    <img class="fimbu-page__avatar-img" src="/fimbu-photo.png" alt="Fimbu" />
+                  </span>
+                }
+
+                <article
+                  class="fimbu-page__bubble"
+                  [class.fimbu-page__bubble--user]="isUserMessage(message)"
+                  [class.fimbu-page__bubble--assistant]="!isUserMessage(message)"
+                >
+                  <div class="fimbu-page__bubble-content">
+                    <p class="fimbu-page__bubble-text" [innerHTML]="message.content | fimbuMessageText"></p>
+                  </div>
+                  <footer class="fimbu-page__bubble-meta">
+                    <time [dateTime]="message.timestamp">
+                      {{ message.timestamp | date: 'HH:mm' }}
+                    </time>
+                  </footer>
+                </article>
+              </article>
+            }
+
+            @if (sending) {
+              <div class="fimbu-page__typing" aria-label="{{ 'fimbu.typing' | t }}">
+                <span class="fimbu-page__avatar fimbu-page__avatar--xs" aria-hidden="true">
+                  <img class="fimbu-page__avatar-img" src="/fimbu-photo.png" alt="Fimbu" />
+                </span>
+                <div class="fimbu-page__typing-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (sendError) {
+        <p class="fimbu-page__error" role="alert">
+          @if (sendErrorIsKey) {
+            {{ sendError | t }}
+          } @else {
+            {{ sendError }}
+          }
+        </p>
+      }
+
+      <footer class="fimbu-page__composer">
+        <form class="fimbu-page__composer-form" [formGroup]="composerForm" (ngSubmit)="handleSubmit()">
+          <div class="fimbu-page__composer-pill">
+            <label class="sr-only" for="fimbu-message">{{ 'fimbu.writeMessage' | t }}</label>
+            <textarea
+              #composerTextarea
+              id="fimbu-message"
+              class="fimbu-page__composer-input"
+              formControlName="message"
+              rows="1"
+              [placeholder]="'fimbu.writeMessage' | t"
+              [disabled]="sending || loadingHistory"
+              (keydown)="handleComposerKeydown($event)"
+              (input)="handleComposerInput()"
+            ></textarea>
+
+            <button
+              type="submit"
+              class="fimbu-page__send-btn"
+              [disabled]="sending || loadingHistory || composerForm.invalid"
+              [attr.aria-label]="'fimbu.sendMessage' | t"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"></path>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </footer>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,253 @@
+@use '../../../styles/mixins' as mixins;
+
+.group-info__loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.group-info__loading--compact {
+  padding: 12px 0;
+}
+
+.group-info__error {
+  margin: 0;
+  color: var(--color-danger, #f4212e);
+  font-size: 0.9rem;
+}
+
+.group-info__hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.group-info__profile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.group-info__photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.group-info__photo-image,
+.group-info__photo-placeholder {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.group-info__photo-placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--gradient-brand);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.group-info__photo-edit {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.group-info__photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.group-info__photo-btn {
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.group-info__photo-btn--confirm {
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+}
+
+.group-info__photo-btn--cancel {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-muted);
+}
+
+.group-info__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group-info__field span {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.group-info__field input,
+.group-info__field textarea,
+.group-info__search input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-muted);
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.group-info__field textarea {
+  resize: vertical;
+  min-height: 72px;
+  max-height: 140px;
+}
+
+.group-info__save-btn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.group-info__save-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.group-info__members,
+.group-info__add {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-muted);
+}
+
+.group-info__members h3,
+.group-info__add h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.group-info__member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.group-info__member-item,
+.group-info__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.group-info__add-btn {
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+
+  &:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: wait;
+  }
+}
+
+.group-info__member-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.group-info__member-meta strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-info__member-meta span {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+
+.group-info__add-label {
+  font-size: 0.82rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.group-info__search {
+  display: block;
+}
+
+.group-info__danger {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.group-info__danger h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.group-info__delete-btn {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-danger);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--color-danger);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.28s ease, color 0.28s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(244, 33, 46, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

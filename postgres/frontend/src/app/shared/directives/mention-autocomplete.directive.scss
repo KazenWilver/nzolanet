@@ -1,0 +1,110 @@
+.mention-field {
+  position: relative;
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.mention-field__highlight {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.mention-field__token {
+  color: var(--color-accent);
+  -webkit-text-fill-color: var(--color-accent);
+  font-weight: 700;
+}
+
+.mention-field__input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+  -webkit-text-fill-color: currentColor;
+  caret-color: var(--color-text-primary);
+
+  &::placeholder {
+    color: var(--color-text-secondary);
+    -webkit-text-fill-color: var(--color-text-secondary);
+    opacity: 1;
+  }
+
+  &::selection {
+    background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+    color: inherit;
+  }
+}
+
+.mention-autocomplete {
+  max-height: 220px;
+  overflow-y: auto;
+  border-radius: 14px;
+  border: 1px solid var(--color-border-muted);
+  background: var(--color-bg-elevated, var(--color-bg-primary));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mention-autocomplete__item {
+  border: none;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.mention-autocomplete__item:hover,
+.mention-autocomplete__item--active {
+  background: var(--color-bg-hover);
+}
+
+.mention-autocomplete__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.mention-autocomplete__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mention-autocomplete__meta strong {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.mention-autocomplete__meta span {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.mention-autocomplete__empty {
+  padding: 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}

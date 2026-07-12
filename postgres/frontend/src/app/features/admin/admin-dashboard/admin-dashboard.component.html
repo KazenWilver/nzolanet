@@ -1,0 +1,512 @@
+<section class="dashboard">
+  <header class="dashboard__header">
+    <div>
+      <h1 class="dashboard__title">Painel de administração</h1>
+      <p class="dashboard__subtitle">
+        Indicadores da plataforma e moderação de conteúdos.
+        @if (lastUpdatedAt) {
+          <span class="dashboard__updated">Última actualização: {{ lastUpdatedAt | date: 'HH:mm:ss' }}</span>
+        }
+      </p>
+    </div>
+    <button
+      type="button"
+      class="dashboard__refresh"
+      [disabled]="refreshing"
+      (click)="handleRefresh()"
+    >
+      {{ refreshing ? 'A actualizar…' : 'Atualizar' }}
+    </button>
+  </header>
+
+  @if (successMessage) {
+    <div class="dashboard__toast dashboard__toast--success" role="status">{{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="dashboard__toast dashboard__toast--error" role="alert">{{ errorMessage }}</div>
+  }
+
+  <nav class="dashboard__nav" role="tablist" aria-label="Secções do painel">
+    <button
+      type="button"
+      role="tab"
+      class="dashboard__nav-item"
+      [class.dashboard__nav-item--active]="mainView === 'indicadores'"
+      (click)="handleSelectMainView('indicadores')"
+    >
+      Indicadores
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="dashboard__nav-item"
+      [class.dashboard__nav-item--active]="mainView === 'graficos'"
+      (click)="handleSelectMainView('graficos')"
+    >
+      Gráficos
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="dashboard__nav-item"
+      [class.dashboard__nav-item--active]="mainView === 'moderacao'"
+      (click)="handleSelectMainView('moderacao')"
+    >
+      Moderação
+      <span class="dashboard__nav-badge">{{ reportedComments.length + reportedPublications.length }}</span>
+    </button>
+  </nav>
+
+  @switch (mainView) {
+    @case ('indicadores') {
+      <div class="metrics">
+        @if (loadingMetrics && !metrics) {
+          <div class="metrics__loading">A carregar indicadores…</div>
+        } @else if (metrics) {
+          <article class="metric">
+            <span class="metric__label">Utilizadores</span>
+            <span class="metric__value">{{ metrics.totalUtilizadoresComuns }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Administradores</span>
+            <span class="metric__value">{{ metrics.totalAdministradores }}</span>
+          </article>
+          <article class="metric metric--online">
+            <span class="metric__label">Contas online</span>
+            <span class="metric__value">{{ metrics.totalUtilizadoresOnline }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Contas offline</span>
+            <span class="metric__value">{{ metrics.totalUtilizadoresOffline }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Publicações</span>
+            <span class="metric__value">{{ metrics.totalPublicacoes }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Comentários</span>
+            <span class="metric__value">{{ metrics.totalComentarios }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Bazes</span>
+            <span class="metric__value">{{ metrics.totalBazes }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Hashtags criadas</span>
+            <span class="metric__value">{{ metrics.totalHashtagsCriadas }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Fotografias partilhadas</span>
+            <span class="metric__value">{{ metrics.totalFotografiasPartilhadas }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Vídeos partilhados</span>
+            <span class="metric__value">{{ metrics.totalVideosPartilhados }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Chats criados</span>
+            <span class="metric__value">{{ metrics.totalChatsCriados }}</span>
+          </article>
+          <article class="metric">
+            <span class="metric__label">Grupos criados</span>
+            <span class="metric__value">{{ metrics.totalGruposCriados }}</span>
+          </article>
+          <article class="metric metric--fimbu">
+            <span class="metric__label">Interações com a Fimbu</span>
+            <span class="metric__value">{{ metrics.totalInteracoesFimbu }}</span>
+          </article>
+          <article class="metric metric--fimbu">
+            <span class="metric__label">Mensagens da Fimbu</span>
+            <span class="metric__value">{{ metrics.totalMensagensFimbu }}</span>
+          </article>
+          <article class="metric metric--warning">
+            <span class="metric__label">Publicações denunciadas</span>
+            <span class="metric__value">{{ metrics.totalPublicacoesDenunciadas }}</span>
+          </article>
+          <article class="metric metric--warning">
+            <span class="metric__label">Comentários denunciados</span>
+            <span class="metric__value">{{ metrics.totalComentariosDenunciados }}</span>
+          </article>
+          <article class="metric metric--warning">
+            <span class="metric__label">Total de denúncias</span>
+            <span class="metric__value">{{ metrics.totalDenuncias }}</span>
+          </article>
+        }
+      </div>
+
+      @if (metrics) {
+        <div class="rankings">
+          <article class="ranking">
+            <h2 class="ranking__title">Top 10 hashtags mais usadas</h2>
+            @if (metrics.topHashtags.length === 0) {
+              <p class="ranking__empty">Ainda não há hashtags.</p>
+            } @else {
+              <ol class="ranking__list">
+                @for (hashtag of metrics.topHashtags; track hashtag.tag) {
+                  <li class="ranking__row">
+                    <span class="ranking__label">#{{ hashtag.tag }}</span>
+                    <span class="ranking__value">{{ hashtag.totalUtilizacoes }} uso(s)</span>
+                  </li>
+                }
+              </ol>
+            }
+          </article>
+
+          <article class="ranking">
+            <h2 class="ranking__title">Top 10 contas mais seguidas</h2>
+            @if (metrics.topPerfisSeguidos.length === 0) {
+              <p class="ranking__empty">Ainda não há seguidores registados.</p>
+            } @else {
+              <ol class="ranking__list">
+                @for (perfil of metrics.topPerfisSeguidos; track perfil.id) {
+                  <li class="ranking__row">
+                    <span class="ranking__profile">
+                      @if (perfil.fotoPerfil) {
+                        <img class="ranking__avatar" [src]="perfil.fotoPerfil" [alt]="perfil.nome" />
+                      } @else {
+                        <span class="ranking__avatar ranking__avatar--placeholder">
+                          {{ (perfil.nome || perfil.nomeUtilizador).charAt(0).toUpperCase() }}
+                        </span>
+                      }
+                      <span class="ranking__names">
+                        <span class="ranking__label">{{ perfil.nome || perfil.nomeUtilizador }}</span>
+                        <span class="ranking__handle">&#64;{{ perfil.nomeUtilizador }}</span>
+                      </span>
+                    </span>
+                    <span class="ranking__value">{{ perfil.totalSeguidores }} seguidor(es)</span>
+                  </li>
+                }
+              </ol>
+            }
+          </article>
+
+          <article class="ranking">
+            <h2 class="ranking__title">Top 10 utilizadores mais ativos com a Fimbu</h2>
+            @if (metrics.topUtilizadoresFimbu.length === 0) {
+              <p class="ranking__empty">Ainda não há interações com a Fimbu.</p>
+            } @else {
+              <ol class="ranking__list">
+                @for (perfil of metrics.topUtilizadoresFimbu; track perfil.id) {
+                  <li class="ranking__row">
+                    <span class="ranking__profile">
+                      @if (perfil.fotoPerfil) {
+                        <img class="ranking__avatar" [src]="perfil.fotoPerfil" [alt]="perfil.nome" />
+                      } @else {
+                        <span class="ranking__avatar ranking__avatar--placeholder">
+                          {{ (perfil.nome || perfil.nomeUtilizador).charAt(0).toUpperCase() }}
+                        </span>
+                      }
+                      <span class="ranking__names">
+                        <span class="ranking__label">{{ perfil.nome || perfil.nomeUtilizador }}</span>
+                        <span class="ranking__handle">&#64;{{ perfil.nomeUtilizador }}</span>
+                      </span>
+                    </span>
+                    <span class="ranking__value">{{ perfil.totalInteracoes }} interação(ões)</span>
+                  </li>
+                }
+              </ol>
+            }
+          </article>
+        </div>
+      }
+    }
+
+    @case ('graficos') {
+      @if (metrics) {
+        <app-admin-metrics-charts [metrics]="metrics" />
+      } @else if (loadingMetrics) {
+        <p class="panel__state">A carregar gráficos…</p>
+      } @else {
+        <p class="panel__state">Sem dados para gráficos.</p>
+      }
+    }
+
+    @case ('moderacao') {
+      <nav class="tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          class="tabs__item"
+          [class.tabs__item--active]="activeTab === 'comentarios'"
+          (click)="handleSelectTab('comentarios')"
+        >
+          Comentários denunciados
+          <span class="tabs__count">{{ reportedComments.length }}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tabs__item"
+          [class.tabs__item--active]="activeTab === 'publicacoes'"
+          (click)="handleSelectTab('publicacoes')"
+        >
+          Publicações denunciadas
+          <span class="tabs__count">{{ reportedPublications.length }}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tabs__item"
+          [class.tabs__item--active]="activeTab === 'utilizadores'"
+          (click)="handleSelectTab('utilizadores')"
+        >
+          Utilizadores
+          <span class="tabs__count">{{ users.length }}</span>
+        </button>
+      </nav>
+
+      @switch (activeTab) {
+        @case ('comentarios') {
+          <div class="panel">
+            @if (loadingComments) {
+              <p class="panel__state">A carregar comentários denunciados…</p>
+            } @else if (reportedComments.length === 0) {
+              <p class="panel__state">Não há comentários denunciados. Bom trabalho!</p>
+            } @else {
+              <div class="report-list">
+                @for (comment of reportedComments; track comment.id) {
+                  <article class="report-card">
+                    <div class="report-card__head">
+                      <div class="report-card__author">
+                        @if (comment.autorFoto) {
+                          <img class="report-card__avatar" [src]="comment.autorFoto" [alt]="comment.autorNome" />
+                        } @else {
+                          <span class="report-card__avatar report-card__avatar--placeholder">
+                            {{ comment.autorNome.charAt(0).toUpperCase() }}
+                          </span>
+                        }
+                        <div>
+                          <span class="report-card__name">{{ comment.autorNome }}</span>
+                          <span class="report-card__handle">&#64;{{ comment.autorNomeUtilizador }}</span>
+                        </div>
+                      </div>
+                      <span class="report-card__badge">{{ comment.reportsCount }} denúncia(s)</span>
+                    </div>
+
+                    <p class="report-card__text">{{ comment.texto }}</p>
+                    <span class="report-card__date">{{ comment.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+
+                    <div class="report-card__reasons">
+                      @for (report of comment.reports; track $index) {
+                        <span class="report-card__reason">
+                          {{ report.motivo }}@if (report.descricao) { — {{ report.descricao }} }
+                        </span>
+                      }
+                    </div>
+
+                    <div class="report-card__actions">
+                      <button
+                        type="button"
+                        class="btn btn--ghost"
+                        [disabled]="processingId === comment.id"
+                        (click)="handleDismissComment(comment)"
+                      >
+                        Ignorar denúncias
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--danger"
+                        [disabled]="processingId === comment.id"
+                        (click)="handleRemoveComment(comment)"
+                      >
+                        {{ processingId === comment.id ? 'A processar…' : 'Remover comentário' }}
+                      </button>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @case ('publicacoes') {
+          <div class="panel">
+            @if (loadingPublications) {
+              <p class="panel__state">A carregar publicações denunciadas…</p>
+            } @else if (reportedPublications.length === 0) {
+              <p class="panel__state">Não há publicações denunciadas.</p>
+            } @else {
+              <div class="report-list">
+                @for (publication of reportedPublications; track publication.id) {
+                  <article class="report-card">
+                    <div class="report-card__head">
+                      <div class="report-card__author">
+                        @if (publication.donoFoto) {
+                          <img class="report-card__avatar" [src]="publication.donoFoto" [alt]="publication.donoNome" />
+                        } @else {
+                          <span class="report-card__avatar report-card__avatar--placeholder">
+                            {{ publication.donoNome.charAt(0).toUpperCase() }}
+                          </span>
+                        }
+                        <div>
+                          <span class="report-card__name">{{ publication.donoNome }}</span>
+                          <span class="report-card__handle">&#64;{{ publication.donoNomeUtilizador }}</span>
+                        </div>
+                      </div>
+                      <span class="report-card__badge">{{ publication.reportsCount }} denúncia(s)</span>
+                    </div>
+
+                    <p class="report-card__text">{{ publication.texto }}</p>
+
+                    @if (publication.imagemUrl) {
+                      <img class="report-card__media" [src]="publication.imagemUrl" alt="Imagem da publicação" />
+                    }
+                    @if (publication.videoUrl) {
+                      <video class="report-card__media" [src]="publication.videoUrl" controls></video>
+                    }
+
+                    <span class="report-card__date">{{ publication.criadoEm | date: 'dd/MM/yyyy HH:mm' }}</span>
+
+                    <div class="report-card__reasons">
+                      @for (report of publication.reports; track $index) {
+                        <span class="report-card__reason">
+                          {{ report.motivo }}@if (report.descricao) { — {{ report.descricao }} }
+                        </span>
+                      }
+                    </div>
+
+                    <div class="report-card__actions">
+                      <button
+                        type="button"
+                        class="btn btn--ghost"
+                        [disabled]="processingId === publication.id"
+                        (click)="handleDismissPublication(publication)"
+                      >
+                        Ignorar denúncias
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--danger"
+                        [disabled]="processingId === publication.id"
+                        (click)="handleRemovePublication(publication)"
+                      >
+                        {{ processingId === publication.id ? 'A processar…' : 'Remover publicação' }}
+                      </button>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @case ('utilizadores') {
+          <div class="panel">
+            @if (loadingUsers) {
+              <p class="panel__state">A carregar utilizadores…</p>
+            } @else if (users.length === 0) {
+              <p class="panel__state">Sem utilizadores registados.</p>
+            } @else {
+              <div class="user-groups">
+                <section class="user-group">
+                  <header class="user-group__header">
+                    <h2 class="user-group__title">Utilizadores</h2>
+                    <span class="user-group__count">{{ regularUsers.length }}</span>
+                  </header>
+                  @if (regularUsers.length === 0) {
+                    <p class="panel__state">Sem utilizadores comuns.</p>
+                  } @else {
+                    <div class="table-wrap table-wrap--scroll">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Utilizador</th>
+                            <th>Email</th>
+                            <th>Perfil</th>
+                            <th class="table__num">Seguidores</th>
+                            <th class="table__num">Publicações</th>
+                            <th>Registo</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (user of regularUsers; track user.id) {
+                            <tr>
+                              <td>
+                                <div class="table__user">
+                                  @if (user.profilePhotoUrl) {
+                                    <img class="table__avatar" [src]="user.profilePhotoUrl" [alt]="user.username" />
+                                  } @else {
+                                    <span class="table__avatar table__avatar--placeholder">
+                                      {{ (user.displayName || user.username).charAt(0).toUpperCase() }}
+                                    </span>
+                                  }
+                                  <div>
+                                    <span class="table__name">{{ user.displayName || user.username }}</span>
+                                    <span class="table__handle">&#64;{{ user.username }}</span>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>{{ user.email }}</td>
+                              <td>{{ user.isPrivate ? 'Privado' : 'Público' }}</td>
+                              <td class="table__num">{{ user.followersCount }}</td>
+                              <td class="table__num">{{ user.publicacoesCount }}</td>
+                              <td>{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+                </section>
+
+                <section class="user-group">
+                  <header class="user-group__header">
+                    <h2 class="user-group__title">Administradores</h2>
+                    <span class="user-group__count user-group__count--admin">{{ adminUsers.length }}</span>
+                  </header>
+                  @if (adminUsers.length === 0) {
+                    <p class="panel__state">Sem administradores registados.</p>
+                  } @else {
+                    <div class="table-wrap table-wrap--scroll">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Administrador</th>
+                            <th>Email</th>
+                            <th>Perfil</th>
+                            <th class="table__num">Seguidores</th>
+                            <th class="table__num">Publicações</th>
+                            <th>Registo</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (user of adminUsers; track user.id) {
+                            <tr>
+                              <td>
+                                <div class="table__user">
+                                  @if (user.profilePhotoUrl) {
+                                    <img class="table__avatar" [src]="user.profilePhotoUrl" [alt]="user.username" />
+                                  } @else {
+                                    <span class="table__avatar table__avatar--placeholder">
+                                      {{ (user.displayName || user.username).charAt(0).toUpperCase() }}
+                                    </span>
+                                  }
+                                  <div>
+                                    <span class="table__name">
+                                      {{ user.displayName || user.username }}
+                                      <span class="table__role">Admin</span>
+                                    </span>
+                                    <span class="table__handle">&#64;{{ user.username }}</span>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>{{ user.email }}</td>
+                              <td>{{ user.isPrivate ? 'Privado' : 'Público' }}</td>
+                              <td class="table__num">{{ user.followersCount }}</td>
+                              <td class="table__num">{{ user.publicacoesCount }}</td>
+                              <td>{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+                </section>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  }
+</section>

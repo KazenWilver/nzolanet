@@ -1,0 +1,800 @@
+<div class="messages-page">
+  <div class="messages-page__layout">
+    <aside class="messages-page__inbox" aria-label="Lista de conversas">
+      <label class="messages-page__search" aria-label="Pesquisar conversas">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          type="search"
+          [(ngModel)]="searchQuery"
+          [placeholder]="'chat.searchConversations' | t"
+          class="messages-page__search-input"
+        />
+      </label>
+
+      <header class="messages-page__inbox-header">
+        <app-mobile-account-button />
+        <h1 class="messages-page__inbox-title">{{ 'chat.title' | t }}</h1>
+        <div class="messages-page__inbox-actions">
+          <button
+            type="button"
+            class="messages-page__icon-btn"
+            aria-label="Nova conversa"
+            (click)="handleOpenNewConversation()"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      @if (loadingConversations) {
+        <div class="messages-page__loading">
+          <app-loading-spinner tamanho="md" />
+        </div>
+      } @else if (conversationsError) {
+        <div class="messages-page__state">
+          <p>Não foi possível carregar as conversas.</p>
+          <button type="button" class="messages-page__pill-btn" (click)="loadConversations()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (visibleConversations.length === 0) {
+        <div class="messages-page__state">
+          <p>{{ searchQuery ? 'Nenhuma conversa encontrada.' : 'Ainda não tens conversas.' }}</p>
+        </div>
+      } @else {
+        <ul class="messages-page__list" role="list">
+          @for (conversation of visibleConversations; track trackConversation($index, conversation)) {
+            <li>
+              <button
+                type="button"
+                class="messages-page__list-item"
+                [class.messages-page__list-item--active]="activeConversation?.id === conversation.id"
+                (click)="handleSelectConversation(conversation)"
+              >
+                <app-avatar
+                  [src]="getConversationAvatar(conversation)"
+                  [username]="conversation.otherUsername ?? conversation.title ?? 'grupo'"
+                  size="md"
+                />
+                <span class="messages-page__list-body">
+                  <span class="messages-page__list-top">
+                    <strong>{{ getConversationDisplayName(conversation) }}</strong>
+                    @if (conversation.lastMessageAt) {
+                      <time [dateTime]="conversation.lastMessageAt">
+                        {{ conversation.lastMessageAt | tempoAtras : relativeTime.tick() }}
+                      </time>
+                    }
+                  </span>
+                  <span class="messages-page__list-preview">
+                    {{ getPreviewText(conversation) }}
+                  </span>
+                </span>
+                @if (conversation.unreadCount > 0) {
+                  <span class="messages-page__unread-dot" aria-label="{{ conversation.unreadCount }} por ler"></span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </aside>
+
+    <section class="messages-page__stage" aria-label="Conversa activa">
+      @if (!activeConversation) {
+        <div class="messages-page__welcome">
+          <div class="messages-page__welcome-icon" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h2>Iniciar conversa</h2>
+          <p>Escolhe uma conversa existente ou começa uma nova a partir de um perfil.</p>
+          <a routerLink="/search" class="messages-page__welcome-btn">Procurar utilizadores</a>
+          <button type="button" class="messages-page__welcome-btn messages-page__welcome-btn--secondary" (click)="handleOpenNewConversation()">
+            Nova conversa
+          </button>
+        </div>
+      } @else {
+        <header class="messages-page__thread-header">
+          <button
+            type="button"
+            class="messages-page__back-btn"
+            aria-label="Voltar à lista"
+            (click)="handleBackToList()"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          <app-avatar
+            [src]="getConversationAvatar(activeConversation)"
+            [username]="activeConversation.otherUsername ?? activeConversation.title ?? 'grupo'"
+            size="sm"
+          />
+          <div class="messages-page__thread-meta">
+            <strong>{{ getConversationDisplayName(activeConversation) }}</strong>
+            <span
+              class="messages-page__presence"
+              [class.messages-page__presence--online]="!activeConversation.isGroup && activeConversation.otherUserIsOnline"
+            >
+              @if (!activeConversation.isGroup && activeConversation.otherUserIsOnline) {
+                <span class="messages-page__presence-dot" aria-hidden="true"></span>
+              }
+              {{ getPresenceLabel(activeConversation) }}
+            </span>
+          </div>
+          @if (activeConversation.isGroup) {
+            <button
+              type="button"
+              class="messages-page__icon-btn"
+              aria-label="Informações do grupo"
+              (click)="handleOpenGroupInfo()"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 3.6 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.6a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 8a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
+          } @else if (activeConversation.otherUserId) {
+            <a
+              class="messages-page__icon-btn"
+              [routerLink]="['/profile', activeConversation.otherUserId]"
+              aria-label="Ver perfil"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="5" cy="12" r="1.75"></circle>
+                <circle cx="12" cy="12" r="1.75"></circle>
+                <circle cx="19" cy="12" r="1.75"></circle>
+              </svg>
+            </a>
+          }
+        </header>
+
+        @if (loadingMessages) {
+          <div class="messages-page__loading messages-page__loading--thread">
+            <app-loading-spinner tamanho="md" />
+          </div>
+        } @else if (messagesError) {
+          <div class="messages-page__state messages-page__state--thread">
+            <p>Não foi possível carregar as mensagens.</p>
+            <button type="button" class="messages-page__pill-btn" (click)="handleRetryMessages()">
+              Tentar novamente
+            </button>
+          </div>
+        } @else {
+          <div
+            #messagesScroll
+            class="messages-page__messages"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
+            (scroll)="handleMessagesScroll()"
+          >
+            @if (loadingOlderMessages) {
+              <div class="messages-page__loading-older">A carregar mensagens anteriores…</div>
+            }
+            <div class="messages-page__intro" [class.messages-page__intro--hidden]="messages.length > 0">
+              <app-avatar
+                [src]="getConversationAvatar(activeConversation)"
+                [username]="activeConversation.otherUsername ?? activeConversation.title ?? 'grupo'"
+                size="xl"
+              />
+              <h3>{{ getConversationDisplayName(activeConversation) }}</h3>
+              <p>
+                @if (activeConversation.isGroup) {
+                  {{ activeConversation.participantCount }} participantes
+                } @else {
+                  @{{ activeConversation.otherUsername }}
+                }
+              </p>
+              @if (activeConversation.isGroup && activeConversation.description) {
+                <p class="messages-page__intro-description">{{ activeConversation.description }}</p>
+              }
+              @if (activeConversation.isGroup) {
+                <button type="button" class="messages-page__intro-btn" (click)="handleOpenGroupInfo()">
+                  Ver informações do grupo
+                </button>
+              } @else if (activeConversation.otherUserId) {
+                <a
+                  class="messages-page__intro-btn"
+                  [routerLink]="['/profile', activeConversation.otherUserId]"
+                >
+                  Ver perfil
+                </a>
+              }
+            </div>
+
+            @for (group of messageDayGroups; track trackDayGroup($index, group)) {
+              <div class="messages-page__day-separator">
+                <span>{{ group.label }}</span>
+              </div>
+
+              @for (message of group.messages; track trackMessage($index, message)) {
+                <article
+                  class="messages-page__bubble-wrap"
+                  [class.messages-page__bubble-wrap--mine]="message.isMine"
+                  [attr.data-message-id]="message.id"
+                  (touchstart)="handleMessageTouchStart(message.id)"
+                  (touchend)="handleMessageTouchEnd()"
+                  (touchcancel)="handleMessageTouchEnd()"
+                >
+                  <article
+                    class="messages-page__bubble"
+                    [class.messages-page__bubble--mine]="message.isMine"
+                    [class.messages-page__bubble--theirs]="!message.isMine"
+                    [class.messages-page__bubble--wide]="message.audioUrl || message.documentUrl"
+                  >
+                    <div class="messages-page__bubble-content">
+                      @if (!message.isMine && activeConversation.isGroup) {
+                        <a
+                          class="messages-page__sender-in-bubble"
+                          [style.color]="getGroupSenderColor(message.senderId)"
+                          [routerLink]="['/profile/by-username', message.senderUsername]"
+                        >
+                          @{{ message.senderUsername }}
+                        </a>
+                      }
+                      @if (message.replyTo) {
+                        <blockquote class="messages-page__reply-quote">
+                          <strong>{{ getReplyAuthorName(message.replyTo) }}</strong>
+                          <span>{{ getReplyPreviewLabel(message.replyTo) }}</span>
+                        </blockquote>
+                      }
+                      @if (message.videoUrl) {
+                        <div class="messages-page__video-wrap">
+                          <video
+                            class="messages-page__bubble-video"
+                            [src]="message.videoUrl"
+                            controls
+                            playsinline
+                            preload="metadata"
+                          ></video>
+                          <button
+                            type="button"
+                            class="messages-page__media-expand"
+                            aria-label="Ver vídeo em ecrã inteiro"
+                            (click)="handleOpenMediaLightbox(message.videoUrl!, 'video')"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                              <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                              <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+                              <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+                              <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+                            </svg>
+                          </button>
+                        </div>
+                      }
+                      @if (message.imageUrl) {
+                        <button
+                          type="button"
+                          class="messages-page__media-trigger"
+                          aria-label="Abrir imagem em ecrã inteiro"
+                          (click)="handleOpenMediaLightbox(message.imageUrl!, 'image', message.isGif)"
+                        >
+                          <img
+                            class="messages-page__bubble-image"
+                            [class.messages-page__bubble-image--gif]="message.isGif"
+                            [src]="message.imageUrl"
+                            [alt]="message.isGif ? 'GIF enviado na conversa' : 'Imagem enviada na conversa'"
+                            loading="lazy"
+                          />
+                        </button>
+                      }
+                      @if (message.audioUrl) {
+                        <div
+                          class="messages-page__audio-player"
+                          [class.messages-page__audio-player--mine]="message.isMine"
+                        >
+                          <button
+                            type="button"
+                            class="messages-page__audio-play"
+                            [attr.aria-label]="isAudioPlaying(message.id) ? 'Pausar áudio' : 'Reproduzir áudio'"
+                            (click)="handleToggleAudioPlayback(message.id, message.audioUrl!)"
+                          >
+                            @if (isAudioPlaying(message.id)) {
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+                                <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+                              </svg>
+                            } @else {
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M8 5v14l11-7z"></path>
+                              </svg>
+                            }
+                          </button>
+                          <div class="messages-page__audio-wave" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                          </div>
+                          <span class="messages-page__audio-label">Mensagem de voz</span>
+                        </div>
+                      }
+                      @if (message.documentUrl) {
+                        <div class="messages-page__document">
+                          <div class="messages-page__document-info">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <span class="messages-page__document-name">{{ message.documentFileName ?? 'Documento' }}</span>
+                          </div>
+                          <div class="messages-page__document-actions">
+                            <button
+                              type="button"
+                              class="messages-page__document-btn"
+                              (click)="handleOpenDocument(message.documentUrl!)"
+                            >
+                              Abrir
+                            </button>
+                            <button
+                              type="button"
+                              class="messages-page__document-btn messages-page__document-btn--secondary"
+                              (click)="handleDownloadDocument(message.documentUrl!, message.documentFileName)"
+                            >
+                              Baixar
+                            </button>
+                          </div>
+                        </div>
+                      }
+                      @if (message.isDeletedForEveryone) {
+                        <p class="messages-page__deleted-text">
+                          <svg class="messages-page__deleted-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <line x1="5.6" y1="5.6" x2="18.4" y2="18.4"></line>
+                          </svg>
+                          <span>{{ getDeletedForEveryoneLabel(message) }}</span>
+                        </p>
+                      } @else if (message.text) {
+                        <p
+                          class="messages-page__bubble-text"
+                          [class.messages-page__bubble-text--collapsed]="isMessageExpandable(message) && !isMessageExpanded(message.id)"
+                          [innerHTML]="message.text | linkifyText:activeConversation.isGroup"
+                        ></p>
+                        @if (isMessageExpandable(message)) {
+                          <button
+                            type="button"
+                            class="messages-page__read-more"
+                            (click)="handleToggleMessageExpanded(message.id)"
+                          >
+                            {{ isMessageExpanded(message.id) ? 'Ler menos' : 'Ler mais' }}
+                          </button>
+                        }
+                      }
+                      @if (!message.isDeletedForEveryone && message.isEdited) {
+                        <span class="messages-page__edited-label">(editada)</span>
+                      }
+                      @if (message.forwardedFromMessageId) {
+                        <span class="messages-page__forwarded-label">Encaminhada</span>
+                      }
+                    </div>
+                    <footer class="messages-page__bubble-meta">
+                      <div class="messages-page__bubble-meta-main">
+                        <time [dateTime]="message.createdAt">
+                          {{ message.createdAt | date:'HH:mm' }}
+                        </time>
+                        @if (message.isMine) {
+                          <span
+                            class="messages-page__read-status"
+                            [class.messages-page__read-status--delivered]="message.readStatus === 'delivered'"
+                            [class.messages-page__read-status--read]="message.readStatus === 'read'"
+                            [attr.aria-label]="getReadStatusLabel(message.readStatus)"
+                          >
+                            {{ getReadStatusSymbol(message.readStatus) }}
+                          </span>
+                        }
+                      </div>
+                      <div class="messages-page__bubble-meta-actions">
+                        <button
+                          type="button"
+                          class="messages-page__bubble-meta-btn"
+                          aria-label="Responder"
+                          (click)="handleReplyToMessage(message)"
+                        >
+                          ↩
+                        </button>
+                        <button
+                          type="button"
+                          class="messages-page__bubble-meta-btn"
+                          aria-label="Mais ações"
+                          [attr.aria-expanded]="actionMenuMessageId === message.id"
+                          (click)="handleOpenActionsMenu(message.id, $event)"
+                        >
+                          ⋯
+                        </button>
+                      </div>
+                    </footer>
+                  </article>
+
+                  @if (actionMenuMessageId === message.id) {
+                    <div class="messages-page__message-actions-menu">
+                      <button type="button" (click)="handleReplyToMessage(message)">Responder</button>
+                      <button type="button" (click)="handleOpenReactionPicker(message.id, $event)">Reagir</button>
+                      @if (message.isMine && !message.isDeletedForEveryone && canEditForEveryone(message)) {
+                        <button type="button" (click)="handleEditMessage(message)">Editar</button>
+                      }
+                      @if (message.isMine && !message.isDeletedForEveryone && canDeleteForEveryone(message)) {
+                        <button type="button" (click)="handleDeleteMessage(message, 'everyone')">Apagar para todos</button>
+                      }
+                      <button type="button" (click)="handleDeleteMessage(message, 'self')">Apagar para mim</button>
+                      <button type="button" (click)="handleOpenForwardModal(message)">Encaminhar</button>
+                    </div>
+                  }
+
+                  @if (reactionPickerMessageId === message.id) {
+                    <div class="messages-page__reaction-picker">
+                      <app-chat-emoji-picker
+                        mode="reaction"
+                        (emojiSelected)="handleReactionSelected(message, $event)"
+                        (closed)="reactionPickerMessageId = null"
+                      />
+                    </div>
+                  }
+
+                  @if (message.reactions.length > 0) {
+                    <div class="messages-page__reactions" [class.messages-page__reactions--mine]="message.isMine">
+                      @for (reaction of message.reactions; track reaction.emoji) {
+                        <button
+                          type="button"
+                          class="messages-page__reaction-chip"
+                          [class.messages-page__reaction-chip--mine]="reaction.reactedByMe"
+                          [attr.aria-label]="'Reacção ' + reaction.emoji"
+                          (click)="handleReactionSelected(message, reaction.emoji)"
+                        >
+                          <span>{{ reaction.emoji }}</span>
+                          <span>{{ reaction.count }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </article>
+              }
+            }
+
+            @if (messages.length === 0) {
+              <p class="messages-page__thread-hint">Envia a primeira mensagem para iniciar a conversa.</p>
+            }
+          </div>
+        }
+
+        @if (typingLabel) {
+          <p #typingIndicator class="messages-page__typing" aria-live="polite">{{ typingLabel }}</p>
+        }
+
+        <footer class="messages-page__composer">
+          @if (sendError) {
+            <p class="messages-page__send-error" role="alert">{{ sendError }}</p>
+          }
+          @if (replyingTo) {
+            <div class="messages-page__reply-banner">
+              <div class="messages-page__reply-banner-body">
+                <span class="messages-page__reply-banner-label">A responder a {{ getReplyAuthorName(replyingTo) }}</span>
+                <span class="messages-page__reply-banner-text">{{ getReplyPreviewLabel(replyingTo) }}</span>
+              </div>
+              <button
+                type="button"
+                class="messages-page__reply-banner-close"
+                aria-label="Cancelar resposta"
+                (click)="handleCancelReply()"
+              >
+                ×
+              </button>
+            </div>
+          }
+          @if (editingMessage) {
+            <div class="messages-page__reply-banner messages-page__reply-banner--edit">
+              <div class="messages-page__reply-banner-body">
+                <span class="messages-page__reply-banner-label">A editar mensagem</span>
+              </div>
+              <button
+                type="button"
+                class="messages-page__reply-banner-close"
+                aria-label="Cancelar edição"
+                (click)="handleCancelEdit()"
+              >
+                ×
+              </button>
+            </div>
+          }
+          @if (isRecording) {
+            <div class="messages-page__recording-banner" role="status">
+              <span class="messages-page__recording-dot" aria-hidden="true"></span>
+              A gravar… {{ recordingSeconds }}s
+              <button type="button" class="messages-page__pill-btn" (click)="handleStopRecording()">Parar</button>
+              <button type="button" class="messages-page__pill-btn messages-page__pill-btn--ghost" (click)="handleCancelRecording()">Cancelar</button>
+            </div>
+          }
+          <form class="messages-page__composer-form" [formGroup]="messageForm" (ngSubmit)="handleSendMessage()">
+            <input
+              #imageInput
+              type="file"
+              accept="image/*"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              (change)="handleImageSelected($event)"
+            />
+            <input
+              #gifInput
+              type="file"
+              accept="image/gif"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              (change)="handleGifSelected($event)"
+            />
+            <input
+              #videoInput
+              type="file"
+              accept="video/*"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              (change)="handleVideoSelected($event)"
+            />
+            <input
+              #documentInput
+              type="file"
+              accept=".txt,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.rtf"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              (change)="handleDocumentSelected($event)"
+            />
+            @if (composerAttachOpen) {
+              <div class="messages-page__attach-card" role="menu">
+                <button type="button" (click)="imageInput.click()">Imagem</button>
+                <button type="button" (click)="gifInput.click()">GIF</button>
+                <button type="button" (click)="videoInput.click()">Vídeo</button>
+                <button type="button" (click)="documentInput.click()">Documento</button>
+                <button type="button" (click)="handleStartRecording()">Áudio</button>
+              </div>
+            }
+            <div class="messages-page__composer-pill">
+              <button
+                type="button"
+                class="messages-page__attach-btn"
+                aria-label="Anexar ficheiro"
+                [attr.aria-expanded]="composerAttachOpen"
+                (click)="handleToggleAttachMenu()"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </button>
+              <div class="messages-page__emoji-anchor messages-page__emoji-anchor--composer">
+                <button
+                  type="button"
+                  class="messages-page__emoji-btn"
+                  aria-label="Inserir emoji"
+                  [attr.aria-expanded]="composerEmojiOpen"
+                  (click)="handleToggleComposerEmoji()"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                  </svg>
+                </button>
+                @if (composerEmojiOpen) {
+                  <div class="messages-page__composer-emoji-picker">
+                    <app-chat-emoji-picker
+                      mode="composer"
+                      (emojiSelected)="handleComposerEmojiSelected($event)"
+                      (closed)="composerEmojiOpen = false"
+                    />
+                  </div>
+                }
+              </div>
+              <textarea
+                #composerTextarea
+                formControlName="text"
+                class="messages-page__composer-input"
+                appMentionAutocomplete
+                [mentionAutocompleteEnabled]="activeConversation.isGroup"
+                rows="1"
+                [placeholder]="'chat.writeMessage' | t"
+                [attr.aria-label]="'chat.writeMessage' | t"
+                (click)="handleComposerTextareaClick()"
+                (input)="resizeComposerTextarea()"
+                (keydown)="handleComposerKeydown($event)"
+              ></textarea>
+              <button
+                type="submit"
+                class="messages-page__send-btn"
+                [disabled]="!canSendMessage"
+                aria-label="Enviar mensagem"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </footer>
+      }
+    </section>
+  </div>
+</div>
+
+@if (newConversationOpen) {
+  <app-new-conversation-modal
+    (closed)="handleCloseNewConversation()"
+    (conversationCreated)="handleConversationCreated($event)"
+  />
+}
+
+@if (groupInfoOpen && activeConversation; as groupConversation) {
+  <app-group-info-modal
+    [conversationId]="groupConversation.id"
+    (closed)="handleCloseGroupInfo()"
+    (updated)="handleGroupInfoUpdated($event)"
+    (deleted)="handleGroupDeleted()"
+  />
+}
+
+@if (forwardingMessage) {
+  <div class="messages-page__forward-overlay" (click)="handleCloseForwardModal()">
+    <div class="messages-page__forward-modal" (click)="$event.stopPropagation()">
+      <h3>{{ 'chat.forwardMessage' | t }}</h3>
+      <p>{{ 'chat.selectConversations' | t }}</p>
+      <label class="messages-page__forward-caption">
+        <span>Legenda (opcional)</span>
+        <textarea
+          rows="2"
+          [(ngModel)]="forwardCaption"
+          placeholder="Adiciona uma mensagem…"
+          class="messages-page__forward-caption-input"
+        ></textarea>
+      </label>
+      <div class="messages-page__forward-list">
+        @for (conversation of conversations; track trackConversation($index, conversation)) {
+          @if (activeConversation?.id !== conversation.id) {
+            <label class="messages-page__forward-item">
+              <input
+                type="checkbox"
+                [checked]="forwardingIds.has(conversation.id)"
+                (change)="handleToggleForwardConversation(conversation.id)"
+              />
+              <span>{{ getConversationDisplayName(conversation) }}</span>
+            </label>
+          }
+        }
+      </div>
+      @if (forwardError) {
+        <p class="messages-page__send-error">{{ forwardError }}</p>
+      }
+      <div class="messages-page__forward-actions">
+        <button type="button" class="messages-page__pill-btn" (click)="handleCloseForwardModal()">{{ 'common.cancel' | t }}</button>
+        <button
+          type="button"
+          class="messages-page__pill-btn"
+          [disabled]="forwarding || forwardingIds.size === 0"
+          (click)="handleConfirmForward()"
+        >
+          {{ forwarding ? ('common.loading' | t) : ('chat.forwardMessage' | t) }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (lightboxMedia) {
+  <div
+    class="messages-page__lightbox-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Media em ecrã inteiro"
+    (click)="handleCloseMediaLightbox()"
+  >
+    <div class="messages-page__lightbox-content" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="messages-page__lightbox-close"
+        aria-label="Fechar"
+        (click)="handleCloseMediaLightbox()"
+      >
+        ×
+      </button>
+      @if (lightboxMedia.type === 'video') {
+        <video [src]="lightboxMedia.url" controls autoplay class="messages-page__lightbox-media"></video>
+      } @else if (lightboxMedia.type === 'audio') {
+        <audio [src]="lightboxMedia.url" controls autoplay class="messages-page__lightbox-media messages-page__lightbox-audio"></audio>
+      } @else {
+        <img
+          [src]="lightboxMedia.url"
+          [alt]="lightboxMedia.isGif ? 'GIF' : 'Imagem'"
+          class="messages-page__lightbox-media"
+        />
+      }
+    </div>
+  </div>
+}
+
+@if (pendingDelete) {
+  <app-confirm-dialog
+    [mensagem]="getDeleteConfirmMessage()"
+    [textoConfirmar]="'Sim'"
+    [textoCancelar]="'Não'"
+    (confirmado)="handleConfirmDelete()"
+    (cancelado)="handleCancelDelete()"
+  />
+}
+
+@if (hasPendingMedia) {
+  <div
+    class="messages-page__pending-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Pré-visualização do anexo"
+    (click)="handleRemovePendingMedia()"
+  >
+    <div class="messages-page__pending-card" [formGroup]="messageForm" (click)="$event.stopPropagation()">
+      <div class="messages-page__pending-preview">
+        @if (pendingImagePreview) {
+          <img [src]="pendingImagePreview" alt="Pré-visualização da imagem" class="messages-page__pending-media" />
+        }
+        @if (pendingVideoPreview) {
+          <video [src]="pendingVideoPreview" controls class="messages-page__pending-media"></video>
+        }
+        @if (pendingDocument) {
+          <div class="messages-page__pending-doc-card">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>{{ pendingDocumentName }}</span>
+          </div>
+        }
+        @if (pendingAudioPreview) {
+          <audio [src]="pendingAudioPreview" controls class="messages-page__pending-audio-full"></audio>
+        }
+      </div>
+      <div class="messages-page__pending-caption-row">
+        <textarea
+          #pendingCaptionTextarea
+          formControlName="text"
+          class="messages-page__pending-caption"
+          rows="2"
+          placeholder="Adiciona uma legenda (opcional)…"
+          aria-label="Legenda da mensagem"
+          (click)="handlePendingCaptionClick()"
+        ></textarea>
+        <div class="messages-page__emoji-anchor messages-page__emoji-anchor--pending">
+          <button
+            type="button"
+            class="messages-page__image-btn"
+            aria-label="Inserir emoji na legenda"
+            [attr.aria-expanded]="pendingMediaEmojiOpen"
+            (click)="handleTogglePendingMediaEmoji()"
+          >
+            ☺
+          </button>
+          @if (pendingMediaEmojiOpen) {
+            <div class="messages-page__composer-emoji-picker messages-page__composer-emoji-picker--pending">
+              <app-chat-emoji-picker
+                mode="composer"
+                (emojiSelected)="handlePendingMediaEmojiSelected($event)"
+                (closed)="pendingMediaEmojiOpen = false"
+              />
+            </div>
+          }
+        </div>
+      </div>
+      <div class="messages-page__pending-actions">
+        <button type="button" class="messages-page__pill-btn messages-page__pill-btn--ghost" (click)="handleRemovePendingMedia()">
+          Cancelar
+        </button>
+        <button type="button" class="messages-page__pill-btn" [disabled]="!canSendMessage" (click)="handleSendMessage()">
+          Enviar
+        </button>
+      </div>
+    </div>
+  </div>
+}

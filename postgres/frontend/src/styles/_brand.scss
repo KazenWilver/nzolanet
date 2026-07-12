@@ -1,0 +1,14 @@
+@use 'mixins' as mixins;
+
+// Superfícies e acções de marca reutilizáveis
+.nz-brand-gradient {
+  @include mixins.brand-gradient-bg;
+}
+
+.nz-brand-gradient-btn {
+  @include mixins.brand-gradient-button;
+}
+
+.nz-brand-gradient-text {
+  @include mixins.brand-gradient-text;
+}

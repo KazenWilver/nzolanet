@@ -1,0 +1,29 @@
+<div class="admin-shell">
+  <header class="admin-shell__topbar">
+    <div class="admin-shell__brand">
+      <span class="admin-shell__logo">NzolaNet</span>
+      <span class="admin-shell__tag">Admin</span>
+    </div>
+
+    <div class="admin-shell__user">
+      @if (admin$ | async; as admin) {
+        <div class="admin-shell__identity">
+          <span class="admin-shell__name">{{ admin.displayName || admin.username }}</span>
+          <span class="admin-shell__email">{{ admin.email }}</span>
+        </div>
+        @if (admin.profilePhotoUrl) {
+          <img class="admin-shell__avatar" [src]="admin.profilePhotoUrl" [alt]="admin.username" />
+        } @else {
+          <span class="admin-shell__avatar admin-shell__avatar--placeholder">
+            {{ (admin.displayName || admin.username || 'A').charAt(0).toUpperCase() }}
+          </span>
+        }
+      }
+      <button type="button" class="admin-shell__logout" (click)="handleLogout()">Sair</button>
+    </div>
+  </header>
+
+  <main class="admin-shell__content">
+    <router-outlet />
+  </main>
+</div>

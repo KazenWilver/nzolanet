@@ -1,0 +1,127 @@
+<div class="admin-auth">
+  <div class="admin-auth__panel admin-auth__panel--brand">
+    <div class="admin-auth__brand">
+      <span class="admin-auth__logo">NzolaNet</span>
+      <span class="admin-auth__badge">Painel de Administração</span>
+    </div>
+    <h1 class="admin-auth__headline">Cria a tua conta de administrador.</h1>
+    <p class="admin-auth__subtitle">
+      O registo de administradores é protegido por um código de convite. Pede o
+      código à equipa responsável pela NzolaNet.
+    </p>
+    <ul class="admin-auth__features">
+      <li>Acesso ao painel de moderação</li>
+      <li>Remoção de conteúdos que violem as políticas</li>
+      <li>Visão global da plataforma</li>
+    </ul>
+  </div>
+
+  <div class="admin-auth__panel admin-auth__panel--form">
+    <form class="admin-form" [formGroup]="registerForm" (ngSubmit)="handleSubmit()" novalidate>
+      <header class="admin-form__header">
+        <h2>Criar conta</h2>
+        <p>Preenche os dados e o código de administrador.</p>
+      </header>
+
+      @if (errorMessage) {
+        <div class="admin-form__alert" role="alert">{{ errorMessage }}</div>
+      }
+
+      <div class="admin-form__field">
+        <label for="admin-displayName">Nome a apresentar</label>
+        <input
+          id="admin-displayName"
+          type="text"
+          formControlName="displayName"
+          autocomplete="name"
+          placeholder="Ex: Administrador NzolaNet"
+          [class.admin-form__input--error]="isInvalid('displayName')"
+        />
+        @if (isInvalid('displayName')) {
+          <span class="admin-form__error">Introduz o nome a apresentar.</span>
+        }
+      </div>
+
+      <div class="admin-form__row">
+        <div class="admin-form__field">
+          <label for="admin-username">Nome de utilizador</label>
+          <input
+            id="admin-username"
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+            placeholder="admin"
+            [class.admin-form__input--error]="isInvalid('username')"
+          />
+          @if (isInvalid('username')) {
+            <span class="admin-form__error">Mínimo de 3 caracteres.</span>
+          }
+        </div>
+
+        <div class="admin-form__field">
+          <label for="admin-email">Email</label>
+          <input
+            id="admin-email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="admin@nzolanet.ao"
+            [class.admin-form__input--error]="isInvalid('email')"
+          />
+          @if (isInvalid('email')) {
+            <span class="admin-form__error">Introduz um email válido.</span>
+          }
+        </div>
+      </div>
+
+      <div class="admin-form__field">
+        <label for="admin-password">Palavra-passe</label>
+        <div class="admin-form__password">
+          <input
+            id="admin-password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+            placeholder="••••••••"
+            [class.admin-form__input--error]="isInvalid('password')"
+          />
+          <button
+            type="button"
+            class="admin-form__toggle"
+            (click)="handleTogglePassword()"
+            [attr.aria-label]="showPassword ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'"
+          >
+            {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        @if (isInvalid('password')) {
+          <span class="admin-form__error">A palavra-passe deve ter pelo menos 6 caracteres.</span>
+        }
+      </div>
+
+      <div class="admin-form__field">
+        <label for="admin-code">Código de administrador</label>
+        <input
+          id="admin-code"
+          type="text"
+          formControlName="adminCode"
+          autocomplete="off"
+          placeholder="Código de convite"
+          [class.admin-form__input--error]="isInvalid('adminCode')"
+        />
+        @if (isInvalid('adminCode')) {
+          <span class="admin-form__error">O código de administrador é obrigatório.</span>
+        }
+      </div>
+
+      <button type="submit" class="admin-form__submit" [disabled]="isLoading">
+        {{ isLoading ? 'A criar conta…' : 'Criar conta de administrador' }}
+      </button>
+
+      <p class="admin-form__footer">
+        Já tens conta?
+        <a routerLink="/admin/login">Iniciar sessão</a>
+      </p>
+    </form>
+  </div>
+</div>

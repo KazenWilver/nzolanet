@@ -1,0 +1,86 @@
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-height: 100%;
+  padding-bottom: var(--spacing-lg);
+
+  @media (min-width: 1536px) {
+    gap: var(--spacing-xl);
+  }
+}
+
+.aside__search {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding-bottom: var(--spacing-sm);
+  background: var(--color-bg-primary);
+}
+
+.aside__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-text-secondary);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  mask-size: contain;
+  -webkit-mask-size: contain;
+}
+
+.aside__search-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: none;
+  border-radius: var(--border-radius-full);
+  background-color: var(--color-bg-search);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+
+  &:focus {
+    outline: 2px solid var(--color-accent);
+    background-color: var(--color-bg-primary);
+  }
+}
+
+.aside__section {
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-bg-widget);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(15, 20, 25, 0.04);
+  overflow: hidden;
+
+  .trends-panel {
+    border-bottom: none;
+    background: transparent;
+  }
+
+  .trends-panel__title {
+    padding-top: 12px;
+  }
+
+  .trends-panel__list {
+    max-height: min(22rem, calc(100dvh - 20rem));
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 9999px;
+    }
+  }
+}
+
+body.dark-theme .aside__section {
+  box-shadow: none;
+}

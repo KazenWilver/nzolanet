@@ -1,0 +1,136 @@
+<div class="main-layout" [class.main-layout--messages]="isFullWidthChatRoute">
+  <div class="main-layout__sidebar">
+    <app-sidebar />
+  </div>
+
+  <div
+    class="main-layout__center"
+    [class.main-layout__center--mobile-topbar]="showMobileTopbar"
+    [class.main-layout__center--mobile-feed-tabs]="showMobileFeedTabs"
+    [class.main-layout__center--hide-page-header]="hideMobilePageHeader"
+  >
+    <app-topbar />
+    <main class="main-layout__content">
+      <router-outlet />
+    </main>
+  </div>
+
+  @if (!isFullWidthChatRoute) {
+    <aside class="main-layout__aside">
+      <app-aside />
+    </aside>
+  }
+</div>
+
+@if (mediaOverlay.state(); as overlay) {
+  <app-publication-thread-modal
+    [publication]="overlay.publication"
+    [open]="true"
+    [embedded]="false"
+    [mediaFocus]="true"
+    [videoStartTime]="overlay.videoStartTime"
+    (closed)="handleCloseMediaOverlay()"
+    (publicationChange)="handleMediaOverlayPublicationChange($event)"
+  />
+}
+
+<app-modal
+  [open]="publishModal.isOpen()"
+  title="Criar publicação"
+  (closed)="handleClosePublishModal()"
+>
+  @if (publishModal.isOpen()) {
+    <app-create-post
+      [modoModal]="true"
+      (postCriado)="handlePostCreated()"
+      (cancelado)="handleClosePublishModal()"
+    />
+  }
+</app-modal>
+
+@if (accountMenu.isOpen() && currentUser) {
+  <div class="account-drawer-layer" role="presentation">
+    <button
+      type="button"
+      class="account-drawer-layer__backdrop"
+      aria-label="Fechar menu"
+      (click)="handleCloseAccountMenu()"
+    ></button>
+
+    <aside
+      #accountMenuNav
+      class="account-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu da conta"
+    >
+      <header class="account-drawer__header">
+        <app-avatar
+          [src]="currentUser.profilePhotoUrl"
+          [username]="currentUser.username"
+          size="lg"
+        />
+        <div class="account-drawer__identity">
+          <strong class="account-drawer__name">{{ displayName }}</strong>
+          <span class="account-drawer__handle">@{{ currentUser.username }}</span>
+          <div class="account-drawer__stats">
+            <span><strong>{{ currentUser.followingCount }}</strong> A seguir</span>
+            <span><strong>{{ currentUser.followersCount }}</strong> Seguidores</span>
+          </div>
+        </div>
+      </header>
+
+      <nav class="account-drawer__nav" aria-label="Opções da conta">
+        <a
+          class="account-drawer__item"
+          [routerLink]="profileRoute"
+          (click)="handleAccountMenuNavigate()"
+        >
+          <span class="account-drawer__icon" data-icon="user" aria-hidden="true"></span>
+          <span>{{ 'nav.profile' | t }}</span>
+        </a>
+        <a
+          class="account-drawer__item"
+          routerLink="/bookmarks"
+          (click)="handleAccountMenuNavigate()"
+        >
+          <span class="account-drawer__icon" data-icon="bookmark" aria-hidden="true"></span>
+          <span>{{ 'nav.bookmarks' | t }}</span>
+        </a>
+        <a
+          class="account-drawer__item"
+          routerLink="/settings"
+          (click)="handleAccountMenuNavigate()"
+        >
+          <span class="account-drawer__icon" data-icon="settings" aria-hidden="true"></span>
+          <span>{{ 'nav.settings' | t }}</span>
+        </a>
+      </nav>
+
+      <div class="account-drawer__divider" aria-hidden="true"></div>
+
+      <div class="account-drawer__secondary">
+        <button
+          type="button"
+          class="account-drawer__item account-drawer__item--button"
+          (click)="handleToggleTheme()"
+        >
+          <span
+            class="account-drawer__icon"
+            data-icon="palette"
+            aria-hidden="true"
+          ></span>
+          <span>{{ themeService.isDarkMode() ? ('nav.themeLight' | t) : ('nav.themeDark' | t) }}</span>
+        </button>
+        <button
+          type="button"
+          class="account-drawer__item account-drawer__item--button account-drawer__item--danger"
+          (click)="handleLogout()"
+        >
+          <span class="account-drawer__icon" data-icon="logout" aria-hidden="true"></span>
+          <span>{{ 'common.logout' | t }}</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+}

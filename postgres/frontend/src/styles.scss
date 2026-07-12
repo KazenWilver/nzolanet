@@ -1,0 +1,109 @@
+@use 'styles/variables';
+@use 'styles/typography';
+@use 'styles/mixins' as mixins;
+@use 'styles/brand';
+@use 'styles/animations';
+@use 'app/styles/global';
+@use 'app/shared/directives/mention-autocomplete.directive';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+body.dark-theme {
+  color-scheme: dark;
+}
+
+body.light-theme {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.public-auth-page {
+  overflow: auto;
+  height: auto;
+  min-height: 100%;
+}
+
+button:not(:disabled) {
+  transition:
+    background-color 0.28s ease,
+    color 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    filter 0.28s ease,
+    transform 0.28s ease,
+    opacity 0.28s ease;
+}
+
+a,
+input,
+button,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+a.linkify__mention {
+  font-weight: 700;
+}
+
+.messages-page__bubble--mine a.linkify__mention {
+  color: #e0e7ff !important;
+  -webkit-text-fill-color: #e0e7ff !important;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

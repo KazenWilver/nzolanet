@@ -669,10 +669,13 @@ NzolaNet/
 │   ├── relatorio-nzolanet.html    # Versão HTML do relatório
 │   └── report-assets/             # 27 screenshots do relatório
 ├── palavras_angolanas/            # Lexicon da Fimbu
+├── postgres/                      # Variante cloud: Postgres + Render + Vercel (ver postgres/README.md)
 └── README.md
 ```
 
 > **Nota:** Pastas locais como `extras/` (enunciado, referências) e `.cursor/` estão no `.gitignore` e não fazem parte do repositório remoto.
+
+> **Hospedagem gratuita:** a pasta [`postgres/`](./postgres/README.md) é uma cópia independente com **PostgreSQL (Npgsql)** para deploy em Supabase + Render + Vercel. A raiz deste repo continua em **SQL Server** e não é alterada por essa variante.
 
 ---
 

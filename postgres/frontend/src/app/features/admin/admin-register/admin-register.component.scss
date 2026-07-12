@@ -1,0 +1,11 @@
+.admin-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+@media (max-width: 520px) {
+  .admin-form__row {
+    grid-template-columns: 1fr;
+  }
+}

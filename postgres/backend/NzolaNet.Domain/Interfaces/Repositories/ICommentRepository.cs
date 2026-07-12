@@ -1,0 +1,21 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using NzolaNet.Domain.Entities;
+
+namespace NzolaNet.Domain.Interfaces.Repositories;
+
+public interface ICommentRepository
+{
+    Task<Comment?> GetByIdAsync(Guid id);
+    Task<IEnumerable<Comment>> GetByPostIdAsync(Guid postId);
+    Task<IEnumerable<Comment>> GetAllAsync();
+    Task<int> GetTotalCountAsync();
+    Task<int> GetTotalWithImageAsync();
+    Task<int> GetTotalWithVideoAsync();
+    Task<bool> CreateAsync(Comment comment);
+    Task<bool> UpdateAsync(Comment comment);
+    Task<bool> DeleteAsync(Comment comment);
+    Task<Dictionary<Guid, int>> GetCommentCountsByPostIdsAsync(IEnumerable<Guid> postIds);
+    Task<Comment?> GetByMediaPathAsync(string mediaPath);
+}

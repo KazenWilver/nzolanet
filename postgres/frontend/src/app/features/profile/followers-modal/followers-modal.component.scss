@@ -1,0 +1,146 @@
+@use '../../../styles/variables' as vars;
+@use '../../../styles/mixins' as mixins;
+
+.followers-modal__loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.followers-modal__error,
+.followers-modal__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: vars.$color-text-secondary;
+  padding: 16px 0;
+  margin: 0;
+  gap: 12px;
+}
+
+.followers-modal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.followers-modal__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid vars.$color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.followers-modal__follow-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.followers-modal__follow-error {
+  font-size: 11px;
+  color: var(--color-danger, #f4212e);
+  white-space: nowrap;
+}
+
+.followers-modal__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  padding: 8px;
+  margin: -8px;
+  border-radius: var(--border-radius-md);
+  transition: background-color var(--transition-base);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+
+    strong {
+      text-decoration: underline;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.followers-modal__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    color: vars.$color-text;
+    font-size: 15px;
+  }
+
+  span {
+    color: vars.$color-text-secondary;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.followers-modal__follow-btn {
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  border: 1px solid vars.$color-border;
+  background: vars.$color-text;
+  color: vars.$color-background;
+  flex-shrink: 0;
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+
+  &--following {
+    background: transparent;
+    color: vars.$color-text;
+  }
+
+  &:hover:not(:disabled) {
+    filter: brightness(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.followers-modal__retry {
+  color: var(--color-text-inverse);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 9999px;
+  padding: 8px 20px;
+  cursor: pointer;
+  @include mixins.brand-gradient-button;
+}

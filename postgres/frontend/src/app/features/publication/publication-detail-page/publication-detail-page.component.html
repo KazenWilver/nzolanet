@@ -1,0 +1,41 @@
+<div class="publication-detail-page" [class.publication-detail-page--media]="mediaFocus">
+  @if (!mediaFocus) {
+    <app-page-header
+      title="Publicação"
+      [subtitle]="headerSubtitle"
+      [showBack]="true"
+      backLink="/feed"
+    />
+  }
+
+  @if (loading) {
+    <app-publication-card-skeleton />
+  } @else if (notFound) {
+    <div class="publication-detail-page__message">
+      <p>Esta publicação não existe ou foi removida.</p>
+      <a routerLink="/feed" class="publication-detail-page__link">Voltar ao feed</a>
+    </div>
+  } @else if (forbidden) {
+    <div class="publication-detail-page__message">
+      <p>Não tens permissão para ver esta publicação.</p>
+      <a routerLink="/feed" class="publication-detail-page__link">Voltar ao feed</a>
+    </div>
+  } @else if (loadError) {
+    <div class="publication-detail-page__message">
+      <p>Não foi possível carregar a publicação.</p>
+      <button type="button" class="publication-detail-page__link" (click)="retryLoad()">
+        Tentar novamente
+      </button>
+    </div>
+  } @else if (publication) {
+    <app-publication-thread-modal
+      [publication]="publication"
+      [open]="true"
+      [embedded]="!mediaFocus"
+      [mediaFocus]="mediaFocus"
+      [videoStartTime]="videoStartTime"
+      (closed)="handleMediaClose()"
+      (publicationChange)="handlePublicationChange($event)"
+    />
+  }
+</div>

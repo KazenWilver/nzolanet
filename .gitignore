@@ -119,4 +119,5 @@ extras/
 # ---------- Léxico Fimbu (manter só ficheiros usados em runtime pela API) ----------
 palavras_angolanas/dicionario_angolano_train.jsonl
 palavras_angolanas/dicionario_angolano_full.jsonl
-palavras_angolanas/cache_words.json
+palavras_angolanas/cache_words.jsonpostgres/supabase-initial.sql
+postgres/supabase-apply.sql

@@ -1,0 +1,120 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using NzolaNet.Application.DTOs.Admin;
+using NzolaNet.Application.Interfaces;
+
+namespace NzolaNet.Api.Controllers;
+
+/// <summary>
+/// Exposes the administrator authentication and moderation endpoints. Every
+/// endpoint other than login and registration requires the caller to hold the
+/// <c>Admin</c> role.
+/// </summary>
+[ApiController]
+[Route("api/admin")]
+public class AdminController : ControllerBase
+{
+    private readonly IAdminService _adminService;
+
+    public AdminController(IAdminService adminService)
+    {
+        _adminService = adminService;
+    }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] AdminLoginDto loginDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var response = await _adminService.LoginAsync(loginDto);
+        return Ok(response);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] AdminRegisterDto registerDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var response = await _adminService.RegisterAsync(registerDto);
+        return Ok(response);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("verify-access")]
+    public IActionResult VerifyAccess()
+    {
+        return Ok(new { message = "Acesso de administrador confirmado." });
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("metrics")]
+    public async Task<IActionResult> GetMetrics()
+    {
+        var metrics = await _adminService.GetMetricsAsync();
+        return Ok(metrics);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("comments/reported")]
+    public async Task<IActionResult> GetReportedComments()
+    {
+        var comments = await _adminService.GetReportedCommentsAsync();
+        return Ok(comments);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("publications/reported")]
+    public async Task<IActionResult> GetReportedPublications()
+    {
+        var publications = await _adminService.GetReportedPublicationsAsync();
+        return Ok(publications);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("comments/{id}")]
+    public async Task<IActionResult> RemoveComment(Guid id)
+    {
+        await _adminService.RemoveCommentAsync(id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("comments/{id}/dismiss")]
+    public async Task<IActionResult> DismissCommentReports(Guid id)
+    {
+        await _adminService.DismissCommentReportsAsync(id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("publications/{id}")]
+    public async Task<IActionResult> RemovePublication(Guid id)
+    {
+        await _adminService.RemovePublicationAsync(id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("publications/{id}/dismiss")]
+    public async Task<IActionResult> DismissPublicationReports(Guid id)
+    {
+        await _adminService.DismissPublicationReportsAsync(id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _adminService.GetUsersAsync();
+        return Ok(users);
+    }
+}

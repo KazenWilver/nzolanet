@@ -1,0 +1,202 @@
+<section class="settings">
+  <header class="settings__header">
+    <h1 class="settings__title">{{ 'settings.title' | t }}</h1>
+  </header>
+
+  <nav class="settings__nav" aria-label="Secções de definições">
+    @for (section of sections; track section.id) {
+      <button
+        type="button"
+        class="settings__nav-item"
+        [class.settings__nav-item--active]="activeSection === section.id"
+        (click)="setSection(section.id)"
+      >
+        {{ ('settings.' + section.id) | t }}
+      </button>
+    }
+  </nav>
+
+  <div class="settings__layout">
+    <aside class="settings__sidebar" aria-label="Navegação de definições">
+      @for (section of sections; track section.id) {
+        <button
+          type="button"
+          class="settings__sidebar-item"
+          [class.settings__sidebar-item--active]="activeSection === section.id"
+          (click)="setSection(section.id)"
+        >
+          {{ ('settings.' + section.id) | t }}
+        </button>
+      }
+    </aside>
+
+    <div class="settings__content">
+      @if (activeSection === 'account' && user) {
+        <section class="settings__panel" aria-labelledby="settings-account-title">
+          <h2 id="settings-account-title" class="settings__panel-title">{{ 'settings.account' | t }}</h2>
+
+          <label class="settings__field" for="settings-display-name">
+            <span class="settings__label">Nome de exibição</span>
+            <input
+              id="settings-display-name"
+              name="displayName"
+              type="text"
+              autocomplete="name"
+              [(ngModel)]="displayName"
+              maxlength="50"
+            />
+          </label>
+
+          <label class="settings__field" for="settings-bio">
+            <span class="settings__label">Bio</span>
+            <textarea
+              id="settings-bio"
+              name="bio"
+              autocomplete="off"
+              [(ngModel)]="bio"
+              rows="3"
+              [maxlength]="maxBioLength"
+            ></textarea>
+            <span class="settings__counter" [class.settings__counter--warn]="remainingBioChars <= 20">
+              {{ remainingBioChars }}
+            </span>
+          </label>
+
+          <div class="settings__field settings__field--readonly">
+            <label class="settings__label" for="settings-email">Email</label>
+            <input id="settings-email" name="email" type="email" autocomplete="email" [value]="user.email ?? ''" readonly />
+            <span class="settings__hint">Para alterar o email, contacta o suporte.</span>
+          </div>
+
+          <div class="settings__field settings__field--readonly">
+            <label class="settings__label" for="settings-username">Username</label>
+            <input id="settings-username" name="username" type="text" autocomplete="username" [value]="'@' + user.username" readonly />
+            <span class="settings__hint">O username não pode ser alterado.</span>
+          </div>
+
+          @if (accountError) {
+            <p class="settings__message settings__message--error" role="alert">{{ accountError }}</p>
+          }
+          @if (accountSuccess) {
+            <p class="settings__message settings__message--success" role="status">{{ 'settings.savedSuccess' | t }}</p>
+          }
+
+          <button
+            type="button"
+            class="settings__btn-primary"
+            [disabled]="savingAccount"
+            (click)="saveAccount()"
+          >
+            @if (savingAccount) {
+              <app-loading-spinner tamanho="sm" />
+            } @else {
+              {{ 'settings.saveChanges' | t }}
+            }
+          </button>
+
+          <div class="settings__session" aria-labelledby="settings-session-title">
+            <h3 id="settings-session-title" class="settings__session-title">Sessão</h3>
+            <p class="settings__session-text">Termina a sessão neste dispositivo. Terás de voltar a iniciar sessão para aceder à conta.</p>
+            <button type="button" class="settings__logout-btn" (click)="handleLogout()">
+              Terminar sessão
+            </button>
+          </div>
+        </section>
+      }
+
+      @if (activeSection === 'privacy' && user) {
+        <section class="settings__panel" aria-labelledby="settings-privacy-title">
+          <h2 id="settings-privacy-title" class="settings__panel-title">{{ 'settings.privacy' | t }}</h2>
+
+          <div class="settings__toggle-row">
+            <div class="settings__toggle-copy">
+              <h3 class="settings__toggle-title">{{ 'settings.privacyPrivate' | t }}</h3>
+              <p class="settings__toggle-description">
+                {{ 'settings.privacyDescription' | t }}
+              </p>
+              @if (privacyError) {
+                <p class="settings__message settings__message--error" role="alert">{{ privacyError }}</p>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="settings-toggle"
+              [class.settings-toggle--on]="user.isPrivate"
+              [disabled]="privacyLoading"
+              role="switch"
+              [attr.aria-checked]="user.isPrivate"
+              aria-label="Conta privada"
+              (click)="togglePrivacy()"
+            >
+              <span class="settings-toggle__thumb"></span>
+            </button>
+          </div>
+        </section>
+      }
+
+      @if (activeSection === 'password') {
+        <section class="settings__panel" aria-labelledby="settings-password-title">
+          <h2 id="settings-password-title" class="settings__panel-title">{{ 'settings.password' | t }}</h2>
+
+          <label class="settings__field" for="settings-current-password">
+            <span class="settings__label">{{ 'settings.currentPassword' | t }}</span>
+            <input
+              id="settings-current-password"
+              name="currentPassword"
+              type="password"
+              autocomplete="current-password"
+              [(ngModel)]="currentPassword"
+            />
+          </label>
+
+          <label class="settings__field" for="settings-new-password">
+            <span class="settings__label">{{ 'settings.newPassword' | t }}</span>
+            <input
+              id="settings-new-password"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+              [(ngModel)]="newPassword"
+              minlength="6"
+            />
+          </label>
+
+          <label class="settings__field" for="settings-confirm-password">
+            <span class="settings__label">{{ 'settings.confirmPassword' | t }}</span>
+            <input
+              id="settings-confirm-password"
+              name="confirmNewPassword"
+              type="password"
+              autocomplete="new-password"
+              [(ngModel)]="confirmNewPassword"
+              minlength="6"
+            />
+          </label>
+
+          @if (passwordError) {
+            <p class="settings__message settings__message--error" role="alert">{{ passwordError }}</p>
+          }
+          @if (passwordSuccess) {
+            <p class="settings__message settings__message--success" role="status">
+              {{ 'settings.passwordChanged' | t }}
+            </p>
+          }
+
+          <button
+            type="button"
+            class="settings__btn-primary"
+            [disabled]="savingPassword"
+            (click)="changePassword()"
+          >
+            @if (savingPassword) {
+              <app-loading-spinner tamanho="sm" />
+            } @else {
+              {{ 'settings.changePassword' | t }}
+            }
+          </button>
+        </section>
+      }
+    </div>
+  </div>
+</section>

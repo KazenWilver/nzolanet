@@ -1,0 +1,412 @@
+@if (loadingProfile) {
+  <div class="profile-page__loading">
+    <app-loading-spinner tamanho="lg" />
+  </div>
+} @else if (profileNotFound) {
+  <div class="profile-page__error">
+    <p>Este utilizador não existe ou foi removido.</p>
+    <a routerLink="/feed" class="profile-page__retry">Voltar ao feed</a>
+  </div>
+} @else if (profileError) {
+  <div class="profile-page__error">
+    <p>Não foi possível carregar o perfil.</p>
+    <button type="button" class="profile-page__retry" (click)="retryLoadProfile()">
+      Tentar novamente
+    </button>
+  </div>
+} @else if (profile) {
+  <div class="profile-page" appProfileParallax>
+    <app-page-header
+      [title]="displayName"
+      [subtitle]="'@' + profile.username"
+      [showBack]="true"
+      [showAccountMenu]="isOwnProfile"
+    />
+
+    <section class="profile-page__header">
+      <div class="profile-page__cover" aria-hidden="true">
+        @if (profile.coverPhotoUrl) {
+          <img
+            [src]="profile.coverPhotoUrl"
+            alt=""
+            class="profile-page__cover-image"
+          />
+        }
+      </div>
+
+      <div class="profile-page__info">
+        <div class="profile-page__avatar-row">
+          <div class="profile-page__avatar">
+            <app-avatar
+              [src]="profile.profilePhotoUrl"
+              [username]="profile.username"
+              size="xl"
+              [withRing]="true"
+            />
+          </div>
+
+          <div class="profile-page__actions">
+            @if (isOwnProfile) {
+              <button type="button" class="profile-page__btn profile-page__btn--secondary" (click)="openEditModal()">
+                Editar perfil
+              </button>
+          } @else {
+            <div class="profile-page__actions-group">
+              <app-follow-button
+                [isFollowing]="profile.isFollowing === true"
+                [isPending]="profile.isPending === true"
+                [loading]="togglingFollow"
+                (followClick)="toggleFollow()"
+              />
+              <button
+                type="button"
+                class="profile-page__btn profile-page__btn--secondary"
+                [disabled]="openingMessage"
+                (click)="handleOpenMessage()"
+              >
+                {{ openingMessage ? 'A abrir…' : 'Mensagem' }}
+              </button>
+            </div>
+            @if (messageError) {
+              <p class="profile-page__message-error" role="alert">{{ messageError }}</p>
+            }
+          }
+          </div>
+        </div>
+
+        <div class="profile-page__details">
+          <p class="profile-page__name" role="heading" aria-level="2">{{ displayName }}</p>
+          <span class="profile-page__username">@{{ profile.username }}</span>
+          @if (profile.bio) {
+            <p class="profile-page__bio">{{ profile.bio }}</p>
+          }
+          <p class="profile-page__member-since">
+            Membro desde {{ profile.createdAt | date:'longDate' }}
+          </p>
+        </div>
+
+        <div class="profile-page__stats">
+          <button type="button" class="profile-page__stat" (click)="openFollowersModal('following')">
+            <strong>{{ profile.followingCount }}</strong>
+            <span>A seguir</span>
+          </button>
+          <button type="button" class="profile-page__stat" (click)="openFollowersModal('followers')">
+            <strong>{{ profile.followersCount }}</strong>
+            <span>Seguidores</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    @if (showIncomingFollowRequest && profile.hasIncomingFollowRequest && !isOwnProfile) {
+      <div class="profile-page__follow-request" role="region" aria-label="Pedido de seguimento">
+        <p><strong>{{ displayName }}</strong> pediu para te seguir.</p>
+        <div class="profile-page__follow-request-actions">
+          <button
+            type="button"
+            class="profile-page__btn profile-page__btn--primary"
+            [disabled]="processingFollowRequest"
+            (click)="handleApproveIncomingRequest()"
+          >
+            Aceitar
+          </button>
+          <button
+            type="button"
+            class="profile-page__btn profile-page__btn--secondary"
+            [disabled]="processingFollowRequest"
+            (click)="handleRejectIncomingRequest()"
+          >
+            Recusar
+          </button>
+        </div>
+      </div>
+    }
+
+    <nav class="profile-page__tabs" role="tablist" aria-label="Secções do perfil">
+      <button
+        type="button"
+        class="profile-page__tab"
+        id="profile-tab-publications"
+        [class.profile-page__tab--active]="activeTab === 'publications'"
+        [attr.aria-selected]="activeTab === 'publications'"
+        aria-controls="profile-panel"
+        role="tab"
+        appPressScale
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'publications')"
+      >
+        Publicações
+      </button>
+      <button
+        type="button"
+        class="profile-page__tab"
+        id="profile-tab-media"
+        [class.profile-page__tab--active]="activeTab === 'media'"
+        [attr.aria-selected]="activeTab === 'media'"
+        aria-controls="profile-panel"
+        role="tab"
+        appPressScale
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'media')"
+      >
+        Media
+      </button>
+      <button
+        type="button"
+        class="profile-page__tab"
+        id="profile-tab-likes"
+        [class.profile-page__tab--active]="activeTab === 'likes'"
+        [attr.aria-selected]="activeTab === 'likes'"
+        aria-controls="profile-panel"
+        role="tab"
+        appPressScale
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'likes')"
+      >
+        Gostos
+      </button>
+      <button
+        type="button"
+        class="profile-page__tab"
+        id="profile-tab-reposts"
+        [class.profile-page__tab--active]="activeTab === 'reposts'"
+        [attr.aria-selected]="activeTab === 'reposts'"
+        aria-controls="profile-panel"
+        role="tab"
+        appPressScale
+        (mousedown)="$event.preventDefault()"
+        (click)="handleTabClick($event, 'reposts')"
+      >
+        Repartilhas
+      </button>
+    </nav>
+
+    <div
+      id="profile-panel"
+      role="tabpanel"
+      class="profile-page__panel"
+      [attr.aria-labelledby]="
+        activeTab === 'reposts'
+          ? 'profile-tab-reposts'
+          : activeTab === 'likes'
+          ? 'profile-tab-likes'
+          : activeTab === 'media'
+            ? 'profile-tab-media'
+            : 'profile-tab-publications'
+      "
+    >
+    @if (activeTab === 'reposts') {
+      @if (contentLoadError) {
+        <div class="profile-page__error">
+          <p>Não foi possível carregar o conteúdo.</p>
+          <button type="button" class="profile-page__retry" (click)="retryContentLoad()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver as repartilhas.</p>
+        </div>
+      } @else if (loadingReposts) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
+      } @else if (repostPublications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem repartilhas.</p>
+        </div>
+      } @else {
+        @for (publication of repostPublications; track trackById($index, publication)) {
+          <div appEnterAnimation [enterIndex]="$index">
+            <app-publication-card
+              [publication]="publication"
+              [currentUserId]="currentUserId"
+              (deleted)="handlePublicationDeleted($event)"
+              (updated)="handlePublicationUpdated($event)"
+            />
+          </div>
+        }
+
+        @if (loadingMoreReposts) {
+          <app-publication-card-skeleton />
+        }
+
+        @if (repostsLoadMoreError) {
+          <div class="profile-page__load-more-error">
+            <p>Não foi possível carregar mais repartilhas.</p>
+            <button type="button" class="profile-page__retry" (click)="repostsLoadMoreError = false; loadMoreReposts()">
+              Tentar novamente
+            </button>
+          </div>
+        }
+
+        @if (repostsHasMore && !repostsLoadMoreError) {
+          <div
+            appInfiniteScroll
+            [infiniteScrollDisabled]="loadingMoreReposts"
+            (appInfiniteScroll)="loadMoreReposts()"
+            class="profile-page__scroll-sentinel"
+            aria-hidden="true"
+          ></div>
+        }
+      }
+    } @else if (activeTab === 'likes') {
+      @if (contentLoadError) {
+        <div class="profile-page__error">
+          <p>Não foi possível carregar o conteúdo.</p>
+          <button type="button" class="profile-page__retry" (click)="retryContentLoad()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver os gostos.</p>
+        </div>
+      } @else if (loadingLikes) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
+      } @else if (likedPublications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem gostos.</p>
+        </div>
+      } @else {
+        @for (publication of likedPublications; track trackById($index, publication)) {
+          <div appEnterAnimation [enterIndex]="$index">
+            <app-publication-card
+            [publication]="publication"
+            [currentUserId]="currentUserId"
+            (deleted)="handlePublicationDeleted($event)"
+            (updated)="handlePublicationUpdated($event)"
+          />
+          </div>
+        }
+      }
+    } @else if (activeTab === 'media') {
+      @if (contentLoadError) {
+        <div class="profile-page__error">
+          <p>Não foi possível carregar o conteúdo.</p>
+          <button type="button" class="profile-page__retry" (click)="retryContentLoad()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver a media.</p>
+        </div>
+      } @else if (loadingMedia) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
+      } @else if (mediaPublications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem media.</p>
+        </div>
+      } @else {
+        @for (publication of mediaPublications; track trackById($index, publication)) {
+          <div appEnterAnimation [enterIndex]="$index">
+            <app-publication-card
+              [publication]="publication"
+              [currentUserId]="currentUserId"
+              (deleted)="handlePublicationDeleted($event)"
+              (updated)="handlePublicationUpdated($event)"
+            />
+          </div>
+        }
+
+        @if (loadingMoreMedia) {
+          <app-publication-card-skeleton />
+        }
+
+        @if (mediaLoadMoreError) {
+          <div class="profile-page__load-more-error">
+            <p>Não foi possível carregar mais media.</p>
+            <button type="button" class="profile-page__retry" (click)="mediaLoadMoreError = false; loadMoreMedia()">
+              Tentar novamente
+            </button>
+          </div>
+        }
+
+        @if (mediaHasMore && !mediaLoadMoreError) {
+          <div
+            appInfiniteScroll
+            [infiniteScrollDisabled]="loadingMoreMedia"
+            (appInfiniteScroll)="loadMoreMedia()"
+            class="profile-page__scroll-sentinel"
+            aria-hidden="true"
+          ></div>
+        }
+      }
+    } @else {
+      @if (contentLoadError) {
+        <div class="profile-page__error">
+          <p>Não foi possível carregar o conteúdo.</p>
+          <button type="button" class="profile-page__retry" (click)="retryContentLoad()">
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (privateAccount) {
+        <div class="profile-page__private">
+          <p>Esta conta é privada. Segue para ver as publicações.</p>
+        </div>
+      } @else if (loadingPublications) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <app-publication-card-skeleton />
+        }
+      } @else if (publications.length === 0) {
+        <div class="profile-page__empty">
+          <p>Ainda sem publicações.</p>
+        </div>
+      } @else {
+        @for (publication of publications; track trackById($index, publication)) {
+          <div appEnterAnimation [enterIndex]="$index">
+            <app-publication-card
+              [publication]="publication"
+              [currentUserId]="currentUserId"
+              (deleted)="handlePublicationDeleted($event)"
+              (updated)="handlePublicationUpdated($event)"
+            />
+          </div>
+        }
+
+        @if (loadingMorePublications) {
+          <app-publication-card-skeleton />
+        }
+
+        @if (publicationsLoadMoreError) {
+          <div class="profile-page__load-more-error">
+            <p>Não foi possível carregar mais publicações.</p>
+            <button type="button" class="profile-page__retry" (click)="publicationsLoadMoreError = false; loadMorePublications()">
+              Tentar novamente
+            </button>
+          </div>
+        }
+
+        @if (publicationsHasMore && !publicationsLoadMoreError) {
+          <div
+            appInfiniteScroll
+            [infiniteScrollDisabled]="loadingMorePublications"
+            (appInfiniteScroll)="loadMorePublications()"
+            class="profile-page__scroll-sentinel"
+            aria-hidden="true"
+          ></div>
+        }
+      }
+    }
+  </div>
+
+  <app-edit-profile-modal
+    [open]="editModalOpen"
+    [user]="profile"
+    (closed)="editModalOpen = false"
+    (saved)="handleProfileSaved($event)"
+  />
+
+  <app-followers-modal
+    [open]="followersModalOpen"
+    [profileUserId]="profile.id"
+    [mode]="followersModalMode"
+    (closed)="followersModalOpen = false"
+  />
+  </div>
+}

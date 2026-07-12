@@ -1,0 +1,60 @@
+<div #overlay class="repost-dialog__overlay" (click)="handleClose()">
+  <section #dialog class="repost-dialog" (click)="$event.stopPropagation()">
+    <header class="repost-dialog__header">
+      <h2>Repartilhar publicação</h2>
+      <button type="button" (click)="handleClose()" aria-label="Fechar">×</button>
+    </header>
+
+    <label class="repost-dialog__composer">
+      <span class="sr-only">Comentário opcional</span>
+      <textarea
+        rows="3"
+        maxlength="280"
+        [(ngModel)]="quoteText"
+        name="quoteText"
+        placeholder="Adiciona um comentário (opcional)"
+      ></textarea>
+    </label>
+
+    <article class="repost-dialog__quoted" aria-label="Publicação a repartilhar">
+      <div class="repost-dialog__quoted-header">
+        <app-avatar
+          [src]="publication.authorPhotoUrl"
+          [username]="authorName"
+          size="sm"
+        />
+        <div>
+          <strong>{{ authorName }}</strong>
+          <span>@{{ publication.authorUsername }}</span>
+        </div>
+      </div>
+      @if (publication.text) {
+        <p>{{ publication.text }}</p>
+      }
+      @if (publication.imageUrl) {
+        <img [src]="publication.imageUrl" alt="" class="repost-dialog__quoted-media" />
+      }
+      @if (publication.videoUrl) {
+        <video [src]="publication.videoUrl" class="repost-dialog__quoted-media" controls></video>
+      }
+    </article>
+
+    <footer class="repost-dialog__actions">
+      <button type="button" class="repost-dialog__btn repost-dialog__btn--ghost" (click)="handleClose()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="repost-dialog__btn repost-dialog__btn--primary"
+        (click)="handleConfirm()"
+        [disabled]="submitting"
+      >
+        @if (submitting) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          Repartilhar
+        }
+      </button>
+    </footer>
+  </section>
+</div>

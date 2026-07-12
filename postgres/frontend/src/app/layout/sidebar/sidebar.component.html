@@ -1,0 +1,189 @@
+<aside class="sidebar" aria-label="Navegação principal">
+  <div class="sidebar__desktop">
+    <a class="sidebar__brand" routerLink="/feed" aria-label="NzolaNet">
+      <img src="/nzolanet-logo-64.png" width="64" height="64" alt="NzolaNet" class="sidebar__brand-icon" />
+      <span class="sidebar__brand-name">NzolaNet</span>
+    </a>
+
+    <nav class="sidebar__nav">
+      @for (item of primaryNavItems; track item.id) {
+        @if (isNotificationsItem(item)) {
+          <a
+            class="sidebar__link sidebar__link--notifications"
+            [class.sidebar__link--active]="isActive(item.route)"
+            [routerLink]="item.route"
+          >
+            <span class="sidebar__icon-wrap">
+              <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+              @if (unreadCount > 0) {
+                <span class="sidebar__badge" aria-label="{{ unreadCount }} notificações por ler">
+                  {{ unreadCount > 99 ? '99+' : unreadCount }}
+                </span>
+              }
+            </span>
+            <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
+          </a>
+        } @else if (isMessagesItem(item)) {
+          <a
+            class="sidebar__link sidebar__link--messages"
+            [class.sidebar__link--active]="isActive(item.route)"
+            [routerLink]="item.route"
+          >
+            <span class="sidebar__icon-wrap">
+              <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+              @if (unreadMessagesCount > 0) {
+                <span class="sidebar__badge" aria-label="{{ unreadMessagesCount }} mensagens por ler">
+                  {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
+                </span>
+              }
+            </span>
+            <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
+          </a>
+        } @else {
+          <a
+            class="sidebar__link"
+            [class.sidebar__link--active]="isActive(item.route, item.type === 'link' ? item.exact : false)"
+            [routerLink]="item.route"
+          >
+            <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+            <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
+          </a>
+        }
+      }
+
+      <a
+        class="sidebar__link"
+        [class.sidebar__link--active]="isActive(profileRoute)"
+        [routerLink]="profileRoute"
+      >
+        <span class="sidebar__icon" data-icon="user" aria-hidden="true"></span>
+        <span class="sidebar__label">{{ 'nav.profile' | t }}</span>
+      </a>
+
+      @for (item of secondaryNavItems; track item.id) {
+        <a
+          class="sidebar__link"
+          [class.sidebar__link--active]="isActive(item.route)"
+          [routerLink]="item.route"
+        >
+          <span class="sidebar__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+          <span class="sidebar__label">{{ (item.labelKey ?? item.label) | t }}</span>
+        </a>
+      }
+
+      <button
+        type="button"
+        class="sidebar__link sidebar__link--theme"
+        (click)="handleToggleTheme()"
+        [attr.aria-label]="themeService.isDarkMode() ? ('nav.themeLight' | t) : ('nav.themeDark' | t)"
+      >
+        <span class="sidebar__icon" [attr.data-icon]="themeService.isDarkMode() ? 'sun' : 'moon'" aria-hidden="true"></span>
+        <span class="sidebar__label">{{ themeService.isDarkMode() ? ('nav.themeLight' | t) : ('nav.themeDark' | t) }}</span>
+      </button>
+    </nav>
+
+    <button type="button" class="sidebar__publish" (click)="handleOpenPublishModal()" aria-label="Publicar nova publicação">
+      <span class="sidebar__publish-icon" aria-hidden="true">+</span>
+      <span class="sidebar__publish-label">{{ 'nav.publish' | t }}</span>
+    </button>
+
+    @if (currentUser) {
+      <div class="sidebar__account-wrap" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="sidebar__account"
+          [class.sidebar__account--open]="accountMenuOpen"
+          (click)="handleToggleAccountMenu($event)"
+          [attr.aria-expanded]="accountMenuOpen"
+          aria-haspopup="menu"
+          aria-label="Menu da conta"
+        >
+          <app-avatar
+            [src]="currentUser.profilePhotoUrl"
+            [username]="currentUser.username"
+            size="sm"
+          />
+          <span class="sidebar__account-text">
+            <strong>{{ displayName }}</strong>
+            <small>@{{ currentUser.username }}</small>
+          </span>
+          <svg class="sidebar__account-more" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="5" cy="12" r="1.75"></circle>
+            <circle cx="12" cy="12" r="1.75"></circle>
+            <circle cx="19" cy="12" r="1.75"></circle>
+          </svg>
+        </button>
+
+        @if (accountMenuOpen) {
+          <nav class="sidebar__account-menu" role="menu" aria-label="Opções da conta">
+            <div class="sidebar__account-menu-header" role="presentation">
+              <app-avatar
+                [src]="currentUser.profilePhotoUrl"
+                [username]="currentUser.username"
+                size="sm"
+              />
+              <div class="sidebar__account-menu-meta">
+                <strong>{{ displayName }}</strong>
+                <small>@{{ currentUser.username }}</small>
+              </div>
+            </div>
+            <a class="sidebar__account-menu-item" [routerLink]="profileRoute" role="menuitem" (click)="accountMenuOpen = false">
+              {{ 'nav.profile' | t }}
+            </a>
+            <a class="sidebar__account-menu-item" routerLink="/settings" role="menuitem" (click)="accountMenuOpen = false">
+              {{ 'nav.settings' | t }}
+            </a>
+            <button type="button" class="sidebar__account-menu-item sidebar__account-menu-item--danger" role="menuitem" (click)="handleLogout()">
+              {{ 'common.logout' | t }}
+            </button>
+          </nav>
+        }
+      </div>
+    }
+  </div>
+
+  <nav class="sidebar__mobile" aria-label="Navegação mobile">
+    <a class="sidebar__mobile-link" appPressScale routerLink="/feed" [class.sidebar__mobile-link--active]="isActive('/feed', true)" [attr.aria-label]="'nav.home' | t">
+      <span class="sidebar__icon" data-icon="home" aria-hidden="true"></span>
+      <span class="sr-only">{{ 'nav.home' | t }}</span>
+    </a>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/search" [class.sidebar__mobile-link--active]="isActive('/search')" [attr.aria-label]="'nav.search' | t">
+      <span class="sidebar__icon" data-icon="search" aria-hidden="true"></span>
+      <span class="sr-only">{{ 'nav.search' | t }}</span>
+    </a>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/fimbu" [class.sidebar__mobile-link--active]="isActive('/fimbu')" [attr.aria-label]="'nav.fimbu' | t">
+      <span class="sidebar__icon" data-icon="sparkles" aria-hidden="true"></span>
+      <span class="sr-only">{{ 'nav.fimbu' | t }}</span>
+    </a>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/notifications" [class.sidebar__mobile-link--active]="isActive('/notifications')" [attr.aria-label]="'nav.notifications' | t">
+      <span class="sidebar__icon-wrap">
+        <span class="sidebar__icon" data-icon="bell" aria-hidden="true"></span>
+        @if (unreadCount > 0) {
+          <span class="sidebar__badge sidebar__badge--dot" [attr.aria-label]="unreadCount + ' notificações por ler'"></span>
+        }
+      </span>
+      <span class="sr-only">{{ 'nav.notifications' | t }}</span>
+    </a>
+    <a class="sidebar__mobile-link" appPressScale routerLink="/messages" [class.sidebar__mobile-link--active]="isActive('/messages')" [attr.aria-label]="'nav.messages' | t">
+      <span class="sidebar__icon-wrap">
+        <span class="sidebar__icon" data-icon="mail" aria-hidden="true"></span>
+        @if (unreadMessagesCount > 0) {
+          <span class="sidebar__badge sidebar__badge--dot" [attr.aria-label]="unreadMessagesCount + ' mensagens por ler'"></span>
+        }
+      </span>
+      <span class="sr-only">{{ 'nav.messages' | t }}</span>
+    </a>
+  </nav>
+
+  @if (showMobileFab) {
+    <button
+      type="button"
+      class="sidebar__mobile-fab"
+      appPressScale
+      (click)="handleOpenPublishModal()"
+      [attr.aria-label]="'nav.publish' | t"
+    >
+      <span class="sidebar__publish-icon" aria-hidden="true">+</span>
+    </button>
+  }
+</aside>

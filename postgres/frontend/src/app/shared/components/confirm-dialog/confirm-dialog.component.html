@@ -1,0 +1,20 @@
+<div class="dialogo-overlay" role="presentation" (click)="cancelar()">
+  <div
+    #dialogPanel
+    class="dialogo"
+    role="alertdialog"
+    aria-modal="true"
+    [attr.aria-label]="mensagem"
+    (click)="$event.stopPropagation()"
+  >
+    <p class="dialogo__mensagem">{{ mensagem }}</p>
+    <div class="dialogo__acoes">
+      <button type="button" class="dialogo__btn dialogo__btn--cancelar" (click)="cancelar()">
+        {{ textoCancelar }}
+      </button>
+      <button type="button" class="dialogo__btn dialogo__btn--confirmar" (click)="confirmar()">
+        {{ textoConfirmar }}
+      </button>
+    </div>
+  </div>
+</div>

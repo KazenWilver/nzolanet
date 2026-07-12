@@ -1,0 +1,198 @@
+// Mixins extraídos de globals.scss (twitter-clone-main)
+
+@mixin hover-animation {
+  transition: color var(--transition-base), background-color var(--transition-base),
+    border-color var(--transition-base), opacity var(--transition-base),
+    box-shadow var(--transition-base), filter var(--transition-base);
+}
+
+@mixin custom-button {
+  @include hover-animation;
+  border-radius: var(--border-radius-full);
+  padding: var(--spacing-md);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+@mixin custom-underline {
+  @include hover-animation;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: inherit;
+  }
+}
+
+@mixin focus-ring($color: #878a8c) {
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px #{$color};
+    transition: box-shadow var(--transition-base);
+  }
+}
+
+@mixin accent-tab {
+  @include focus-ring(rgba(232, 106, 23, 0.8));
+}
+
+@mixin hover-card {
+  @include hover-animation;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-bg-card-hover);
+  }
+}
+
+/// Card elevado — publicações, notificações, compositor do feed
+@mixin card-elevated {
+  border-radius: var(--card-elevated-radius);
+  border: 1px solid var(--color-border-muted);
+  background-color: var(--color-bg-primary);
+  box-shadow: var(--card-elevated-shadow);
+  @include hover-animation;
+
+  &:hover {
+    box-shadow: var(--card-elevated-shadow-hover);
+    border-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-border-muted));
+  }
+}
+
+/// Card de perfil — sugestões, pesquisa, seguidores
+@mixin card-profile {
+  border-radius: var(--card-profile-radius);
+  border: 1px solid var(--color-border-muted);
+  background-color: var(--card-profile-bg);
+  box-shadow: 0 2px 12px rgba(15, 14, 23, 0.04);
+  @include hover-animation;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 18%, var(--color-border-muted));
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.1);
+  }
+}
+
+/// Contentor widget — aside, tendências
+@mixin card-widget {
+  border-radius: var(--card-widget-radius);
+  border: 1px solid var(--color-border-muted);
+  background-color: var(--color-bg-widget);
+  box-shadow: var(--card-widget-shadow);
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-brand);
+    border-radius: var(--card-widget-radius) var(--card-widget-radius) 0 0;
+  }
+}
+
+@mixin menu-container {
+  z-index: 10;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-bg-modal);
+  outline: none;
+  box-shadow: var(--color-shadow-menu);
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin line-clamp($lines: 1) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin avatar-size($size) {
+  width: $size;
+  height: $size;
+  min-width: $size;
+  min-height: $size;
+  border-radius: var(--border-radius-full);
+}
+
+@mixin respond-below($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin respond-above($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin brand-gradient-bg {
+  background: var(--gradient-brand);
+}
+
+@mixin brand-gradient-indicator {
+  background: var(--gradient-brand);
+  border-radius: var(--border-radius-full);
+}
+
+@mixin brand-gradient-button {
+  @include brand-gradient-bg;
+  color: var(--color-text-on-accent);
+  border: none;
+  transition:
+    filter 0.32s ease,
+    transform 0.32s ease,
+    box-shadow 0.32s ease,
+    opacity 0.28s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--gradient-brand-hover);
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(124, 58, 237, 0.28);
+  }
+
+  &:active:not(:disabled) {
+    filter: brightness(0.96);
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.18);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+@mixin brand-gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@mixin brand-gradient-icon {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

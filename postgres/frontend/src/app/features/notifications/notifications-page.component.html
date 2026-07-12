@@ -1,0 +1,121 @@
+<section class="notifications-page">
+  <app-page-header [title]="'notifications.title' | t" [showBack]="true" />
+
+  @if (notifications.length > 0) {
+    <div class="notifications-page__toolbar">
+      <button
+        type="button"
+        class="notifications-page__mark-all"
+        [disabled]="markingAll"
+        appPressScale
+        (click)="handleMarkAllAsRead()"
+      >
+        @if (markingAll) {
+          <app-loading-spinner tamanho="sm" />
+        } @else {
+          {{ 'notifications.markAllRead' | t }}
+        }
+      </button>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="notifications-page__loading">
+      <app-loading-spinner tamanho="md" />
+    </div>
+  }
+
+  @if (error) {
+    <div class="notifications-page__error">
+      <p>{{ 'notifications.loadError' | t }}</p>
+      <button type="button" class="notifications-page__retry" (click)="loadNotifications()">
+        {{ 'notifications.retry' | t }}
+      </button>
+    </div>
+  }
+
+  @if (!loading && !error && notifications.length === 0) {
+    <div class="notifications-page__empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+      </svg>
+      <p>{{ 'notifications.empty' | t }}</p>
+    </div>
+  }
+
+  <ul class="notifications-page__list">
+    @for (notification of notifications; track trackById($index, notification)) {
+      <li appEnterAnimation [enterIndex]="$index">
+        <article
+          class="notifications-page__item"
+          [class.notifications-page__item--unread]="!notification.isRead"
+        >
+          <div class="notifications-page__row">
+            <div
+              class="notifications-page__main"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Abrir notificação de ' + notification.actorUsername"
+              (click)="handleNotificationClick(notification)"
+              (keydown)="handleNotificationKeydown(notification, $event)"
+            >
+              <app-avatar
+                [src]="notification.actorPhotoUrl"
+                [username]="notification.actorUsername"
+                size="md"
+              />
+
+              <div class="notifications-page__content">
+                <p class="notifications-page__message">
+                  <strong>@{{ notification.actorUsername }}</strong>
+                  {{ getMessage(notification) }}
+                </p>
+
+                @if (getContextText(notification); as context) {
+                  <p class="notifications-page__context">"{{ context }}"</p>
+                }
+
+                <time class="notifications-page__time">{{ notification.createdAt | tempoAtras : relativeTime.tick() }}</time>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="notifications-page__delete"
+              aria-label="Eliminar notificação"
+              (click)="handleDelete(notification, $event)"
+            >
+              ×
+            </button>
+          </div>
+
+          @if (isFollowRequest(notification)) {
+            <div class="notifications-page__actions">
+              <button
+                type="button"
+                class="notifications-page__btn notifications-page__btn--approve"
+                [disabled]="isProcessing(notification)"
+                (click)="handleApproveRequest(notification, $event)"
+              >
+                @if (isProcessing(notification)) {
+                  <app-loading-spinner tamanho="sm" />
+                } @else {
+                  {{ 'notifications.followRequestApprove' | t }}
+                }
+              </button>
+              <button
+                type="button"
+                class="notifications-page__btn notifications-page__btn--reject"
+                [disabled]="isProcessing(notification)"
+                (click)="handleRejectRequest(notification, $event)"
+              >
+                {{ 'notifications.followRequestReject' | t }}
+              </button>
+            </div>
+          }
+        </article>
+      </li>
+    }
+  </ul>
+</section>

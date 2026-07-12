@@ -1,0 +1,75 @@
+.auth-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+    linear-gradient(165deg, #0c0a1a 0%, #15132b 42%, #1a1740 100%);
+  color: #ffffff;
+}
+
+.auth-welcome__logo {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 40px rgba(124, 58, 237, 0.35));
+}
+
+.auth-welcome__title {
+  margin: 0;
+  font-family: var(--font-family-extended);
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: var(--font-weight-heavy);
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+
+.auth-welcome__tagline {
+  margin: 0;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.auth-welcome__subtitle {
+  margin: 0.75rem 0 0;
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 500px) {
+  .auth-welcome {
+    padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.625rem;
+  }
+
+  .auth-welcome__logo {
+    width: 104px;
+    height: 104px;
+    margin-bottom: 0.25rem;
+  }
+
+  .auth-welcome__title {
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+  }
+
+  .auth-welcome__tagline {
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+    max-width: 22ch;
+  }
+
+  .auth-welcome__subtitle {
+    font-size: 0.9rem;
+    max-width: 28ch;
+  }
+}

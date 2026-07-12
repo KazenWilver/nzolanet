@@ -1,0 +1,187 @@
+import { Component, DestroyRef, EventEmitter, Input, Output, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { switchMap, of } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
+import { translateApiMessage } from '../../../core/helpers/translate-api-message.helper';
+import type { User } from '../../../core/models/user.model';
+import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+
+@Component({
+  selector: 'app-edit-profile-modal',
+  standalone: true,
+  imports: [CommonModule, FormsModule, AvatarComponent, ModalComponent, LoadingSpinnerComponent],
+  templateUrl: './edit-profile-modal.component.html',
+  styleUrl: './edit-profile-modal.component.scss'
+})
+export class EditProfileModalComponent implements OnChanges {
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  @Input({ required: true }) user!: User;
+  @Input() open = false;
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<User>();
+
+  readonly maxBioLength = 160;
+  readonly maxImageBytes = 10 * 1024 * 1024;
+
+  displayName = '';
+  bio = '';
+  selectedPhoto: File | null = null;
+  photoPreviewUrl: string | null = null;
+  selectedCover: File | null = null;
+  coverPreviewUrl: string | null = null;
+  saving = false;
+  error = '';
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.user && changes['open']?.currentValue === true) {
+      this.displayName = this.user.displayName ?? this.user.username;
+      this.bio = this.user.bio ?? '';
+      this.resetMediaSelection();
+      this.error = '';
+    }
+  }
+
+  get photoPreview(): string | undefined {
+    return this.photoPreviewUrl ?? this.user?.profilePhotoUrl;
+  }
+
+  get photoPreviewKey(): string {
+    return this.photoPreviewUrl ?? this.user?.profilePhotoUrl ?? 'default';
+  }
+
+  get coverPreview(): string | undefined {
+    return this.coverPreviewUrl ?? this.user?.coverPhotoUrl;
+  }
+
+  get remainingBioChars(): number {
+    return this.maxBioLength - this.bio.length;
+  }
+
+  handlePhotoSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
+
+    const file = input.files[0];
+    const validationError = this.validateImageFile(file);
+    if (validationError) {
+      this.error = validationError;
+      input.value = '';
+      return;
+    }
+
+    this.selectedPhoto = file;
+    if (this.photoPreviewUrl) {
+      URL.revokeObjectURL(this.photoPreviewUrl);
+    }
+    this.photoPreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+  }
+
+  handleCoverSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) {
+      return;
+    }
+
+    const file = input.files[0];
+    const validationError = this.validateImageFile(file);
+    if (validationError) {
+      this.error = validationError;
+      input.value = '';
+      return;
+    }
+
+    this.selectedCover = file;
+    if (this.coverPreviewUrl) {
+      URL.revokeObjectURL(this.coverPreviewUrl);
+    }
+    this.coverPreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+  }
+
+  handleClose(): void {
+    this.resetMediaSelection();
+    this.error = '';
+    this.closed.emit();
+  }
+
+  save(): void {
+    if (!this.user || this.saving) {
+      return;
+    }
+
+    this.saving = true;
+    this.error = '';
+
+    this.userService
+      .updateProfile(this.user.id, {
+        displayName: this.displayName.trim() || this.user.username,
+        bio: this.bio.trim()
+      })
+      .pipe(
+        switchMap(updatedUser => {
+          if (this.selectedPhoto) {
+            return this.userService.uploadPhoto(this.user.id, this.selectedPhoto);
+          }
+          return of(updatedUser);
+        }),
+        switchMap(updatedUser => {
+          if (this.selectedCover) {
+            return this.userService.uploadCoverPhoto(this.user.id, this.selectedCover);
+          }
+          return of(updatedUser);
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: updatedUser => {
+          this.authService.updateCurrentUser(updatedUser);
+          this.saving = false;
+          this.resetMediaSelection();
+          this.saved.emit(updatedUser);
+          this.closed.emit();
+        },
+        error: (error: { error?: { message?: string; Message?: string } }) => {
+          this.saving = false;
+          const apiMessage = error?.error?.message ?? error?.error?.Message;
+          this.error =
+            translateApiMessage(apiMessage) || 'Não foi possível guardar o perfil. Tenta novamente.';
+        }
+      });
+  }
+
+  private validateImageFile(file: File): string | null {
+    if (!file.type.startsWith('image/')) {
+      return 'Selecciona um ficheiro de imagem válido.';
+    }
+
+    if (file.size > this.maxImageBytes) {
+      return 'A imagem não pode exceder 10 MB.';
+    }
+
+    return null;
+  }
+
+  private resetMediaSelection(): void {
+    if (this.photoPreviewUrl) {
+      URL.revokeObjectURL(this.photoPreviewUrl);
+    }
+    if (this.coverPreviewUrl) {
+      URL.revokeObjectURL(this.coverPreviewUrl);
+    }
+    this.selectedPhoto = null;
+    this.photoPreviewUrl = null;
+    this.selectedCover = null;
+    this.coverPreviewUrl = null;
+  }
+}

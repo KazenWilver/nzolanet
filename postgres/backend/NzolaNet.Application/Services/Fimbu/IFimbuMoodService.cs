@@ -1,0 +1,21 @@
+namespace NzolaNet.Application.Services.Fimbu;
+
+/// <summary>
+/// Gere a combinação de personalidade da Fimbu associada a cada utilizador,
+/// atribuída no primeiro pedido de uma sessão (login) e libertada no logout.
+/// </summary>
+public interface IFimbuMoodService
+{
+    /// <summary>
+    /// Devolve a combinação de personalidade já atribuída a este utilizador nesta
+    /// sessão, ou sorteia e regista uma nova se ainda não existir nenhuma.
+    /// </summary>
+    FimbuSessionMood GetOrAssignSessionMood(Guid userId);
+
+    /// <summary>
+    /// Sorteia e regista uma combinação nova para o utilizador, diferente da
+    /// anterior. Deve ser chamado no login/registo para garantir que cada
+    /// sessão arranca com uma personalidade fresca da Fimbu.
+    /// </summary>
+    FimbuSessionMood AssignNewSessionMood(Guid userId);
+}
