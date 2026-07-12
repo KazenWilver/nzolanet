@@ -19,6 +19,12 @@ RUN dotnet publish backend/NzolaNet.Api/NzolaNet.Api.csproj -c Release -o /app/p
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+
+# Render injecta PORT; fallback 8080 para local/docker
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+ENV DOTNET_EnableDiagnostics=0
+
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "NzolaNet.Api.dll"]
