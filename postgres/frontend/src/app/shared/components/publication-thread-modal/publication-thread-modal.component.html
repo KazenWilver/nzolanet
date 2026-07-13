@@ -40,7 +40,7 @@
 
 <ng-template #modalContent>
   @if (useMediaLayout) {
-    <div class="thread-modal__split">
+    <div class="thread-modal__split" [class.thread-modal__split--show-comments]="showCommentsMobile">
       <div class="thread-modal__media-pane">
         <button type="button" class="thread-modal__media-close" aria-label="Fechar" (click)="handleClose()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -61,9 +61,43 @@
             ></video>
           }
         </div>
+
+        <!-- Mobile floating actions bar -->
+        <div class="thread-modal__mobile-media-actions">
+          <button type="button" class="thread-modal__mobile-action-btn" (click)="toggleCommentsMobile(true)" aria-label="Comentários">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="thread-modal__mobile-action-count">{{ publication.commentsCount }}</span>
+          </button>
+          
+          <button 
+            type="button" 
+            class="thread-modal__mobile-action-btn" 
+            [class.thread-modal__mobile-action-btn--liked]="publication.hasLiked"
+            [disabled]="likingInProgress"
+            (click)="toggleLike()" 
+            aria-label="Gostar"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="publication.hasLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="thread-modal__mobile-action-count">{{ publication.likesCount }}</span>
+          </button>
+        </div>
       </div>
 
-      <div class="thread-modal__side-pane">
+      <div class="thread-modal__side-pane" [class.thread-modal__side-pane--visible-mobile]="showCommentsMobile">
+        <!-- Mobile back header for comments panel -->
+        <div class="thread-modal__mobile-comments-header">
+          <button type="button" class="thread-modal__back-btn" (click)="toggleCommentsMobile(false)" aria-label="Voltar para a imagem">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <span class="thread-modal__mobile-comments-title">Respostas</span>
+        </div>
         <ng-container *ngTemplateOutlet="sideContent" />
       </div>
     </div>

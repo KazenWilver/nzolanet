@@ -77,6 +77,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
   @ViewChild('replyTextarea') replyTextareaRef?: ElementRef<HTMLTextAreaElement>;
 
   comments: Comment[] = [];
+  showCommentsMobile = false;
   loading = true;
   loadError = false;
   currentUser: User | null = null;
@@ -140,6 +141,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
     if (openingOverlay) {
       this.scrollLock.lock();
       this.pendingModalAnimation = true;
+      this.showCommentsMobile = false;
     }
 
     if (!this.embedded && changes['open']?.currentValue === false) {
@@ -147,6 +149,7 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
       this.focusTrap.deactivate();
       this.scrollLock.unlock();
       this.resetComposer();
+      this.showCommentsMobile = false;
     }
   }
 
@@ -195,10 +198,15 @@ export class PublicationThreadModalComponent implements OnChanges, OnDestroy, On
       this.scrollLock.forceUnlock();
     }
     this.closed.emit();
+    this.showCommentsMobile = false;
   }
 
   handleBackdropClick(): void {
     this.handleClose();
+  }
+
+  toggleCommentsMobile(show: boolean): void {
+    this.showCommentsMobile = show;
   }
 
   toggleLike(): void {
