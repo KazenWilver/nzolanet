@@ -240,24 +240,33 @@ body.dark-theme .layout-publico__cartao {
     min-height: 100vh;
     min-height: 100dvh;
     align-items: flex-start;
-    padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1rem calc(1.75rem + env(safe-area-inset-bottom, 0px));
+    background: transparent;
+    padding:
+      calc(1.5rem + env(safe-area-inset-top, 0px))
+      clamp(1.25rem, 5vw, 1.75rem)
+      calc(2rem + env(safe-area-inset-bottom, 0px));
   }
 
   .layout-publico__form-inner {
     max-width: min(100%, 26.25rem);
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .layout-publico__cartao {
-    border: none;
-    box-shadow: none;
-    padding: 0;
+    padding: clamp(1.5rem, 5vw, 1.875rem) clamp(1.25rem, 4.5vw, 1.75rem);
+    border: 1px solid rgba(229, 231, 235, 0.9);
+    border-radius: 20px;
+    box-shadow:
+      0 12px 40px rgba(15, 14, 23, 0.1),
+      0 2px 8px rgba(99, 102, 241, 0.08);
   }
 }
 
 @media (max-width: 500px) {
   .layout-publico__formulario {
     padding-top: calc(1.25rem + env(safe-area-inset-top, 0px));
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
   }
 
   .layout-publico__brand-icon {
@@ -267,6 +276,10 @@ body.dark-theme .layout-publico__cartao {
   }
 
   .layout-publico__form-inner {
-    gap: 0.875rem;
+    gap: 1.125rem;
+  }
+
+  .layout-publico__cartao {
+    padding: 1.5rem 1.25rem 1.75rem;
   }
 }

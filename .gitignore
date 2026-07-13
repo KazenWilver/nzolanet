@@ -124,6 +124,9 @@ postgres/supabase-apply.sql
 
 # Vercel MCP deploy leftovers
 postgres/frontend/.vercel-*
+postgres/frontend/.deploy-*
 postgres/frontend/source.part*.b64
 postgres/frontend/source.parts.json
+postgres/supabase-initial.sql
+postgres/supabase-apply.sql
 

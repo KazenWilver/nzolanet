@@ -1,0 +1,17 @@
+node_modules
+.angular
+dist
+test-results
+e2e
+.vscode
+.vercel-chunks
+.deploy-assets
+.deploy-*
+.vercel-*
+source.part*
+source.parts.json
+dev-server.*
+*.log
+playwright.config.ts
+mock-backend.js
+scripts
