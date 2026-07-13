@@ -159,6 +159,14 @@ builder.Services.PostConfigure<EmailSettings>(options =>
     {
         options.SmtpPort = port;
     }
+
+    // Gmail App Password: remove espaços "xxxx xxxx xxxx xxxx" → "xxxxxxxxxxxxxxxx"
+    options.SmtpUser = options.SmtpUser.Replace(" ", string.Empty).Trim();
+    options.SmtpPassword = options.SmtpPassword.Replace(" ", string.Empty).Trim();
+    if (!string.IsNullOrWhiteSpace(options.From))
+    {
+        options.From = options.From.Trim();
+    }
 });
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();

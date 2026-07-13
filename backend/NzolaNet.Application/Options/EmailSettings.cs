@@ -31,7 +31,13 @@ public class EmailSettings
     /// <summary>
     /// Returns true when enough credentials exist to send real email.
     /// </summary>
-    public bool IsConfigured =>
-        !string.IsNullOrWhiteSpace(SmtpUser) &&
-        !string.IsNullOrWhiteSpace(SmtpPassword);
+    public bool IsConfigured
+    {
+        get
+        {
+            var user = (SmtpUser ?? string.Empty).Replace(" ", string.Empty).Trim();
+            var pass = (SmtpPassword ?? string.Empty).Replace(" ", string.Empty).Trim();
+            return user.Length > 0 && pass.Length > 0;
+        }
+    }
 }

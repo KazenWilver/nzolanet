@@ -1,15 +1,17 @@
 using System.Net;
-using System.Net.Mail;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MimeKit;
 using NzolaNet.Application.Interfaces;
 using NzolaNet.Application.Options;
 
 namespace NzolaNet.Infrastructure.Services;
 
 /// <summary>
-/// Sends transactional email via SMTP (Gmail App Password compatible),
+/// Sends transactional email via MailKit SMTP (Gmail App Password compatible),
 /// matching extras/main.py (SMTP_SSL on smtp.gmail.com:465).
 /// In Development without SMTP, logs the body so local flows still work.
 /// </summary>
@@ -79,7 +81,13 @@ public class EmailService : IEmailService
         string textBody,
         string? htmlBody)
     {
-        if (!_settings.IsConfigured)
+        var smtpUser = NormalizeSecret(_settings.SmtpUser);
+        var smtpPassword = NormalizeSecret(_settings.SmtpPassword);
+        var fromAddress = string.IsNullOrWhiteSpace(_settings.From)
+            ? smtpUser
+            : _settings.From.Trim();
+
+        if (string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
         {
             if (_environment.IsDevelopment())
             {
@@ -96,38 +104,64 @@ public class EmailService : IEmailService
                 "O envio de email não está configurado no servidor. Contacta o administrador.");
         }
 
-        var fromAddress = string.IsNullOrWhiteSpace(_settings.From)
-            ? _settings.SmtpUser
-            : _settings.From;
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(
+            string.IsNullOrWhiteSpace(_settings.FromName) ? "NzolaNet" : _settings.FromName,
+            fromAddress));
+        message.To.Add(MailboxAddress.Parse(recipientEmail));
+        message.Subject = subject;
 
-        using var message = new MailMessage
+        var builder = new BodyBuilder { TextBody = textBody };
+        if (!string.IsNullOrWhiteSpace(htmlBody))
         {
-            From = new MailAddress(fromAddress, _settings.FromName),
-            Subject = subject,
-            Body = string.IsNullOrWhiteSpace(htmlBody) ? textBody : htmlBody,
-            IsBodyHtml = !string.IsNullOrWhiteSpace(htmlBody)
-        };
-        message.To.Add(recipientEmail);
+            builder.HtmlBody = htmlBody;
+        }
 
-        using var client = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort)
-        {
-            EnableSsl = _settings.UseSsl,
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(_settings.SmtpUser, _settings.SmtpPassword)
-        };
+        message.Body = builder.ToMessageBody();
+
+        var host = string.IsNullOrWhiteSpace(_settings.SmtpHost) ? "smtp.gmail.com" : _settings.SmtpHost;
+        var port = _settings.SmtpPort > 0 ? _settings.SmtpPort : 465;
 
         try
         {
-            await client.SendMailAsync(message);
+            using var client = new SmtpClient();
+            // Gmail App Password: 465 SslOnConnect (como smtplib.SMTP_SSL) ou 587 StartTls
+            var socketOptions = port == 587
+                ? SecureSocketOptions.StartTls
+                : SecureSocketOptions.SslOnConnect;
+
+            await client.ConnectAsync(host, port, socketOptions);
+            await client.AuthenticateAsync(smtpUser, smtpPassword);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+
             _logger.LogInformation("Email enviado para {Email}. Assunto: {Subject}", recipientEmail, subject);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Falha ao enviar email para {Email}", recipientEmail);
+            _logger.LogError(
+                ex,
+                "Falha SMTP ao enviar para {Email} via {Host}:{Port} (user configurado={HasUser})",
+                recipientEmail,
+                host,
+                port,
+                !string.IsNullOrWhiteSpace(smtpUser));
             throw new InvalidOperationException(
                 "Não foi possível enviar o email de recuperação. Tenta novamente dentro de momentos.",
                 ex);
         }
+    }
+
+    /// <summary>
+    /// Trim + remove spaces (Gmail App Passwords often paste as "xxxx xxxx xxxx xxxx").
+    /// </summary>
+    private static string NormalizeSecret(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return value.Replace(" ", string.Empty, StringComparison.Ordinal).Trim();
     }
 }
