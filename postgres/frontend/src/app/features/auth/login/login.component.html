@@ -124,9 +124,10 @@
         }
       </div>
 
-      <button type="submit" class="auth-form__submit" [disabled]="forgotForm.invalid || isForgotLoading">
+      <button type="submit" class="auth-form__submit" [disabled]="forgotForm.invalid || isForgotLoading" [attr.aria-busy]="isForgotLoading">
         @if (isForgotLoading) {
           <app-loading-spinner tamanho="sm" />
+          <span>A enviar...</span>
         } @else {
           <span>{{ 'auth.sendInstructions' | t }}</span>
         }

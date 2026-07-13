@@ -153,6 +153,15 @@ builder.Services.PostConfigure<EmailSettings>(options =>
         options.SmtpPort = port;
     }
 
+    options.ResendApiKey = FirstNonEmpty(
+        Environment.GetEnvironmentVariable("RESEND_API_KEY"),
+        Environment.GetEnvironmentVariable("NZOLANET_RESEND_API_KEY"),
+        options.ResendApiKey);
+    options.ResendFrom = FirstNonEmpty(
+        Environment.GetEnvironmentVariable("RESEND_FROM"),
+        Environment.GetEnvironmentVariable("NZOLANET_RESEND_FROM"),
+        options.ResendFrom);
+
     // Gmail App Password: remove espaços "xxxx xxxx xxxx xxxx" → "xxxxxxxxxxxxxxxx"
     options.SmtpUser = options.SmtpUser.Replace(" ", string.Empty).Trim();
     options.SmtpPassword = options.SmtpPassword.Replace(" ", string.Empty).Trim();
@@ -160,6 +169,10 @@ builder.Services.PostConfigure<EmailSettings>(options =>
     {
         options.From = options.From.Trim();
     }
+});
+builder.Services.AddHttpClient("NzolaNetEmail", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();

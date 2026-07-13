@@ -1,4 +1,7 @@
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Hosting;
@@ -11,24 +14,32 @@ using NzolaNet.Application.Options;
 namespace NzolaNet.Infrastructure.Services;
 
 /// <summary>
-/// Sends transactional email via MailKit SMTP (Gmail App Password compatible),
-/// matching extras/main.py (SMTP_SSL on smtp.gmail.com:465).
-/// In Development without SMTP, logs the body so local flows still work.
+/// Sends transactional email.
+/// Prefers Resend HTTPS API (works on Render free). Falls back to MailKit SMTP
+/// for local / paid plans (Gmail App Password like extras/main.py).
 /// </summary>
 public class EmailService : IEmailService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private readonly ILogger<EmailService> _logger;
     private readonly EmailSettings _settings;
     private readonly IHostEnvironment _environment;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public EmailService(
         ILogger<EmailService> logger,
         IOptions<EmailSettings> settings,
-        IHostEnvironment environment)
+        IHostEnvironment environment,
+        IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
         _settings = settings.Value;
         _environment = environment;
+        _httpClientFactory = httpClientFactory;
     }
 
     public Task SendFollowRequestRejectedEmailAsync(string recipientEmail, string rejectorDisplayName)
@@ -81,19 +92,13 @@ public class EmailService : IEmailService
         string textBody,
         string? htmlBody)
     {
-        var smtpUser = NormalizeSecret(_settings.SmtpUser);
-        var smtpPassword = NormalizeSecret(_settings.SmtpPassword);
-        var fromAddress = string.IsNullOrWhiteSpace(_settings.From)
-            ? smtpUser
-            : _settings.From.Trim();
-
-        if (string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
+        if (!_settings.IsConfigured)
         {
             if (_environment.IsDevelopment())
             {
                 _logger.LogWarning(
-                    "SMTP não configurado (dev). Email para {Email} (assunto: {Subject}) só ficou no log. " +
-                    "Define EMAIL_USER + EMAIL_PASS para envio real.",
+                    "Email não configurado (dev). Define RESEND_API_KEY (recomendado) ou EMAIL_USER + EMAIL_PASS. " +
+                    "Destino: {Email}. Assunto: {Subject}",
                     recipientEmail,
                     subject);
                 _logger.LogInformation("Corpo do email: {Body}", textBody);
@@ -101,8 +106,93 @@ public class EmailService : IEmailService
             }
 
             throw new InvalidOperationException(
-                "O envio de email não está configurado no servidor. Contacta o administrador.");
+                "O envio de email não está configurado. Define RESEND_API_KEY no servidor.");
         }
+
+        // Render free bloqueia SMTP 25/465/587 — Resend (HTTPS) primeiro.
+        if (_settings.HasResend)
+        {
+            await SendViaResendAsync(recipientEmail, subject, textBody, htmlBody);
+            return;
+        }
+
+        await SendViaSmtpAsync(recipientEmail, subject, textBody, htmlBody);
+    }
+
+    private async Task SendViaResendAsync(
+        string recipientEmail,
+        string subject,
+        string textBody,
+        string? htmlBody)
+    {
+        var from = string.IsNullOrWhiteSpace(_settings.ResendFrom)
+            ? "NzolaNet <beth.t@example.com>"
+            : _settings.ResendFrom.Trim();
+
+        var payload = new Dictionary<string, object?>
+        {
+            ["from"] = from,
+            ["to"] = new[] { recipientEmail },
+            ["subject"] = subject,
+            ["text"] = textBody
+        };
+
+        if (!string.IsNullOrWhiteSpace(htmlBody))
+        {
+            payload["html"] = htmlBody;
+        }
+
+        var client = _httpClientFactory.CreateClient("NzolaNetEmail");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _settings.ResendApiKey.Trim());
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(payload, JsonOptions),
+            Encoding.UTF8,
+            "application/json");
+
+        try
+        {
+            using var response = await client.SendAsync(request);
+            var body = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "Resend falhou ({Status}): {Body}",
+                    (int)response.StatusCode,
+                    Truncate(body, 500));
+                throw new InvalidOperationException(
+                    "Não foi possível enviar o email de recuperação. Tenta novamente dentro de momentos.");
+            }
+
+            _logger.LogInformation(
+                "Email enviado via Resend para {Email}. Assunto: {Subject}",
+                recipientEmail,
+                subject);
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao enviar email via Resend para {Email}", recipientEmail);
+            throw new InvalidOperationException(
+                "Não foi possível enviar o email de recuperação. Tenta novamente dentro de momentos.",
+                ex);
+        }
+    }
+
+    private async Task SendViaSmtpAsync(
+        string recipientEmail,
+        string subject,
+        string textBody,
+        string? htmlBody)
+    {
+        var smtpUser = NormalizeSecret(_settings.SmtpUser);
+        var smtpPassword = NormalizeSecret(_settings.SmtpPassword);
+        var fromAddress = string.IsNullOrWhiteSpace(_settings.From)
+            ? smtpUser
+            : _settings.From.Trim();
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(
@@ -125,36 +215,40 @@ public class EmailService : IEmailService
         try
         {
             using var client = new SmtpClient();
-            // Gmail App Password: 465 SslOnConnect (como smtplib.SMTP_SSL) ou 587 StartTls
+            client.Timeout = 15_000;
+
             var socketOptions = port == 587
                 ? SecureSocketOptions.StartTls
                 : SecureSocketOptions.SslOnConnect;
 
-            await client.ConnectAsync(host, port, socketOptions);
-            await client.AuthenticateAsync(smtpUser, smtpPassword);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await client.ConnectAsync(host, port, socketOptions, cts.Token);
+            await client.AuthenticateAsync(smtpUser, smtpPassword, cts.Token);
+            await client.SendAsync(message, cts.Token);
+            await client.DisconnectAsync(true, cts.Token);
 
-            _logger.LogInformation("Email enviado para {Email}. Assunto: {Subject}", recipientEmail, subject);
+            _logger.LogInformation("Email enviado via SMTP para {Email}. Assunto: {Subject}", recipientEmail, subject);
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Falha SMTP ao enviar para {Email} via {Host}:{Port} (user configurado={HasUser})",
+                "Falha SMTP ao enviar para {Email} via {Host}:{Port}. " +
+                "No plano free do Render as portas SMTP estão bloqueadas — usa RESEND_API_KEY.",
                 recipientEmail,
                 host,
-                port,
-                !string.IsNullOrWhiteSpace(smtpUser));
+                port);
+
+            var hint = !_environment.IsDevelopment()
+                ? " O plano gratuito do Render bloqueia SMTP; configura RESEND_API_KEY (envio por HTTPS)."
+                : string.Empty;
+
             throw new InvalidOperationException(
-                "Não foi possível enviar o email de recuperação. Tenta novamente dentro de momentos.",
+                "Não foi possível enviar o email de recuperação." + hint,
                 ex);
         }
     }
 
-    /// <summary>
-    /// Trim + remove spaces (Gmail App Passwords often paste as "xxxx xxxx xxxx xxxx").
-    /// </summary>
     private static string NormalizeSecret(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -163,5 +257,15 @@ public class EmailService : IEmailService
         }
 
         return value.Replace(" ", string.Empty, StringComparison.Ordinal).Trim();
+    }
+
+    private static string Truncate(string value, int max)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= max)
+        {
+            return value;
+        }
+
+        return value[..max] + "...";
     }
 }
