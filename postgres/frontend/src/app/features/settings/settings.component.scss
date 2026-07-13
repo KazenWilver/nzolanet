@@ -176,11 +176,38 @@
     min-height: 88px;
   }
 
+  &--feedback textarea {
+    resize: none;
+    min-height: 12rem;
+    max-height: 12rem;
+    height: 12rem;
+    overflow-y: auto;
+    line-height: 1.5;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.4);
+      border-radius: 999px;
+    }
+  }
+
   &--readonly input {
     background-color: var(--nz-color-input-bg);
     color: vars.$color-text-secondary;
     cursor: not-allowed;
   }
+}
+
+.settings__panel-intro {
+  margin: -8px 0 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: vars.$color-text-secondary;
 }
 
 .settings__label {

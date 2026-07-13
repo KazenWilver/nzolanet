@@ -121,6 +121,7 @@ builder.Services.AddScoped<IMessageReactionRepository, MessageReactionRepository
 builder.Services.AddScoped<IRepostRepository, RepostRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<IContentReportRepository, ContentReportRepository>();
+builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 builder.Services.AddScoped<IPlatformCounterRepository, PlatformCounterRepository>();
 builder.Services.AddScoped<IFimbuActivityRepository, FimbuActivityRepository>();
 
@@ -139,6 +140,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IMediaAccessService, MediaAccessService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 
 // 4.1. Fimbu — vincula a secção inteira do appsettings de uma vez (apanha

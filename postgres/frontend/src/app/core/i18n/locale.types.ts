@@ -102,6 +102,7 @@ export interface LocaleMessages {
     account: string
     privacy: string
     password: string
+    feedback: string
     about: string
     language: string
     languageDescription: string
@@ -116,6 +117,12 @@ export interface LocaleMessages {
     passwordChanged: string
     passwordMismatch: string
     passwordTooShort: string
+    feedbackDescription: string
+    feedbackPlaceholder: string
+    feedbackSubmit: string
+    feedbackSuccess: string
+    feedbackTooShort: string
+    feedbackError: string
   }
   report: {
     button: string

@@ -55,6 +55,16 @@
       Moderação
       <span class="dashboard__nav-badge">{{ reportedComments.length + reportedPublications.length }}</span>
     </button>
+    <button
+      type="button"
+      role="tab"
+      class="dashboard__nav-item"
+      [class.dashboard__nav-item--active]="mainView === 'feedback'"
+      (click)="handleSelectMainView('feedback')"
+    >
+      Feedback
+      <span class="dashboard__nav-badge">{{ feedbackEntries.length }}</span>
+    </button>
   </nav>
 
   @switch (mainView) {
@@ -506,6 +516,47 @@
             }
           </div>
         }
+      }
+
+      @case ('feedback') {
+        <section class="panel" aria-labelledby="feedback-title">
+          <div class="panel__header">
+            <h2 id="feedback-title" class="panel__title">Feedback</h2>
+            <p class="panel__subtitle">Mensagens enviadas pelos utilizadores sobre a aplicação.</p>
+          </div>
+
+          @if (loadingFeedback && feedbackEntries.length === 0) {
+            <p class="panel__state">A carregar feedback…</p>
+          } @else if (feedbackEntries.length === 0) {
+            <p class="panel__state">Ainda não há feedback.</p>
+          } @else {
+            <div class="feedback-list" role="list">
+              @for (entry of feedbackEntries; track entry.id) {
+                <article class="feedback-card" role="listitem">
+                  <header class="feedback-card__header">
+                    <div>
+                      <h3 class="feedback-card__author">
+                        {{ entry.displayName || entry.username }}
+                      </h3>
+                      <p class="feedback-card__meta">
+                        &#64;{{ entry.username }}
+                        @if (entry.email) {
+                          <span>· {{ entry.email }}</span>
+                        }
+                      </p>
+                    </div>
+                    <time class="feedback-card__date" [attr.datetime]="entry.createdAt">
+                      {{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                    </time>
+                  </header>
+                  <div class="feedback-card__body">
+                    <p class="feedback-card__message">{{ entry.message }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
       }
     }
   }

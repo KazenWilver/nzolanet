@@ -4,12 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
+import { FeedbackService } from '../../core/services/feedback.service';
 import { translateApiMessage } from '../../core/helpers/translate-api-message.helper';
 import type { User } from '../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TPipe } from '../../core/i18n/translate.pipe';
 
-type SettingsSection = 'account' | 'privacy' | 'password';
+type SettingsSection = 'account' | 'privacy' | 'password' | 'feedback';
 
 @Component({
   selector: 'app-settings',
@@ -21,13 +22,16 @@ type SettingsSection = 'account' | 'privacy' | 'password';
 export class SettingsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly feedbackService = inject(FeedbackService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly maxBioLength = 160;
+  readonly maxFeedbackLength = 4000;
   readonly sections: Array<{ id: SettingsSection; label: string }> = [
     { id: 'account', label: 'Conta' },
     { id: 'privacy', label: 'Privacidade' },
-    { id: 'password', label: 'Palavra-passe' }
+    { id: 'password', label: 'Palavra-passe' },
+    { id: 'feedback', label: 'Feedback' }
   ];
 
   activeSection: SettingsSection = 'account';
@@ -48,6 +52,11 @@ export class SettingsComponent implements OnInit {
   savingPassword = false;
   passwordError = '';
   passwordSuccess = false;
+
+  feedbackMessage = '';
+  savingFeedback = false;
+  feedbackError = '';
+  feedbackSuccess = false;
 
   ngOnInit(): void {
     this.authService.currentUser$
@@ -72,6 +81,51 @@ export class SettingsComponent implements OnInit {
     this.privacyError = '';
     this.passwordError = '';
     this.passwordSuccess = false;
+    this.feedbackError = '';
+    this.feedbackSuccess = false;
+  }
+
+  get remainingFeedbackChars(): number {
+    return this.maxFeedbackLength - this.feedbackMessage.length;
+  }
+
+  submitFeedback(): void {
+    if (this.savingFeedback) {
+      return;
+    }
+
+    const message = this.feedbackMessage.trim();
+    this.feedbackError = '';
+    this.feedbackSuccess = false;
+
+    if (message.length < 5) {
+      this.feedbackError = 'O feedback deve ter pelo menos 5 caracteres.';
+      return;
+    }
+
+    this.savingFeedback = true;
+
+    this.feedbackService
+      .submit({ message })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.savingFeedback = false;
+          this.feedbackSuccess = true;
+          this.feedbackMessage = '';
+        },
+        error: error => {
+          this.savingFeedback = false;
+          const apiError = error?.error;
+          const rawMessage =
+            apiError?.message ??
+            (Array.isArray(apiError?.errors)
+              ? Object.values(apiError.errors as Record<string, string[]>).flat().join(' ')
+              : null);
+          this.feedbackError =
+            translateApiMessage(rawMessage) || 'Não foi possível enviar o feedback. Tenta novamente.';
+        }
+      });
   }
 
   saveAccount(): void {

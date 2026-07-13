@@ -103,6 +103,7 @@ const ptPT: LocaleMessages = {
     account: 'Conta',
     privacy: 'Privacidade',
     password: 'Palavra-passe',
+    feedback: 'Feedback',
     about: 'Sobre nós',
     language: 'Idioma',
     languageDescription: 'Escolhe o idioma da interface.',
@@ -116,7 +117,13 @@ const ptPT: LocaleMessages = {
     confirmPassword: 'Confirmar nova palavra-passe',
     passwordChanged: 'Palavra-passe alterada com sucesso.',
     passwordMismatch: 'A nova palavra-passe e a confirmação não coincidem.',
-    passwordTooShort: 'A nova palavra-passe deve ter pelo menos 6 caracteres.'
+    passwordTooShort: 'A nova palavra-passe deve ter pelo menos 6 caracteres.',
+    feedbackDescription: 'Conta-nos o que corre bem, o que falha ou o que mudarias no NzolaNet.',
+    feedbackPlaceholder: 'Escreve o teu feedback aqui…',
+    feedbackSubmit: 'Enviar feedback',
+    feedbackSuccess: 'Feedback enviado. Obrigado!',
+    feedbackTooShort: 'O feedback deve ter pelo menos 5 caracteres.',
+    feedbackError: 'Não foi possível enviar o feedback. Tenta novamente.'
   },
   report: {
     button: 'Denunciar',

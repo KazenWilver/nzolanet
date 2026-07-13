@@ -256,6 +256,32 @@ namespace NzolaNet.Infrastructure.Data.Migrations
                     b.ToTable("ContentReports");
                 });
 
+            modelBuilder.Entity("NzolaNet.Domain.Entities.Feedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Feedbacks");
+                });
+
             modelBuilder.Entity("NzolaNet.Domain.Entities.Conversation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -841,6 +867,17 @@ namespace NzolaNet.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Reporter");
+                });
+
+            modelBuilder.Entity("NzolaNet.Domain.Entities.Feedback", b =>
+                {
+                    b.HasOne("NzolaNet.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NzolaNet.Domain.Entities.ConversationParticipant", b =>

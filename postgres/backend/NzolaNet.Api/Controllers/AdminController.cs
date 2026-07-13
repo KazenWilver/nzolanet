@@ -120,6 +120,14 @@ public class AdminController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
+    [HttpGet("feedback")]
+    public async Task<IActionResult> GetFeedback([FromServices] IFeedbackService feedbackService)
+    {
+        var feedback = await feedbackService.GetAllAsync();
+        return Ok(feedback);
+    }
+
+    [Authorize(Roles = "Admin")]
     [HttpPost("users/{id:guid}/deactivate")]
     public async Task<IActionResult> DeactivateUser(Guid id)
     {

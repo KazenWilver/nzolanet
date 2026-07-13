@@ -198,6 +198,10 @@ public class UserRepository : IUserRepository
                 messageIds.Contains(report.TargetId))
             .ToListAsync());
 
+        _context.Feedbacks.RemoveRange(await _context.Feedbacks
+            .Where(feedback => feedback.UserId == userId)
+            .ToListAsync());
+
         _context.MessageReactions.RemoveRange(await _context.MessageReactions
             .Where(reaction => reaction.UserId == userId || messageIds.Contains(reaction.MessageId))
             .ToListAsync());

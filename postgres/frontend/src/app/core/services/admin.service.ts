@@ -104,6 +104,16 @@ export interface AdminUserRow {
   isBanned: boolean
 }
 
+export interface AdminFeedbackEntry {
+  id: string
+  userId: string
+  username: string
+  displayName?: string
+  email?: string
+  message: string
+  createdAt: string
+}
+
 /**
  * Talks to the administrator moderation endpoints, always attaching the
  * administrator token so the calls stay independent from the regular session.
@@ -167,6 +177,12 @@ export class AdminService {
         isBanned: !!user.isBanned,
         profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl),
       }))))
+  }
+
+  obterFeedbacks(): Observable<AdminFeedbackEntry[]> {
+    return this.http.get<AdminFeedbackEntry[]>(`${this.baseUrl}/feedback`, {
+      headers: this.adminAuth.authHeaders(),
+    })
   }
 
   removerComentario(id: string): Observable<void> {

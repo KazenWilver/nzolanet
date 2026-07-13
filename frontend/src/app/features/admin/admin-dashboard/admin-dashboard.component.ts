@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { forkJoin, finalize } from 'rxjs'
 import {
+  AdminFeedbackEntry,
   AdminMetrics,
   AdminService,
   AdminUserRow,
@@ -12,7 +13,7 @@ import {
 import { AdminRealtimeService } from '../../../core/services/admin-realtime.service'
 import { AdminMetricsChartsComponent } from '../admin-metrics-charts/admin-metrics-charts.component'
 
-type AdminMainView = 'indicadores' | 'graficos' | 'moderacao'
+type AdminMainView = 'indicadores' | 'graficos' | 'moderacao' | 'feedback'
 type AdminTab = 'comentarios' | 'publicacoes' | 'utilizadores'
 
 @Component({
@@ -34,11 +35,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   reportedComments: ReportedComment[] = []
   reportedPublications: ReportedPublication[] = []
   users: AdminUserRow[] = []
+  feedbackEntries: AdminFeedbackEntry[] = []
 
   loadingMetrics = false
   loadingComments = false
   loadingPublications = false
   loadingUsers = false
+  loadingFeedback = false
   refreshing = false
   processingId: string | null = null
 
@@ -88,12 +91,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.loadingComments = this.reportedComments.length === 0
     this.loadingPublications = this.reportedPublications.length === 0
     this.loadingUsers = this.users.length === 0
+    this.loadingFeedback = this.feedbackEntries.length === 0
 
     forkJoin({
       metrics: this.adminService.obterMetricas(),
       comments: this.adminService.obterComentariosDenunciados(),
       publications: this.adminService.obterPublicacoesDenunciadas(),
-      users: this.adminService.obterUtilizadores()
+      users: this.adminService.obterUtilizadores(),
+      feedback: this.adminService.obterFeedbacks()
     })
       .pipe(
         finalize(() => {
@@ -102,15 +107,17 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.loadingComments = false
           this.loadingPublications = false
           this.loadingUsers = false
+          this.loadingFeedback = false
         }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: ({ metrics, comments, publications, users }) => {
+        next: ({ metrics, comments, publications, users, feedback }) => {
           this.metrics = metrics
           this.reportedComments = comments
           this.reportedPublications = publications
           this.users = users
+          this.feedbackEntries = feedback
           this.applyPresenceMetrics(this.latestPresenceMetrics)
           this.lastUpdatedAt = new Date()
         },

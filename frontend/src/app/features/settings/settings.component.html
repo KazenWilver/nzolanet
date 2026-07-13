@@ -197,6 +197,51 @@
           </button>
         </section>
       }
+
+      @if (activeSection === 'feedback') {
+        <section class="settings__panel" aria-labelledby="settings-feedback-title">
+          <h2 id="settings-feedback-title" class="settings__panel-title">{{ 'settings.feedback' | t }}</h2>
+          <p class="settings__panel-intro">{{ 'settings.feedbackDescription' | t }}</p>
+
+          <label class="settings__field settings__field--feedback" for="settings-feedback-message">
+            <span class="settings__label">{{ 'settings.feedback' | t }}</span>
+            <textarea
+              id="settings-feedback-message"
+              name="feedbackMessage"
+              [(ngModel)]="feedbackMessage"
+              [maxlength]="maxFeedbackLength"
+              rows="8"
+              [attr.aria-label]="'settings.feedback' | t"
+              [placeholder]="'settings.feedbackPlaceholder' | t"
+            ></textarea>
+            <span class="settings__counter" [class.settings__counter--warn]="remainingFeedbackChars <= 200">
+              {{ remainingFeedbackChars }}
+            </span>
+          </label>
+
+          @if (feedbackError) {
+            <p class="settings__message settings__message--error" role="alert">{{ feedbackError }}</p>
+          }
+          @if (feedbackSuccess) {
+            <p class="settings__message settings__message--success" role="status">
+              {{ 'settings.feedbackSuccess' | t }}
+            </p>
+          }
+
+          <button
+            type="button"
+            class="settings__btn-primary"
+            [disabled]="savingFeedback"
+            (click)="submitFeedback()"
+          >
+            @if (savingFeedback) {
+              <app-loading-spinner tamanho="sm" />
+            } @else {
+              {{ 'settings.feedbackSubmit' | t }}
+            }
+          </button>
+        </section>
+      }
     </div>
   </div>
 </section>

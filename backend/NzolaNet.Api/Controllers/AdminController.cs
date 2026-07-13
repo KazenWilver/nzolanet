@@ -117,4 +117,12 @@ public class AdminController : ControllerBase
         var users = await _adminService.GetUsersAsync();
         return Ok(users);
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("feedback")]
+    public async Task<IActionResult> GetFeedback([FromServices] IFeedbackService feedbackService)
+    {
+        var feedback = await feedbackService.GetAllAsync();
+        return Ok(feedback);
+    }
 }

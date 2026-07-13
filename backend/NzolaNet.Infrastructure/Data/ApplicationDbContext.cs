@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Bookmark> Bookmarks { get; set; } = null!;
     public DbSet<MessageUserHide> MessageUserHides { get; set; } = null!;
     public DbSet<ContentReport> ContentReports { get; set; } = null!;
+    public DbSet<Feedback> Feedbacks { get; set; } = null!;
     public DbSet<PlatformCounter> PlatformCounters { get; set; } = null!;
     public DbSet<FimbuUserActivity> FimbuUserActivities { get; set; } = null!;
 
@@ -284,6 +285,21 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
             entity.HasIndex(report => new { report.ReporterId, report.TargetType, report.TargetId }).IsUnique();
             entity.HasIndex(report => new { report.TargetType, report.TargetId });
+        });
+
+        builder.Entity<Feedback>(entity =>
+        {
+            entity.HasKey(feedback => feedback.Id);
+            entity.Property(feedback => feedback.Message).IsRequired().HasMaxLength(4000);
+            entity.Property(feedback => feedback.CreatedAt).IsRequired();
+
+            entity.HasOne(feedback => feedback.User)
+                  .WithMany()
+                  .HasForeignKey(feedback => feedback.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(feedback => feedback.CreatedAt);
+            entity.HasIndex(feedback => feedback.UserId);
         });
 
         builder.Entity<PlatformCounter>(entity =>
