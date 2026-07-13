@@ -136,6 +136,23 @@
   background: var(--color-bg-primary);
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.thread-modal--media .thread-modal__post,
+.thread-modal--media .thread-modal__reply,
+.thread-modal--media .thread-modal__header {
+  flex-shrink: 0;
+}
+
+.thread-modal--media .thread-modal__comments {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 .thread-modal__header {

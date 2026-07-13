@@ -561,11 +561,11 @@ public sealed class FimbuMoodService : IFimbuMoodService
     }
 
     /// <summary>
-    /// Intervalo entre 0.68 e 0.86 — mantém personalidade, mas reduz nonsense.
+    /// Intervalo entre 0.78 e 0.95 — mais sabor angolano e personalidade viva.
     /// </summary>
     private static double SortearTemperatura(Random random)
     {
-        return 0.68 + (random.NextDouble() * 0.18);
+        return 0.78 + (random.NextDouble() * 0.17);
     }
 }
 

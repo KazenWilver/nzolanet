@@ -158,6 +158,10 @@ builder.Services.PostConfigure<FimbuSettings>(options =>
     options.GoogleAiApiKey = ResolveSecret("NZOLANET_FIMBU_GOOGLE_AI_KEY", options.GoogleAiApiKey);
     options.GroqApiKey = ResolveSecret("NZOLANET_FIMBU_GROQ_KEY", options.GroqApiKey);
     options.NvidiaApiKey = ResolveSecret("NZOLANET_FIMBU_NVIDIA_KEY", options.NvidiaApiKey);
+    options.OpenRouterModel = ResolveSecret("NZOLANET_FIMBU_OPENROUTER_MODEL", options.OpenRouterModel);
+    options.GoogleAiModel = ResolveSecret("NZOLANET_FIMBU_GOOGLE_AI_MODEL", options.GoogleAiModel);
+    options.GroqModel = ResolveSecret("NZOLANET_FIMBU_GROQ_MODEL", options.GroqModel);
+    options.NvidiaModel = ResolveSecret("NZOLANET_FIMBU_NVIDIA_MODEL", options.NvidiaModel);
 });
 
 builder.Services.AddHttpClient("FimbuLlm", (sp, client) =>
