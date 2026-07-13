@@ -96,6 +96,9 @@
     @if (forgotSuccessMessage) {
       <p class="auth-form__success" role="status">{{ forgotSuccessMessage }}</p>
     }
+    @if (errorMessage) {
+      <p class="auth-form__error" role="alert">{{ errorMessage }}</p>
+    }
     @if (devResetLink) {
       <p class="auth-form__info">
         Link de recuperação (desenvolvimento):

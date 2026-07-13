@@ -1,15 +1,14 @@
 namespace NzolaNet.Application.Services.Fimbu.Lexicon;
 
 /// <summary>
-/// Selecciona entradas relevantes do léxico para cada mensagem do utilizador.
-/// Se houver poucos matches, completa com entradas aleatórias estáveis para a Fimbu
-/// manter calão angolano mesmo em conversas genéricas.
+/// Selecciona 5–8 entradas relevantes por turno (extras/lexicon_index.py).
+/// Só preenche com termos genéricos quando não há nenhum match — evita salada.
 /// </summary>
 internal static partial class FimbuLexiconSelector
 {
-    private const int MaxEntriesPerMessage = 12;
-    private const int MinEntriesPerMessage = 8;
-    private const int MaxRelatedPerMatch = 3;
+    private const int MaxEntriesPerMessage = 8;
+    private const int SoftFillWhenEmpty = 5;
+    private const int MaxRelatedPerMatch = 2;
 
     public static IReadOnlyList<FimbuLexiconEntry> Select(
         FimbuLexiconData lexicon,
@@ -69,14 +68,15 @@ internal static partial class FimbuLexiconSelector
             }
         }
 
-        FillWithStableRandom(lexicon, userId, messageIndex, result, seen);
+        // Só preenche se não houve match — senão o modelo força gíria irrelevante.
+        if (result.Count == 0)
+        {
+            FillWithStableRandom(lexicon, userId, messageIndex, result, seen);
+        }
+
         return result;
     }
 
-    /// <summary>
-    /// Completa a lista com entradas não sensíveis, estáveis por utilizador e índice
-    /// da mensagem, para a Fimbu nunca ficar sem calão para usar.
-    /// </summary>
     private static void FillWithStableRandom(
         FimbuLexiconData lexicon,
         Guid userId,
@@ -84,7 +84,7 @@ internal static partial class FimbuLexiconSelector
         List<FimbuLexiconEntry> result,
         HashSet<string> seen)
     {
-        if (result.Count >= MinEntriesPerMessage || lexicon.Entries.Count == 0)
+        if (lexicon.Entries.Count == 0)
         {
             return;
         }
@@ -109,24 +109,16 @@ internal static partial class FimbuLexiconSelector
 
         foreach (var index in order)
         {
-            AddSeen(pool[index], result, seen);
-            if (result.Count >= MinEntriesPerMessage)
+            if (!seen.Add(pool[index].Word))
+            {
+                continue;
+            }
+
+            result.Add(pool[index]);
+            if (result.Count >= SoftFillWhenEmpty)
             {
                 return;
             }
         }
-    }
-
-    private static void AddSeen(
-        FimbuLexiconEntry entry,
-        List<FimbuLexiconEntry> result,
-        HashSet<string> seen)
-    {
-        if (!seen.Add(entry.Word))
-        {
-            return;
-        }
-
-        result.Add(entry);
     }
 }

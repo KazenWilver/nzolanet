@@ -117,6 +117,7 @@ export class LoginComponent implements OnInit {
 
     this.isForgotLoading = true;
     const { email } = this.forgotForm.getRawValue();
+    this.errorMessage = '';
 
     this.authService
       .forgotPassword(email)
@@ -130,10 +131,12 @@ export class LoginComponent implements OnInit {
             this.devResetLink = response.devResetLink;
           }
         },
-        error: () => {
+        error: (error: { error?: { message?: string }; status?: number }) => {
           this.isForgotLoading = false;
-          this.forgotSuccessMessage =
-            this.localeService.translate('auth.recoverSent');
+          this.forgotSuccessMessage = '';
+          this.errorMessage =
+            error?.error?.message?.trim() ||
+            'Não foi possível enviar o email de recuperação. Tenta novamente.';
         }
       });
   }

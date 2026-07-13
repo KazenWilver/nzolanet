@@ -118,7 +118,10 @@ public class AuthService : IAuthService
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-        var frontendBaseUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:4200";
+        var frontendBaseUrl =
+            Environment.GetEnvironmentVariable("NZOLANET_FRONTEND_BASE_URL")
+            ?? _configuration["Frontend:BaseUrl"]
+            ?? "http://localhost:4200";
         var resetLink =
             $"{frontendBaseUrl.TrimEnd('/')}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={encodedToken}";
 

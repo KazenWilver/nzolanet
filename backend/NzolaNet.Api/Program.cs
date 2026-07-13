@@ -126,6 +126,33 @@ builder.Services.AddScoped<IPlatformCounterRepository, PlatformCounterRepository
 builder.Services.AddScoped<IFimbuActivityRepository, FimbuActivityRepository>();
 
 builder.Services.AddScoped<IStorageService, StorageService>();
+
+// Email SMTP — igual ao extras/main.py (Gmail App Password via EMAIL_USER / EMAIL_PASS)
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection(EmailSettings.SectionName));
+builder.Services.PostConfigure<EmailSettings>(options =>
+{
+    options.SmtpUser = FirstNonEmpty(
+        Environment.GetEnvironmentVariable("EMAIL_USER"),
+        Environment.GetEnvironmentVariable("NZOLANET_SMTP_USER"),
+        options.SmtpUser);
+    options.SmtpPassword = FirstNonEmpty(
+        Environment.GetEnvironmentVariable("EMAIL_PASS"),
+        Environment.GetEnvironmentVariable("NZOLANET_SMTP_PASS"),
+        options.SmtpPassword);
+    options.From = FirstNonEmpty(
+        Environment.GetEnvironmentVariable("NZOLANET_SMTP_FROM"),
+        options.From,
+        options.SmtpUser);
+    options.SmtpHost = FirstNonEmpty(
+        Environment.GetEnvironmentVariable("NZOLANET_SMTP_HOST"),
+        options.SmtpHost);
+    var smtpPort = Environment.GetEnvironmentVariable("NZOLANET_SMTP_PORT");
+    if (int.TryParse(smtpPort, out var port) && port > 0)
+    {
+        options.SmtpPort = port;
+    }
+});
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -347,4 +374,17 @@ static string ResolveSecret(string environmentVariableName, string? configuredVa
 {
     var fromEnvironment = Environment.GetEnvironmentVariable(environmentVariableName);
     return string.IsNullOrWhiteSpace(fromEnvironment) ? (configuredValue ?? string.Empty) : fromEnvironment;
+}
+
+static string FirstNonEmpty(params string?[] values)
+{
+    foreach (var value in values)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+    }
+
+    return string.Empty;
 }

@@ -136,6 +136,8 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
   private recordingStream: MediaStream | null = null
   private recordingIntervalId?: ReturnType<typeof setInterval>
   private audioChunks: Blob[] = []
+  private recordingMimeType = ''
+  private recordingExtension = 'webm'
   private readonly audioPlayers = new Map<string, HTMLAudioElement>()
   playingAudioId: string | null = null
 
@@ -721,20 +723,39 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
     try {
       this.recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       this.audioChunks = []
-      this.mediaRecorder = new MediaRecorder(this.recordingStream)
+      const format = this.pickAudioRecordingFormat()
+      this.recordingMimeType = format.mimeType
+      this.recordingExtension = format.extension
+
+      this.mediaRecorder = format.mimeType
+        ? new MediaRecorder(this.recordingStream, { mimeType: format.mimeType })
+        : new MediaRecorder(this.recordingStream)
+
       this.mediaRecorder.ondataavailable = event => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data)
         }
       }
       this.mediaRecorder.onstop = () => {
-        const blob = new Blob(this.audioChunks, { type: 'audio/webm' })
-        this.clearPendingMedia()
-        this.pendingAudio = new File([blob], `audio-${Date.now()}.webm`, { type: 'audio/webm' })
-        this.pendingAudioPreview = URL.createObjectURL(blob)
+        const mimeType =
+          this.mediaRecorder?.mimeType || this.recordingMimeType || 'audio/webm'
+        const extension = this.resolveAudioExtension(mimeType, this.recordingExtension)
+        const blob = new Blob(this.audioChunks, { type: mimeType })
         this.stopRecordingTracks()
+
+        if (blob.size === 0) {
+          this.sendError = 'O áudio gravado está vazio. Tenta novamente.'
+          return
+        }
+
+        this.clearPendingMedia()
+        this.pendingAudio = new File([blob], `audio-${Date.now()}.${extension}`, {
+          type: mimeType
+        })
+        this.pendingAudioPreview = URL.createObjectURL(blob)
       }
-      this.mediaRecorder.start()
+      // timeslice garante chunks no Safari iOS (senão o blob fica vazio)
+      this.mediaRecorder.start(250)
       this.isRecording = true
       this.recordingSeconds = 0
       this.composerAttachOpen = false
@@ -772,6 +793,42 @@ export class MessagesPageComponent implements OnInit, OnDestroy {
       this.recordingIntervalId = undefined
     }
     this.stopRecordingTracks()
+  }
+
+  private pickAudioRecordingFormat(): { mimeType: string; extension: string } {
+    const candidates = [
+      { mimeType: 'audio/mp4', extension: 'm4a' },
+      { mimeType: 'audio/aac', extension: 'm4a' },
+      { mimeType: 'audio/webm;codecs=opus', extension: 'webm' },
+      { mimeType: 'audio/webm', extension: 'webm' },
+      { mimeType: 'audio/ogg;codecs=opus', extension: 'ogg' }
+    ]
+
+    if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function') {
+      return { mimeType: '', extension: 'webm' }
+    }
+
+    for (const candidate of candidates) {
+      if (MediaRecorder.isTypeSupported(candidate.mimeType)) {
+        return candidate
+      }
+    }
+
+    return { mimeType: '', extension: 'webm' }
+  }
+
+  private resolveAudioExtension(mimeType: string, fallback: string): string {
+    const lower = mimeType.toLowerCase()
+    if (lower.includes('mp4') || lower.includes('aac') || lower.includes('m4a')) {
+      return 'm4a'
+    }
+    if (lower.includes('ogg')) {
+      return 'ogg'
+    }
+    if (lower.includes('webm')) {
+      return 'webm'
+    }
+    return fallback || 'webm'
   }
 
   private stopRecordingTracks(): void {

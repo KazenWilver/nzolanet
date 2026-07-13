@@ -69,6 +69,10 @@ public class ExceptionMiddleware
                 statusCode = HttpStatusCode.BadRequest;
                 message = "Ocorreu um conflito ao processar os dados. Tenta novamente.";
                 break;
+            case InvalidOperationException invalidOpEx:
+                statusCode = HttpStatusCode.BadRequest;
+                message = TranslateExceptionMessage(invalidOpEx.Message);
+                break;
             default:
                 if (_env.IsDevelopment())
                 {

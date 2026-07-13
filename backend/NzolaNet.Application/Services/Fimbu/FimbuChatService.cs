@@ -27,7 +27,7 @@ public sealed partial class FimbuChatService : IFimbuChatService
     [GeneratedRegex(@"[\u0400-\u052F\u0600-\u06FF\u0B80-\u0BFF\u3040-\u30FF\u4E00-\u9FFF]")]
     private static partial Regex ForeignScriptRegex();
 
-    [GeneratedRegex(@"\b(você|a gente|celular|bacana|cara|moça|moço|galera|legal|tudo bem)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(você|a gente|celular|bacana|cara|moça|moço|galera|legal|tudo bem|beleza|moleque|valeu|fala aí|e aí|tô de boa|beleza mano)\b", RegexOptions.IgnoreCase)]
     private static partial Regex BrazilianMarkerRegex();
 
     [GeneratedRegex(@"<[^>]+>")]
@@ -618,7 +618,7 @@ public sealed partial class FimbuChatService : IFimbuChatService
         }
 
         var brazilianMarkers = BrazilianMarkerRegex().Matches(reply).Count;
-        if (brazilianMarkers >= 2)
+        if (brazilianMarkers >= 1)
         {
             reason = "português do brasil";
             return false;

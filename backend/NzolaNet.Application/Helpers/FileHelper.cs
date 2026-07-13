@@ -88,7 +88,7 @@ public static class FileHelper
 
     private static readonly HashSet<string> AllowedAudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".webm", ".ogg", ".mp3", ".m4a", ".wav"
+        ".webm", ".ogg", ".mp3", ".m4a", ".mp4", ".wav", ".aac", ".caf"
     };
 
     public const long MaxDocumentBytes = 25 * 1024 * 1024;
@@ -120,7 +120,7 @@ public static class FileHelper
         if (!AllowedAudioExtensions.Contains(extension))
         {
             throw new ArgumentException(
-                "Extensão de áudio inválida. Permitidos: .webm, .ogg, .mp3, .m4a, .wav.");
+                "Extensão de áudio inválida. Permitidos: .webm, .ogg, .mp3, .m4a, .mp4, .wav, .aac.");
         }
 
         if (file.Length > MaxAudioBytes)

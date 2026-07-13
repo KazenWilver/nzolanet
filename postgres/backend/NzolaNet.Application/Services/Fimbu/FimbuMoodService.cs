@@ -561,11 +561,11 @@ public sealed class FimbuMoodService : IFimbuMoodService
     }
 
     /// <summary>
-    /// Intervalo entre 0.78 e 0.95 — mais sabor angolano e personalidade viva.
+    /// Intervalo entre 0.62 e 0.82 — naturalidade sem salada de gíria.
     /// </summary>
     private static double SortearTemperatura(Random random)
     {
-        return 0.78 + (random.NextDouble() * 0.17);
+        return 0.62 + (random.NextDouble() * 0.20);
     }
 }
 
