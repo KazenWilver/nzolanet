@@ -47,6 +47,11 @@ export class LoginComponent implements OnInit {
   devResetLink = '';
   sessionExpiredMessage = '';
 
+  /** Em produção (Vercel) a recuperação por email ainda não está activa. */
+  get isProductionPasswordRecoveryPending(): boolean {
+    return environment.production;
+  }
+
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.sessionExpiredMessage = params.get('sessionExpired') === '1'
@@ -110,6 +115,13 @@ export class LoginComponent implements OnInit {
     this.forgotForm.markAllAsTouched();
     this.forgotSuccessMessage = '';
     this.devResetLink = '';
+    this.errorMessage = '';
+
+    if (environment.production) {
+      this.forgotSuccessMessage =
+        'Esta funcionalidade ainda não foi implementada, mas já estamos a tratar disso.';
+      return;
+    }
 
     if (this.forgotForm.invalid) {
       return;
@@ -117,7 +129,6 @@ export class LoginComponent implements OnInit {
 
     this.isForgotLoading = true;
     const { email } = this.forgotForm.getRawValue();
-    this.errorMessage = '';
 
     this.authService
       .forgotPassword(email)
@@ -127,7 +138,7 @@ export class LoginComponent implements OnInit {
           this.isForgotLoading = false;
           this.forgotSuccessMessage =
             this.localeService.translate('auth.recoverSent');
-          if (!environment.production && response.devResetLink) {
+          if (response.devResetLink) {
             this.devResetLink = response.devResetLink;
           }
         },
@@ -149,6 +160,11 @@ export class LoginComponent implements OnInit {
     const email = this.loginForm.controls.email.value;
     if (email) {
       this.forgotForm.controls.email.setValue(email);
+    }
+
+    if (environment.production) {
+      this.forgotSuccessMessage =
+        'Esta funcionalidade ainda não foi implementada, mas já estamos a tratar disso.';
     }
   }
 

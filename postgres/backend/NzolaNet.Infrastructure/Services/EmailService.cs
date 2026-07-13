@@ -97,8 +97,8 @@ public class EmailService : IEmailService
             if (_environment.IsDevelopment())
             {
                 _logger.LogWarning(
-                    "Email não configurado (dev). Define RESEND_API_KEY (recomendado) ou EMAIL_USER + EMAIL_PASS. " +
-                    "Destino: {Email}. Assunto: {Subject}",
+                    "Email não configurado (dev). Destino: {Email}. Assunto: {Subject}. " +
+                    "Usa o DevResetLink no frontend local.",
                     recipientEmail,
                     subject);
                 _logger.LogInformation("Corpo do email: {Body}", textBody);
@@ -107,6 +107,17 @@ public class EmailService : IEmailService
 
             throw new InvalidOperationException(
                 "O envio de email não está configurado. Define RESEND_API_KEY no servidor.");
+        }
+
+        // Em Development: nunca chama a rede (funciona offline). Só log + DevResetLink.
+        if (_environment.IsDevelopment())
+        {
+            _logger.LogInformation(
+                "Dev offline: email não enviado. Destino={Email}. Assunto={Subject}. Corpo:\n{Body}",
+                recipientEmail,
+                subject,
+                textBody);
+            return;
         }
 
         // Render free bloqueia SMTP 25/465/587 — Resend (HTTPS) primeiro.

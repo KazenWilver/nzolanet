@@ -18,10 +18,23 @@ export class ForgotPasswordComponent {
   aEnviar = false;
   enviado = false;
   devResetLink = '';
+  mensagemPendente =
+    'Esta funcionalidade ainda não foi implementada, mas já estamos a tratar disso.';
 
-  constructor(private authService: AuthService) {}
+  readonly isProduction = environment.production;
+
+  constructor(private authService: AuthService) {
+    if (this.isProduction) {
+      this.enviado = true;
+    }
+  }
 
   enviar(): void {
+    if (this.isProduction) {
+      this.enviado = true;
+      return;
+    }
+
     if (!this.email.trim()) return;
     this.aEnviar = true;
     this.devResetLink = '';
@@ -29,7 +42,7 @@ export class ForgotPasswordComponent {
       next: response => {
         this.enviado = true;
         this.aEnviar = false;
-        if (!environment.production && response.devResetLink) {
+        if (response.devResetLink) {
           this.devResetLink = response.devResetLink;
         }
       },

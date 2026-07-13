@@ -127,7 +127,7 @@ export class LoginComponent implements OnInit {
           this.isForgotLoading = false;
           this.forgotSuccessMessage =
             this.localeService.translate('auth.recoverSent');
-          if (!environment.production && response.devResetLink) {
+          if (response.devResetLink) {
             this.devResetLink = response.devResetLink;
           }
         },
