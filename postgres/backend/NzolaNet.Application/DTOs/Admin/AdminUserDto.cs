@@ -18,4 +18,5 @@ public class AdminUserDto
     public DateTime CreatedAt { get; set; }
     public bool IsDeactivated { get; set; }
     public bool IsBanned { get; set; }
+    public bool IsOnline { get; set; }
 }

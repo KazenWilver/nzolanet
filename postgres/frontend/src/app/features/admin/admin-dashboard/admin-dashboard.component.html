@@ -49,6 +49,16 @@
       type="button"
       role="tab"
       class="dashboard__nav-item"
+      [class.dashboard__nav-item--active]="mainView === 'online'"
+      (click)="handleSelectMainView('online')"
+    >
+      Online
+      <span class="dashboard__nav-badge dashboard__nav-badge--online">{{ onlineUsers.length }}</span>
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="dashboard__nav-item"
       [class.dashboard__nav-item--active]="mainView === 'moderacao'"
       (click)="handleSelectMainView('moderacao')"
     >
@@ -229,6 +239,48 @@
       } @else {
         <p class="panel__state">Sem dados para gráficos.</p>
       }
+    }
+
+    @case ('online') {
+      <section class="panel" aria-labelledby="online-title">
+        <div class="panel__header">
+          <h2 id="online-title" class="panel__title">Contas online</h2>
+          <p class="panel__subtitle">
+            Contas com a aplicação aberta neste momento (ligação activa ao chat).
+          </p>
+        </div>
+
+        @if (loadingOnlineUsers && onlineUsers.length === 0) {
+          <p class="panel__state">A carregar contas online…</p>
+        } @else if (onlineUsers.length === 0) {
+          <p class="panel__state">Nenhuma conta está online de momento.</p>
+        } @else {
+          <ul class="online-list" role="list">
+            @for (user of onlineUsers; track user.id) {
+              <li class="online-list__item" role="listitem">
+                <div class="online-list__user">
+                  @if (user.profilePhotoUrl) {
+                    <img
+                      class="online-list__avatar"
+                      [src]="user.profilePhotoUrl"
+                      [alt]="user.displayName || user.username"
+                    />
+                  } @else {
+                    <span class="online-list__avatar online-list__avatar--placeholder" aria-hidden="true">
+                      {{ (user.displayName || user.username).charAt(0).toUpperCase() }}
+                    </span>
+                  }
+                  <div class="online-list__names">
+                    <span class="online-list__name">{{ user.displayName || user.username }}</span>
+                    <span class="online-list__handle">&#64;{{ user.username }}</span>
+                  </div>
+                </div>
+                <span class="status-pill status-pill--online" aria-label="Online">Online</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
     }
 
     @case ('moderacao') {
@@ -451,6 +503,9 @@
                               <td>{{ user.email }}</td>
                               <td>
                                 <div class="table__status">
+                                  @if (user.isOnline) {
+                                    <span class="status-pill status-pill--online">Online</span>
+                                  }
                                   @if (user.isBanned) {
                                     <span class="status-pill status-pill--banned">Banida</span>
                                   }
@@ -560,6 +615,9 @@
                                     <span class="table__name">
                                       {{ user.displayName || user.username }}
                                       <span class="table__role">Admin</span>
+                                      @if (user.isOnline) {
+                                        <span class="status-pill status-pill--online">Online</span>
+                                      }
                                     </span>
                                     <span class="table__handle">&#64;{{ user.username }}</span>
                                   </div>

@@ -58,4 +58,9 @@ public interface IAdminService
     /// Lists every user registered on the platform.
     /// </summary>
     Task<IReadOnlyList<AdminUserDto>> GetUsersAsync();
+
+    /// <summary>
+    /// Lists users with an active chat-hub connection (currently online).
+    /// </summary>
+    Task<IReadOnlyList<AdminOnlineUserDto>> GetOnlineUsersAsync();
 }

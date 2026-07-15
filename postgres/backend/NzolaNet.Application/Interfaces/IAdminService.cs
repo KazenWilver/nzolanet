@@ -60,6 +60,11 @@ public interface IAdminService
     Task<IReadOnlyList<AdminUserDto>> GetUsersAsync();
 
     /// <summary>
+    /// Lists users with an active chat-hub connection (currently online).
+    /// </summary>
+    Task<IReadOnlyList<AdminOnlineUserDto>> GetOnlineUsersAsync();
+
+    /// <summary>
     /// Deactivates a regular user account. The account can be reactivated later.
     /// </summary>
     Task DeactivateUserAsync(Guid actorAdminId, Guid targetUserId);

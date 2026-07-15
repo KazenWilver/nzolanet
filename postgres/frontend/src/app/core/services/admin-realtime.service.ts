@@ -3,6 +3,8 @@ import * as signalR from '@microsoft/signalr'
 import { ReplaySubject } from 'rxjs'
 import { AdminAuthService } from './admin-auth.service'
 import { environment } from '../../../environments/environment'
+import type { AdminOnlineUser } from './admin.service'
+import { resolveMediaUrl } from '../helpers/media-url.helper'
 
 export interface AdminPresenceMetricsEvent {
   totalUtilizadoresOnline: number
@@ -16,8 +18,10 @@ export class AdminRealtimeService {
   private connection?: signalR.HubConnection
   private connectPromise: Promise<void> | null = null
   private readonly presenceMetricsSubject = new ReplaySubject<AdminPresenceMetricsEvent>(1)
+  private readonly onlineUsersSubject = new ReplaySubject<AdminOnlineUser[]>(1)
 
   readonly presenceMetrics$ = this.presenceMetricsSubject.asObservable()
+  readonly onlineUsers$ = this.onlineUsersSubject.asObservable()
 
   async connect(): Promise<void> {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
@@ -61,6 +65,15 @@ export class AdminRealtimeService {
 
     this.connection.on('PresenceMetricsUpdated', (payload: AdminPresenceMetricsEvent) => {
       this.presenceMetricsSubject.next(payload)
+    })
+
+    this.connection.on('OnlineUsersUpdated', (payload: AdminOnlineUser[]) => {
+      const users = (payload ?? []).map(user => ({
+        ...user,
+        isOnline: true,
+        profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl)
+      }))
+      this.onlineUsersSubject.next(users)
     })
 
     await this.connection.start()

@@ -328,12 +328,41 @@ public class AdminService : IAdminService
                 FollowersCount = followersCount,
                 FollowingCount = followingCount,
                 PublicacoesCount = posts.Count(),
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                IsOnline = _userPresenceService.IsOnline(user.Id)
             });
         }
 
         return result
             .OrderByDescending(user => user.CreatedAt)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<AdminOnlineUserDto>> GetOnlineUsersAsync()
+    {
+        var onlineIds = _userPresenceService.GetOnlineUserIds();
+        var result = new List<AdminOnlineUserDto>();
+
+        foreach (var userId in onlineIds)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+            {
+                continue;
+            }
+
+            result.Add(new AdminOnlineUserDto
+            {
+                Id = user.Id,
+                Username = user.UserName ?? string.Empty,
+                DisplayName = user.DisplayName,
+                ProfilePhotoUrl = user.ProfilePhoto,
+                IsOnline = true
+            });
+        }
+
+        return result
+            .OrderBy(user => user.DisplayName ?? user.Username, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 

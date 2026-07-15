@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using NzolaNet.Api.Hubs;
+using NzolaNet.Application.DTOs.Admin;
 using NzolaNet.Application.Interfaces;
+using NzolaNet.Domain.Entities;
 using NzolaNet.Domain.Interfaces.Repositories;
 
 namespace NzolaNet.Api.Services;
@@ -25,8 +28,11 @@ public sealed class SignalRAdminMetricsBroadcaster : IAdminMetricsBroadcaster
     {
         using var scope = _scopeFactory.CreateScope();
         var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var totalUtilizadores = await userRepository.GetTotalCountAsync();
-        var totalOnline = Math.Min(_presenceService.GetOnlineUsersCount(), totalUtilizadores);
+        var onlineIds = _presenceService.GetOnlineUserIds();
+        var totalOnline = Math.Min(onlineIds.Count, totalUtilizadores);
+        var onlineUsers = await BuildOnlineUsersAsync(userManager, onlineIds);
 
         await _hubContext.Clients
             .Group(AdminHub.DashboardGroup)
@@ -38,5 +44,38 @@ public sealed class SignalRAdminMetricsBroadcaster : IAdminMetricsBroadcaster
                     totalUtilizadoresOffline = totalUtilizadores - totalOnline
                 },
                 cancellationToken);
+
+        await _hubContext.Clients
+            .Group(AdminHub.DashboardGroup)
+            .SendAsync("OnlineUsersUpdated", onlineUsers, cancellationToken);
+    }
+
+    private static async Task<IReadOnlyList<AdminOnlineUserDto>> BuildOnlineUsersAsync(
+        UserManager<User> userManager,
+        IReadOnlyCollection<Guid> onlineIds)
+    {
+        var result = new List<AdminOnlineUserDto>();
+
+        foreach (var userId in onlineIds)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+            {
+                continue;
+            }
+
+            result.Add(new AdminOnlineUserDto
+            {
+                Id = user.Id,
+                Username = user.UserName ?? string.Empty,
+                DisplayName = user.DisplayName,
+                ProfilePhotoUrl = user.ProfilePhoto,
+                IsOnline = true
+            });
+        }
+
+        return result
+            .OrderBy(user => user.DisplayName ?? user.Username, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 }

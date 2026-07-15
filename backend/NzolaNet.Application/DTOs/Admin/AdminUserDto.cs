@@ -16,4 +16,5 @@ public class AdminUserDto
     public int FollowingCount { get; set; }
     public int PublicacoesCount { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsOnline { get; set; }
 }

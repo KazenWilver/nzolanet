@@ -5,6 +5,7 @@ import { forkJoin, finalize } from 'rxjs'
 import {
   AdminFeedbackEntry,
   AdminMetrics,
+  AdminOnlineUser,
   AdminService,
   AdminUserRow,
   ReportedComment,
@@ -13,7 +14,7 @@ import {
 import { AdminRealtimeService } from '../../../core/services/admin-realtime.service'
 import { AdminMetricsChartsComponent } from '../admin-metrics-charts/admin-metrics-charts.component'
 
-type AdminMainView = 'indicadores' | 'graficos' | 'moderacao' | 'feedback'
+type AdminMainView = 'indicadores' | 'graficos' | 'online' | 'moderacao' | 'feedback'
 type AdminTab = 'comentarios' | 'publicacoes' | 'utilizadores'
 
 @Component({
@@ -35,12 +36,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   reportedComments: ReportedComment[] = []
   reportedPublications: ReportedPublication[] = []
   users: AdminUserRow[] = []
+  onlineUsers: AdminOnlineUser[] = []
   feedbackEntries: AdminFeedbackEntry[] = []
 
   loadingMetrics = false
   loadingComments = false
   loadingPublications = false
   loadingUsers = false
+  loadingOnlineUsers = false
   loadingFeedback = false
   refreshing = false
   processingId: string | null = null
@@ -68,6 +71,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.latestPresenceMetrics = event
         this.applyPresenceMetrics(event)
       })
+
+    this.adminRealtime.onlineUsers$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(users => {
+        this.applyOnlineUsers(users)
+      })
   }
 
   ngOnDestroy(): void {
@@ -91,6 +100,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.loadingComments = this.reportedComments.length === 0
     this.loadingPublications = this.reportedPublications.length === 0
     this.loadingUsers = this.users.length === 0
+    this.loadingOnlineUsers = this.onlineUsers.length === 0
     this.loadingFeedback = this.feedbackEntries.length === 0
 
     forkJoin({
@@ -98,6 +108,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       comments: this.adminService.obterComentariosDenunciados(),
       publications: this.adminService.obterPublicacoesDenunciadas(),
       users: this.adminService.obterUtilizadores(),
+      onlineUsers: this.adminService.obterUtilizadoresOnline(),
       feedback: this.adminService.obterFeedbacks()
     })
       .pipe(
@@ -107,16 +118,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.loadingComments = false
           this.loadingPublications = false
           this.loadingUsers = false
+          this.loadingOnlineUsers = false
           this.loadingFeedback = false
         }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: ({ metrics, comments, publications, users, feedback }) => {
+        next: ({ metrics, comments, publications, users, onlineUsers, feedback }) => {
           this.metrics = metrics
           this.reportedComments = comments
           this.reportedPublications = publications
           this.users = users
+          this.applyOnlineUsers(onlineUsers)
           this.feedbackEntries = feedback
           this.applyPresenceMetrics(this.latestPresenceMetrics)
           this.lastUpdatedAt = new Date()
@@ -242,6 +255,17 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       totalUtilizadoresOnline: metrics.totalUtilizadoresOnline,
       totalUtilizadoresOffline: metrics.totalUtilizadoresOffline
     }
+    this.lastUpdatedAt = new Date()
+  }
+
+  private applyOnlineUsers(users: AdminOnlineUser[]): void {
+    this.onlineUsers = users
+    this.loadingOnlineUsers = false
+    const onlineIds = new Set(users.map(user => user.id))
+    this.users = this.users.map(user => ({
+      ...user,
+      isOnline: onlineIds.has(user.id)
+    }))
     this.lastUpdatedAt = new Date()
   }
 }

@@ -100,6 +100,15 @@ export interface AdminUserRow {
   followingCount: number
   publicacoesCount: number
   createdAt: string
+  isOnline: boolean
+}
+
+export interface AdminOnlineUser {
+  id: string
+  username: string
+  displayName?: string
+  profilePhotoUrl?: string
+  isOnline: boolean
 }
 
 export interface AdminFeedbackEntry {
@@ -171,6 +180,19 @@ export class AdminService {
       })
       .pipe(map(users => users.map(user => ({
         ...user,
+        isOnline: !!user.isOnline,
+        profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl),
+      }))))
+  }
+
+  obterUtilizadoresOnline(): Observable<AdminOnlineUser[]> {
+    return this.http
+      .get<AdminOnlineUser[]>(`${this.baseUrl}/users/online`, {
+        headers: this.adminAuth.authHeaders(),
+      })
+      .pipe(map(users => users.map(user => ({
+        ...user,
+        isOnline: true,
         profilePhotoUrl: resolveMediaUrl(user.profilePhotoUrl),
       }))))
   }
